@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spotlight Kiosks — Turn wait time into opportunity</title>
+<meta name="description" content="Touch-screen kiosks that give visitors useful venue information and put local businesses in front of them. Free for qualified venues. Local ads from $399 a year.">
+<meta property="og:title" content="Spotlight Kiosks — Turn wait time into opportunity">
+<meta property="og:description" content="Useful visitor information and local business advertising on one touch screen.">
+<meta property="og:image" content="assets/kiosk-clubhouse.jpg">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400;9..144,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header" id="top">
+  <div class="wrap header-inner">
+    <a class="brand" href="#top" aria-label="Spotlight Kiosks home">
+      <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
+        <polygon points="17,13 40,44 4,44" fill="#FFCE22"/>
+        <g transform="rotate(32 14 10)"><rect x="6" y="5" width="16" height="10" rx="2" fill="currentColor"/><rect x="20" y="6.5" width="4" height="7" rx="1" fill="currentColor"/></g>
+        <rect x="17" y="27" width="10" height="12" rx="1.5" fill="currentColor"/>
+        <rect x="19" y="29" width="6" height="7" rx=".5" fill="#FFCE22"/>
+        <rect x="21" y="39" width="2" height="4" fill="currentColor"/>
+        <rect x="16" y="43" width="12" height="2" rx="1" fill="currentColor"/>
+      </svg>
+      <span>Spotlight<br>Kiosks</span>
+    </a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav"><span class="sr">Menu</span><i></i><i></i></button>
+    <nav id="site-nav" class="site-nav" aria-label="Main">
+      <a href="#demo">Try the kiosk</a>
+      <a href="#advertise">Advertise</a>
+      <a href="#host">Host a kiosk</a>
+      <a href="#hardware">Hardware</a>
+      <a href="#faq">Questions</a>
+      <a class="btn btn-small" href="#contact">Get in touch</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap hero-copy">
+      <h1>Turn wait time into opportunity.</h1>
+      <div class="hero-side">
+        <p class="lede">Touch-screen kiosks that help visitors find their way around your venue — and point them to the best local places nearby.</p>
+        <div class="cta-row">
+          <a class="btn" href="#advertise">Advertise on a kiosk</a>
+          <a class="btn btn-ghost" href="#host">Host a kiosk for free</a>
+        </div>
+      </div>
+    </div>
+    <figure class="stage">
+      <img src="assets/kiosk-clubhouse.jpg" alt="A matte black Spotlight kiosk in a golf clubhouse lobby, showing course guide, tee times, dining and events on its screen" width="1774" height="887" fetchpriority="high">
+      <div class="stage-light" aria-hidden="true"></div>
+      <figcaption class="wrap">
+        <span>Clubhouse concierge, matte black</span>
+        <a href="#demo">Tap through one below</a>
+      </figcaption>
+    </figure>
+    <div class="wrap facts">
+      <div><strong>For visitors</strong><p>Amenities, directions and answers in one place.</p></div>
+      <div><strong>For local businesses</strong><p>Your offer on screen when people decide where to go next.</p></div>
+      <div><strong>For venues</strong><p>Hardware, setup and upkeep handled for you.</p></div>
+    </div>
+  </section>
+
+  <!-- DEMO -->
+  <section class="demo" id="demo" aria-labelledby="demo-title">
+    <div class="wrap">
+      <div class="demo-head">
+        <h2 id="demo-title">Try the kiosk.</h2>
+        <p>This is the screen your guests use. Pick a venue, then tap around the way a visitor would. The panel on the right shows what gets counted for advertisers.</p>
+      </div>
+
+      <div class="venue-switch" role="radiogroup" aria-label="Choose a venue">
+        <button role="radio" aria-checked="true" data-venue="golf">Golf clubhouse</button>
+        <button role="radio" aria-checked="false" data-venue="hotel">Hotel lobby</button>
+        <button role="radio" aria-checked="false" data-venue="medical">Medical office</button>
+        <button role="radio" aria-checked="false" data-venue="auto">Dealership lounge</button>
+      </div>
+
+      <div class="demo-grid">
+        <div class="device" id="device" data-finish="black">
+          <div class="device-head">
+            <div class="screen" id="screen" aria-live="polite">
+              <!-- rendered by kiosk.js -->
+            </div>
+          </div>
+          <div class="device-pole"><span class="device-slot"></span></div>
+          <div class="device-base"></div>
+        </div>
+
+        <aside class="console" aria-labelledby="console-title">
+          <h3 id="console-title">Behind the screen</h3>
+          <p class="console-note">Counts update as you tap. Reports show totals, never who tapped.</p>
+          <dl class="stats">
+            <div><dt>Sessions</dt><dd id="st-sessions">0</dd></div>
+            <div><dt>Screens viewed</dt><dd id="st-views">0</dd></div>
+            <div><dt>Sponsor impressions</dt><dd id="st-impr">0</dd></div>
+            <div><dt>Taken home by phone</dt><dd id="st-scans">0</dd></div>
+          </dl>
+          <h4>Activity</h4>
+          <ol class="feed" id="feed">
+            <li class="feed-empty">Tap the kiosk screen to start a session.</li>
+          </ol>
+          <button class="btn btn-ghost btn-small" id="reset-demo" type="button">Reset demo</button>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- TWO WAYS IN -->
+  <section class="ways">
+    <div class="wrap ways-grid">
+      <article class="way" id="advertise">
+        <h2>Be part of their next decision.</h2>
+        <p class="way-lede">Your business appears while visitors are choosing where to eat, what to do and where to go next — a few minutes from your door.</p>
+        <dl class="brief">
+          <div><dt>Place</dt><dd>Your market and the venues that fit your customers.</dd></div>
+          <div><dt>Purpose</dt><dd>The goal, and the step you want a visitor to take.</dd></div>
+          <div><dt>Message</dt><dd>One offer, a clear identity, a link they can take home.</dd></div>
+          <div><dt>Review</dt><dd>Availability, pricing, timing and what you'll see in reports.</dd></div>
+        </dl>
+        <a class="btn" href="#contact" data-interest="Advertising">Plan a campaign</a>
+      </article>
+
+      <article class="way way-host" id="host">
+        <h2>Add something useful to your lobby.</h2>
+        <p class="way-lede">A managed digital concierge for qualified venues. We plan the content around your space and your visitors, then keep it running.</p>
+        <dl class="brief">
+          <div><dt>Equipment</dt><dd>Kiosk hardware and software, at no cost to qualified venues.</dd></div>
+          <div><dt>Setup</dt><dd>Installation and your venue's own information, coordinated with your team.</dd></div>
+          <div><dt>Care</dt><dd>Content updates and routine maintenance.</dd></div>
+          <div><dt>What you provide</dt><dd>A visible, accessible spot, a standard outlet and connectivity.</dd></div>
+        </dl>
+        <a class="btn" href="#contact" data-interest="Hosting a kiosk">Request a kiosk</a>
+        <p class="fine">No-cost hosting depends on a site review, availability and a signed Host Agreement.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- HARDWARE -->
+  <section class="hardware" id="hardware" aria-labelledby="hw-title">
+    <div class="wrap">
+      <h2 id="hw-title">Two finishes. One welcome screen.</h2>
+      <p class="section-lede">Every kiosk runs the same software. The finish is chosen to suit the room.</p>
+      <div class="hw-grid">
+        <figure class="hw">
+          <img src="assets/kiosk-clubhouse-sm.jpg" alt="Matte black kiosk beside a clubhouse front desk overlooking a golf course" width="900" height="450" loading="lazy">
+          <figcaption>
+            <h3>Clubhouse Concierge</h3>
+            <p>Matte black column and base. Made for clubhouses, resorts and darker, wood-toned interiors.</p>
+            <ul><li>Portrait touch display</li><li>Course, dining, events and membership</li><li>Local discovery panel</li></ul>
+          </figcaption>
+        </figure>
+        <figure class="hw">
+          <img src="assets/kiosk-lobby-sm.jpg" alt="Silver kiosk in a bright marble hotel lobby near the reception desk" width="900" height="600" loading="lazy">
+          <figcaption>
+            <h3>Guest Directory</h3>
+            <p>Brushed silver enclosure with an integrated card slot. Suits hotel lobbies, medical offices and service lounges.</p>
+            <ul><li>Portrait touch display</li><li>Dining, amenities, local guide and events</li><li>Sponsor slot on every screen</li></ul>
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- VENUES -->
+  <section class="venues" aria-labelledby="venues-title">
+    <div class="wrap">
+      <h2 id="venues-title">Built around the room it stands in.</h2>
+      <div class="venue-list">
+        <div><h3>Hotels &amp; hospitality</h3><p>Guests planning their evening: dining, attractions, transport and your property's amenities.</p></div>
+        <div><h3>Golf &amp; country clubs</h3><p>Members between rounds: course conditions, tee times, events and the pro shop.</p></div>
+        <div><h3>Medical offices</h3><p>Patients waiting: check-in help, the nearest pharmacy, coffee and parking.</p></div>
+        <div><h3>Dealership service lounges</h3><p>Customers killing an hour: service status, lunch nearby and something to do.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="steps" aria-labelledby="steps-title">
+    <div class="wrap">
+      <h2 id="steps-title">How it works</h2>
+      <ol class="step-list">
+        <li><h3>Find the right fit</h3><p>Tell us about your venue or your campaign goal. We review the setting, placement and availability with you.</p></li>
+        <li><h3>Make it relevant</h3><p>We plan venue information or ad creative around the people who'll actually be standing at the screen.</p></li>
+        <li><h3>Confirm the details</h3><p>You review the agreement, setup or campaign scope, timing, and how support and reporting work.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="pricing" aria-labelledby="price-title">
+    <div class="wrap price-grid">
+      <div>
+        <h2 id="price-title">Start local. Grow your reach.</h2>
+        <p>Annual placements keep your business on screen all year, in the venues your customers already visit. Multi-kiosk plans are quoted for your market.</p>
+      </div>
+      <div class="price-card">
+        <p class="price"><span>$399</span> per year</p>
+        <p>Annual ad placement, starting price</p>
+        <ul>
+          <li>Sponsor slot on a kiosk in your area</li>
+          <li>Tap-to-phone link or offer</li>
+          <li>Totals for impressions and take-home scans</li>
+        </ul>
+        <a class="btn" href="#contact" data-interest="Advertising pricing">Get a quote</a>
+        <p class="fine">Final scope, availability and terms are confirmed in your quote.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq" id="faq" aria-labelledby="faq-title">
+    <div class="wrap faq-grid">
+      <h2 id="faq-title">A little clarity before you start.</h2>
+      <div class="faq-list">
+        <details><summary>Is there a cost to host a kiosk?</summary><p>Qualified venues get the kiosk hardware, software, installation, content updates and maintenance at no cost. It depends on a site review and a signed Host Agreement.</p></details>
+        <details><summary>What does my venue need to provide?</summary><p>A visible, accessible spot with a standard power outlet. We review internet availability and the right installation with your team.</p></details>
+        <details><summary>Who looks after the kiosk?</summary><p>Spotlight manages the equipment, software, content updates and routine maintenance. Contact support for installation or service questions.</p></details>
+        <details><summary>Who can advertise?</summary><p>Local businesses, restaurants and entertainment, medical and wellness services, automotive businesses and retail brands can ask about placements that fit.</p></details>
+        <details><summary>What does advertising cost?</summary><p>Annual placements start at $399. Multi-kiosk plans are priced by market and number of screens, and confirmed in your quote.</p></details>
+        <details><summary>What do advertisers see in reports?</summary><p>Totals: how often your message was shown, how many people opened it and how many took it home by phone. Kiosks don't identify who tapped.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact" id="contact" aria-labelledby="contact-title">
+    <div class="wrap contact-grid">
+      <div>
+        <h2 id="contact-title">Let's put your space in the spotlight.</h2>
+        <p>Host a useful amenity or reach your next customer. Start with a conversation.</p>
+        <p class="contact-direct"><a href="mailto:sales@spotlightkiosks.com">sales@spotlightkiosks.com</a><br><a href="tel:+16028874058">602-887-4058</a></p>
+      </div>
+      <form class="contact-form" id="contact-form" novalidate>
+        <fieldset class="interest">
+          <legend>I'm interested in</legend>
+          <label><input type="radio" name="interest" value="Advertising" checked> Advertising</label>
+          <label><input type="radio" name="interest" value="Hosting a kiosk"> Hosting a kiosk</label>
+        </fieldset>
+        <label>Your name<input name="name" autocomplete="name" required></label>
+        <label>Business or venue<input name="business" autocomplete="organization"></label>
+        <label>Email<input name="email" type="email" autocomplete="email" required></label>
+        <label>City or area<input name="area" placeholder="e.g. Scottsdale, Gilbert"></label>
+        <label class="full">Anything we should know<textarea name="message" rows="4"></textarea></label>
+        <p class="form-error full" id="form-error" role="alert" hidden></p>
+        <div class="full form-actions">
+          <button class="btn" type="submit">Email Spotlight</button>
+          <span class="fine">Opens your email app with these details filled in.</span>
+        </div>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-grid">
+    <div>
+      <p class="footer-brand">Spotlight Kiosks</p>
+      <p>Smart kiosks. Useful information. Local connection.</p>
+    </div>
+    <nav aria-label="Footer">
+      <a href="#demo">Try the kiosk</a>
+      <a href="#advertise">Advertise</a>
+      <a href="#host">Host a kiosk</a>
+      <a href="#hardware">Hardware</a>
+      <a href="#faq">Questions</a>
+    </nav>
+    <div>
+      <a href="mailto:sales@spotlightkiosks.com">sales@spotlightkiosks.com</a><br>
+      <a href="tel:+16028874058">602-887-4058</a>
+      <p class="socials">
+        <a href="https://www.instagram.com/spotlightkiosks/" rel="noopener" target="_blank">Instagram</a>
+        <a href="https://www.linkedin.com/company/spotlight-kiosks/" rel="noopener" target="_blank">LinkedIn</a>
+        <a href="https://www.facebook.com/profile.php?id=61581139512802" rel="noopener" target="_blank">Facebook</a>
+        <a href="https://x.com/spotlightkiosks" rel="noopener" target="_blank">X</a>
+      </p>
+    </div>
+  </div>
+  <div class="wrap footer-base">© <span id="year">2026</span> Spotlight Kiosks. Businesses shown in the kiosk demo are fictional.</div>
+</footer>
+
+<script src="kiosk.js"></script>
+<script src="site.js"></script>
+</body>
+</html>
