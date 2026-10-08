@@ -1,15 +1,27 @@
 # Spotlight Kiosks website
 
-Static site for Spotlight Kiosks — touch-screen venue kiosks that combine visitor information with local business advertising.
+Static multi-page site for Spotlight Kiosks — touch-screen venue kiosks that combine visitor information with local business advertising. Live on GitHub Pages: https://aeroassistindustries.github.io/spotlight-kiosks/
 
-## What's here
+## Editing
 
-- `index.html` — the one-page site (hero, interactive kiosk demo, advertiser and host offers, hardware, venues, how it works, pricing, FAQ, contact)
-- `styles.css` — all styles, including the kiosk screen UI
-- `kiosk.js` — the interactive kiosk demo: four venues (golf clubhouse, hotel lobby, medical office, dealership lounge), category screens, business detail pages with take-home QR, tee-time booking, venue map wayfinding, live service status, rotating sponsor slot, idle timeout, larger-text mode, and a "Behind the screen" panel that counts sessions, views, sponsor impressions and phone take-homes
-- `site.js` — mobile nav and the contact form (opens the visitor's email app addressed to sales@spotlightkiosks.com)
-- `assets/` — kiosk photos and favicon
+Pages are generated from Python so the header, footer and shared sections stay consistent.
 
-No build step. Open `index.html` or serve the folder with any static host (GitHub Pages: Settings → Pages → Deploy from branch → `main` / root).
+- `build/build.py` — every page's content
+- `build/lib.py` — header, footer, navigation, shared components, forms and content data (venues, FAQs, campaign ideas, markets)
+- `build/legal.py` — Terms & Conditions and Privacy Policy
+- `assets/styles.css` — all styles, including the kiosk screen
+- `assets/kiosk.js` — the interactive kiosk demo (venues, screens, the "Your ad here" ad slider, the behind-the-screen counters)
+- `assets/site.js` — menus, tabs, filters, inquiry email drafts, campaign planner, creative studio, pricing calculator
 
-Businesses shown inside the kiosk demo are fictional.
+After editing anything in `build/`, regenerate the pages:
+
+```
+python3 build/build.py
+```
+
+Then commit the regenerated `index.html` files along with your changes. No other build step or dependencies.
+
+## Notes
+
+- Inquiry forms build an email draft in the visitor's browser (open in email, copy or download). Nothing is posted to a server.
+- Businesses shown inside the kiosk demo and campaign examples are fictional.

@@ -6,290 +6,196 @@
 <title>Spotlight Kiosks — Turn wait time into opportunity</title>
 <meta name="description" content="Touch-screen kiosks that give visitors useful venue information and put local businesses in front of them. Free for qualified venues. Local ads from $399 a year.">
 <meta property="og:title" content="Spotlight Kiosks — Turn wait time into opportunity">
-<meta property="og:description" content="Useful visitor information and local business advertising on one touch screen.">
-<meta property="og:image" content="assets/kiosk-clubhouse.jpg">
-<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<meta property="og:description" content="Touch-screen kiosks that give visitors useful venue information and put local businesses in front of them. Free for qualified venues. Local ads from $399 a year.">
+<meta property="og:image" content="./assets/kiosk-clubhouse.jpg">
+<link rel="icon" href="./assets/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400;9..144,600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="./assets/styles.css">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-
-<header class="site-header" id="top">
+<header class="site-header">
   <div class="wrap header-inner">
-    <a class="brand" href="#top" aria-label="Spotlight Kiosks home">
-      <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
-        <polygon points="17,13 40,44 4,44" fill="#FFCE22"/>
-        <g transform="rotate(32 14 10)"><rect x="6" y="5" width="16" height="10" rx="2" fill="currentColor"/><rect x="20" y="6.5" width="4" height="7" rx="1" fill="currentColor"/></g>
-        <rect x="17" y="27" width="10" height="12" rx="1.5" fill="currentColor"/>
-        <rect x="19" y="29" width="6" height="7" rx=".5" fill="#FFCE22"/>
-        <rect x="21" y="39" width="2" height="4" fill="currentColor"/>
-        <rect x="16" y="43" width="12" height="2" rx="1" fill="currentColor"/>
-      </svg>
-      <span>Spotlight<br>Kiosks</span>
-    </a>
+    <a class="brand" href="./" aria-label="Spotlight Kiosks home"><img src="./assets/logo.png" alt="Spotlight Kiosks" width="517" height="320"></a>
     <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav"><span class="sr">Menu</span><i></i><i></i></button>
     <nav id="site-nav" class="site-nav" aria-label="Main">
-      <a href="#demo">Try the kiosk</a>
-      <a href="#advertise">Advertise</a>
-      <a href="#host">Host a kiosk</a>
-      <a href="#hardware">Hardware</a>
-      <a href="#faq">Questions</a>
-      <a class="btn btn-small" href="#contact">Get in touch</a>
+      <a href="./kiosk/">The kiosk</a><div class="nav-item"><button class="nav-btn" aria-expanded="false" aria-controls="menu-advertise">Advertise<svg class="" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button><div class="mega" id="menu-advertise"><a href="./advertise/" class="mega-lead"><b>Advertise with Spotlight</b><span>Placements, pricing and how a campaign comes together</span></a><a href="./pricing/"><b>Pricing & calculator</b><span>Annual rates and a multi-kiosk estimate</span></a><a href="./campaign-planner/"><b>Campaign planner</b><span>Build a brief step by step</span></a><a href="./creative-studio/"><b>Creative studio</b><span>Preview your message on the kiosk</span></a><a href="./campaign-ideas/"><b>Campaign ideas</b><span>Eight local playbooks to adapt</span></a><a href="./audience/"><b>Who you can reach</b><span>Visitor moments in each venue</span></a><a href="./locations/"><b>Market planning</b><span>Cities and regions in our plans</span></a><a href="./agencies/"><b>For agencies</b><span>Start with a client brief</span></a></div></div><div class="nav-item"><button class="nav-btn" aria-expanded="false" aria-controls="menu-venues">For venues<svg class="" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button><div class="mega" id="menu-venues"><a href="./hosts/" class="mega-lead"><b>Host a kiosk</b><span>The managed offering, at no cost for qualified venues</span></a><a href="./venues/"><b>Venues overview</b><span>Where Spotlight fits</span></a><a href="./resources/host-preparation/"><b>Prepare your venue</b><span>What to have ready for a first call</span></a><a href="./venues/hotels/"><b>Hotels & hospitality</b><span>A useful lobby experience</span></a><a href="./venues/golf/"><b>Golf & country clubs</b><span>A concierge for the clubhouse</span></a><a href="./venues/medical/"><b>Medical offices</b><span>Information while visitors wait</span></a><a href="./venues/automotive/"><b>Car dealerships</b><span>Sales and service lounges</span></a><a href="./venues/restaurants/"><b>Restaurants & venues</b><span>Menus, events and local discovery</span></a></div></div><div class="nav-item"><button class="nav-btn" aria-expanded="false" aria-controls="menu-resources">Resources<svg class="" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button><div class="mega" id="menu-resources"><a href="./resources/" class="mega-lead"><b>All resources</b><span>Guides, tools and inspiration</span></a><a href="./how-it-works/"><b>How it works</b><span>The advertiser and host journeys</span></a><a href="./media-kit/"><b>Media overview</b><span>The concept in one place</span></a><a href="./resources/first-local-campaign/"><b>First campaign guide</b><span>From goal to a useful brief</span></a><a href="./resources/screen-creative/"><b>Creative guide</b><span>A screen message people can read</span></a><a href="./measurement/"><b>Measurement guide</b><span>What the numbers mean</span></a><a href="./faqs/"><b>Common questions</b><span>Answers for advertisers and hosts</span></a><a href="./support/"><b>Help & support</b><span>For existing kiosks and campaigns</span></a></div></div><a href="./about/">About</a>
+      <a class="btn btn-small header-cta" href="./campaign-planner/">Plan a campaign</a>
     </nav>
   </div>
 </header>
-
 <main id="main">
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="wrap hero-copy">
-      <h1>Turn wait time into opportunity.</h1>
-      <div class="hero-side">
-        <p class="lede">Touch-screen kiosks that help visitors find their way around your venue — and point them to the best local places nearby.</p>
-        <div class="cta-row">
-          <a class="btn" href="#advertise">Advertise on a kiosk</a>
-          <a class="btn btn-ghost" href="#host">Host a kiosk for free</a>
-        </div>
-      </div>
-    </div>
-    <figure class="stage">
-      <img src="assets/kiosk-clubhouse.jpg" alt="A matte black Spotlight kiosk in a golf clubhouse lobby, showing course guide, tee times, dining and events on its screen" width="1774" height="887" fetchpriority="high">
-      <div class="stage-light" aria-hidden="true"></div>
-      <figcaption class="wrap">
-        <span>Clubhouse concierge, matte black</span>
-        <a href="#demo">Tap through one below</a>
-      </figcaption>
-    </figure>
-    <div class="wrap facts">
-      <div><strong>For visitors</strong><p>Amenities, directions and answers in one place.</p></div>
-      <div><strong>For local businesses</strong><p>Your offer on screen when people decide where to go next.</p></div>
-      <div><strong>For venues</strong><p>Hardware, setup and upkeep handled for you.</p></div>
-    </div>
-  </section>
-
-  <!-- DEMO -->
-  <section class="demo" id="demo" aria-labelledby="demo-title">
-    <div class="wrap">
-      <div class="demo-head">
-        <h2 id="demo-title">Try the kiosk.</h2>
-        <p>This is the screen your guests use. Pick a venue, then tap around the way a visitor would. The panel on the right shows what gets counted for advertisers.</p>
-      </div>
-
-      <div class="venue-switch" role="radiogroup" aria-label="Choose a venue">
-        <button role="radio" aria-checked="true" data-venue="golf">Golf clubhouse</button>
-        <button role="radio" aria-checked="false" data-venue="hotel">Hotel lobby</button>
-        <button role="radio" aria-checked="false" data-venue="medical">Medical office</button>
-        <button role="radio" aria-checked="false" data-venue="auto">Dealership lounge</button>
-      </div>
-
-      <div class="demo-grid">
-        <div class="device" id="device" data-finish="black">
-          <div class="device-head">
-            <div class="screen" id="screen" aria-live="polite">
-              <!-- rendered by kiosk.js -->
-            </div>
-          </div>
-          <div class="device-pole"><span class="device-slot"></span></div>
-          <div class="device-base"></div>
-        </div>
-
-        <aside class="console" aria-labelledby="console-title">
-          <h3 id="console-title">Behind the screen</h3>
-          <p class="console-note">Counts update as you tap. Reports show totals, never who tapped.</p>
-          <dl class="stats">
-            <div><dt>Sessions</dt><dd id="st-sessions">0</dd></div>
-            <div><dt>Screens viewed</dt><dd id="st-views">0</dd></div>
-            <div><dt>Sponsor impressions</dt><dd id="st-impr">0</dd></div>
-            <div><dt>Taken home by phone</dt><dd id="st-scans">0</dd></div>
-          </dl>
-          <h4>Activity</h4>
-          <ol class="feed" id="feed">
-            <li class="feed-empty">Tap the kiosk screen to start a session.</li>
-          </ol>
-          <button class="btn btn-ghost btn-small" id="reset-demo" type="button">Reset demo</button>
-        </aside>
-      </div>
-    </div>
-  </section>
-
-  <!-- TWO WAYS IN -->
-  <section class="ways">
-    <div class="wrap ways-grid">
-      <article class="way" id="advertise">
-        <h2>Be part of their next decision.</h2>
-        <p class="way-lede">Your business appears while visitors are choosing where to eat, what to do and where to go next — a few minutes from your door.</p>
-        <dl class="brief">
-          <div><dt>Place</dt><dd>Your market and the venues that fit your customers.</dd></div>
-          <div><dt>Purpose</dt><dd>The goal, and the step you want a visitor to take.</dd></div>
-          <div><dt>Message</dt><dd>One offer, a clear identity, a link they can take home.</dd></div>
-          <div><dt>Review</dt><dd>Availability, pricing, timing and what you'll see in reports.</dd></div>
-        </dl>
-        <a class="btn" href="#contact" data-interest="Advertising">Plan a campaign</a>
-      </article>
-
-      <article class="way way-host" id="host">
-        <h2>Add something useful to your lobby.</h2>
-        <p class="way-lede">A managed digital concierge for qualified venues. We plan the content around your space and your visitors, then keep it running.</p>
-        <dl class="brief">
-          <div><dt>Equipment</dt><dd>Kiosk hardware and software, at no cost to qualified venues.</dd></div>
-          <div><dt>Setup</dt><dd>Installation and your venue's own information, coordinated with your team.</dd></div>
-          <div><dt>Care</dt><dd>Content updates and routine maintenance.</dd></div>
-          <div><dt>What you provide</dt><dd>A visible, accessible spot, a standard outlet and connectivity.</dd></div>
-        </dl>
-        <a class="btn" href="#contact" data-interest="Hosting a kiosk">Request a kiosk</a>
-        <p class="fine">No-cost hosting depends on a site review, availability and a signed Host Agreement.</p>
-      </article>
-    </div>
-  </section>
-
-  <!-- HARDWARE -->
-  <section class="hardware" id="hardware" aria-labelledby="hw-title">
-    <div class="wrap">
-      <h2 id="hw-title">Two finishes. One welcome screen.</h2>
-      <p class="section-lede">Every kiosk runs the same software. The finish is chosen to suit the room.</p>
-      <div class="hw-grid">
-        <figure class="hw">
-          <img src="assets/kiosk-clubhouse-sm.jpg" alt="Matte black kiosk beside a clubhouse front desk overlooking a golf course" width="900" height="450" loading="lazy">
-          <figcaption>
-            <h3>Clubhouse Concierge</h3>
-            <p>Matte black column and base. Made for clubhouses, resorts and darker, wood-toned interiors.</p>
-            <ul><li>Portrait touch display</li><li>Course, dining, events and membership</li><li>Local discovery panel</li></ul>
-          </figcaption>
-        </figure>
-        <figure class="hw">
-          <img src="assets/kiosk-lobby-sm.jpg" alt="Silver kiosk in a bright marble hotel lobby near the reception desk" width="900" height="600" loading="lazy">
-          <figcaption>
-            <h3>Guest Directory</h3>
-            <p>Brushed silver enclosure with an integrated card slot. Suits hotel lobbies, medical offices and service lounges.</p>
-            <ul><li>Portrait touch display</li><li>Dining, amenities, local guide and events</li><li>Sponsor slot on every screen</li></ul>
-          </figcaption>
-        </figure>
-      </div>
-    </div>
-  </section>
-
-  <!-- VENUES -->
-  <section class="venues" aria-labelledby="venues-title">
-    <div class="wrap">
-      <h2 id="venues-title">Built around the room it stands in.</h2>
-      <div class="venue-list">
-        <div><h3>Hotels &amp; hospitality</h3><p>Guests planning their evening: dining, attractions, transport and your property's amenities.</p></div>
-        <div><h3>Golf &amp; country clubs</h3><p>Members between rounds: course conditions, tee times, events and the pro shop.</p></div>
-        <div><h3>Medical offices</h3><p>Patients waiting: check-in help, the nearest pharmacy, coffee and parking.</p></div>
-        <div><h3>Dealership service lounges</h3><p>Customers killing an hour: service status, lunch nearby and something to do.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- HOW IT WORKS -->
-  <section class="steps" aria-labelledby="steps-title">
-    <div class="wrap">
-      <h2 id="steps-title">How it works</h2>
-      <ol class="step-list">
-        <li><h3>Find the right fit</h3><p>Tell us about your venue or your campaign goal. We review the setting, placement and availability with you.</p></li>
-        <li><h3>Make it relevant</h3><p>We plan venue information or ad creative around the people who'll actually be standing at the screen.</p></li>
-        <li><h3>Confirm the details</h3><p>You review the agreement, setup or campaign scope, timing, and how support and reporting work.</p></li>
-      </ol>
-    </div>
-  </section>
-
-  <!-- PRICING -->
-  <section class="pricing" aria-labelledby="price-title">
-    <div class="wrap price-grid">
-      <div>
-        <h2 id="price-title">Start local. Grow your reach.</h2>
-        <p>Annual placements keep your business on screen all year, in the venues your customers already visit. Multi-kiosk plans are quoted for your market.</p>
-      </div>
-      <div class="price-card">
-        <p class="price"><span>$399</span> per year</p>
-        <p>Annual ad placement, starting price</p>
-        <ul>
-          <li>Sponsor slot on a kiosk in your area</li>
-          <li>Tap-to-phone link or offer</li>
-          <li>Totals for impressions and take-home scans</li>
-        </ul>
-        <a class="btn" href="#contact" data-interest="Advertising pricing">Get a quote</a>
-        <p class="fine">Final scope, availability and terms are confirmed in your quote.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- FAQ -->
-  <section class="faq" id="faq" aria-labelledby="faq-title">
-    <div class="wrap faq-grid">
-      <h2 id="faq-title">A little clarity before you start.</h2>
-      <div class="faq-list">
-        <details><summary>Is there a cost to host a kiosk?</summary><p>Qualified venues get the kiosk hardware, software, installation, content updates and maintenance at no cost. It depends on a site review and a signed Host Agreement.</p></details>
-        <details><summary>What does my venue need to provide?</summary><p>A visible, accessible spot with a standard power outlet. We review internet availability and the right installation with your team.</p></details>
-        <details><summary>Who looks after the kiosk?</summary><p>Spotlight manages the equipment, software, content updates and routine maintenance. Contact support for installation or service questions.</p></details>
-        <details><summary>Who can advertise?</summary><p>Local businesses, restaurants and entertainment, medical and wellness services, automotive businesses and retail brands can ask about placements that fit.</p></details>
-        <details><summary>What does advertising cost?</summary><p>Annual placements start at $399. Multi-kiosk plans are priced by market and number of screens, and confirmed in your quote.</p></details>
-        <details><summary>What do advertisers see in reports?</summary><p>Totals: how often your message was shown, how many people opened it and how many took it home by phone. Kiosks don't identify who tapped.</p></details>
-      </div>
-    </div>
-  </section>
-
-  <!-- CONTACT -->
-  <section class="contact" id="contact" aria-labelledby="contact-title">
-    <div class="wrap contact-grid">
-      <div>
-        <h2 id="contact-title">Let's put your space in the spotlight.</h2>
-        <p>Host a useful amenity or reach your next customer. Start with a conversation.</p>
-        <p class="contact-direct"><a href="mailto:sales@spotlightkiosks.com">sales@spotlightkiosks.com</a><br><a href="tel:+16028874058">602-887-4058</a></p>
-      </div>
-      <form class="contact-form" id="contact-form" novalidate>
-        <fieldset class="interest">
-          <legend>I'm interested in</legend>
-          <label><input type="radio" name="interest" value="Advertising" checked> Advertising</label>
-          <label><input type="radio" name="interest" value="Hosting a kiosk"> Hosting a kiosk</label>
-        </fieldset>
-        <label>Your name<input name="name" autocomplete="name" required></label>
-        <label>Business or venue<input name="business" autocomplete="organization"></label>
-        <label>Email<input name="email" type="email" autocomplete="email" required></label>
-        <label>City or area<input name="area" placeholder="e.g. Scottsdale, Gilbert"></label>
-        <label class="full">Anything we should know<textarea name="message" rows="4"></textarea></label>
-        <p class="form-error full" id="form-error" role="alert" hidden></p>
-        <div class="full form-actions">
-          <button class="btn" type="submit">Email Spotlight</button>
-          <span class="fine">Opens your email app with these details filled in.</span>
-        </div>
-      </form>
-    </div>
-  </section>
-</main>
-
-<footer class="site-footer">
-  <div class="wrap footer-grid">
+<section class="hero">
+  <div class="wrap hero-copy">
+    <h1>Turn wait time into opportunity.</h1>
     <div>
-      <p class="footer-brand">Spotlight Kiosks</p>
-      <p>Smart kiosks. Useful information. Local connection.</p>
-    </div>
-    <nav aria-label="Footer">
-      <a href="#demo">Try the kiosk</a>
-      <a href="#advertise">Advertise</a>
-      <a href="#host">Host a kiosk</a>
-      <a href="#hardware">Hardware</a>
-      <a href="#faq">Questions</a>
-    </nav>
-    <div>
-      <a href="mailto:sales@spotlightkiosks.com">sales@spotlightkiosks.com</a><br>
-      <a href="tel:+16028874058">602-887-4058</a>
-      <p class="socials">
-        <a href="https://www.instagram.com/spotlightkiosks/" rel="noopener" target="_blank">Instagram</a>
-        <a href="https://www.linkedin.com/company/spotlight-kiosks/" rel="noopener" target="_blank">LinkedIn</a>
-        <a href="https://www.facebook.com/profile.php?id=61581139512802" rel="noopener" target="_blank">Facebook</a>
-        <a href="https://x.com/spotlightkiosks" rel="noopener" target="_blank">X</a>
-      </p>
+      <p class="lede">Useful visitor information and local business advertising, together on one touch screen — in the lobbies, lounges and waiting rooms where people pause.</p>
+      <div class="btn-row"><a class="btn " href="./campaign-planner/">Plan a campaign</a><a class="btn btn-ghost" href="./hosts/">Host a kiosk</a></div>
     </div>
   </div>
-  <div class="wrap footer-base">© <span id="year">2026</span> Spotlight Kiosks. Businesses shown in the kiosk demo are fictional.</div>
-</footer>
+  <figure class="stage">
+    <img src="./assets/kiosk-clubhouse.jpg" alt="A matte black Spotlight kiosk in a golf clubhouse lobby, showing course guide, tee times, dining and events on its screen" width="1774" height="887" fetchpriority="high">
+    <div class="stage-light" aria-hidden="true"></div>
+    <figcaption class="wrap"><span>Clubhouse Concierge, matte black</span><a href="#demo">Tap through one below</a></figcaption>
+  </figure>
+  <div class="wrap facts">
+    <div><strong>For visitors</strong><p>Amenities, directions and answers in one place.</p></div>
+    <div><strong>For local businesses</strong><p>Your ad on screen when people decide where to go next.</p></div>
+    <div><strong>For venues</strong><p>Hardware, setup and upkeep handled for you.</p></div>
+  </div>
+</section>
 
-<script src="kiosk.js"></script>
-<script src="site.js"></script>
+<nav class="jump" aria-label="Get started"><div class="wrap jump-grid">
+  <a href="./campaign-planner/"><span class="ico"><svg class="" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v4h3l7 4V6L6 10H3zM16 9a4 4 0 0 1 0 6"/></svg></span><span><b>Plan a campaign</b><span>A local message with a clear next step. For advertisers.</span></span></a>
+  <a href="./hosts/"><span class="ico"><svg class="" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7M6 9.5V20h12V9.5"/></svg></span><span><b>Host a kiosk</b><span>A useful amenity for your venue. For venue hosts.</span></span></a>
+  <a href="#demo"><span class="ico"><svg class="" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="15" rx="1.5"/><path d="M12 17.5v3.5M8 21h8"/></svg></span><span><b>Explore the kiosk</b><span>See the visitor experience in action.</span></span></a>
+</div></nav>
+
+<section class="demo" id="demo" aria-labelledby="demo-title">
+  <div class="wrap">
+    <div class="demo-head">
+      <h2 id="demo-title">Try the kiosk.</h2>
+      <p>This is the screen your guests use. Pick a venue and tap around the way a visitor would. The lower half of the screen is the ad space local businesses buy — swipe it, or tap "Your ad here".</p>
+    </div>
+    <div class="venue-switch" role="radiogroup" aria-label="Choose a venue">
+      <button role="radio" aria-checked="true" data-venue="golf">Golf clubhouse</button>
+      <button role="radio" aria-checked="false" data-venue="hotel">Hotel lobby</button>
+      <button role="radio" aria-checked="false" data-venue="medical">Medical office</button>
+      <button role="radio" aria-checked="false" data-venue="auto">Dealership lounge</button>
+    </div>
+    <div class="demo-grid">
+      <div class="device" id="device" data-finish="black">
+        <div class="device-head"><div class="screen" id="screen" data-root="./" aria-live="polite"></div></div>
+        <div class="device-pole"><span class="device-slot"></span></div>
+        <div class="device-base"></div>
+      </div>
+      <aside class="console" aria-labelledby="console-title">
+        <h3 id="console-title">Behind the screen</h3>
+        <p class="console-note">Counts update as you tap. Reports show totals, never who tapped.</p>
+        <div class="ad-note"><div><b>The bottom half is for sale.</b>Every visitor sees the ad space while they browse. Annual placements start at $399. <a href="./advertise/">See advertising options</a></div></div>
+        <dl class="stats">
+          <div><dt>Sessions</dt><dd id="st-sessions">0</dd></div>
+          <div><dt>Screens viewed</dt><dd id="st-views">0</dd></div>
+          <div><dt>Ad impressions</dt><dd id="st-impr">0</dd></div>
+          <div><dt>Taken home by phone</dt><dd id="st-scans">0</dd></div>
+        </dl>
+        <h4>Activity</h4>
+        <ol class="feed" id="feed"><li class="feed-empty">Tap the kiosk screen to start a session.</li></ol>
+        <button class="btn btn-ghost btn-small" id="reset-demo" type="button">Reset demo</button>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0"><div class="wrap">
+  <div class="section-head"><h2>Two ways in. One local connection.</h2><p>Start with the opportunity that fits your business or venue.</p></div>
+  <div class="paths">
+    <article class="path" id="advertise">
+      <div class="path-main"><p class="who">For local businesses</p><h3>Be part of their next decision.</h3>
+        <p class="desc">Introduce your business while visitors explore where to go, what to try and what to do next.</p>
+        <div class="btn-row"><a class="btn " href="./campaign-planner/">Plan a campaign</a><a class="text-link" href="./advertise/">View advertising options</a></div></div>
+      <div class="path-panel"><h4>Start with a clear brief</h4><dl class="brief">
+        <div><dt>Place</dt><dd>Your market and a relevant venue setting</dd></div>
+        <div><dt>Purpose</dt><dd>The business goal and the visitor's next step</dd></div>
+        <div><dt>Message</dt><dd>One offer, a clear identity and useful creative</dd></div>
+        <div><dt>Review</dt><dd>Availability, pricing, timing and reporting</dd></div></dl>
+        <p class="fine">Use the planner to organize an inquiry. Campaign details are confirmed with Spotlight.</p></div>
+    </article>
+    <article class="path" id="host">
+      <div class="path-main"><p class="who">For host venues</p><h3>Add something useful. Keep it simple.</h3>
+        <p class="desc">A managed digital amenity for qualified venues, with information planned around your space and visitors.</p>
+        <div class="btn-row"><a class="btn " href="./hosts/#inquiry">Request a kiosk</a><a class="text-link" href="./hosts/">Review the host offering</a></div></div>
+      <div class="path-panel"><h4>The managed host offering</h4><dl class="brief">
+        <div><dt>Equipment</dt><dd>Kiosk hardware and software</dd></div>
+        <div><dt>Setup</dt><dd>Coordinated installation and venue content</dd></div>
+        <div><dt>Care</dt><dd>Content updates and routine maintenance</dd></div>
+        <div><dt>Fit</dt><dd>Accessible space, power, connectivity and a signed agreement</dd></div></dl>
+        <p class="fine">No-cost hosting depends on qualification, availability and a signed Host Agreement.</p></div>
+    </article>
+  </div>
+</div></section>
+
+<section class="section" style="background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)"><div class="wrap">
+  <div class="section-head"><h2>Real places. Relevant possibilities.</h2><p>Explore the visitor moment in each kind of venue, then dig into the details.</p></div>
+  <div data-tabs><div class="tabs" role="tablist" aria-label="Venue types"><button role="tab" id="tab-hotels" aria-controls="panel-hotels" aria-selected="true" tabindex="0">Hotels</button><button role="tab" id="tab-golf" aria-controls="panel-golf" aria-selected="false" tabindex="-1">Golf clubs</button><button role="tab" id="tab-medical" aria-controls="panel-medical" aria-selected="false" tabindex="-1">Medical</button><button role="tab" id="tab-automotive" aria-controls="panel-automotive" aria-selected="false" tabindex="-1">Automotive</button><button role="tab" id="tab-restaurants" aria-controls="panel-restaurants" aria-selected="false" tabindex="-1">Restaurants</button></div><div class="tab-panel" role="tabpanel" id="panel-hotels" aria-labelledby="tab-hotels">
+  <div><h3>A better stay starts in the lobby.</h3><p>Help guests discover dining, attractions, transportation and your property's amenities from one welcoming screen.</p><ul class="check-list"><li>Digital concierge and local discovery</li><li>Property amenities and useful FAQs</li><li>Dining, activities and transportation information</li></ul><a class="text-link" href="./venues/hotels/">Explore hotels & hospitality</a></div>
+  <div class="moment"><div class="mini" data-finish="silver" aria-hidden="true"><div class="mini-head"><div class="mini-screen "><b>Welcome</b><small>to The Arden Hotel</small><div class="mini-tiles"><span style="--g:linear-gradient(135deg,#7a3b1f,#c9773a)">Dining</span><span style="--g:linear-gradient(135deg,#1f6f78,#7cc4c0)">Amenities</span><span style="--g:linear-gradient(120deg,#2b5876,#c2702f)">Local guide</span><span style="--g:linear-gradient(135deg,#2a2f5c,#8a64b0)">Events</span></div><div class="mini-ad"><i>YOUR AD HERE<em>Ad space for local businesses</em></i></div></div></div><div class="mini-pole"></div><div class="mini-base"></div></div><dl><dt>The visitor moment</dt><dd>Guests planning what to do next</dd><dt>On screen</dt><dd>Discover your next local favorite.</dd></dl></div>
+</div><div class="tab-panel" role="tabpanel" id="panel-golf" aria-labelledby="tab-golf" hidden>
+  <div><h3>A concierge for the clubhouse.</h3><p>Give members and guests course conditions, tee times, dining, events and the pro shop — plus the best of the neighborhood.</p><ul class="check-list"><li>Course guide, conditions and tee times</li><li>Dining, events and membership information</li><li>Pro shop highlights and local discovery</li></ul><a class="text-link" href="./venues/golf/">Explore golf & country clubs</a></div>
+  <div class="moment"><div class="mini" data-finish="black" aria-hidden="true"><div class="mini-head"><div class="mini-screen "><b>Welcome</b><small>to Saguaro Hills Golf Club</small><div class="mini-tiles"><span style="--g:linear-gradient(135deg,#1f5a32,#8fbf5a)">Course guide</span><span style="--g:linear-gradient(135deg,#2f6b34,#b7d36a)">Tee times</span><span style="--g:linear-gradient(135deg,#7a3b1f,#c9773a)">Dining</span><span style="--g:linear-gradient(135deg,#2a2f5c,#8a64b0)">Events</span></div><div class="mini-ad"><i>YOUR AD HERE<em>Ad space for local businesses</em></i></div></div></div><div class="mini-pole"></div><div class="mini-base"></div></div><dl><dt>The visitor moment</dt><dd>Members between rounds</dd><dt>On screen</dt><dd>Everything about today, in one place.</dd></dl></div>
+</div><div class="tab-panel" role="tabpanel" id="panel-medical" aria-labelledby="tab-medical" hidden>
+  <div><h3>Make the waiting room more useful.</h3><p>Give visitors an easy way to explore practice information, patient education, directions and relevant local services.</p><ul class="check-list"><li>Practice services and visitor FAQs</li><li>General educational content selected by the practice</li><li>Directions, wellness and local service information</li></ul><a class="text-link" href="./venues/medical/">Explore medical offices</a></div>
+  <div class="moment"><div class="mini" data-finish="silver" aria-hidden="true"><div class="mini-head"><div class="mini-screen "><b>Welcome</b><small>to Camelback Family Health</small><div class="mini-tiles"><span style="--g:linear-gradient(135deg,#1b6ca8,#62b6cb)">Check-in</span><span style="--g:linear-gradient(135deg,#227a5c,#8ccfa6)">Pharmacy</span><span style="--g:linear-gradient(135deg,#6e4772,#d29ab0)">Wellness</span><span style="--g:linear-gradient(120deg,#2b5876,#c2702f)">Local guide</span></div><div class="mini-ad"><i>YOUR AD HERE<em>Ad space for local businesses</em></i></div></div></div><div class="mini-pole"></div><div class="mini-base"></div></div><dl><dt>The visitor moment</dt><dd>Visitors looking for practical information</dd><dt>On screen</dt><dd>Useful information while you wait.</dd></dl></div>
+</div><div class="tab-panel" role="tabpanel" id="panel-automotive" aria-labelledby="tab-automotive" hidden>
+  <div><h3>Put the waiting area to work.</h3><p>Showcase vehicle highlights, service information and relevant offers while customers spend time in your sales or service lounge.</p><ul class="check-list"><li>Featured vehicles and inventory highlights</li><li>Financing, service and warranty information</li><li>Promotions and QR links to take the next step</li></ul><a class="text-link" href="./venues/automotive/">Explore car dealerships</a></div>
+  <div class="moment"><div class="mini" data-finish="black" aria-hidden="true"><div class="mini-head"><div class="mini-screen "><b>Welcome</b><small>to Valley Motors</small><div class="mini-tiles"><span style="--g:linear-gradient(135deg,#2d3436,#e17055)">Service</span><span style="--g:linear-gradient(135deg,#24343f,#5f7a8a)">Vehicles</span><span style="--g:linear-gradient(135deg,#7a3b1f,#c9773a)">Dining</span><span style="--g:linear-gradient(135deg,#a2740a,#e8b923)">Offers</span></div><div class="mini-ad"><i>YOUR AD HERE<em>Ad space for local businesses</em></i></div></div></div><div class="mini-pole"></div><div class="mini-base"></div></div><dl><dt>The visitor moment</dt><dd>Sales and service customers considering their options</dd><dt>On screen</dt><dd>Your next move starts here.</dd></dl></div>
+</div><div class="tab-panel" role="tabpanel" id="panel-restaurants" aria-labelledby="tab-restaurants" hidden>
+  <div><h3>Give guests a reason to explore more.</h3><p>Spotlight menu highlights, specials, events and nearby experiences through a simple interactive display.</p><ul class="check-list"><li>Menu highlights and daily specials</li><li>Events and promotional content</li><li>Local attractions and partner visibility</li></ul><a class="text-link" href="./venues/restaurants/">Explore restaurants & venues</a></div>
+  <div class="moment"><div class="mini" data-finish="black" aria-hidden="true"><div class="mini-head"><div class="mini-screen "><b>Welcome</b><small>to Salt &amp; Ember</small><div class="mini-tiles"><span style="--g:linear-gradient(135deg,#7a3b1f,#c9773a)">Menu</span><span style="--g:linear-gradient(135deg,#a2740a,#e8b923)">Specials</span><span style="--g:linear-gradient(135deg,#2a2f5c,#8a64b0)">Events</span><span style="--g:linear-gradient(120deg,#2b5876,#c2702f)">Local guide</span></div><div class="mini-ad"><i>YOUR AD HERE<em>Ad space for local businesses</em></i></div></div></div><div class="mini-pole"></div><div class="mini-base"></div></div><dl><dt>The visitor moment</dt><dd>Guests discovering menus, events and experiences</dd><dt>On screen</dt><dd>There's more on the menu.</dd></dl></div>
+</div></div>
+</div></section>
+
+<section class="section"><div class="wrap">
+  <div class="section-head"><h2>Give the next step a little spotlight.</h2><p>How a setting, a simple invitation and a useful destination shape a campaign concept.</p></div>
+  <div class="concepts"><article class="concept" data-item data-cat="dining"><div class="creative" style="--cbg:#1F4433"><small>Willow Kitchen</small><strong>A good evening starts nearby.</strong><span>Explore the menu ↗</span><em>Example concept</em></div>
+  <div class="concept-body"><span class="kind">Dining & drinks · hotel lobby</span><h3>The next dinner decision</h3><dl><div><dt>The visitor moment</dt><dd>A hotel guest is choosing where to spend the evening.</dd></div><div><dt>The message</dt><dd>Introduce a welcoming dinner option with a useful menu link.</dd></div><div><dt>The next step</dt><dd>Explore the menu.</dd></div></dl>
+    <div class="concept-links"><a class="text-link" href="./campaign-planner/?idea=dinner-nearby">Adapt this idea</a><a class="text-link" href="./creative-studio/?idea=dinner-nearby">Preview the creative</a></div></div></article><article class="concept" data-item data-cat="dining"><div class="creative light" style="--cbg:#FFCE22"><small>Corner Cup &amp; Co.</small><strong>Something good for the way home.</strong><span>View the menu ↗</span><em>Example concept</em></div>
+  <div class="concept-body"><span class="kind">Dining & drinks · service lounge</span><h3>Be the convenient next stop</h3><dl><div><dt>The visitor moment</dt><dd>A customer is finishing a wait and thinking about food or a drink nearby.</dd></div><div><dt>The message</dt><dd>Introduce a nearby cafe or takeaway option for a visitor planning the next stop.</dd></div><div><dt>The next step</dt><dd>View the menu.</dd></div></dl>
+    <div class="concept-links"><a class="text-link" href="./campaign-planner/?idea=takeaway-next">Adapt this idea</a><a class="text-link" href="./creative-studio/?idea=takeaway-next">Preview the creative</a></div></div></article></div>
+  <p class="fine" style="margin-top:18px">Example businesses for planning and inspiration. <a class="text-link" href="./campaign-ideas/">Explore all eight playbooks</a></p>
+</div></section>
+
+<section class="section dark"><div class="wrap">
+  <div class="section-head"><h2>Give your next idea some room to grow.</h2><p>Explore a local campaign, preview a message and bring a clear starting point to the conversation.</p></div>
+  <div class="tools">
+    <a class="tool" href="./campaign-planner/"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg><h3>Build the brief.</h3><p>Connect your business goal to a market, venue setting and useful next step.</p><span class="go">Open the campaign planner</span></a>
+    <a class="tool lamp" href="./creative-studio/"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1 4 3 6 7 7-4 1-6 3-7 7-1-4-3-6-7-7 4-1 6-3 7-7z"/></svg><h3>Try the message.</h3><p>Write a headline and action, and see it in the kiosk's ad space.</p><span class="go">Try the creative studio</span></a>
+    <a class="tool" href="./campaign-ideas/"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="16.5" cy="9" r="2.4"/><path d="M15.5 14c2.6 0 4.4 1.6 5 4.5"/></svg><h3>Find a starting point.</h3><p>Browse local campaign playbooks built around real visitor moments.</p><span class="go">Explore campaign ideas</span></a>
+  </div>
+</div></section>
+
+<section class="section"><div class="wrap">
+  <div class="section-head"><h2>Start with a place. Build the right fit.</h2><p>A useful first conversation, a relevant plan and confirmed details before you commit.</p></div>
+  <ol class="step-list">
+    <li><h3>Find the right fit</h3><p>Share your venue or campaign goals. Review the setting, placement and availability with the team.</p></li>
+    <li><h3>Make it relevant</h3><p>Plan useful venue information or ad creative around the people and the place.</p></li>
+    <li><h3>Confirm the details</h3><p>Review the agreement, setup or campaign scope, timing, and how support and reporting work.</p></li>
+  </ol>
+  <p style="margin-top:24px"><a class="text-link" href="./how-it-works/">Follow the complete process</a></p>
+</div></section>
+
+<section class="section" style="background:#fff;border-top:1px solid var(--line)"><div class="wrap faq-grid">
+  <div><h2>A little clarity before you start.</h2><a class="text-link" href="./faqs/">All common questions</a></div>
+  <div class="faq-list"><details data-item data-cat="hosts"><summary>Is there a cost to host a kiosk?</summary><div><p>Qualified venues get kiosk hardware, software, installation, content updates and ongoing maintenance at no cost. Participation depends on a site review and a signed Host Agreement.</p></div></details><details data-item data-cat="hosts"><summary>What does my venue need to provide?</summary><div><p>A visible, accessible spot with a standard power outlet. We review internet availability and the right installation setup with your team.</p></div></details><details data-item data-cat="hosts"><summary>Who looks after the kiosk?</summary><div><p>Spotlight manages the equipment, software, content updates and routine maintenance. Contact support for installation or service questions.</p></div></details><details data-item data-cat="advertisers"><summary>Who can advertise?</summary><div><p>Local businesses, restaurants and entertainment, medical and wellness services, automotive businesses and retail brands can ask about placements that fit.</p></div></details><details data-item data-cat="advertisers"><summary>What does advertising cost?</summary><div><p>Local annual placements start at $399 a year, including ad artwork, digital copy and 12 months of display. Multi-kiosk campaigns are $499 per ad, per kiosk, per year. Your quote confirms the venues, format and terms.</p></div></details></div>
+</div></section>
+
+<section class="section" style="padding-top:0;background:#fff"><div class="wrap">
+  <div class="teaser"><div><h2 style="font-size:clamp(30px,3.6vw,44px)">Start local. Plan your reach.</h2><p class="lede" style="margin-top:10px">One ad on one kiosk, or a campaign across many. Build an estimate in the calculator.</p></div>
+  <p class="price"><span>$399</span>/ year</p><a class="btn btn-dark" href="./pricing/">Explore pricing</a></div>
+</div></section>
+
+<section class="cta-band"><div class="wrap cta-inner"><div><h2>Let's put your space in the spotlight.</h2><p>Host a useful amenity. Reach your next customer. Start with a conversation.</p></div>
+  <div class="btn-row"><a class="btn " href="./campaign-planner/">Plan a campaign</a><a class="btn btn-ghost" href="./hosts/#inquiry">Request a kiosk</a></div></div></section>
+
+</main>
+<footer class="site-footer">
+  <div class="wrap footer-grid">
+    <div class="footer-brand"><img src="./assets/logo-light.png" alt="Spotlight Kiosks" width="517" height="320"><p>Turning wait time into opportunity. Smart kiosks, useful information and local connection.</p></div>
+    <div><h2>Explore Spotlight</h2><nav aria-label="Explore Spotlight"><a href="./kiosk/">The kiosk</a><a href="./venues/">Venues</a><a href="./audience/">Who you can reach</a><a href="./locations/">Market planning</a><a href="./how-it-works/">How it works</a><a href="./about/">About us</a></nav></div>
+    <div><h2>Advertise</h2><nav aria-label="Advertise"><a href="./advertise/">Advertising options</a><a href="./pricing/">Pricing & calculator</a><a href="./campaign-planner/">Campaign planner</a><a href="./creative-studio/">Creative studio</a><a href="./campaign-ideas/">Campaign ideas</a><a href="./measurement/">Measurement guide</a><a href="./agencies/">For agencies</a></nav></div>
+    <div><h2>Keep it useful</h2><nav aria-label="Keep it useful"><a href="./hosts/#inquiry">Request a kiosk</a><a href="./resources/">Guides & resources</a><a href="./media-kit/">Media overview</a><a href="./faqs/">Common questions</a><a href="./contact/">Contact Spotlight</a><a href="./support/">Help & support</a></nav></div>
+    <div class="footer-talk"><h2>Let's talk</h2>
+      <a class="big" href="mailto:sales@spotlightkiosks.com">sales@spotlightkiosks.com</a><a class="big" href="tel:+16028874058">602-887-4058</a>
+      <p class="socials"><a href="https://www.instagram.com/spotlightkiosks/" rel="noopener" target="_blank">Instagram</a><a href="https://www.linkedin.com/company/spotlight-kiosks/" rel="noopener" target="_blank">LinkedIn</a><a href="https://www.facebook.com/profile.php?id=61581139512802" rel="noopener" target="_blank">Facebook</a><a href="https://x.com/spotlightkiosks" rel="noopener" target="_blank">X</a></p>
+    </div>
+  </div>
+  <div class="wrap footer-base"><span>© <span id="year">2026</span> Spotlight Kiosks. All rights reserved.</span><nav aria-label="Legal"><a href="./privacy/">Privacy Policy</a><a href="./terms/">Terms &amp; Conditions</a></nav></div>
+</footer>
+<script src="./assets/kiosk.js"></script>
+<script src="./assets/site.js"></script>
 </body>
 </html>
