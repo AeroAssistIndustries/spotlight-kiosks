@@ -1262,3 +1262,17 @@ a.card:hover{border-color:var(--ink)}
 .kapp .device-head { position: absolute; inset: 0; padding: 0; background: none; box-shadow: none; }
 .kapp .screen { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto; border-radius: 0; }
 .kapp .venue-switch[hidden], .kapp .console[hidden] { display: none; }
+
+/* Kiosk app: full-screen control and staff password prompt. */
+.kapp-fs { position: fixed; top: .5rem; right: .5rem; z-index: 20000; background: rgba(255,255,255,.85); border: 0; border-radius: 999px; padding: .45rem .9rem; font: inherit; font-size: .85rem; font-weight: 600; color: #0F1C2B; box-shadow: 0 4px 12px rgba(15,28,43,.18); cursor: pointer; }
+.kapp-modal { position: fixed; inset: 0; background: rgba(15,28,43,.6); z-index: 20001; display: grid; place-items: center; }
+.kapp-modal[hidden] { display: none; }
+.kapp-box { background: #fff; color: #0F1C2B; border-radius: 20px; padding: 1.8rem; width: min(420px, 90vw); box-sizing: border-box; font-family: "Instrument Sans", system-ui, sans-serif; }
+.kapp-box h2 { margin: 0 0 .4rem; font-size: 1.5rem; }
+.kapp-box p { margin: 0 0 1rem; color: #4a5a6a; }
+.kapp-box input { width: 100%; box-sizing: border-box; padding: .8rem; font: inherit; font-size: 1.1rem; border: 2px solid #cfdde5; border-radius: 12px; }
+.kapp-msg { color: #c0392b !important; min-height: 1.2rem; margin: .5rem 0 0 !important; font-size: .95rem; }
+.kapp-row { display: flex; gap: .6rem; justify-content: flex-end; margin-top: .8rem; }
+.kapp-btn, .kapp-btn-ghost { border: 0; border-radius: 999px; padding: .7rem 1.2rem; font: inherit; font-weight: 700; cursor: pointer; }
+.kapp-btn { background: #22C7B6; color: #0F1C2B; }
+.kapp-btn-ghost { background: #eef3f6; color: #0F1C2B; }
