@@ -130,7 +130,9 @@ add_action( 'wp_enqueue_scripts', function () {
 	wp_enqueue_style( 'citypulse-fonts', 'https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400;9..144,600&display=swap', array(), null );
 	wp_enqueue_style( 'citypulse', $uri . 'styles.css', array( 'citypulse-fonts' ), $v );
 
-	wp_enqueue_script( 'citypulse-kiosk', $uri . 'kiosk.js', array(), $v, true );
+	wp_enqueue_script( 'citypulse-qr', $uri . 'vendor/qrcode-generator.js', array(), $v, true );
+	wp_enqueue_script( 'citypulse-kiosk', $uri . 'kiosk.js', array( 'citypulse-qr' ), $v, true );
+	wp_enqueue_script( 'citypulse-concierge', $uri . 'concierge.js', array(), $v, true );
 	wp_enqueue_script( 'citypulse-integrations', $uri . 'integrations.js', array(), $v, true );
 	wp_add_inline_script( 'citypulse-integrations', 'window.CITYPULSE_CONFIG = ' . wp_json_encode( citypulse_public_config() ) . ';', 'before' );
 	wp_enqueue_script( 'citypulse-checkout', $uri . 'checkout.js', array( 'citypulse-integrations' ), $v, true );

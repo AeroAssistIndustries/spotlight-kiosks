@@ -20,6 +20,16 @@
   "front": false
  },
  {
+  "path": "concierge",
+  "slug": "concierge",
+  "parent": "",
+  "title": "Your concierge",
+  "description": "Your CityPulse guide, opened from the kiosk's QR code: dining, amenities, local guide and events.",
+  "content": "<!-- wp:html -->\n<section class=\"section\"><div class=\"wrap\"><div class=\"cc-app\" id=\"cc-app\"><p>Loading your guide…</p><noscript><p>Turn on JavaScript to view this guide.</p></noscript></div></div></section>\n<!-- /wp:html -->",
+  "active": "concierge/",
+  "front": false
+ },
+ {
   "path": "advertise",
   "slug": "advertise",
   "parent": "",

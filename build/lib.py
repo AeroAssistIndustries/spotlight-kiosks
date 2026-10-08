@@ -158,7 +158,7 @@ def page(path, title, desc, body, active=None, kiosk=False, extra_js=()):
 {body}
 </main>
 {footer()}
-{'<script src="{R}assets/kiosk.js"></script>' if kiosk else ''}
+{'<script src="{R}assets/vendor/qrcode-generator.js"></script><script src="{R}assets/kiosk.js"></script>' if kiosk else ''}
 <script src="{{R}}assets/config.js"></script>
 <script src="{{R}}assets/integrations.js"></script>
 {''.join(f'<script src="{{R}}assets/{j}"></script>' for j in extra_js)}

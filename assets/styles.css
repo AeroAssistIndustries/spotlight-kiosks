@@ -1156,3 +1156,19 @@ a.card:hover{border-color:var(--ink)}
 .prose a.btn{color:var(--ink)}
 .prose a.btn-dark{color:var(--paper)}
 .hp{position:absolute!important;left:-9999px!important;width:1px;height:1px;opacity:0}
+
+/* Kiosk: concierge handoff button and phone concierge page */
+.k-cta { margin-top: 14px; width: 100%; justify-content: center; }
+.cc-app { max-width: 560px; margin: 0 auto; padding: 0 16px; font-size: 16px; }
+.cc-kicker { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: #0E6B63; font-weight: 700; margin: 0 0 6px; }
+.cc-h { font-size: 26px; line-height: 1.15; margin: 0 0 8px; color: #0F1C2B; }
+.cc-lede { color: #536170; margin: 0 0 18px; }
+.cc-list { display: grid; gap: 12px; }
+.cc-card { background: #fff; border: 1px solid #D5DCE2; border-radius: 14px; padding: 16px; }
+.cc-card h2 { font-size: 17px; margin: 0 0 4px; color: #0F1C2B; }
+.cc-card p { margin: 0 0 8px; color: #2a3744; }
+.cc-card small { color: #536170; }
+.cc-sponsor { border-style: dashed; background: #F7FBFA; }
+.cc-tip { margin: 22px 0 8px; padding: 16px; border-radius: 14px; background: #0F1C2B; color: #E6EEF4; }
+.cc-tip h2 { font-size: 17px; margin: 0 0 8px; color: #fff; }
+.cc-tip p { margin: 4px 0; }
