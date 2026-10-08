@@ -67,7 +67,7 @@ home = f'''
   <p style="margin-top:18px"><a class="text-link" href="{{R}}locations/">See every market</a></p>
 </div></section>
 
-<section class="section" style="padding-top:0"><div class="wrap">
+<section class="section"><div class="wrap">
   {head("Two ways in. One local connection.", "Start with the opportunity that fits your business or venue.")}
   <div class="paths">
     <article class="path" id="advertise">
