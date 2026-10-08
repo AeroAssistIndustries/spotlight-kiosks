@@ -8,6 +8,8 @@
   const app = document.getElementById("show-app");
   if (!app) return;
   const AJAX = app.dataset.ajax || "";
+  const GITHUB = app.dataset.github || ""; // public content folder on GitHub (demo mode)
+  const MEDIA = /\.(jpe?g|png|webp|gif|mp4|webm)$/i;
   const KEY = "cp-kiosk-setup";
   const SECONDS = 8;
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -54,7 +56,12 @@
     const key = JSON.stringify(list.map(i => i.url));
     if (key === shown && items.length) return; // same content: keep playing without restarting
     shown = key; items = list; idx = 0;
-    if (!items.length) { frame(`<h1>CityPulse</h1><p>No content yet. It will appear here when it is added in WordPress.</p>`); return; }
+    if (!items.length) {
+      const gh = GITHUB && !AJAX;
+      frame(`<h1>CityPulse</h1><p>${gh ? "No content yet. Upload pictures or videos to the content folder on GitHub (see the README in that folder)." : "No content yet. It will appear here when it is added in WordPress."}</p>
+        ${gh ? '<p><a class="btn" href="https://github.com/AeroAssistIndustries/spotlight-kiosks/tree/main/content" target="_blank" rel="noopener">Open the content folder</a></p>' : ""}`);
+      return;
+    }
     app.innerHTML = `
       <div class="kshow-wrap">
         <div class="kshow-stage" id="kshow-stage"></div>
@@ -107,12 +114,24 @@
       .catch(() => { frame(`<h1>CityPulse</h1><p>Waiting for the connection. Trying again shortly.</p>`); setTimeout(() => fetchContent(setup), 60000); });
   }
 
+  function fetchGitHub() {
+    fetch(GITHUB, { headers: { Accept: "application/vnd.github+json" } })
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(list => {
+        const files = (Array.isArray(list) ? list : []).filter(f => f.type === "file" && MEDIA.test(f.name))
+          .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+        play(files.map(f => ({ type: /\.(mp4|webm)$/i.test(f.name) ? "video" : "image", url: f.download_url })));
+      })
+      .catch(() => { frame(`<h1>CityPulse</h1><p>Waiting for the connection. Trying again shortly.</p><p><label id="usb-open">Use files from a USB stick</label></p>`); const u = document.getElementById("usb-open"); if (u) u.addEventListener("click", usbPicker); });
+  }
+
   function heartbeat(setup) {
     post({ action: "citypulse_heartbeat", kiosk: setup.kiosk, token: setup.token, version: "kiosk-player-1" }).catch(() => {});
   }
 
   function start() {
-    if (!AJAX) { usbPicker(); return; } // no site address: USB only (GitHub demo)
+    if (GITHUB && !AJAX) { fetchGitHub(); refresh = setInterval(fetchGitHub, 10 * 60 * 1000); return; }
+    if (!AJAX) { usbPicker(); return; } // no site address: USB only
     const setup = load();
     if (!setup || !setup.kiosk || !setup.token) { setupForm(); return; }
     clearInterval(refresh); clearInterval(checkin);
