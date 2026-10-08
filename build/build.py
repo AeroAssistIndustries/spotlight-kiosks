@@ -165,7 +165,7 @@ KIOSK_DOC = f'''<!doctype html>
 <meta name="theme-color" content="#0B1622">
 <title>Lexen North Hollywood · Concierge</title>
 <link rel="icon" href="../assets/favicon.png" type="image/png">
-<link rel="stylesheet" href="../assets/styles.css?v=40261008b">
+<link rel="stylesheet" href="../assets/styles.css?v=20261008b">
 <link rel="stylesheet" href="../assets/cp-kiosk.css?v=4">
 </head>
 <body class="kiosk-body">

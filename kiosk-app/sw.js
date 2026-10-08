@@ -4,7 +4,7 @@
 const CACHE = "cpk-v4";
 const CORE = [
   "./",
-  "../assets/styles.css?v=40261008b",
+  "../assets/styles.css?v=20261008b",
   "../assets/cp-kiosk.css?v=4",
   "../assets/cp-kiosk.js?v=4",
   "../assets/kiosk-app.js?v=4",
