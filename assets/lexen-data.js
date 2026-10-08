@@ -12,7 +12,7 @@ window.CP_VENUE = {
   tz: "America/Los_Angeles",
   /* Live AI concierge: the address of the relay (cloudflare/concierge-worker.js), for example
      "https://citypulse-concierge.yourname.workers.dev". Leave empty to use the built-in answers only. */
-  ai: { endpoint: "" },
+  ai: { endpoint: "https://spotlight-kiosks.sarvesh-bb0.workers.dev" },
   phone: "(818) 821-3680",
   tel: "+18188213680",
   email: "lexennoho@gmail.com",
