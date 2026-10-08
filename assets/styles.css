@@ -1253,3 +1253,38 @@ a.card:hover{border-color:var(--ink)}
 .ki-back { margin-top: 1.2rem; background: #22C7B6; border: 0; border-radius: 999px; padding: 1rem 2rem; font: inherit; font-weight: 700; font-size: 1.15rem; color: #0F1C2B; cursor: pointer; box-shadow: 0 10px 22px rgba(34,199,182,.35); }
 @media (max-width: 560px) { .ki-grid { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: reduce) { .kshow-stage img, .kshow-stage video, .kshow-stage > .kshow-interactive { transition: none; } }
+
+/* Kiosk home: a touch website for the venue. Bright, large type and big tap targets. */
+.kh-wrap { position: fixed; inset: 0; background: #F4F8FA; color: #0F1C2B; display: flex; flex-direction: column; font-family: "Instrument Sans", system-ui, sans-serif; z-index: 10000; }
+.kh-top { display: flex; align-items: center; justify-content: space-between; background: #0F1C2B; color: #fff; padding: 1rem 1.4rem; }
+.kh-brand { display: flex; align-items: center; gap: .9rem; }
+.kh-logo { width: 3rem; height: 3rem; border-radius: 14px; background: #22C7B6; color: #0F1C2B; display: grid; place-items: center; font-weight: 800; font-family: "Bricolage Grotesque", sans-serif; }
+.kh-brand strong { display: block; font-size: 1.4rem; }
+.kh-brand small { display: block; color: rgba(255,255,255,.75); font-size: .95rem; }
+.kh-clock { font-size: 1.6rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.kh-main { flex: 1; overflow: auto; padding: 1.4rem; box-sizing: border-box; }
+.kh-hero h1 { font-family: "Bricolage Grotesque", sans-serif; font-size: clamp(2.4rem, 6vw, 3.6rem); margin: 0 0 .4rem; }
+.kh-hero p { font-size: 1.3rem; color: #3d4f5f; margin: 0 0 1.4rem; line-height: 1.5; }
+.kh-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.kh-tile { background: #fff; border: 0; border-top: 8px solid #22C7B6; border-radius: 22px; padding: 1.6rem; text-align: left; font: inherit; cursor: pointer; box-shadow: 0 12px 30px rgba(15,28,43,.12); min-height: 9rem; }
+.kh-tile:nth-child(2n) { border-top-color: #FF6B4A; }
+.kh-tile strong { display: block; font-size: 1.6rem; }
+.kh-tile span { display: block; color: #4a5a6a; font-size: 1.05rem; margin-top: .4rem; }
+.kh-back { background: #fff; border: 0; border-radius: 999px; padding: .8rem 1.3rem; font: inherit; font-weight: 700; font-size: 1.1rem; box-shadow: 0 6px 16px rgba(15,28,43,.12); cursor: pointer; margin-bottom: 1rem; }
+.kh-page h1 { font-family: "Bricolage Grotesque", sans-serif; font-size: clamp(2.2rem, 5vw, 3.2rem); margin: 0 0 .3rem; }
+.kh-intro { font-size: 1.2rem; color: #3d4f5f; margin: 0 0 1.4rem; }
+.kh-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.kh-card { background: #fff; border: 0; border-left: 8px solid #22C7B6; border-radius: 22px; padding: 1.5rem; text-align: left; font: inherit; cursor: pointer; box-shadow: 0 12px 30px rgba(15,28,43,.12); min-height: 8.5rem; }
+.kh-card:nth-child(2n) { border-left-color: #FF6B4A; }
+.kh-card strong { display: block; font-size: 1.35rem; }
+.kh-card span { display: block; color: #4a5a6a; font-size: 1.05rem; margin-top: .5rem; }
+.kh-detail { margin-top: 1.4rem; background: #fff; border-radius: 22px; padding: 1.6rem; box-shadow: 0 12px 30px rgba(15,28,43,.12); font-size: 1.25rem; line-height: 1.5; }
+.kh-detail h2 { margin: 0 0 .4rem; font-size: 1.7rem; }
+.kh-close { margin-top: 1rem; background: #22C7B6; border: 0; border-radius: 999px; padding: .9rem 1.8rem; font: inherit; font-weight: 700; color: #0F1C2B; cursor: pointer; }
+.kh-ticker { background: #fff; border-top: 2px solid #e1eaef; overflow: hidden; white-space: nowrap; padding: .9rem 0; }
+.kh-track { display: inline-block; animation: kh-scroll 28s linear infinite; }
+.kh-ad { display: inline-block; margin: 0 2.2rem; font-size: 1.2rem; color: #0F1C2B; }
+.kh-ad b { color: #0f9688; margin-right: .4rem; }
+@keyframes kh-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (max-width: 560px) { .kh-tiles, .kh-cards { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .kh-track { animation: none; } }

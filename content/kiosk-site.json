@@ -1,0 +1,42 @@
+{
+  "venue": "Demo Hotel Lobby",
+  "welcome": "Welcome. Explore what is nearby, see today's offers and ask the front desk for anything you need.",
+  "sections": [
+    {
+      "id": "dining", "title": "Dining", "intro": "Breakfast, lunch and dinner, all in walking distance.",
+      "cards": [
+        { "title": "Lobby cafe", "short": "Open 6:30am to 9pm", "detail": "Coffee, pastries and light meals on the ground floor. Ask the desk for a table." },
+        { "title": "Rooftop grill", "short": "Dinner from 5pm", "detail": "Seasonal menu with city views. Reservations recommended on weekends." },
+        { "title": "In-room dining", "short": "24 hours", "detail": "Order from the room phone or the app. Breakfast is served until 11am." }
+      ]
+    },
+    {
+      "id": "spa", "title": "Spa and pool", "intro": "Relax after a long day.",
+      "cards": [
+        { "title": "Pool deck", "short": "Open 8am to 8pm", "detail": "Pool deck on level 2. Towels are at the spa desk." },
+        { "title": "Spa", "short": "Book at the desk", "detail": "Massage and facial treatments. Ask the concierge about first-visit offers." }
+      ]
+    },
+    {
+      "id": "shuttle", "title": "Getting around", "intro": "Shuttle, taxi and car options.",
+      "cards": [
+        { "title": "Airport shuttle", "short": "Every 30 minutes", "detail": "Pick-up at the front entrance. Ask the front desk for the schedule." },
+        { "title": "Taxi and rideshare", "short": "Call the front desk", "detail": "The front desk can call a taxi any time of day." }
+      ]
+    },
+    {
+      "id": "offers", "title": "Today's offers", "intro": "Sponsored offers from local partners.",
+      "cards": [
+        { "title": "Sample Coffee Co.", "short": "Free pastry with any drink", "detail": "Show this screen at the coffee bar. Sample offer for demonstration." },
+        { "title": "Demo Auto Group", "short": "Free loaner car service", "detail": "Book a service visit at the front desk. Sample offer for demonstration." },
+        { "title": "Sample Spa & Wellness", "short": "20% off your first massage", "detail": "Ask the concierge. Sample offer for demonstration." }
+      ]
+    }
+  ],
+  "ads": [
+    { "advertiser": "Sample Coffee Co.", "headline": "Free pastry with any drink" },
+    { "advertiser": "Demo Auto Group", "headline": "Free loaner car service" },
+    { "advertiser": "Sample Spa & Wellness", "headline": "20% off your first massage" },
+    { "advertiser": "Demo Dental Studio", "headline": "New-patient exam this month" }
+  ]
+}
