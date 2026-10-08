@@ -45,3 +45,13 @@
   document.addEventListener("webkitfullscreenchange", sync);
   sync();
 })();
+
+/* Visible Accessibility button in the corner. It opens the same options panel as the bottom bar. */
+(function () {
+  const a = document.getElementById("kapp-a11y");
+  if (!a) return;
+  a.addEventListener("click", () => {
+    const b = document.querySelector('#knav button[data-act="access"]');
+    if (b) b.click();
+  });
+})();

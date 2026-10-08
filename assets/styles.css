@@ -1288,3 +1288,4 @@ a.card:hover{border-color:var(--ink)}
 .k-hc .k-tile::before, .k-hc .k-tile::after, .k-hc .k-tile.wide::before, .k-hc .k-tile.wide::after { display: none !important; }
 .k-hc .k-tile *, .k-hc .k-tile svg, .k-hc .k-tile span, .k-hc .k-tile small { color: #000 !important; stroke: #000 !important; fill: none !important; text-shadow: none !important; }
 button:focus-visible, [tabindex]:focus-visible { outline: 3px solid #0F1C2B !important; outline-offset: 2px; }
+.kapp-a11y { position: fixed; top: .5rem; left: .5rem; z-index: 20000; background: #0F1C2B; color: #fff; border: 0; border-radius: 999px; padding: .45rem .9rem; font: inherit; font-size: .85rem; font-weight: 600; box-shadow: 0 4px 12px rgba(15,28,43,.25); cursor: pointer; }
