@@ -1276,3 +1276,15 @@ a.card:hover{border-color:var(--ink)}
 .kapp-btn, .kapp-btn-ghost { border: 0; border-radius: 999px; padding: .7rem 1.2rem; font: inherit; font-weight: 700; cursor: pointer; }
 .kapp-btn { background: #22C7B6; color: #0F1C2B; }
 .kapp-btn-ghost { background: #eef3f6; color: #0F1C2B; }
+
+/* Kiosk accessibility: high contrast, the options panel, and visible keyboard focus. */
+.k-nav { position: relative; }
+.k-access { position: absolute; bottom: 100%; right: 0; display: grid; gap: .5rem; padding: .8rem; background: #fff; border-radius: 16px; box-shadow: 0 12px 30px rgba(15,28,43,.25); margin-bottom: .6rem; z-index: 5; }
+.k-access button { min-height: 56px; padding: .6rem 1rem; font: inherit; font-size: 1.05rem; font-weight: 600; border: 2px solid #0F1C2B; border-radius: 12px; background: #fff; color: #0F1C2B; cursor: pointer; text-align: left; }
+.k-access button[aria-pressed="true"] { background: #0F1C2B; color: #fff; }
+.k-hc, .k-hc .k-view, .k-hc .k-nav { background: #fff !important; color: #000 !important; }
+.k-hc * { border-color: #000 !important; text-shadow: none !important; }
+.k-hc .k-tile, .k-hc .k-item, .k-hc .k-card, .k-hc .k-tile.wide { background: #fff !important; background-image: none !important; color: #000 !important; border: 3px solid #000 !important; box-shadow: none !important; }
+.k-hc .k-tile::before, .k-hc .k-tile::after, .k-hc .k-tile.wide::before, .k-hc .k-tile.wide::after { display: none !important; }
+.k-hc .k-tile *, .k-hc .k-tile svg, .k-hc .k-tile span, .k-hc .k-tile small { color: #000 !important; stroke: #000 !important; fill: none !important; text-shadow: none !important; }
+button:focus-visible, [tabindex]:focus-visible { outline: 3px solid #0F1C2B !important; outline-offset: 2px; }
