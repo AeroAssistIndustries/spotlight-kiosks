@@ -9,12 +9,12 @@ whenever the relay cannot be reached or the free daily AI allowance runs out.
 The relay runs an open AI model (Meta Llama) on Cloudflare's free plan.
 
 1. Sign up at https://dash.cloudflare.com (the free plan is enough).
-2. Go to **Workers & Pages > Create > Create Worker**. Name it `citypulse-concierge` and click **Deploy**.
+2. Go to **Workers & Pages > Create > Create Worker**. Name it `spotlight-kiosks` (it must match `name` in `wrangler.toml`) and click **Deploy**.
 3. Click **Edit code**, delete the sample, paste the whole of `cloudflare/concierge-worker.js`, and click **Deploy**.
 4. In the worker's **Settings**, find **Bindings**, add a **Workers AI** binding, and name it exactly `AI`. Deploy again if asked.
-5. Open `https://citypulse-concierge.<your-subdomain>.workers.dev/health`. It should show `{"ok":true}`.
+5. Open `https://spotlight-kiosks.<your-subdomain>.workers.dev/health`. It should show `{"ok":true}`.
 6. Send the worker address to whoever maintains the kiosk. It goes in `assets/lexen-data.js`:
-   `ai: { endpoint: "https://citypulse-concierge.<your-subdomain>.workers.dev" }`.
+   `ai: { endpoint: "https://spotlight-kiosks.<your-subdomain>.workers.dev" }`.
 
 Terminal alternative: `cd cloudflare && npx wrangler deploy` (the AI binding is already in `wrangler.toml`).
 

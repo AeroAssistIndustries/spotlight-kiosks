@@ -1,5 +1,5 @@
 # Optional: deploy from a terminal with `npx wrangler deploy` (the dashboard paste method in README.md also works).
-name = "citypulse-concierge"
+name = "spotlight-kiosks"
 main = "concierge-worker.js"
 compatibility_date = "2026-09-01"
 
