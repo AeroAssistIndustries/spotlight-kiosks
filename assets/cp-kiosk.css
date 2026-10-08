@@ -312,3 +312,10 @@ body.kiosk-body { margin: 0; overflow: hidden; background: #0B1622; overscroll-b
 .cpk-newchat svg { color: var(--gold); }
 .cpk-ai-note { color: var(--sub); font-size: .82em; margin: 1.1em 0 0; }
 .cpk-msg.still { animation: none; }
+
+/* Business logos in the ad space */
+.cpk-ad-logo.img { width: 9.5em; height: 6.2em; padding: .5em; background: #13202F; border-color: rgba(217,183,110,.4); }
+.cpk-ad-logo.img img { width: 100%; height: 100%; object-fit: contain; }
+@media (min-aspect-ratio: 1/1) { .cpk-ad-logo.img { width: 13em; height: 8em; } }
+.cpk-ad-logo.img { display: flex; align-items: center; justify-content: center; }
+.cpk-ad-logo.img img { width: auto; height: auto; max-width: 100%; max-height: 100%; min-height: 0; display: block; }

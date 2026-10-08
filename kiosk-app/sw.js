@@ -1,20 +1,24 @@
 /* CityPulse kiosk: keeps the kiosk working if the internet drops.
    Pages load fresh when online and fall back to the saved copy when offline.
    Photos, scripts and styles are served from the saved copy and refreshed in the background. */
-const CACHE = "cpk-v4";
+const CACHE = "cpk-v5";
 const CORE = [
   "./",
   "../assets/styles.css?v=20261008b",
-  "../assets/cp-kiosk.css?v=4",
-  "../assets/cp-kiosk.js?v=4",
-  "../assets/kiosk-app.js?v=4",
-  "../assets/lexen-data.js?v=4",
+  "../assets/cp-kiosk.css?v=5",
+  "../assets/cp-kiosk.js?v=5",
+  "../assets/kiosk-app.js?v=5",
+  "../assets/lexen-data.js?v=5",
   "../assets/vendor/qrcode-generator.js",
   "../assets/favicon.png",
   "../assets/lexen/logo-transparent.png",
   "../assets/lexen/exterior.jpg",
   "../assets/lexen/room.jpg",
-  "../assets/lexen/lounge.jpg"
+  "../assets/lexen/lounge.jpg",
+  "../assets/lexen/ads/granville.png",
+  "../assets/lexen/ads/elportal.png",
+  "../assets/lexen/ads/nohodiner.png",
+  "../assets/lexen/ads/warnerbros.png"
 ];
 
 self.addEventListener("install", e => {
