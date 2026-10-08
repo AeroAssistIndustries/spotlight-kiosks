@@ -448,7 +448,7 @@ FAQS = [
   ("Do host venues receive revenue sharing?", "The standard Host Agreement provides the kiosk at no cost and doesn't include payments or revenue sharing. Any separate arrangement has to be agreed in writing.", "hosts"),
   ("Can we choose what appears on our kiosk?", "Yes. Your venue information is planned with your team, and advertising is reviewed for fit with your setting. Category restrictions, such as competitors, can be discussed before you sign.", "hosts"),
   ("Who can advertise?", "Local businesses, restaurants and entertainment, medical and wellness services, automotive businesses and retail brands can ask about placements that fit.", "advertisers"),
-  ("What does advertising cost?", "$399 a year for one location, $1,099 a year for three locations and $1,200 a year for five. Each location after five is $300 a year. You can also pay monthly at $60 per location. Every package includes ad artwork, digital copy and 12 months on screen.", "advertisers"),
+  ("What does advertising cost?", "$399 a year for one location, $1,099 a year for three locations and $1,200 a year for five. Each location after five is $300 a year. You can also pay monthly at $60 per location. Every package includes ad artwork and digital copy. Each annual contract year includes 12 months of screen time, starting when your ad goes live.", "advertisers"),
   ("What's included in a package?", "Ad artwork and digital copy, your logo and business details, and 12 months in the kiosk ad space at each location. Your quote confirms the exact venues, ad format and reporting.", "advertisers"),
   ("Can I pay monthly?", "Yes. Monthly is $60 per location, per month — $60 for one location, $180 for three, $300 for five. Paying annually costs less.", "advertisers"),
   ("Can I update my ad?", "Creative changes and seasonal offers can be discussed with the team. Your campaign agreement sets the process, schedule and number of updates.", "advertisers"),
@@ -602,7 +602,7 @@ def checkout_section():
     <fieldset class="co-step" data-step="4" hidden><legend>Review and pay</legend>
       <dl class="co-review" id="co-review"></dl>
       <div class="co-total"><span id="co-due-label">Due today</span><b id="co-due">$399</b></div>
-      <label class="ack"><input type="checkbox" name="agree_terms" required data-label="Terms"> <span>I agree to the <a href="{{R}}terms/" target="_blank">Terms &amp; Conditions</a>, including billing and renewal.</span></label>
+      <label class="ack"><input type="checkbox" name="agree_terms" required data-label="Terms"> <span>I agree to the <a href="{{R}}terms/" target="_blank">Terms &amp; Conditions</a>, including billing, the three-year term and cancellation.</span></label>
       <label class="ack"><input type="checkbox" name="agree_rights" required data-label="Artwork rights"> <span>I own or have permission to use the logo and artwork I'm sending.</span></label>
       <label class="ack"><input type="checkbox" name="agree_advertiser" required data-label="Advertiser Agreement"> <span>I accept the Advertiser Agreement for this package: placement, artwork, renewal and cancellation terms.</span></label>
       <label class="field full"><span>Type your full legal name to sign</span><input name="sign_name" required autocomplete="name" maxlength="120" data-label="Signature"><small>Typing your name is your electronic signature under the E-SIGN Act and Arizona's UETA.</small></label>
