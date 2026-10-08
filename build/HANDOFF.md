@@ -118,6 +118,13 @@ Multi-location packages (3 for $1,099/yr, 5 for $1,200/yr, +$300/yr for each loc
 - Recommended: turn on two-factor sign-in for every administrator account, because this page holds company agreements.
 - Nginx only: deny web access to `wp-content/uploads/citypulse-private/`.
 
+## 6B. Concierge visit counts
+
+- Every phone-page visit from a kiosk QR code is counted per venue, per day and per device (phone or desktop), and per item opened.
+- Counts only. No IP addresses, names, phone numbers or cookies are stored.
+- View them under **Orders & inquiries → Concierge visits** (administrators only).
+- Counts are kept for one year.
+
 ## 7. Theme structure
 
 ```
@@ -130,6 +137,7 @@ citypulse/
   inc/setup.php          Creates pages on activation from content/pages.json
   inc/forms.php          Orders & inquiries post type, AJAX handler (citypulse_submit), private uploads
   inc/documents.php      Admin-only Company documents page (sign-in gate, PDF upload, private streaming)
+  inc/visits.php         Concierge visit counts (AJAX endpoint citypulse_visit) and the report screen
   content/pages.json     Original page content (used on activation and for "reset")
   assets/styles.css      All styles (design tokens at the top: navy #0F1C2B, teal #22C7B6)
   assets/site.js         Menus, tabs, filters, forms, planner, studio, calculator, map, slider, journey animation

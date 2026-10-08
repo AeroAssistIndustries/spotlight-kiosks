@@ -11,6 +11,7 @@ require get_theme_file_path( 'inc/settings.php' );
 require get_theme_file_path( 'inc/setup.php' );
 require get_theme_file_path( 'inc/forms.php' );
 require get_theme_file_path( 'inc/documents.php' );
+require get_theme_file_path( 'inc/visits.php' );
 
 add_action( 'after_setup_theme', function () {
 	add_theme_support( 'title-tag' );
@@ -27,7 +28,7 @@ add_action( 'wp_enqueue_scripts', function () {
 
 	wp_enqueue_script( 'citypulse-qr', $uri . 'vendor/qrcode-generator.js', array(), $v, true );
 	wp_enqueue_script( 'citypulse-kiosk', $uri . 'kiosk.js', array( 'citypulse-qr' ), $v, true );
-	wp_enqueue_script( 'citypulse-concierge', $uri . 'concierge.js', array(), $v, true );
+	wp_enqueue_script( 'citypulse-concierge', $uri . 'concierge.js', array( 'citypulse-integrations' ), $v, true );
 	wp_enqueue_script( 'citypulse-integrations', $uri . 'integrations.js', array(), $v, true );
 	wp_add_inline_script( 'citypulse-integrations', 'window.CITYPULSE_CONFIG = ' . wp_json_encode( citypulse_public_config() ) . ';', 'before' );
 	wp_enqueue_script( 'citypulse-checkout', $uri . 'checkout.js', array( 'citypulse-integrations' ), $v, true );
