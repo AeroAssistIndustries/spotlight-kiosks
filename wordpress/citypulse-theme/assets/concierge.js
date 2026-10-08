@@ -35,8 +35,16 @@
     }
   };
   const venue = VENUES[q()] || null;
+  /* Count the visit when the site is served by WordPress (the static site has no endpoint). Counts only. */
+  function track(key) {
+    const cfg = window.CITYPULSE_CONFIG && CITYPULSE_CONFIG.forms && CITYPULSE_CONFIG.forms.ajaxUrl;
+    if (!cfg) return;
+    const body = new URLSearchParams({ action: "citypulse_visit", venue: key, item: new URLSearchParams(location.search).get("i") || "", device: matchMedia("(max-width: 720px)").matches ? "phone" : "desktop" });
+    fetch(cfg, { method: "POST", body, credentials: "same-origin", keepalive: true }).catch(() => {});
+  }
   function q() { return new URLSearchParams(location.search).get("v") || ""; }
 
+  if (venue) track(q());
   if (!venue) {
     app.innerHTML = `<h1 class="cc-h">Your CityPulse guide</h1>
       <p class="cc-lede">Scan the code on a CityPulse kiosk to open its guide here.</p>
