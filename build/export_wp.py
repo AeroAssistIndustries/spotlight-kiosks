@@ -119,6 +119,7 @@ require get_theme_file_path( 'inc/documents.php' );
 require get_theme_file_path( 'inc/visits.php' );
 require get_theme_file_path( 'inc/kiosks.php' );
 require get_theme_file_path( 'inc/fleet.php' );
+require get_theme_file_path( 'inc/media.php' );
 require get_theme_file_path( 'inc/access.php' );
 
 add_action( 'after_setup_theme', function () {
@@ -1525,6 +1526,7 @@ def main():
     w("inc/access.php", ACCESS_PHP)
     # fleet.php is maintained as a file in wordpress/citypulse-theme/inc/ (device heartbeat, host logins, offline alerts).
     w("inc/fleet.php", open(os.path.join(ROOT, "wordpress", "citypulse-theme", "inc", "fleet.php"), encoding="utf-8").read())
+    w("inc/media.php", open(os.path.join(ROOT, "wordpress", "citypulse-theme", "inc", "media.php"), encoding="utf-8").read())
     w("content/pages.json", json.dumps(pages, indent=1, ensure_ascii=False))
     shutil.copytree(os.path.join(ROOT, "assets"), os.path.join(THEME, "assets"), ignore=shutil.ignore_patterns("config.js"))
     shot = os.path.join(ROOT, "build", "theme-screenshot.png")
