@@ -12,6 +12,9 @@
   const GUIDE = new URL(BASE + "concierge/?v=" + encodeURIComponent(V.id), location.href).href;
   const PRICING = new URL(BASE + "pricing/", location.href).href;
   const IDLE_MS = 60000, AD_MS = 8000;
+  const TZ = V.tz || "America/Los_Angeles"; /* the venue's local time, whatever the kiosk's own clock is set to */
+  const hourNow = () => +new Intl.DateTimeFormat("en-US", { hour: "numeric", hourCycle: "h23", timeZone: TZ }).format(new Date());
+  const dayKey = d => new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(d || new Date());
 
   /* ---------- icons ---------- */
   const P = {
@@ -38,7 +41,14 @@
     speak: '<path d="M3 10v4h3l7 4V6L6 10H3zM16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/>',
     pause: '<rect x="6.5" y="5" width="3.5" height="14" rx="1"/><rect x="14" y="5" width="3.5" height="14" rx="1"/>',
     down: '<path d="M12 4v15M6 13l6 6 6-6"/>',
-    mega: '<path d="M3 10v4h3l7 4V6L6 10H3zM16 9a4 4 0 0 1 0 6"/>'
+    mega: '<path d="M3 10v4h3l7 4V6L6 10H3zM16 9a4 4 0 0 1 0 6"/>',
+    cloud: '<path d="M7 18h10a4 4 0 0 0 .5-7.97A5.5 5.5 0 0 0 7 9.5 4.25 4.25 0 0 0 7 18z"/>',
+    partly: '<circle cx="8" cy="8" r="3"/><path d="M8 2.5v1M2.5 8h1M4.1 4.1l.7.7M12 4.1l-.7.7"/><path d="M9 19h8.5a3.5 3.5 0 0 0 .3-7 4.8 4.8 0 0 0-9.2 1.2A2.9 2.9 0 0 0 9 19z"/>',
+    rain: '<path d="M7 15h10a4 4 0 0 0 .5-7.97A5.5 5.5 0 0 0 7 6.5 4.25 4.25 0 0 0 7 15z"/><path d="M8 18l-1 2.5M12 18l-1 2.5M16 18l-1 2.5"/>',
+    storm: '<path d="M7 15h10a4 4 0 0 0 .5-7.97A5.5 5.5 0 0 0 7 6.5 4.25 4.25 0 0 0 7 15z"/><path d="M12.5 15l-2 3.5h3l-2 3.5"/>',
+    fog: '<path d="M4 9h16M3 13h18M5 17h14"/>',
+    wind: '<path d="M3 9h11a3 3 0 1 0-3-3M3 15h15a3 3 0 1 1-3 3M3 12h8"/>',
+    moon: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>'
   };
   const svg = (k, cls) => `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"${cls ? ` class="${cls}"` : ""}>${P[k] || ""}</svg>`;
   const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -78,7 +88,7 @@
   const SKEY = "cpk-stats";
   function bump(group, key) {
     try {
-      const day = new Date().toLocaleDateString("en-CA");
+      const day = dayKey();
       const all = JSON.parse(localStorage.getItem(SKEY) || "{}");
       const d = all[day] || (all[day] = {});
       const g = d[group] || (d[group] = {});
@@ -96,33 +106,80 @@
     <div class="cpk-bg" aria-hidden="true">${V.photos.map((p, i) => `<span style="background-image:url('${A + p}');animation-delay:${i * 9}s"></span>`).join("")}</div>
     <div class="cpk-shade" aria-hidden="true"></div>
     <header class="cpk-top">
+      <div class="cpk-top-l" id="cpk-top-l"></div>
       <img class="cpk-logo" src="${A + V.logo}" alt="${esc(V.name)}">
       <div class="cpk-meta"><span class="cpk-wx" id="cpk-wx" hidden></span><span class="cpk-clock" id="cpk-clock"></span></div>
     </header>
     <main class="cpk-view" id="cpk-view" tabindex="-1"></main>
     <section class="cpk-ads" id="cpk-ads" aria-roledescription="carousel" aria-label="Featured"></section>
     <nav class="cpk-dock" id="cpk-dock" aria-label="Kiosk navigation"></nav>
-    <div class="cpk-sheet" id="cpk-sheet" hidden></div>`;
+    <div class="cpk-sheet" id="cpk-sheet" hidden></div>
+    <div class="cpk-warn" id="cpk-warn" hidden role="alertdialog" aria-modal="true" aria-labelledby="cpk-warn-t" aria-describedby="cpk-warn-d">
+      <div class="cpk-warn-box"><span class="cpk-warn-ring"><b id="cpk-cd">12</b></span>
+        <h2 id="cpk-warn-t">Are you still there?</h2>
+        <p id="cpk-warn-d">This screen will go back to the welcome screen for the next guest.</p>
+        <div class="cpk-warn-acts"><button class="cpk-btn-gold" data-act="stay">I'm still here</button><button class="cpk-btn-ghost" data-act="endnow">Start over</button></div>
+      </div></div>`;
+  const topL = root.querySelector("#cpk-top-l"), warnBox = root.querySelector("#cpk-warn");
   const view = root.querySelector("#cpk-view"), dock = root.querySelector("#cpk-dock"), ads = root.querySelector("#cpk-ads"), sheet = root.querySelector("#cpk-sheet");
 
   /* ---------- clock and weather ---------- */
   function tick() {
     const d = new Date();
-    root.querySelector("#cpk-clock").innerHTML = `<b>${d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</b><small>${d.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" })}</small>`;
+    root.querySelector("#cpk-clock").innerHTML = `<b>${d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: TZ })}</b><small>${d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: TZ })}</small>`;
   }
   tick(); setInterval(tick, 15000);
-  /* US National Weather Service (free, public). Hidden if it cannot be reached. */
+  /* Weather: US National Weather Service (free, public, no key). Now in the top bar, 7 days on the home screen.
+     The last forecast is kept on the kiosk, so it still shows if the internet drops. */
+  function wxIcon(t, night) {
+    t = (t || "").toLowerCase();
+    if (/thunder|storm/.test(t)) return "storm";
+    if (/rain|shower|drizzle/.test(t)) return "rain";
+    if (/fog|haze|smoke|dust/.test(t)) return "fog";
+    if (/wind|breez/.test(t)) return "wind";
+    if (/partly|mostly sunny|mostly clear|few clouds/.test(t)) return night ? "moon" : "partly";
+    if (/cloud|overcast/.test(t)) return "cloud";
+    return night ? "moon" : "sun";
+  }
+  const WKEY = "cpk-wx2";
+  S.wx = null;
+  try { S.wx = JSON.parse(localStorage.getItem(WKEY) || "null"); } catch (e) { /* ignore */ }
+  function showNow() {
+    const box = root.querySelector("#cpk-wx"), w = S.wx && S.wx.now;
+    if (!w) return;
+    box.hidden = false;
+    box.innerHTML = `${svg(wxIcon(w.s, !w.day))}<b>${esc(w.t)}°</b><small>${esc(w.s)}</small>`;
+  }
+  function weekHTML() {
+    const days = S.wx && S.wx.days;
+    if (!days || !days.length) return "";
+    return `<section class="cpk-week" aria-label="7-day forecast for North Hollywood">${days.slice(0, 7).map((d, i) => `
+      <div class="cpk-day${i === 0 ? " today" : ""}"><b>${esc(i === 0 ? "Today" : d.d)}</b>${svg(wxIcon(d.s, false))}
+        <span class="cpk-hi">${d.hi != null ? esc(d.hi) + "°" : "–"}</span><span class="cpk-lo">${d.lo != null ? esc(d.lo) + "°" : ""}</span>
+        <small>${esc(d.s)}</small></div>`).join("")}</section>`;
+  }
   function weather() {
-    const box = root.querySelector("#cpk-wx"), KEY = "cpk-wx";
-    const show = w => { if (!w) return; box.hidden = false; box.innerHTML = `${svg("sun")}<b>${esc(w.t)}°</b><small>${esc(w.s)}</small>`; };
-    try { const c = JSON.parse(localStorage.getItem(KEY) || "null"); if (c && Date.now() - c.at < 30 * 60000) { show(c); return; } if (c) show(c); } catch (e) { /* ignore */ }
+    showNow();
+    if (S.wx && Date.now() - S.wx.at < 30 * 60000) return;
     fetch(`https://api.weather.gov/points/${V.ll[0].toFixed(4)},${V.ll[1].toFixed(4)}`)
-      .then(r => r.json()).then(p => fetch(p.properties.forecastHourly)).then(r => r.json())
-      .then(f => {
-        const p = f.properties.periods[0];
-        const w = { t: p.temperature, s: p.shortForecast.split(" then ")[0].slice(0, 22), at: Date.now() };
-        try { localStorage.setItem(KEY, JSON.stringify(w)); } catch (e) { /* ignore */ }
-        show(w);
+      .then(r => r.json())
+      .then(p => Promise.all([fetch(p.properties.forecastHourly).then(r => r.json()), fetch(p.properties.forecast).then(r => r.json())]))
+      .then(([h, f]) => {
+        const p0 = h.properties.periods[0];
+        const short = t => t.split(" then ")[0].replace(/^Slight Chance /, "Chance ").slice(0, 20);
+        const byDay = {};
+        f.properties.periods.forEach(p => {
+          const k = dayKey(new Date(p.startTime));
+          const d = byDay[k] || (byDay[k] = { k, d: new Date(p.startTime).toLocaleDateString("en-US", { weekday: "short", timeZone: TZ }), hi: null, lo: null, s: "" });
+          if (p.isDaytime) { d.hi = p.temperature; d.s = short(p.shortForecast); }
+          else { d.lo = p.temperature; if (!d.s) d.s = short(p.shortForecast); }
+        });
+        const today = dayKey();
+        const days = Object.values(byDay).filter(d => d.k >= today).sort((a, b) => a.k < b.k ? -1 : 1).slice(0, 7);
+        S.wx = { at: Date.now(), now: { t: p0.temperature, s: short(p0.shortForecast), day: p0.isDaytime }, days };
+        try { localStorage.setItem(WKEY, JSON.stringify(S.wx)); } catch (e) { /* ignore */ }
+        showNow();
+        const wk = root.querySelector("#cpk-weekslot"); if (wk) wk.innerHTML = weekHTML();
       }).catch(() => {});
   }
   weather(); setInterval(weather, 30 * 60000);
@@ -165,7 +222,7 @@
   setInterval(() => { if (!S.still && !document.hidden && !ads.contains(document.activeElement)) showAd(S.ad + 1); }, AD_MS);
 
   /* ---------- views ---------- */
-  const greet = () => { const h = new Date().getHours(); return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"; };
+  const greet = () => { const h = hourNow(); return h < 5 ? "Good evening" : h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"; };
   const item = id => V.items[id];
   const ICON = {};
   Object.values(V.categories).forEach(c => c.items.forEach(i => { if (!ICON[i]) ICON[i] = c.icon; }));
@@ -189,6 +246,7 @@
       <h1 class="cpk-h1">${greet()}.</h1>
       <p class="cpk-lede">How can we help you today?</p>
       <button class="cpk-askbar" data-act="ask">${svg("search")}<span>Ask the concierge</span><em>Wi-Fi, check-out, food, Universal…</em></button>
+      <div id="cpk-weekslot">${weekHTML()}</div>
       <div class="cpk-tiles">${V.tiles.map(tileHTML).join("")}</div>
       <button class="cpk-take" data-act="take">
         <span class="cpk-take-qr">${qr(GUIDE, "QR code: open this guide on your phone")}</span>
@@ -252,7 +310,7 @@
     return `<section class="cpk-ask">
       <h1 class="cpk-h2">Ask the concierge</h1>
       <form class="cpk-askform" data-form="ask" autocomplete="off">
-        ${svg("search")}<input id="cpk-q" type="text" enterkeyhint="search" placeholder="Type a question" aria-label="Your question" maxlength="120">
+        ${svg("search")}<input id="cpk-q" type="text" enterkeyhint="search" placeholder="Type a question" aria-label="Your question" maxlength="120" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
         <button type="submit" class="cpk-askgo">Ask</button>
       </form>
       ${ans}
@@ -315,7 +373,10 @@
     }
     view.innerHTML = html;
     view.className = "cpk-view" + (dir ? " in-" + dir : "");
-    view.scrollTop = 0;
+    const cur = S.stack[S.stack.length - 1];
+    view.scrollTop = dir === "back" && cur && cur.sc ? cur.sc : 0;
+    topL.innerHTML = topLeftHTML();
+    scrollHint();
     dock.innerHTML = dockHTML();
     sheet.hidden = !S.panel || S.mode === "attract";
     sheet.innerHTML = sheet.hidden ? "" : sheetHTML();
@@ -323,15 +384,44 @@
   }
 
   /* ---------- navigation ---------- */
-  function go(entry) { S.stack.push(entry); render("fwd"); }
+  function go(entry) { const cur = S.stack[S.stack.length - 1]; if (cur) cur.sc = view.scrollTop; S.stack.push(entry); render("fwd"); }
+  /* Where Back goes, shown in the top-left Back button. */
+  function labelOf(e) {
+    if (!e) return "";
+    if (e.v === "home") return "Home";
+    if (e.v === "cat") return V.categories[e.id].label;
+    if (e.v === "item") return V.items[e.id].n;
+    if (e.v === "ask") return "Ask the concierge";
+    if (e.v === "take") return "Take this guide";
+    return "Featured";
+  }
+  function topLeftHTML() {
+    if (S.mode === "attract" || S.stack.length < 2) return "";
+    return `<button class="cpk-topback" data-act="back" aria-label="Back to ${esc(labelOf(S.stack[S.stack.length - 2]))}">${svg("back")}<span><b>Back</b><small>${esc(labelOf(S.stack[S.stack.length - 2]))}</small></span></button>`;
+  }
+  /* Soft fade at the bottom when there is more to scroll. */
+  function scrollHint() { const more = view.scrollHeight - view.clientHeight - view.scrollTop > 16; view.classList.toggle("has-more", more); }
+  view.addEventListener("scroll", scrollHint, { passive: true });
   function start() { S.mode = "session"; S.stack = [{ v: "home" }]; bump("sessions", "count"); render("fwd"); }
   function reset() {
+    clearTimeout(S.idle); hideWarn();
     S.mode = "attract"; S.stack = []; S.panel = false; S.answer = null;
     S.large = S.contrast = S.reach = false;
     if (window.speechSynthesis) speechSynthesis.cancel();
     render();
   }
-  function armIdle() { clearTimeout(S.idle); S.idle = setTimeout(reset, IDLE_MS); }
+  /* Idle: warn 12 seconds before going back to the welcome screen. Longer when accessibility options are on. */
+  const WARN_S = 12;
+  const idleMs = () => (S.large || S.contrast || S.reach) ? IDLE_MS * 2 : IDLE_MS;
+  function hideWarn() { clearInterval(S.cd); if (!warnBox.hidden) warnBox.hidden = true; }
+  function armIdle() { clearTimeout(S.idle); hideWarn(); S.idle = setTimeout(warn, idleMs() - WARN_S * 1000); }
+  function warn() {
+    if (S.mode === "attract") return;
+    let n = WARN_S; const cd = root.querySelector("#cpk-cd");
+    cd.textContent = n; warnBox.hidden = false;
+    const stay = warnBox.querySelector("[data-act=stay]"); if (stay) stay.focus({ preventScroll: true });
+    S.cd = setInterval(() => { n--; cd.textContent = n; if (n <= 0) { hideWarn(); reset(); } }, 1000);
+  }
   function speak() {
     if (!window.speechSynthesis) return;
     speechSynthesis.cancel();
@@ -366,6 +456,8 @@
       case "reach": S.reach = !S.reach; render(); break;
       case "still": S.still = !S.still; render(); break;
       case "speak": speak(); break;
+      case "stay": hideWarn(); break;
+      case "endnow": reset(); break;
     }
   });
   root.addEventListener("submit", e => {
@@ -394,6 +486,20 @@
 
   /* Work offline after the first load (service worker in the kiosk folder). */
   if ("serviceWorker" in navigator && window.isSecureContext) navigator.serviceWorker.register("sw.js").catch(() => {});
+
+  /* ---------- lockdown ----------
+     Nothing on the kiosk opens a web page, a new tab or a browser menu. QR codes open links on the guest's own phone only. */
+  const stop = e => { e.preventDefault(); e.stopPropagation(); };
+  document.addEventListener("click", e => { if (e.target.closest && e.target.closest("a[href]")) stop(e); if (e.ctrlKey || e.metaKey || e.shiftKey) stop(e); }, true);
+  ["auxclick", "contextmenu", "dragstart", "drop", "gesturestart"].forEach(ev => document.addEventListener(ev, stop, true));
+  document.addEventListener("selectstart", e => { if (!(e.target.closest && e.target.closest("input"))) e.preventDefault(); }, true);
+  document.addEventListener("wheel", e => { if (e.ctrlKey) e.preventDefault(); }, { passive: false, capture: true });
+  document.addEventListener("keydown", e => {
+    const k = (e.key || "").toLowerCase();
+    if ((e.ctrlKey || e.metaKey || e.altKey) && k !== "control" && k !== "meta" && k !== "alt") stop(e);
+    if (/^f([1-9]|1[0-2])$/.test(k)) stop(e);
+  }, true);
+  try { window.open = () => null; } catch (e) { /* ignore */ }
 
   window.CPK = { reset, answer };
   render();

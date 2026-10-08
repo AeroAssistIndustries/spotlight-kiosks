@@ -9,6 +9,7 @@ window.CP_VENUE = {
   short: "Lexen North Hollywood",
   address: "5268 Tujunga Ave, North Hollywood, CA 91601",
   ll: [34.1668794, -118.3787684],
+  tz: "America/Los_Angeles",
   phone: "(818) 821-3680",
   tel: "+18188213680",
   email: "lexennoho@gmail.com",
