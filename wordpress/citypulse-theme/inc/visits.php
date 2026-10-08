@@ -19,10 +19,15 @@ function citypulse_venue_names() {
 }
 
 function citypulse_record_visit() {
-	$venue = sanitize_key( wp_unslash( $_POST['venue'] ?? '' ) ); // phpcs:ignore
-	if ( ! array_key_exists( $venue, citypulse_venue_names() ) ) {
-		wp_send_json_error( 'Unknown venue.', 400 );
-		return;
+	$kiosk = sanitize_title( wp_unslash( $_POST['kiosk'] ?? '' ) ); // phpcs:ignore
+	$kpost = $kiosk ? citypulse_kiosk_public( $kiosk ) : null;
+	$venue = '';
+	if ( ! $kpost ) {
+		$venue = sanitize_key( wp_unslash( $_POST['venue'] ?? '' ) ); // phpcs:ignore
+		if ( ! array_key_exists( $venue, citypulse_venue_names() ) ) {
+			wp_send_json_error( 'Unknown venue.', 400 );
+			return;
+		}
 	}
 	$item   = substr( sanitize_key( wp_unslash( $_POST['item'] ?? '' ) ), 0, 40 ); // phpcs:ignore
 	$device = 'phone' === ( $_POST['device'] ?? '' ) ? 'phone' : 'desktop'; // phpcs:ignore
@@ -31,10 +36,14 @@ function citypulse_record_visit() {
 	if ( ! is_array( $log ) ) {
 		$log = array();
 	}
-	$log[ $day ][ $venue ][ $device ] = ( $log[ $day ][ $venue ][ $device ] ?? 0 ) + 1;
-	if ( '' !== $item ) {
-		$key = $venue . ':' . $item;
-		$log[ $day ]['items'][ $key ] = ( $log[ $day ]['items'][ $key ] ?? 0 ) + 1;
+	if ( $kpost ) {
+		$log[ $day ]['kiosks'][ $kpost->post_name ][ $device ] = ( $log[ $day ]['kiosks'][ $kpost->post_name ][ $device ] ?? 0 ) + 1;
+	} else {
+		$log[ $day ][ $venue ][ $device ] = ( $log[ $day ][ $venue ][ $device ] ?? 0 ) + 1;
+		if ( '' !== $item ) {
+			$key = $venue . ':' . $item;
+			$log[ $day ]['items'][ $key ] = ( $log[ $day ]['items'][ $key ] ?? 0 ) + 1;
+		}
 	}
 	$cutoff = wp_date( 'Y-m-d', time() - 365 * DAY_IN_SECONDS );
 	foreach ( array_keys( $log ) as $d ) {
@@ -72,6 +81,28 @@ function citypulse_visits_report() {
 		echo '<tr><td>' . esc_html( $name ) . '</td><td>' . (int) $p30 . '</td><td>' . (int) $d30 . '</td><td>' . (int) $pa . '</td><td>' . (int) $da . '</td></tr>';
 	}
 	echo '</tbody></table>';
+
+	$kiosk_totals = array();
+	foreach ( $log as $day => $row ) {
+		foreach ( (array) ( $row['kiosks'] ?? array() ) as $slug => $dev ) {
+			if ( $day >= $since ) {
+				$kiosk_totals[ $slug ]['phone']   = ( $kiosk_totals[ $slug ]['phone'] ?? 0 ) + (int) ( $dev['phone'] ?? 0 );
+				$kiosk_totals[ $slug ]['desktop'] = ( $kiosk_totals[ $slug ]['desktop'] ?? 0 ) + (int) ( $dev['desktop'] ?? 0 );
+			}
+		}
+	}
+	echo '<h2>Kiosks, last 30 days</h2>';
+	if ( ! $kiosk_totals ) {
+		echo '<p>No kiosk phone visits yet.</p>';
+	} else {
+		echo '<table class="widefat striped"><thead><tr><th>Kiosk</th><th>Phone</th><th>Desktop</th></tr></thead><tbody>';
+		foreach ( $kiosk_totals as $slug => $t ) {
+			$kp = get_page_by_path( $slug, OBJECT, 'cp_kiosk' );
+			$label = $kp ? $kp->post_title : $slug;
+			echo '<tr><td>' . esc_html( $label ) . '</td><td>' . (int) $t['phone'] . '</td><td>' . (int) $t['desktop'] . '</td></tr>';
+		}
+		echo '</tbody></table>';
+	}
 
 	$items = array();
 	foreach ( $log as $day => $row ) {

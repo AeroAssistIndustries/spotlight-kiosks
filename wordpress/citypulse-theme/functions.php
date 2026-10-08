@@ -12,6 +12,7 @@ require get_theme_file_path( 'inc/setup.php' );
 require get_theme_file_path( 'inc/forms.php' );
 require get_theme_file_path( 'inc/documents.php' );
 require get_theme_file_path( 'inc/visits.php' );
+require get_theme_file_path( 'inc/kiosks.php' );
 
 add_action( 'after_setup_theme', function () {
 	add_theme_support( 'title-tag' );
