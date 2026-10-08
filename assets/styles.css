@@ -1383,3 +1383,30 @@ button:focus-visible, [tabindex]:focus-visible { outline: 3px solid #0F1C2B !imp
 .kapp .k-status span{font-size:2.6cqw;white-space:nowrap}
 .kapp .k-status b::before{width:15cqw;height:9.5cqw;background-size:contain}
 .kapp::before{background:linear-gradient(180deg,rgba(244,248,250,.50) 0%,rgba(244,248,250,.34) 45%,rgba(244,248,250,.58) 100%),var(--venue-bg) center/cover no-repeat}
+
+/* ===== Lexen kiosk: sliding hotel photos, readable overlay, ADA sizing ===== */
+.kapp{--venue-bg:none}
+.kapp-slides{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.kapp-slides span{position:absolute;inset:0;background:center/cover no-repeat;opacity:0;animation:kslide 24s infinite,kzoom 24s infinite linear}
+@keyframes kslide{0%{opacity:0}4%{opacity:1}30%{opacity:1}38%{opacity:0}100%{opacity:0}}
+@keyframes kzoom{0%{transform:scale(1.02)}100%{transform:scale(1.10)}}
+.kapp::before{background:linear-gradient(180deg,rgba(10,20,32,.78) 0%,rgba(10,20,32,.42) 38%,rgba(10,20,32,.30) 70%,rgba(10,20,32,.62) 100%)!important}
+.kapp .k-status{color:#fff}
+.kapp .k-status b{color:#fff}
+.kapp .k-status span{color:#fff}
+.kapp .k-welcome{color:#fff;text-shadow:0 2px 18px rgba(0,0,0,.35)}
+.kapp .k-venue{color:#e6edf3}
+.kapp .k-attract .a-welcome{color:#fff;text-shadow:0 2px 18px rgba(0,0,0,.35)}
+.kapp .k-attract .a-venue{color:#e6edf3}
+/* ADA sizing: every touch target at least 44 x 44 px */
+.kapp .k-nav button,.kapp .k-btn,.kapp .k-cta,.kapp .a-touch,.kapp .ad-cta,.kapp-fs,.kapp-a11y,.kapp-btn,.kapp-btn-ghost{min-height:44px;min-width:44px}
+.kapp .k-nav button{padding:1.2cqw 3.6cqw}
+.kapp .k-btn,.kapp .k-cta,.kapp .a-touch{padding-top:2.4cqw!important;padding-bottom:2.4cqw!important}
+.kapp-fs,.kapp-a11y{padding:.7rem 1.3rem!important;font-size:1rem!important}
+.kapp .k-dots button{min-width:44px;min-height:44px;background-clip:content-box!important;padding:0!important}
+.kapp .k-tile{min-height:44px}
+.kapp button:focus-visible,.kapp .k-tile:focus-visible{outline:3px solid #C9A96E;outline-offset:3px}
+.kapp .k-tile span{font-size:3.4cqw}
+.kapp .device[data-finish] .device-head{background:none!important;box-shadow:none!important}
+.kapp .device{background:none!important}
+.kapp .k-attract .a-venue,.kapp .k-venue{text-shadow:0 1px 10px rgba(0,0,0,.45);font-weight:600}
