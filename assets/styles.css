@@ -1410,3 +1410,14 @@ button:focus-visible, [tabindex]:focus-visible { outline: 3px solid #0F1C2B !imp
 .kapp .device[data-finish] .device-head{background:none!important;box-shadow:none!important}
 .kapp .device{background:none!important}
 .kapp .k-attract .a-venue,.kapp .k-venue{text-shadow:0 1px 10px rgba(0,0,0,.45);font-weight:600}
+
+/* ===== Kiosk typography: Apple-style system sans (SF Pro on Apple devices, Inter elsewhere) ===== */
+.kapp{--apple:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Inter",system-ui,"Segoe UI",Roboto,Arial,sans-serif}
+.kapp, .kapp .k, .kapp .k *, .kapp button, .kapp-box, .kapp-box *{font-family:var(--apple)!important}
+.kapp .k-welcome,.kapp .k-attract .a-welcome{font-weight:700;letter-spacing:-.035em}
+.kapp .k-head h2,.kapp .k-detail-hero h2,.kapp .ki-inner h2{font-weight:700;letter-spacing:-.03em}
+.kapp .k-tile span{font-weight:600;letter-spacing:-.01em}
+.kapp .k-tile.wide span{font-weight:700;letter-spacing:-.025em}
+.kapp .ad-big{font-weight:700;letter-spacing:-.025em}
+.kapp .k-status b{font-weight:600;letter-spacing:.08em}
+.kapp .k-btn,.kapp .k-cta,.kapp .a-touch,.kapp-btn{font-weight:600;letter-spacing:-.005em}
