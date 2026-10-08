@@ -9,7 +9,7 @@
   if (!app) return;
   const AJAX = app.dataset.ajax || "";
   const GITHUB = app.dataset.github || ""; // public content folder on GitHub (demo mode)
-  const MEDIA = /\.(jpe?g|png|webp|gif|mp4|webm)$/i;
+  const MEDIA = /\.(jpe?g|png|webp|gif|mp4|webm|json)$/i;
   const KEY = "cp-kiosk-setup";
   const SECONDS = 8;
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -53,7 +53,7 @@
   }
 
   function play(list) {
-    const key = JSON.stringify(list.map(i => i.url));
+    const key = JSON.stringify(list.map(i => i.url || i.data));
     if (key === shown && items.length) return; // same content: keep playing without restarting
     shown = key; items = list; idx = 0;
     if (!items.length) {
@@ -72,6 +72,7 @@
       </div>`;
     const stage = document.getElementById("kshow-stage");
     items.forEach((it, i) => {
+      if (it.type === "interactive") { stage.appendChild(interactiveEl(it.data)); return; }
       const el = document.createElement(it.type === "video" ? "video" : "img");
       el.src = it.url; el.dataset.i = i; el.alt = "";
       if (it.type === "video") { el.muted = true; el.playsInline = true; el.preload = "auto"; el.addEventListener("ended", next); }
@@ -86,6 +87,31 @@
     show();
   }
 
+  /** Touch screen: a title, tappable cards, and details. Returns to the next slide after 60 seconds without a touch. */
+  function interactiveEl(data) {
+    const d = document.createElement("div");
+    d.className = "kshow-interactive";
+    const cards = Array.isArray(data.cards) ? data.cards.slice(0, 8) : [];
+    d.innerHTML = `<div class="ki-inner"><h2>${esc(data.title || "")}</h2><p>${esc(data.intro || "")}</p>
+      <div class="ki-grid">${cards.map((c, i) => `<button class="ki-card" type="button" data-i="${i}"><strong>${esc(c.title || "")}</strong><span>${esc(c.short || "Tap to learn more")}</span></button>`).join("")}</div>
+      <div class="ki-detail" hidden></div></div>`;
+    d.addEventListener("click", e => {
+      const det = d.querySelector(".ki-detail");
+      if (e.target.closest(".ki-back")) { det.hidden = true; touched(); return; }
+      const b = e.target.closest(".ki-card");
+      if (!b) return;
+      const c = cards[+b.dataset.i] || {};
+      det.hidden = false;
+      det.innerHTML = `<h3>${esc(c.title || "")}</h3><p>${esc(c.detail || "")}</p><button class="ki-back" type="button">Back</button>`;
+      touched();
+    });
+    return d;
+  }
+
+  function touched() {
+    if (items[idx] && items[idx].type === "interactive") { clearTimeout(timer); timer = setTimeout(next, 60 * 1000); }
+  }
+
   function next() { go(idx + 1); }
   function go(i) { idx = (i + items.length) % items.length; show(); }
 
@@ -96,8 +122,11 @@
       if (el.tagName === "VIDEO") { if (i === idx) { el.currentTime = 0; el.play().catch(() => {}); } else el.pause(); }
     });
     document.querySelectorAll("#kdots span").forEach((s, i) => s.classList.toggle("on", i === idx));
+    const cur = items[idx] || {};
+    document.querySelectorAll(".kshow-tap").forEach(t => { t.style.display = cur.type === "interactive" ? "none" : ""; });
     clearTimeout(timer);
-    if (items[idx] && items[idx].type === "image") timer = setTimeout(next, SECONDS * 1000);
+    if (cur.type === "image") timer = setTimeout(next, SECONDS * 1000);
+    if (cur.type === "interactive") touched();
   }
 
   function post(fields) {
@@ -120,8 +149,14 @@
       .then(list => {
         const files = (Array.isArray(list) ? list : []).filter(f => f.type === "file" && MEDIA.test(f.name))
           .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
-        play(files.map(f => ({ type: /\.(mp4|webm)$/i.test(f.name) ? "video" : "image", url: f.download_url })));
+        return Promise.all(files.map(f => {
+          if (/\.json$/i.test(f.name)) {
+            return fetch(f.download_url).then(r => r.json()).then(d => (d && d.type === "interactive") ? { type: "interactive", data: d } : null).catch(() => null);
+          }
+          return Promise.resolve({ type: /\.(mp4|webm)$/i.test(f.name) ? "video" : "image", url: f.download_url });
+        }));
       })
+      .then(list => play(list.filter(Boolean)))
       .catch(() => { frame(`<h1>CityPulse</h1><p>Waiting for the connection. Trying again shortly.</p><p><label id="usb-open">Use files from a USB stick</label></p>`); const u = document.getElementById("usb-open"); if (u) u.addEventListener("click", usbPicker); });
   }
 

@@ -1234,3 +1234,18 @@ a.card:hover{border-color:var(--ink)}
 .kshow-form input { padding: .8rem; border-radius: 10px; border: 1px solid rgba(255,255,255,.4); background: rgba(255,255,255,.08); color: #fff; font: inherit; font-size: 1.1rem; }
 .kshow-form button { font-size: 1.1rem; }
 @media (prefers-reduced-motion: reduce) { .kshow-stage img, .kshow-stage video { transition: none; } }
+
+/* Kiosk touch screens (interactive slides from the content folder). */
+.kshow-stage > .kshow-interactive { position: absolute; inset: 0; overflow: auto; background: #0F1C2B; color: #fff; padding: 5.5rem 1.5rem 4rem; box-sizing: border-box; opacity: 0; pointer-events: none; transition: opacity .8s ease; font-family: "Instrument Sans", system-ui, sans-serif; }
+.kshow-stage > .kshow-interactive.on { opacity: 1; pointer-events: auto; }
+.ki-inner { max-width: 900px; margin: 0 auto; }
+.ki-inner h2 { font-family: "Bricolage Grotesque", sans-serif; font-size: clamp(2rem, 5vw, 3rem); margin: 0 0 .5rem; }
+.ki-inner > p { color: rgba(255,255,255,.8); font-size: 1.2rem; margin: 0 0 1.5rem; }
+.ki-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.ki-card { background: #18293f; color: #fff; border: 0; border-radius: 20px; padding: 1.5rem; text-align: left; font: inherit; font-size: 1.3rem; min-height: 9rem; cursor: pointer; }
+.ki-card strong { display: block; color: #22C7B6; }
+.ki-card span { display: block; color: rgba(255,255,255,.7); font-size: 1rem; margin-top: .5rem; }
+.ki-detail { margin-top: 1.5rem; background: #18293f; border-radius: 20px; padding: 1.5rem; font-size: 1.25rem; }
+.ki-detail h3 { margin: 0 0 .5rem; color: #FF6B4A; font-size: 1.6rem; }
+.ki-back { margin-top: 1rem; background: #22C7B6; border: 0; border-radius: 999px; padding: .8rem 1.5rem; font: inherit; font-weight: 700; color: #0F1C2B; cursor: pointer; }
+@media (max-width: 560px) { .ki-grid { grid-template-columns: 1fr; } }
