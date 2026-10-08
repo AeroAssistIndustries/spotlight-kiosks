@@ -99,7 +99,7 @@
     };
     const order = ["hotel", "eat", "coffee", "todo", "getting", "essentials"];
     app.innerHTML = `
-      <header class="cg-head"><img src="../assets/${esc(LV.logo)}" alt="${esc(LV.name)}"><p>${esc(LV.address)}</p>
+      <header class="cg-head"><img src="${esc(window.CP_LIVE ? window.CP_LIVE.img(LV.logo, "../assets/") : "../assets/" + LV.logo)}" alt="${esc(LV.name)}"><p>${esc(LV.address)}</p>
         <div class="cg-quick"><a class="cg-btn" href="tel:${esc(LV.tel)}">Call ${esc(LV.phone)}</a><a class="cg-btn ghost" href="mailto:${esc(LV.email)}">Email</a></div></header>
       <nav class="cg-nav" aria-label="Sections">${order.filter(k => LV.categories[k]).map(k => `<a href="#cat-${k}">${esc(LV.categories[k].label)}</a>`).join("")}</nav>
       ${order.filter(k => LV.categories[k]).map(k => { const c = LV.categories[k]; return `<section class="cg-sec" id="cat-${k}"><h2>${esc(c.label)}</h2><p class="cg-intro">${esc(c.intro)}</p>${c.items.map(card).join("")}</section>`; }).join("")}
