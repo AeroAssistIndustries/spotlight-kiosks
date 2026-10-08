@@ -6,7 +6,7 @@ whenever the relay cannot be reached or the free daily AI allowance runs out.
 
 ## Free setup (Cloudflare Workers AI, no API key, no credit card)
 
-The relay runs an open AI model (Meta Llama) on Cloudflare's free plan.
+The relay runs an open AI model (Google Gemma 4) on Cloudflare's free plan.
 
 1. Sign up at https://dash.cloudflare.com (the free plan is enough).
 2. Go to **Workers & Pages > Create > Create Worker**. Name it `spotlight-kiosks` (it must match `name` in `wrangler.toml`) and click **Deploy**.
@@ -49,5 +49,5 @@ For better answers, add a Claude API key; the relay then uses Claude instead of 
 |---|---|
 | `VENUE_URL` | `https://aeroassistindustries.github.io/spotlight-kiosks/assets/lexen-data.json` |
 | `ALLOWED_ORIGINS` | `https://aeroassistindustries.github.io` |
-| `CF_MODEL` | `@cf/meta/llama-3.1-8b-instruct` (free) |
+| `CF_MODEL` | `@cf/google/gemma-4-26b-a4b-it` (free allowance) |
 | `MODEL` | `claude-haiku-5-5` (only with `ANTHROPIC_API_KEY`) |
