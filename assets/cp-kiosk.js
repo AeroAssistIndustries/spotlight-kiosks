@@ -301,7 +301,7 @@
   }
   /* Ask the concierge: a conversation. Live AI answers stream in when the relay is set up and reachable;
      otherwise (or if it fails) the built-in answers reply instantly. */
-  const visible = raw => raw.replace(/\[\[[^\]]*\]\]/g, "").replace(/\[\[?[^\]]*$/, "").replace(/\s+$/, "");
+  const visible = raw => raw.replace(/\s*\[\[[^\]]*\]\]/g, "").replace(/\[\[?[^\]]*$/, "").replace(/\s+([.,;:!?)])/g, "$1").replace(/ {2,}/g, " ").replace(/\s+$/, "");
   function bubbleHTML(m, i) {
     if (m.role === "user") return `<div class="cpk-msg me"><p>${esc(m.text)}</p></div>`;
     const ids = (m.ids || []).filter(id => V.items[id]);
