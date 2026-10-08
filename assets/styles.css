@@ -1289,3 +1289,45 @@ a.card:hover{border-color:var(--ink)}
 .k-hc .k-tile *, .k-hc .k-tile svg, .k-hc .k-tile span, .k-hc .k-tile small { color: #000 !important; stroke: #000 !important; fill: none !important; text-shadow: none !important; }
 button:focus-visible, [tabindex]:focus-visible { outline: 3px solid #0F1C2B !important; outline-offset: 2px; }
 .kapp-a11y { position: fixed; top: .5rem; left: .5rem; z-index: 20000; background: #0F1C2B; color: #fff; border: 0; border-radius: 999px; padding: .45rem .9rem; font: inherit; font-size: .85rem; font-weight: 600; box-shadow: 0 4px 12px rgba(15,28,43,.25); cursor: pointer; }
+
+/* ===== Premium kiosk look (kiosk-app only). Palette and type match the website. ===== */
+/* Background photo: replace kiosk-lobby.jpg with a North Hollywood photo by setting --venue-bg. */
+.kapp{--serif:"Bricolage Grotesque","Helvetica Neue",Arial,sans-serif;--venue-bg:url("kiosk-lobby.jpg");background:#F4F8FA;color:#0F1C2B}
+.kapp::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(244,248,250,.94) 0%,rgba(244,248,250,.86) 45%,rgba(244,248,250,.97) 100%),var(--venue-bg) center/cover no-repeat;z-index:0;pointer-events:none}
+.kapp .screen{background:transparent;z-index:1}
+.kapp .k{--k-bg:transparent;--k-card:#ffffff;--k-fg:#0F1C2B;--k-sub:#5b6b7b;--k-accent:#0F1C2B;font-family:"Instrument Sans",system-ui,sans-serif;background:transparent}
+.kapp .k-status{padding-top:4.6cqw;color:#0F1C2B;font-family:"Bricolage Grotesque",sans-serif;font-weight:700;letter-spacing:.14em}
+.kapp .k-welcome{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;letter-spacing:-.035em;font-size:12cqw;line-height:.95;color:#0F1C2B}
+.kapp .k-venue{color:#5b6b7b;font-size:3.4cqw;letter-spacing:.02em}
+.kapp .k-tiles{gap:2.4cqw}
+.kapp .k-tile{background:#fff!important;color:#0F1C2B;border:1px solid rgba(15,28,43,.07);border-radius:2.6cqw;box-shadow:0 1px 2px rgba(15,28,43,.05),0 12px 30px rgba(15,28,43,.09);transition:transform .15s,box-shadow .15s}
+.kapp .k-tile::before{display:none}
+.kapp .k-tile:active{transform:scale(.98)}
+.kapp .k-tile svg{stroke:#22C7B6;width:7.4cqw;height:7.4cqw;margin-bottom:1.6cqw}
+.kapp .k-tile span{color:#0F1C2B;text-shadow:none;font:700 3.3cqw/1.15 "Bricolage Grotesque",sans-serif;letter-spacing:-.01em}
+.kapp .k-tile.wide{background:radial-gradient(ellipse 70% 120% at 100% 0%,rgba(34,199,182,.35),transparent 60%),#0F1C2B!important;color:#fff;border-color:transparent}
+.kapp .k-tile.wide span{color:#fff;font:800 6cqw/1.05 "Bricolage Grotesque",sans-serif}
+.kapp .k-tile.wide small{color:#b8c7d4;font-size:3cqw}
+.kapp .k-ads{margin:2cqw 4cqw 2cqw;height:auto;min-height:40cqw;border-radius:4cqw;overflow:hidden;background:#0F1C2B;box-shadow:0 24px 60px rgba(15,28,43,.25)}
+.kapp .ad-open{background:radial-gradient(ellipse 60% 90% at 0% 0%,rgba(34,199,182,.28),transparent 70%),#0F1C2B!important;padding:4.4cqw 4.4cqw 9cqw!important}
+.kapp .ad-frame{border:0;border-radius:0;padding:0}
+.kapp .ad-big{font:800 7.4cqw/1 "Bricolage Grotesque",sans-serif;letter-spacing:-.03em;color:#fff}
+.kapp .ad-big::before{content:"Sponsored  ";display:block;font:700 2.6cqw/1 "Instrument Sans",sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#22C7B6;margin-bottom:2cqw}
+.kapp .ad-sub{color:#c9d6e2;font-size:3.2cqw}
+.kapp .ad-cta{background:#22C7B6;color:#0F1C2B;border-radius:3cqw;padding:2.6cqw 3.8cqw}
+.kapp .ad-ico{stroke:#22C7B6}
+.kapp .k-nav{background:rgba(255,255,255,.92);border-top:1px solid rgba(15,28,43,.08);backdrop-filter:blur(8px)}
+.kapp .k-nav button{color:#0F1C2B;font-weight:600}
+.kapp .k-nav svg{stroke:#0F1C2B}
+.kapp .k-btn,.kapp .k-cta{background:#0F1C2B!important;color:#fff!important;border-radius:999px!important;box-shadow:0 10px 24px rgba(15,28,43,.2)}
+.kapp .k-attract{background:transparent}
+.kapp .k-attract .a-welcome{font:800 15cqw/.95 "Bricolage Grotesque",sans-serif;letter-spacing:-.04em;color:#0F1C2B}
+.kapp .k-attract .a-venue{color:#5b6b7b}
+.kapp .k-attract .a-touch{background:#0F1C2B;color:#fff;box-shadow:0 14px 36px rgba(15,28,43,.25)}
+.kapp .k-attract .ring{border-color:#22C7B6}
+.kapp .k-detail-hero{background:#0F1C2B!important;color:#fff}
+.kapp .k-item,.kapp .k-facts div,.kapp .k-take,.kapp .k-map,.kapp .k-pk-list div{background:#fff;border:1px solid rgba(15,28,43,.06);box-shadow:0 8px 24px rgba(15,28,43,.07)}
+.kapp .k-item .thumb{background:#0F1C2B}
+.kapp .k-head h2{font:800 9cqw/1 "Bricolage Grotesque",sans-serif;letter-spacing:-.03em}
+.kapp .k-head .ico{background:#22C7B6}
+.kapp-a11y,.kapp-fs{top:1.4cqw;font-family:"Instrument Sans",sans-serif}
