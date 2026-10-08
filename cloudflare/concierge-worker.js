@@ -59,24 +59,45 @@ function cleanMessages(raw) {
   return out.length && out[out.length - 1].role === "user" ? out : null;
 }
 
+/* Venue data and weather are kept in Cloudflare's shared cache, so a fresh copy of the worker answers fast too.
+   The weather never holds up an answer: after 2.5 seconds the relay goes ahead without it and refreshes in the background. */
+const CACHE_BASE = "https://citypulse-relay.cache/";
+function withTimeout(promise, ms) { return Promise.race([promise, new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), ms))]); }
+async function cacheGet(key) {
+  try { const r = await caches.default.match(CACHE_BASE + key); return r ? await r.json() : null; } catch (e) { return null; }
+}
+async function cachePut(key, data, seconds) {
+  try { await caches.default.put(CACHE_BASE + key, new Response(JSON.stringify(data), { headers: { "Content-Type": "application/json", "Cache-Control": "max-age=" + seconds } })); } catch (e) { /* cache unavailable */ }
+}
+
 async function venue(env) {
   if (venueCache.data && Date.now() - venueCache.at < 10 * 60000) return venueCache.data;
-  const r = await fetch(cfg(env, "VENUE_URL"), { cf: { cacheTtl: 300 } });
+  const cached = await cacheGet("venue");
+  if (cached) { venueCache = { at: Date.now(), data: cached }; return cached; }
+  const r = await withTimeout(fetch(cfg(env, "VENUE_URL"), { cf: { cacheTtl: 300 } }), 6000);
   if (!r.ok) throw new Error("venue " + r.status);
   venueCache = { at: Date.now(), data: await r.json() };
+  await cachePut("venue", venueCache.data, 600);
   return venueCache.data;
 }
 
-async function weather(v) {
+async function loadWeather(v) {
+  const h = { "User-Agent": "CityPulse concierge (citypulsekiosks.com)", Accept: "application/geo+json" };
+  const p = await (await fetch(`https://api.weather.gov/points/${v.ll[0].toFixed(4)},${v.ll[1].toFixed(4)}`, { headers: h })).json();
+  const f = await (await fetch(p.properties.forecast, { headers: h })).json();
+  const text = f.properties.periods.slice(0, 10).map(x => `${x.name}: ${x.temperature}°F, ${x.shortForecast}`).join("; ");
+  wxCache = { at: Date.now(), text };
+  await cachePut("weather", wxCache, 1800);
+  return text;
+}
+async function weather(v, ctx) {
   if (wxCache.text && Date.now() - wxCache.at < 30 * 60000) return wxCache.text;
-  try {
-    const h = { "User-Agent": "CityPulse concierge (citypulsekiosks.com)", Accept: "application/geo+json" };
-    const p = await (await fetch(`https://api.weather.gov/points/${v.ll[0].toFixed(4)},${v.ll[1].toFixed(4)}`, { headers: h })).json();
-    const f = await (await fetch(p.properties.forecast, { headers: h })).json();
-    const text = f.properties.periods.slice(0, 10).map(x => `${x.name}: ${x.temperature}°F, ${x.shortForecast}`).join("; ");
-    wxCache = { at: Date.now(), text };
-  } catch (e) { /* keep the last forecast */ }
-  return wxCache.text || "not available right now";
+  const cached = await cacheGet("weather");
+  if (cached && cached.text && Date.now() - cached.at < 30 * 60000) { wxCache = cached; return cached.text; }
+  const job = loadWeather(v).catch(() => null);
+  try { const t = await withTimeout(job, 2500); if (t) return t; }
+  catch (e) { if (ctx && ctx.waitUntil) ctx.waitUntil(job); }
+  return (cached && cached.text) || wxCache.text || "not available right now";
 }
 
 function miles(a, b) {
@@ -161,7 +182,7 @@ function relayStream(upstream) {
 }
 
 export default {
-  async fetch(req, env) {
+  async fetch(req, env, ctx) {
     const url = new URL(req.url);
     const origin = req.headers.get("Origin") || "";
     const allowed = cfg(env, "ALLOWED_ORIGINS").split(",").map(s => s.trim()).filter(Boolean);
@@ -179,7 +200,7 @@ export default {
     if (!messages) return json(400, { error: "bad request" }, origin);
 
     let v; try { v = await venue(env); } catch (e) { return json(502, { error: "venue unavailable" }, origin); }
-    const wx = await weather(v);
+    const wx = await weather(v, ctx);
 
     const sys = systemPrompt(v, wx);
     let up;
