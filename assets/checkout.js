@@ -78,7 +78,7 @@
     ];
     if (form.elements.destination_url.value) rows.push(["QR code link", form.elements.destination_url.value]);
     $("#co-review").innerHTML = rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join("");
-    $("#co-due-label").textContent = billing() === "annual" ? "Due today, renews yearly" : "Due today, then monthly";
+    $("#co-due-label").textContent = billing() === "annual" ? "Due today, 3-year term, billed yearly" : "Due today, 3-year term, billed monthly";
     $("#co-due").textContent = billing() === "annual" ? "$399" : "$60";
   }
 
