@@ -7,7 +7,7 @@ compatibility_date = "2026-09-01"
 VENUE_URL = "https://aeroassistindustries.github.io/spotlight-kiosks/assets/lexen-data.json"
 ALLOWED_ORIGINS = "https://aeroassistindustries.github.io"
 MODEL = "claude-haiku-5-5"
-CF_MODEL = "@cf/meta/llama-3.1-8b-instruct"
+CF_MODEL = "@cf/google/gemma-4-26b-a4b-it"
 
 # Free AI: Cloudflare Workers AI. No key needed.
 [ai]

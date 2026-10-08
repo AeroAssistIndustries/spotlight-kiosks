@@ -3,7 +3,7 @@
    National Weather Service forecast, asks an AI model, and streams the answer back word by word.
 
    Which AI answers:
-     - Free (default): Cloudflare Workers AI, an open Llama model run by Cloudflare. Needs only the Workers AI
+     - Free (default): Cloudflare Workers AI, an open model (Google Gemma 4) run by Cloudflare. Needs only the Workers AI
        binding named AI on this worker. No API key, no credit card; free within Cloudflare's daily allowance.
      - Claude (optional): add the secret ANTHROPIC_API_KEY and the relay uses Claude instead.
    No key is ever sent to the kiosk.
@@ -13,14 +13,14 @@
      VENUE_URL          venue data JSON (default: the Lexen data on the CityPulse GitHub site)
      ALLOWED_ORIGINS    comma-separated sites allowed to call this relay (default: the CityPulse GitHub site)
      MODEL              Claude model (default: claude-haiku-5-5)
-     CF_MODEL           Workers AI model (default: @cf/meta/llama-3.1-8b-instruct)
+     CF_MODEL           Workers AI model (default: @cf/google/gemma-4-26b-a4b-it)
 */
 
 const DEFAULTS = {
   VENUE_URL: "https://aeroassistindustries.github.io/spotlight-kiosks/assets/lexen-data.json",
   ALLOWED_ORIGINS: "https://aeroassistindustries.github.io",
   MODEL: "claude-haiku-5-5",
-  CF_MODEL: "@cf/meta/llama-3.1-8b-instruct"
+  CF_MODEL: "@cf/google/gemma-4-26b-a4b-it"
 };
 const LIMITS = { perIpPer10Min: 30, perDay: 3000, maxMessages: 10, maxChars: 400, maxTokens: 400 };
 
@@ -147,6 +147,7 @@ function relayStream(upstream) {
             let ev; try { ev = JSON.parse(line.slice(5)); } catch (e) { continue; }
             if (ev.type === "content_block_delta" && ev.delta && ev.delta.type === "text_delta") ctrl.enqueue(enc.encode(`data: ${JSON.stringify({ t: ev.delta.text })}\n\n`));
             else if (typeof ev.response === "string" && ev.response) ctrl.enqueue(enc.encode(`data: ${JSON.stringify({ t: ev.response })}\n\n`));
+            else if (ev.choices && ev.choices[0] && ev.choices[0].delta && typeof ev.choices[0].delta.content === "string" && ev.choices[0].delta.content) ctrl.enqueue(enc.encode(`data: ${JSON.stringify({ t: ev.choices[0].delta.content })}\n\n`));
             else if (ev.type === "error") ctrl.enqueue(enc.encode(`data: ${JSON.stringify({ e: "upstream" })}\n\n`));
           }
         }
