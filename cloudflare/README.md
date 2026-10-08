@@ -15,8 +15,8 @@ Cloudflare builds and deploys the worker from GitHub on every push to `main` (ro
 
 ## Dashboard setup (once)
 
-1. **Database.** In Cloudflare, open **Storage & Databases > D1**, click **Create**, and name it `citypulse`.
-   Copy its **Database ID** into `wrangler.toml` (the `[[d1_databases]]` block, uncommented) and push to `main`.
+1. **Database.** Done: a D1 database named `citypulse` is bound in `wrangler.toml`. (For another account: open
+   **Storage & Databases > D1**, click **Create**, and put its **Database ID** in the `[[d1_databases]]` block.)
    The tables are created automatically on first use, and the content is copied in from the website.
 2. **Staff password.** Open **Workers & Pages > spotlight-kiosks > Settings > Variables and Secrets**, click **Add**,
    choose type **Secret**, name it `ADMIN_PASSWORD`, and enter a long password. Share it only with staff.

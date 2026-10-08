@@ -17,9 +17,9 @@ binding = "AI"
 # with `npx wrangler secret put ANTHROPIC_API_KEY` or in the dashboard.
 
 # Staff dashboard and live content (backend.js): a free D1 database bound as DB.
-# Create it once (Cloudflare > Storage & Databases > D1 > Create, name: citypulse), then put its id below.
+# Created in Cloudflare > Storage & Databases > D1 (name: citypulse).
 # Tables are created automatically. The staff password is a secret named ADMIN_PASSWORD, set in the dashboard.
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "citypulse"
-# database_id = "PASTE-THE-DATABASE-ID-HERE"
+[[d1_databases]]
+binding = "DB"
+database_name = "citypulse"
+database_id = "983c844a-4158-4662-bee7-f1f49c428df9"
