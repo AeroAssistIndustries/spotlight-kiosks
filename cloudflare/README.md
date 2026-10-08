@@ -1,39 +1,47 @@
 # Live AI concierge: setup
 
-The kiosk's "Ask the concierge" uses Claude for live answers through a small relay that holds the API key.
+The kiosk's "Ask the concierge" gets live AI answers through a small relay (`concierge-worker.js`).
 Until the relay is set up, the kiosk uses its built-in answers, and it switches back to them automatically
-whenever the relay cannot be reached.
+whenever the relay cannot be reached or the free daily AI allowance runs out.
 
-## 1. Claude API key (Anthropic Console)
+## Free setup (Cloudflare Workers AI, no API key, no credit card)
 
-1. Sign up at https://console.anthropic.com and add a payment method.
-2. Go to **Settings > Limits** and set a **monthly spend limit** you are comfortable with. This is the real cost cap.
-3. Go to **API Keys > Create Key**. Name it `citypulse-kiosk`. Copy the key. Keep it private: do not email it,
-   paste it in chat, or put it in this repository.
-
-## 2. The relay (Cloudflare Workers, free plan)
+The relay runs an open AI model (Meta Llama) on Cloudflare's free plan.
 
 1. Sign up at https://dash.cloudflare.com (the free plan is enough).
 2. Go to **Workers & Pages > Create > Create Worker**. Name it `citypulse-concierge` and click **Deploy**.
 3. Click **Edit code**, delete the sample, paste the whole of `cloudflare/concierge-worker.js`, and click **Deploy**.
-4. Go to the worker's **Settings > Variables and Secrets > Add**. Choose **Secret**, name `ANTHROPIC_API_KEY`,
-   paste the key from step 1, and save.
+4. In the worker's **Settings**, find **Bindings**, add a **Workers AI** binding, and name it exactly `AI`. Deploy again if asked.
 5. Open `https://citypulse-concierge.<your-subdomain>.workers.dev/health`. It should show `{"ok":true}`.
-6. Send the worker address (not the key) to whoever maintains the kiosk. It goes in `assets/lexen-data.js`:
+6. Send the worker address to whoever maintains the kiosk. It goes in `assets/lexen-data.js`:
    `ai: { endpoint: "https://citypulse-concierge.<your-subdomain>.workers.dev" }`.
 
-Terminal alternative: `cd cloudflare && npx wrangler deploy && npx wrangler secret put ANTHROPIC_API_KEY`.
+Terminal alternative: `cd cloudflare && npx wrangler deploy` (the AI binding is already in `wrangler.toml`).
+
+Free plan notes: Cloudflare gives a daily allowance of AI use (counted in "neurons") that resets at midnight UTC.
+When it runs out, the kiosk quietly uses its built-in answers until the reset. The free model is smaller than
+Claude, so its answers are simpler and slightly more likely to be wrong; the kiosk shows a note saying AI answers
+can be wrong and gives the front desk number.
+
+## Optional upgrade: Claude
+
+For better answers, add a Claude API key; the relay then uses Claude instead of the free model.
+
+1. Sign up at https://console.anthropic.com, add a payment method, and set a **monthly spend limit** first.
+2. Create an API key. Keep it private: do not email it, paste it in chat, or put it in this repository.
+3. In the worker's **Settings > Variables and Secrets**, add a **Secret** named `ANTHROPIC_API_KEY` with the key.
 
 ## What the relay does
 
 - Builds the AI's instructions from the venue data (`assets/lexen-data.json`, made by `build/build.py`),
   the current Pacific time, and the National Weather Service forecast.
 - Tells the AI to use only the verified hotel facts, places and distances, never to invent hours or prices,
-  to answer briefly in the guest's language, and to point to 911 and the front desk in an emergency.
+  to answer briefly in the guest's language, to answer harmless general questions briefly, and to point to 911
+  and the front desk in an emergency.
 - Streams the answer to the kiosk word by word. Places the AI mentions appear as cards with QR codes.
 - Accepts requests only from the CityPulse site, limits each location to 30 questions per 10 minutes and
   3,000 per day, and caps message length and conversation size.
-- Stores nothing. Guest questions are sent to Anthropic to generate the answer.
+- Stores nothing. Guest questions are sent to the AI provider (Cloudflare, or Anthropic if a key is added).
 
 ## Settings (optional)
 
@@ -41,4 +49,5 @@ Terminal alternative: `cd cloudflare && npx wrangler deploy && npx wrangler secr
 |---|---|
 | `VENUE_URL` | `https://aeroassistindustries.github.io/spotlight-kiosks/assets/lexen-data.json` |
 | `ALLOWED_ORIGINS` | `https://aeroassistindustries.github.io` |
-| `MODEL` | `claude-haiku-5-5` |
+| `CF_MODEL` | `@cf/meta/llama-3.1-8b-instruct` (free) |
+| `MODEL` | `claude-haiku-5-5` (only with `ANTHROPIC_API_KEY`) |
