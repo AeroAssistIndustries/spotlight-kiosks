@@ -180,6 +180,9 @@
     while (feed.children.length > 30) feed.lastChild.remove();
   }
 
+  /* The kiosk app can show a real venue name (data-hotel on #kapp). The website demo keeps its sample name. */
+  const APP = document.getElementById("kapp");
+  if (APP && APP.dataset.hotel) { VENUES.hotel.name = APP.dataset.hotel; VENUES.hotel.short = APP.dataset.hotelShort || APP.dataset.hotel.toUpperCase(); }
   const V = () => VENUES[S.venue];
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   const catOf = id => CATS[id] || SPECIAL[id];

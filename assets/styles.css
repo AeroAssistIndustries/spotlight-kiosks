@@ -1253,3 +1253,12 @@ a.card:hover{border-color:var(--ink)}
 .ki-back { margin-top: 1.2rem; background: #22C7B6; border: 0; border-radius: 999px; padding: 1rem 2rem; font: inherit; font-weight: 700; font-size: 1.15rem; color: #0F1C2B; cursor: pointer; box-shadow: 0 10px 22px rgba(34,199,182,.35); }
 @media (max-width: 560px) { .ki-grid { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: reduce) { .kshow-stage img, .kshow-stage video, .kshow-stage > .kshow-interactive { transition: none; } }
+
+/* Kiosk app: the demo screen full-screen on the device. The side panel and venue switch are hidden. */
+.kapp { position: fixed; inset: 0; background: #E9EEF2; z-index: 10000; }
+.kapp .demo-grid.kapp-grid { display: block; position: absolute; inset: 0; margin: 0; max-width: none; }
+.kapp .device { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; margin: 0; padding: 0; border: 0; border-radius: 0; box-shadow: none; background: none; }
+.kapp .device-pole, .kapp .device-base { display: none; }
+.kapp .device-head { position: absolute; inset: 0; padding: 0; background: none; box-shadow: none; }
+.kapp .screen { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto; border-radius: 0; }
+.kapp .venue-switch[hidden], .kapp .console[hidden] { display: none; }
