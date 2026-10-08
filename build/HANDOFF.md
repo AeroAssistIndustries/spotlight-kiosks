@@ -53,6 +53,7 @@ If a page is ever deleted, **Settings → CityPulse → Create missing pages** r
 /how-it-works/  /media-kit/  /measurement/  /faqs/  /about/  /contact/  /support/
 /welcome/                 Shown after payment (Stripe redirects here)
 /terms/  /privacy/
+/company-documents/       Admins only. Company agreements and policies (PDF). Not in the menu, noindex.
 ```
 
 ## 5. Forms, orders and payments
@@ -109,6 +110,14 @@ Multi-location packages (3 for $1,099/yr, 5 for $1,200/yr, +$300/yr for each loc
 - **Pricing.** Pricing copy is in the content of the Pricing, Advertise, Home and FAQ pages. The price calculator's logic is in `assets/site.js` (search for `annual =`). Checkout prices are in `assets/checkout.js` and the payment links.
 - **Kiosk demo** content (venues, screens, example businesses) is in `assets/kiosk.js`. All businesses in the demo are fictional.
 
+## 6A. Company documents (admins only)
+
+- The page **/company-documents/** is created automatically. It shows a sign-in button to visitors. Only accounts with the Administrator role see the documents.
+- Upload PDFs on that page: enter a name, choose the file (max 25 MB), and click **Upload PDF**. Remove a document with **Remove**.
+- PDFs are stored in `wp-content/uploads/citypulse-private/`, which web access is denied to. They are only streamed after the admin check.
+- Recommended: turn on two-factor sign-in for every administrator account, because this page holds company agreements.
+- Nginx only: deny web access to `wp-content/uploads/citypulse-private/`.
+
 ## 7. Theme structure
 
 ```
@@ -120,6 +129,7 @@ citypulse/
   inc/settings.php       Settings → CityPulse (forms, payments, page tools)
   inc/setup.php          Creates pages on activation from content/pages.json
   inc/forms.php          Orders & inquiries post type, AJAX handler (citypulse_submit), private uploads
+  inc/documents.php      Admin-only Company documents page (sign-in gate, PDF upload, private streaming)
   content/pages.json     Original page content (used on activation and for "reset")
   assets/styles.css      All styles (design tokens at the top: navy #0F1C2B, teal #22C7B6)
   assets/site.js         Menus, tabs, filters, forms, planner, studio, calculator, map, slider, journey animation
