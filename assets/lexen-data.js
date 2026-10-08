@@ -116,9 +116,16 @@ window.CP_VENUE = {
     lax: { n: "Los Angeles International Airport (LAX)", k: "Airport", addr: "1 World Way, Los Angeles, CA 90045", ll: [33.9416, -118.4085], d: "About 20 miles by road. Allow at least an hour by car, more at rush hour.", f: [["Code", "LAX"], ["Allow", "1 hour or more"]] }
   },
 
-  /* Ad space on the kiosk. Add a business here when an ad is sold:
-     { title, text, cta, url (optional, opens on the phone by QR), image (optional, in assets/) } */
-  sponsors: [],
+  /* Featured businesses in the ad carousel. They rotate on their own; nothing is tappable on the kiosk.
+     name, kind, tagline: text on the ad. website: shown as text. url: what the QR code opens on the guest's phone.
+     item: the matching place above (adds the walking time). logo: a file in assets/ (for example "lexen/ads/granville.png");
+     without a logo the ad shows the business initials. Websites checked October 2026. */
+  sponsors: [
+    { name: "Granville", kind: "Restaurant and bar", tagline: "Modern American dining and cocktails in the NoHo Arts District.", website: "granvillerestaurants.com", url: "https://www.granvillerestaurants.com/", item: "granville" },
+    { name: "El Portal Theatre", kind: "Live theatre", tagline: "Plays, comedy and concerts in a historic NoHo theatre.", website: "elportaltheatre.com", url: "https://elportaltheatre.com/", item: "elportal" },
+    { name: "NoHo Diner", kind: "Breakfast and diner classics", tagline: "Around the corner on Magnolia Blvd.", website: "@thenohodiner on Instagram", url: "https://www.instagram.com/thenohodiner/", item: "nohodiner" },
+    { name: "Warner Bros. Studio Tour Hollywood", kind: "Studio tour", tagline: "Go behind the scenes of a working film and TV studio.", website: "wbstudiotour.com", url: "https://www.wbstudiotour.com/", item: "warner" }
+  ],
 
   /* Built-in concierge answers. "keys" are words that match a guest's question; "items" link to places. */
   faq: [

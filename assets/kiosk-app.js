@@ -51,11 +51,11 @@
       return Object.entries(t).sort((a, b) => b[1] - a[1]).slice(0, n);
     };
     const names = window.CP_VENUE ? window.CP_VENUE.items : {};
-    const rows = days.map(d => `<tr><td>${d}</td><td>${sum(d, "sessions")}</td><td>${sum(d, "places")}</td><td>${sum(d, "questions")}</td><td>${sum(d, "adShown")}</td><td>${sum(d, "adTaps")}</td></tr>`).join("") || '<tr><td colspan="6">No activity yet.</td></tr>';
+    const rows = days.map(d => `<tr><td>${d}</td><td>${sum(d, "sessions")}</td><td>${sum(d, "places")}</td><td>${sum(d, "questions")}</td><td>${sum(d, "adShown")}</td></tr>`).join("") || '<tr><td colspan="5">No activity yet.</td></tr>';
     const list = (g, map) => top(g, 5).map(([k, v]) => `<li>${esc(map && map[k] ? map[k].n : k)}<b>${v}</b></li>`).join("") || "<li>None yet</li>";
     stats.innerHTML = `<h2>Kiosk activity</h2><p>Last 7 days on this kiosk.</p>
-      <div class="kapp-table"><table><thead><tr><th>Day</th><th>Sessions</th><th>Places opened</th><th>Questions</th><th>Ad views</th><th>Ad taps</th></tr></thead><tbody>${rows}</tbody></table></div>
-      <div class="kapp-cols"><div><h3>Top places</h3><ol>${list("places", names)}</ol></div><div><h3>Top questions</h3><ol>${list("questions")}</ol></div></div>
+      <div class="kapp-table"><table><thead><tr><th>Day</th><th>Sessions</th><th>Places opened</th><th>Questions</th><th>Ad views</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <div class="kapp-cols"><div><h3>Top places</h3><ol>${list("places", names)}</ol></div><div><h3>Top questions</h3><ol>${list("questions")}</ol></div><div><h3>Ad views by business</h3><ol>${list("adShown")}</ol></div></div>
       <div class="kapp-row"><button type="button" class="kapp-btn-ghost" data-reload>Reload content</button><button type="button" class="kapp-btn-ghost" data-close>Close</button>${isFs() ? '<button type="button" class="kapp-btn" data-exitfs>Exit full screen</button>' : ""}</div>`;
   }
 

@@ -184,42 +184,42 @@
   }
   weather(); setInterval(weather, 30 * 60000);
 
-  /* ---------- ads ---------- */
-  function adSlides() {
-    const list = (V.sponsors || []).map(s => ({ type: "sp", s }));
-    if (list.length < 2) list.push({ type: "open" });
-    if (list.length < 3) list.push({ type: "pkg" });
-    return list;
+  /* ---------- ads ----------
+     Featured local businesses rotate on their own for equal exposure. Nothing here can be tapped:
+     each ad shows the business name, logo, website and a QR code that opens the site on the guest's phone. */
+  const SPONS = (V.sponsors || []).filter(x => x && x.name);
+  const SLIDES = SPONS.length ? SPONS : [{ name: "Your business here", kind: "Advertise on this screen", tagline: "Reach every guest at " + V.name + ". From $399 a year.", website: "citypulsekiosks.com", url: PRICING, house: true }];
+  const initials = n => n.replace(/^The /, "").split(/[\s.&]+/).filter(Boolean).slice(0, 2).map(w => w[0]).join("").toUpperCase();
+  function adHTML(sp, i) {
+    const it = sp.item && V.items[sp.item], f = it ? howFar(it) : null;
+    return `<div class="cpk-ad" role="group" aria-roledescription="slide" aria-label="${i + 1} of ${SLIDES.length}: ${esc(sp.name)}">
+      <div class="cpk-ad-logo${sp.logo ? " img" : ""}">${sp.logo ? `<img src="${A + esc(sp.logo)}" alt="">` : `<span>${esc(initials(sp.name))}</span>`}</div>
+      <div class="cpk-ad-body">
+        <span class="cpk-ad-tag">${sp.house ? "Advertise here" : "Featured nearby"}</span>
+        <span class="cpk-ad-t">${esc(sp.name)}</span>
+        <span class="cpk-ad-s">${esc(sp.kind)}${f ? " · " + esc(f.label) : ""}</span>
+        ${sp.tagline ? `<span class="cpk-ad-x">${esc(sp.tagline)}</span>` : ""}
+        <span class="cpk-ad-web">${esc(sp.website)}</span>
+      </div>
+      <div class="cpk-ad-qr">${qr(sp.url, "QR code: open " + sp.name + " on your phone")}<small>Scan to visit</small></div>
+    </div>`;
   }
-  const SLIDES = adSlides();
-  function adHTML(sl, i) {
-    if (sl.type === "sp") {
-      const s = sl.s;
-      return `<button class="cpk-ad cpk-ad-sp" data-act="ad" data-i="${i}"${s.image ? ` style="--img:url('${A + s.image}')"` : ""}>
-        <span class="cpk-ad-tag">Featured</span><span class="cpk-ad-t">${esc(s.title)}</span><span class="cpk-ad-s">${esc(s.text || "")}</span>
-        ${s.cta ? `<span class="cpk-ad-cta">${esc(s.cta)}${svg("chev")}</span>` : ""}</button>`;
-    }
-    if (sl.type === "open") {
-      return `<button class="cpk-ad cpk-ad-open" data-act="ad" data-i="${i}">
-        <span class="cpk-ad-tag">Advertise here</span><span class="cpk-ad-t">Your business, in front of every guest</span>
-        <span class="cpk-ad-s">Reach visitors at ${esc(V.name)} while they plan their day.</span>
-        <span class="cpk-ad-cta">From $399 a year${svg("chev")}</span></button>`;
-    }
-    return `<button class="cpk-ad cpk-ad-pkg" data-act="ad" data-i="${i}">
-      <span class="cpk-ad-tag">Local advertising</span><span class="cpk-ad-t">Be the place guests choose</span>
-      <span class="cpk-ad-pk"><span><b>$399</b><small>1 location / yr</small></span><span><b>$1,099</b><small>3 locations / yr</small></span><span><b>$1,200</b><small>5 locations / yr</small></span></span></button>`;
-  }
-  ads.innerHTML = `<div class="cpk-ad-track" id="cpk-ad-track">${SLIDES.map(adHTML).join("")}</div>
-    <div class="cpk-ad-dots">${SLIDES.map((_, i) => `<button data-act="addot" data-i="${i}" aria-label="Show ad ${i + 1}"><i></i></button>`).join("")}</div>`;
+  ads.setAttribute("aria-label", "Featured nearby businesses");
+  ads.innerHTML = `<div class="cpk-ad-track" id="cpk-ad-track" aria-live="off">${SLIDES.map(adHTML).join("")}</div>
+    <div class="cpk-ad-dots" aria-hidden="true">${SLIDES.map(() => "<i></i>").join("")}</div>
+    <div class="cpk-ad-bar" aria-hidden="true"><i id="cpk-ad-bar"></i></div>`;
   function showAd(i) {
     S.ad = (i + SLIDES.length) % SLIDES.length;
     root.querySelector("#cpk-ad-track").style.transform = `translateX(-${S.ad * 100}%)`;
-    ads.querySelectorAll(".cpk-ad").forEach((el, j) => { el.tabIndex = j === S.ad ? 0 : -1; el.setAttribute("aria-hidden", String(j !== S.ad)); });
-    ads.querySelectorAll(".cpk-ad-dots button").forEach((d, j) => d.setAttribute("aria-current", String(j === S.ad)));
-    bump("adShown", String(S.ad));
+    ads.querySelectorAll(".cpk-ad").forEach((el, j) => el.setAttribute("aria-hidden", String(j !== S.ad)));
+    ads.querySelectorAll(".cpk-ad-dots i").forEach((d, j) => d.classList.toggle("on", j === S.ad));
+    const bar = root.querySelector("#cpk-ad-bar");
+    if (bar) { bar.style.transition = "none"; bar.style.transform = "scaleX(0)"; void bar.offsetWidth; bar.style.transition = `transform ${AD_MS}ms linear`; bar.style.transform = S.still ? "scaleX(0)" : "scaleX(1)"; }
+    bump("adShown", SLIDES[S.ad].name);
   }
   showAd(0);
-  setInterval(() => { if (!S.still && !document.hidden && !ads.contains(document.activeElement)) showAd(S.ad + 1); }, AD_MS);
+  /* Rotates on its own, including on the welcome screen. "Stop moving images" in Accessibility pauses it (required for moving content). */
+  setInterval(() => { if (!S.still && !document.hidden && SLIDES.length > 1) showAd(S.ad + 1); }, AD_MS);
 
   /* ---------- views ---------- */
   const greet = () => { const h = hourNow(); return h < 5 ? "Good evening" : h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"; };
@@ -324,20 +324,6 @@
       <div class="cpk-qrbig">${qr(GUIDE, "QR code: open this guide on your phone")}</div>
       <ol class="cpk-steps"><li><b>1</b>Open your camera</li><li><b>2</b>Point it at the code</li><li><b>3</b>Tap the link</li></ol></section>`;
   }
-  function vAd(i) {
-    const sl = SLIDES[i];
-    if (sl && sl.type === "sp") {
-      const s = sl.s;
-      return `<section class="cpk-item"><p class="cpk-kicker">Featured</p><h1 class="cpk-h2">${esc(s.title)}</h1><p class="cpk-desc">${esc(s.text || "")}</p>
-        ${s.url ? `<div class="cpk-qrcard"><div class="cpk-qr">${qr(s.url, "QR code: open on your phone")}</div><div><b>${esc(s.cta || "Open on your phone")}</b><small>Point your phone camera at the code.</small></div></div>` : ""}</section>`;
-    }
-    return `<section class="cpk-item"><p class="cpk-kicker">Advertise on this screen</p>
-      <h1 class="cpk-h2">Put your business in front of every guest</h1>
-      <p class="cpk-desc">Your ad runs in this space on the ${esc(V.name)} kiosk, every day, for a full year. We design it for you.</p>
-      <div class="cpk-pkgs"><div><small>1 location</small><b>$399</b><span>per year · or $60 a month</span></div><div><small>3 locations</small><b>$1,099</b><span>per year · or $180 a month</span></div><div class="best"><small>5 locations · best value</small><b>$1,200</b><span>per year · or $300 a month</span></div></div>
-      <div class="cpk-qrcard"><div class="cpk-qr">${qr(PRICING, "QR code: CityPulse advertising packages")}</div><div><b>See packages on your phone</b><small>Point your phone camera at the code to see packages and get started.</small></div></div></section>`;
-  }
-
   function dockHTML() {
     if (S.mode === "attract") return "";
     return `<button data-act="home">${svg("home")}<span>Home</span></button>
@@ -369,7 +355,6 @@
       else if (top.v === "item") html = vItem(top.id);
       else if (top.v === "ask") html = vAsk();
       else if (top.v === "take") html = vTake();
-      else if (top.v === "ad") html = vAd(top.i);
     }
     view.innerHTML = html;
     view.className = "cpk-view" + (dir ? " in-" + dir : "");
@@ -434,9 +419,7 @@
     if (!b) return;
     const act = b.dataset.act;
     if (S.mode === "attract") {
-      if (act === "ad") { start(); bump("adTaps", b.dataset.i); go({ v: "ad", i: +b.dataset.i }); }
-      else if (act === "addot") showAd(+b.dataset.i);
-      else start();
+      start();
       return;
     }
     armIdle();
@@ -448,8 +431,6 @@
       case "ask": S.answer = null; go({ v: "ask" }); setTimeout(() => { const i = root.querySelector("#cpk-q"); if (i) i.focus({ preventScroll: true }); }, 50); break;
       case "q": { const f = V.faq[+b.dataset.i]; S.answer = { q: f.q, f }; bump("questions", f.q); render(); break; }
       case "take": bump("takeHome", "open"); go({ v: "take" }); break;
-      case "ad": bump("adTaps", b.dataset.i); go({ v: "ad", i: +b.dataset.i }); break;
-      case "addot": showAd(+b.dataset.i); break;
       case "panel": S.panel = !S.panel; render(); break;
       case "large": S.large = !S.large; render(); break;
       case "contrast": S.contrast = !S.contrast; render(); break;
@@ -472,13 +453,6 @@
     render();
   });
   ["pointerdown", "keydown", "scroll"].forEach(ev => root.addEventListener(ev, () => { if (S.mode !== "attract") armIdle(); }, { passive: true, capture: true }));
-
-  /* Swipe the ad strip. */
-  (function () {
-    let x0 = null;
-    ads.addEventListener("pointerdown", e => { x0 = e.clientX; });
-    ads.addEventListener("pointerup", e => { if (x0 == null) return; const dx = e.clientX - x0; x0 = null; if (Math.abs(dx) > 50) showAd(S.ad + (dx < 0 ? 1 : -1)); });
-  })();
 
   /* Keep the screen awake where supported. */
   try { if (navigator.wakeLock) navigator.wakeLock.request("screen").catch(() => {}); } catch (e) { /* not supported */ }
