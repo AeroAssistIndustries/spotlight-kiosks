@@ -137,6 +137,16 @@ Multi-location packages (3 for $1,099/yr, 5 for $1,200/yr, +$300/yr for each loc
 - Kiosk visits are counted under **Orders & inquiries → Concierge visits**, in a Kiosks table.
 - Not included yet: live kiosk status from the hardware, ad tap reports per placement, and host logins. Those need the kiosk device software.
 
+## 6D. Team operations area (access code)
+
+- The page **/operations/** is created automatically. It is not in the menu and is hidden from search engines.
+- Visitors enter a team access code. There are no user accounts for the team. The code is stored only as a password hash.
+- A correct code lasts 12 hours. Changing the code signs everyone out.
+- Failed attempts are limited to 10 per 15 minutes per visitor.
+- Administrators set the access code and add team files on the same page: single PDF, Word or Excel files, or one .zip of them (up to 60 files).
+- Team files are kept in `wp-content/uploads/citypulse-private/team/`, which web access is denied to. Each file downloads only after the code is checked.
+- Share the access code only with team members. Change it when someone leaves.
+
 ## 7. Theme structure
 
 ```
@@ -151,6 +161,7 @@ citypulse/
   inc/documents.php      Admin-only Company documents page (sign-in gate, PDF upload, private streaming)
   inc/visits.php         Concierge visit counts (AJAX endpoint citypulse_visit) and the report screen
   inc/kiosks.php         Hosts & kiosks back end: kiosk records, phone guide, ad placements, guide endpoint
+  inc/access.php         Team operations area: access code, signed 12-hour cookie, team file downloads
   content/pages.json     Original page content (used on activation and for "reset")
   assets/styles.css      All styles (design tokens at the top: navy #0F1C2B, teal #22C7B6)
   assets/site.js         Menus, tabs, filters, forms, planner, studio, calculator, map, slider, journey animation
