@@ -1,4 +1,4 @@
-"""Spotlight markets: major cities in all 50 states (city, latitude, longitude)."""
+"""CityPulse markets: major cities in all 50 states (city, latitude, longitude)."""
 MARKETS = {
   "Alabama": ("AL", [("Birmingham", 33.52, -86.80), ("Huntsville", 34.73, -86.59), ("Mobile", 30.69, -88.04)]),
   "Alaska": ("AK", [("Anchorage", 61.22, -149.90), ("Fairbanks", 64.84, -147.72)]),

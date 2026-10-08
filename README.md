@@ -1,6 +1,6 @@
-# Spotlight Kiosks website
+# CityPulse Kiosks website
 
-Static multi-page site for Spotlight Kiosks — touch-screen venue kiosks that combine visitor information with local business advertising. Live on GitHub Pages: https://aeroassistindustries.github.io/spotlight-kiosks/
+Static multi-page site for CityPulse Kiosks (formerly Spotlight Kiosks) — touch-screen venue kiosks that combine visitor information with local business advertising. Live on GitHub Pages: https://aeroassistindustries.github.io/spotlight-kiosks/
 
 ## Editing
 
@@ -35,13 +35,13 @@ Support, Contact) and every kiosk order is emailed there.
 
 - **First use:** the first submission sends an activation email from FormSubmit to that inbox. Click *Activate form* once.
   Until then, submissions are held.
-- **Orders** arrive with the uploaded logo/artwork attached (up to `maxUploadMB`, default 5 MB) and an order number like `SK-261008-AB12`.
+- **Orders** arrive with the uploaded logo/artwork attached (up to `maxUploadMB`, default 5 MB) and an order number like `CP-261008-AB12`.
 - **To change the inbox,** edit `forms.to`. **To move to Formspree,** set `provider: "formspree"` and `endpoint: "https://formspree.io/f/xxxx"`.
 - If delivery fails, the form opens an email draft in the visitor's own email app instead, so nothing is lost.
 
 ### Payments (ready for Stripe)
 
-In Stripe create two Payment Links for "Spotlight kiosk ad — 1 location": $399 recurring yearly and $60 recurring monthly.
+In Stripe create two Payment Links for "CityPulse kiosk ad — 1 location": $399 recurring yearly and $60 recurring monthly.
 Under *After payment* redirect to `https://aeroassistindustries.github.io/spotlight-kiosks/welcome/`. Paste the links into
 `payments.yearly` and `payments.monthly`.
 

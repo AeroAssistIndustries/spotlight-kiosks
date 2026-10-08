@@ -1,4 +1,4 @@
-/* Spotlight Kiosks — integration settings. This is the only file you need to edit
+/* CityPulse Kiosks — integration settings. This is the only file you need to edit
    to connect forms and payments. Commit it and the site picks it up.
 
    FORMS — where inquiries and kiosk orders are delivered.
@@ -14,7 +14,7 @@
                (orders are still delivered and you invoice the customer).
      Any other processor with hosted checkout links (Square, PayPal) works the same way:
      paste its links and set provider to its name. */
-window.SPOTLIGHT_CONFIG = {
+window.CITYPULSE_CONFIG = {
   forms: {
     provider: "formsubmit",
     to: "sarvesh.joshiaz@gmail.com",

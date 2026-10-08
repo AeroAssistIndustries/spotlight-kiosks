@@ -1,4 +1,4 @@
-"""Build every page of the Spotlight Kiosks site. Run: python3 build/build.py"""
+"""Build every page of the CityPulse Kiosks site. Run: python3 build/build.py"""
 from lib import *
 from urllib.parse import quote_plus
 
@@ -12,21 +12,16 @@ home = f'''
       {btns(("Get started — $399/yr","#get-started"),("Host a kiosk for free","hosts/","btn-ghost"))}
       <ul class="hero2-points"><li><b>From $399</b><span>a year, or $60 a month</span></li><li><b>Every tap</b><span>counted and reported</span></li><li><b>$0</b><span>for qualified host venues</span></li></ul>
     </div>
-    <div class="slider" data-slider aria-roledescription="carousel" aria-label="Spotlight Kiosks highlights">
+    <div class="slider" data-slider aria-roledescription="carousel" aria-label="CityPulse Kiosks highlights">
       <div class="slides">
-        <figure class="slide slide-photo" aria-roledescription="slide" aria-label="1 of 4">
-          <img src="{{R}}assets/kiosk-clubhouse.jpg" alt="Matte black Spotlight kiosk in a golf clubhouse lobby" width="1774" height="887" fetchpriority="high" style="object-position:30% 50%">
-          <span class="slide-beam" aria-hidden="true"></span>
-          <figcaption><b>The Clubhouse Concierge</b><span>Course guide, tee times, dining — and your ad.</span></figcaption>
-        </figure>
-        <div class="slide slide-cycle" aria-roledescription="slide" aria-label="2 of 4" hidden>
-          <div class="slide-cycle-in"><p class="slide-kicker">New to kiosk advertising?</p><h2>Here's how it pays off.</h2>{cycle("small")}</div>
-        </div>
-        <figure class="slide slide-photo" aria-roledescription="slide" aria-label="3 of 4" hidden>
-          <img src="{{R}}assets/kiosk-lobby.jpg" alt="Silver Spotlight kiosk in a marble hotel lobby" width="1536" height="1024" loading="lazy" style="object-position:72% 50%">
+        <figure class="slide slide-photo" aria-roledescription="slide" aria-label="1 of 3">
+          <img src="{{R}}assets/kiosk-lobby.jpg" alt="Silver CityPulse kiosk in a marble hotel lobby" width="1536" height="1024" fetchpriority="high" style="object-position:72% 50%">
           <figcaption><b>The Guest Directory</b><span>Dining, amenities and local guides for hotel guests.</span></figcaption>
         </figure>
-        <div class="slide slide-ad" aria-roledescription="slide" aria-label="4 of 4" hidden>
+        <div class="slide slide-cycle" aria-roledescription="slide" aria-label="2 of 3" hidden>
+          <div class="slide-cycle-in"><p class="slide-kicker">New to kiosk advertising?</p><h2>Here's how it pays off.</h2>{cycle("small")}</div>
+        </div>
+        <div class="slide slide-ad" aria-roledescription="slide" aria-label="3 of 3" hidden>
           <div class="slide-ad-in">{mini("your venue", ("Dining","Amenities","Local guide","Events"), "black")}
             <div><p class="slide-kicker">Your business here</p><h2>On every screen, all year.</h2>
               <ul class="slide-pkgs"><li><span>1 location</span><b>$399/yr</b></li><li><span>3 locations</span><b>$1,099/yr</b></li><li class="best"><span>5 locations</span><b>$1,200/yr</b></li></ul>
@@ -35,7 +30,7 @@ home = f'''
       </div>
       <div class="slider-ctrl">
         <button class="sl-prev" type="button" aria-label="Previous slide">{icon("arrowl","")}</button>
-        <div class="sl-dots" role="tablist" aria-label="Choose a slide"><button role="tab" aria-selected="true" aria-label="Clubhouse kiosk"></button><button role="tab" aria-selected="false" aria-label="How it pays off"></button><button role="tab" aria-selected="false" aria-label="Hotel lobby kiosk"></button><button role="tab" aria-selected="false" aria-label="Advertising packages"></button></div>
+        <div class="sl-dots" role="tablist" aria-label="Choose a slide"><button role="tab" aria-selected="true" aria-label="Hotel lobby kiosk"></button><button role="tab" aria-selected="false" aria-label="How it pays off"></button><button role="tab" aria-selected="false" aria-label="Advertising packages"></button></div>
         <button class="sl-next" type="button" aria-label="Next slide">{icon("arrow","")}</button>
       </div>
     </div>
@@ -62,7 +57,7 @@ home = f'''
 {demo_block()}
 
 <section class="section markets" aria-labelledby="mk-title"><div class="wrap">
-  {head("Hosts in all 50 states.", f"Kiosks in hotel lobbies, clubhouses, medical offices and dealership lounges in {N_MARKETS} cities, from Anchorage to Miami. Tap a pin to advertise there.", "mk-title")}
+  {head("Hosts in all 50 states.", f"Kiosks in hotel lobbies, medical offices, dealership lounges and restaurants in {N_MARKETS} cities, from Anchorage to Miami. Tap a pin to advertise there.", "mk-title")}
   {us_map()}
   <p style="margin-top:18px"><a class="text-link" href="{{R}}locations/">See every market</a></p>
 </div></section>
@@ -79,7 +74,7 @@ home = f'''
         <div><dt>Purpose</dt><dd>The business goal and the visitor's next step</dd></div>
         <div><dt>Message</dt><dd>One offer, a clear identity and useful creative</dd></div>
         <div><dt>Review</dt><dd>Availability, pricing, timing and reporting</dd></div></dl>
-        <p class="fine">Use the planner to organize an inquiry. Campaign details are confirmed with Spotlight.</p></div>
+        <p class="fine">Use the planner to organize an inquiry. Campaign details are confirmed with CityPulse.</p></div>
     </article>
     <article class="path" id="host">
       <div class="path-main"><p class="who">For host venues</p><h3>Add something useful. Keep it simple.</h3>
@@ -128,7 +123,7 @@ page("", "Turn wait time into opportunity", "Touch-screen kiosks that give visit
 kiosk_page = page_hero([("The kiosk","kiosk/")], "One screen. A world of possibility.",
   "A digital concierge, information hub and local advertising platform in one professionally managed touch-screen kiosk.",
   btns(("Try the kiosk","#demo"),("Explore hosting","hosts/","btn-ghost")),
-  aside=f'<div class="hero-photo"><img src="{{R}}assets/kiosk-lobby-sm.jpg" alt="Silver Spotlight kiosk in a marble hotel lobby" width="900" height="600"></div>') + f'''
+  aside=f'<div class="hero-photo"><img src="{{R}}assets/kiosk-lobby-sm.jpg" alt="Silver CityPulse kiosk in a marble hotel lobby" width="900" height="600"></div>') + f'''
 {section(head("Useful information. A local next step.", "A digital concierge and local discovery hub, together on one approachable touch screen.") + '''<div class="cards">
   <div class="card"><h3>Know the venue.</h3><p>Amenities, directions and helpful answers in one place.</p></div>
   <div class="card"><h3>Discover the neighborhood.</h3><p>Dining, services and experiences with a local connection.</p></div>
@@ -137,18 +132,18 @@ kiosk_page = page_hero([("The kiosk","kiosk/")], "One screen. A world of possibi
 <section class="section" style="background:var(--stone)" id="hardware"><div class="wrap">
   {head("Two finishes. One welcome screen.", "Every kiosk runs the same software. The finish is chosen to suit the room.")}
   <div class="hw-grid">
-    <figure class="hw"><img src="{{R}}assets/kiosk-clubhouse-sm.jpg" alt="Matte black kiosk beside a clubhouse front desk overlooking a golf course" width="900" height="450" loading="lazy">
-      <figcaption><h3>Clubhouse Concierge</h3><p>Matte black column and base. Made for clubhouses, resorts and darker, wood-toned interiors.</p>
-      <ul class="pills"><li>Portrait touch display</li><li>Course, dining, events and membership</li><li>Ad space on every screen</li></ul></figcaption></figure>
     <figure class="hw"><img src="{{R}}assets/kiosk-lobby-sm.jpg" alt="Silver kiosk in a bright marble hotel lobby near the reception desk" width="900" height="600" loading="lazy">
       <figcaption><h3>Guest Directory</h3><p>Brushed silver enclosure with an integrated card slot. Suits hotel lobbies, medical offices and service lounges.</p>
       <ul class="pills"><li>Portrait touch display</li><li>Dining, amenities, local guide and events</li><li>Ad space on every screen</li></ul></figcaption></figure>
+    <figure class="hw hw-alt">{mini("your venue", ("Dining","Amenities","Local guide","Events"), "black")}
+      <figcaption><h3>Lobby Concierge</h3><p>Matte black column and base. Made for dealership lounges, restaurants and darker, wood-toned interiors.</p>
+      <ul class="pills"><li>Portrait touch display</li><li>Service status, offers and local guide</li><li>Ad space on every screen</li></ul></figcaption></figure>
   </div>
 </div></section>
 {section(head("A managed amenity. We handle the details.") + '''<div class="cards">
   <div class="card"><h3>Hardware & software</h3><p>The kiosk and its software are part of the managed host offering.</p></div>
   <div class="card"><h3>Installation & content</h3><p>We coordinate setup and relevant venue information with your team.</p></div>
-  <div class="card"><h3>Maintenance & support</h3><p>Content updates and routine service are handled by Spotlight.</p></div></div>''')}
+  <div class="card"><h3>Maintenance & support</h3><p>Content updates and routine service are handled by CityPulse.</p></div></div>''')}
 {cta_band()}'''
 page("kiosk/", "The kiosk", "A digital concierge, information hub and local advertising platform in one managed touch-screen kiosk. Try the interactive demo.", kiosk_page, kiosk=True)
 
@@ -171,7 +166,7 @@ price_cards = f'''<div class="price-cards three">
   <p><b>Prefer monthly?</b> $60 per location, per month.</p>
   <p><b>Need 2 or 4?</b> The 3- and 5-location packages cover them, with a spare location included.</p>
 </div>
-<p class="fine" style="margin-top:14px">A location is one Spotlight kiosk venue. Available venues and final terms are confirmed in your quote. <a class="text-link" href="{{R}}pricing/#calculator">Build an estimate</a></p>'''
+<p class="fine" style="margin-top:14px">A location is one CityPulse kiosk venue. Available venues and final terms are confirmed in your quote. <a class="text-link" href="{{R}}pricing/#calculator">Build an estimate</a></p>'''
 
 adv = page_hero([("Advertise","advertise/")], "Your next customer could be right nearby.",
   "Reach people while they wait, browse, plan and decide. Put a relevant local message in a space they already spend time.",
@@ -196,12 +191,12 @@ adv = page_hero([("Advertise","advertise/")], "Your next customer could be right
   <div class="card"><h3>The scope</h3><p>Review the campaign term, creative needs, format and how updates work.</p></div>
   <div class="card"><h3>The review</h3><p>Agree on availability, final pricing, creative requirements and reporting. Ask about impressions, screen interactions and QR activity.</p></div></div>''')}
 <section class="section" style="padding-top:0"><div class="wrap">
-  {head("Give the next step a little spotlight.", "Example concepts for planning and creative inspiration.")}
+  {head("Put the next step on their radar.", "Example concepts for planning and creative inspiration.")}
   <div class="concepts">{concept_card(IDEAS[0])}{concept_card(IDEAS[7])}</div>
   <p style="margin-top:18px"><a class="text-link" href="{{R}}campaign-ideas/">Explore all eight playbooks</a> &nbsp; <a class="text-link" href="{{R}}media-kit/">Review the media overview</a></p>
 </div></section>
 {form_section("inquiry", "Plan your next placement.", "Start with your business, market and goal. The team confirms the right placement and campaign terms.", ["Tell us your market and goal", "Confirm placements and pricing", "Plan creative, timing and reporting"], advertiser_form(), dark=True)}'''
-page("advertise/", "Advertise with Spotlight", "Put your local business on screen in hotel lobbies, clubhouses, medical offices and dealership lounges. From $399 a year or $60 a month.", adv)
+page("advertise/", "Advertise with CityPulse", "Put your local business on screen in hotel lobbies, medical offices, dealership lounges and restaurants. From $399 a year or $60 a month.", adv)
 
 # ================================================================ PRICING
 pricing = page_hero([("Advertise","advertise/"),("Pricing & calculator","pricing/")], "Simple packages. Room to grow.",
@@ -233,7 +228,7 @@ pricing = page_hero([("Advertise","advertise/"),("Pricing & calculator","pricing
   <div><span style="color:var(--lamp);font-weight:600">For qualified host venues</span><h2 style="font-size:clamp(30px,3.6vw,44px);margin-top:6px">A useful amenity. At no kiosk cost.</h2><p style="color:var(--muted-dark);margin-top:10px">Equipment, installation, service and maintenance at no cost, subject to a site review and a signed Host Agreement. Your venue supplies suitable space, power and available connectivity.</p></div>
   <p class="price"><span>$0</span></p><a class="btn" href="{{R}}hosts/">Explore the host offering</a></div></div></section>
 <section class="section" style="padding-top:0"><div class="wrap faq-grid"><div><h2>A little pricing clarity.</h2><a class="text-link" href="{{R}}faqs/">All common questions</a></div>
-  <div class="faq-list">{faq_html([FAQS[7], ("What counts as a location?", "One location is one Spotlight kiosk venue — for example, a hotel lobby or a clubhouse. Your quote lists the exact venues your ad runs in.", "advertisers"), ("What if I want 2 or 4 locations?", "Two locations are covered by the 3-location package ($1,099), and four by the 5-location package ($1,200), so you get a spare location included at no extra cost.", "advertisers"), FAQS[8], FAQS[9], FAQS[3]])}</div></div></section>
+  <div class="faq-list">{faq_html([FAQS[7], ("What counts as a location?", "One location is one CityPulse kiosk venue — for example, a hotel lobby or a medical office waiting room. Your quote lists the exact venues your ad runs in.", "advertisers"), ("What if I want 2 or 4 locations?", "Two locations are covered by the 3-location package ($1,099), and four by the 5-location package ($1,200), so you get a spare location included at no extra cost.", "advertisers"), FAQS[8], FAQS[9], FAQS[3]])}</div></div></section>
 {cta_band("Bring your next local idea.", "Choose a starting point, plan the scale and discuss a campaign that fits.")}'''
 page("pricing/", "Pricing & calculator", "Kiosk advertising packages: $399 a year for one location, $1,099 for three, $1,200 for five, or $60 a month per location. Free hosting for qualified venues.", pricing)
 
@@ -243,7 +238,7 @@ def choice(name, value, sub, need=False):
     return f'<label class="choice"><input type="radio" name="{name}" value="{value}"{n}><b>{value}</b><span>{sub}</span></label>'
 
 planner = page_hero([("Advertise","advertise/"),("Campaign planner","campaign-planner/")], "Your next campaign. One clear brief.",
-  "Organize your idea into a practical starting point for the Spotlight team. Plan the goal, the setting, the message and the next step.") + f'''
+  "Organize your idea into a practical starting point for the CityPulse team. Plan the goal, the setting, the message and the next step.") + f'''
 <section class="section"><div class="wrap planner">
   <ol class="planner-steps"><li class="on"><span>1</span>Your goal</li><li><span>2</span>The setting</li><li><span>3</span>The message</li><li><span>4</span>Your brief</li></ol>
   <div>
@@ -253,7 +248,7 @@ planner = page_hero([("Advertise","advertise/"),("Campaign planner","campaign-pl
       <div class="grid2">{field("Business name","Business").replace('name="Business"','name="Business" data-need="Add your business name to continue."')}{field("Business category","Business category","select",options=CATEGORIES)}</div>
       <p class="form-error" role="alert" hidden></p></section>
     <section class="pstep" hidden><h2>Where could your message fit?</h2><p>A relevant setting gives the message a purpose.</p>
-      <div class="choice-grid">{choice("Venue setting","Hotels & hospitality","Guests planning what comes next",True)}{choice("Venue setting","Golf & country clubs","Members and guests between rounds")}{choice("Venue setting","Medical offices","Visitors looking for practical information")}{choice("Venue setting","Car dealerships","Sales and service lounge visitors")}{choice("Venue setting","Restaurants & venues","Guests exploring menus and events")}{choice("Venue setting","Help me choose","Discuss the right setting for my goal")}</div>
+      <div class="choice-grid">{choice("Venue setting","Hotels & hospitality","Guests planning what comes next",True)}{choice("Venue setting","Medical offices","Visitors looking for practical information")}{choice("Venue setting","Car dealerships","Sales and service lounge visitors")}{choice("Venue setting","Restaurants & venues","Guests exploring menus and events")}{choice("Venue setting","Help me choose","Discuss the right setting for my goal")}</div>
       <div class="grid2">{field("Target city / state","Target city / state",ph="e.g. Phoenix, AZ")}{field("Preferred format","Placement","select",options=PLACEMENTS,value="Help me choose")}</div>
       <p class="fine" style="margin-top:10px">The team reviews actual venue and format availability.</p>
       <p class="form-error" role="alert" hidden></p></section>
@@ -274,7 +269,7 @@ page("campaign-planner/", "Campaign planner", "Build a local kiosk campaign brie
 # ================================================================ CREATIVE STUDIO
 studio_presets = "".join(f'<button type="button" class="chip" data-preset="{i}" aria-pressed="{str(n==0).lower()}">{l}</button>' for n, (i, l) in enumerate([("dinner-nearby","Dining & drinks"),("weekend-experience","Local experiences"),("service-reminder","Automotive & services"),("local-event","Events & community")]))
 studio = page_hero([("Advertise","advertise/"),("Creative studio","creative-studio/")], "A clear message. A useful next step.",
-  "Try a campaign concept in your browser. Write a message, see it in the kiosk's ad space, and download a draft to share with your designer or the Spotlight team.") + f'''
+  "Try a campaign concept in your browser. Write a message, see it in the kiosk's ad space, and download a draft to share with your designer or the CityPulse team.") + f'''
 <section class="section"><div class="wrap studio">
   <form class="studio-form" id="studio" novalidate>
     <div><span class="fine" style="font-weight:600">Start from an example</span><div class="presets" style="margin:8px 0 0">{studio_presets}</div></div>
@@ -287,7 +282,7 @@ studio = page_hero([("Advertise","advertise/"),("Creative studio","creative-stud
       <label><input type="radio" name="color" value="forest" checked><i style="--sw:#1F4433"></i>Forest</label>
       <label><input type="radio" name="color" value="sunset"><i style="--sw:linear-gradient(135deg,#c2502f,#f2a65b)"></i>Sunset</label>
       <label><input type="radio" name="color" value="cobalt"><i style="--sw:linear-gradient(135deg,#1c3f8a,#3f7ad8)"></i>Cobalt</label>
-      <label><input type="radio" name="color" value="lamp"><i style="--sw:#FFCE22"></i>Spotlight</label></div></fieldset>
+      <label><input type="radio" name="color" value="lamp"><i style="--sw:#22C7B6"></i>Pulse teal</label></div></fieldset>
     <div class="btn-row" style="margin-top:4px"><button class="btn" type="button" data-studio="download">Download SVG concept</button><a class="btn btn-ghost" href="{{R}}campaign-planner/">Build the brief</a></div>
     <p class="fine">Final artwork dimensions and accepted formats are confirmed for your placement. Your changes stay in this page.</p>
   </form>
@@ -326,7 +321,7 @@ audience = page_hero([("Advertise","advertise/"),("Who you can reach","audience/
   <p class="fine" style="margin-top:22px">Audience and availability are confirmed campaign by campaign. Display impressions reflect screen activity; unique viewers and sales need separate verification.</p>
 </div></section>
 {cta_band("Make your message relevant.", "Share your business, target market and the next step you want people to take.")}'''
-page("audience/", "Who you can reach", "Hotel guests, club members, patients and service customers — reach people in a useful moment with a relevant local message.", audience)
+page("audience/", "Who you can reach", "Hotel guests, patients, diners and service customers — reach people in a useful moment with a relevant local message.", audience)
 
 # ================================================================ LOCATIONS
 loc_groups = ""
@@ -335,7 +330,7 @@ for state, (ab, cities) in MARKETS.items():
     loc_groups += f'<div class="loc-group" data-group><h3>{state}</h3><ul class="loc-list">{lis}</ul></div>'
 state_opts = '<option value="all">All states</option>' + "".join(f'<option value="{ab}">{st}</option>' for st, (ab, _) in MARKETS.items())
 locations = page_hero([("Advertise","advertise/"),("Locations","locations/")], "Hosts in all 50 states.",
-  f"Spotlight kiosks stand in hotel lobbies, golf clubhouses, medical offices, dealership lounges and restaurants in {N_MARKETS} cities across the country. Pick your city and get on a kiosk today.",
+  f"CityPulse kiosks stand in hotel lobbies, medical offices, dealership lounges and restaurants in {N_MARKETS} cities across the country. Pick your city and get on a kiosk today.",
   btns(("Get started — $399/yr","#get-started-link"),("Host a kiosk","hosts/","btn-ghost")).replace('href="#get-started-link"','href="{R}#get-started"')) + f'''
 <section class="section markets"><div class="wrap">{us_map()}</div></section>
 <section class="section" style="padding-top:0"><div class="wrap" data-filter-root>
@@ -346,25 +341,25 @@ locations = page_hero([("Advertise","advertise/"),("Locations","locations/")], "
   <p class="fine">Exact venues are confirmed with you before your ad goes live.</p>
 </div></section>
 {cta_band("Ready when you are.", "One location is $399 a year. Pick your city and check out in about five minutes.")}'''
-page("locations/", "Locations", f"Spotlight kiosk hosts in {N_MARKETS} cities across all 50 states. Find your city and advertise from $399 a year.", locations)
+page("locations/", "Locations", f"CityPulse kiosk hosts in {N_MARKETS} cities across all 50 states. Find your city and advertise from $399 a year.", locations)
 
 # ================================================================ AGENCIES
 agencies = page_hero([("Advertise","advertise/"),("For agencies","agencies/")], "Give your local brief another useful setting.",
-  "Talk to us about Spotlight venue opportunities for clients, local business groups and multi-location brands.",
+  "Talk to us about CityPulse venue opportunities for clients, local business groups and multi-location brands.",
   btns(("Discuss your client brief", f"mailto:{EMAIL}?subject=Agency%20opportunity"),("View the media overview","media-kit/","btn-ghost"))) + f'''
-{section(head("Bring the strategy. Let's discuss the fit.", "A local screen campaign should connect to the rest of your client's plan.") + '''<div class="cards two"><div class="card"><p style="color:var(--ink);font-size:18px">Share the target market, venue setting, creative direction and the action you want to encourage. Spotlight reviews the opportunity and helps clarify available placements and terms.</p></div><div class="card"><p style="color:var(--ink);font-size:18px">Agency arrangements, multi-venue availability, category considerations, creative coordination and reporting are agreed for each opportunity.</p><a class="text-link" href="{R}campaign-planner/">Build a client campaign brief</a></div></div>''')}
+{section(head("Bring the strategy. Let's discuss the fit.", "A local screen campaign should connect to the rest of your client's plan.") + '''<div class="cards two"><div class="card"><p style="color:var(--ink);font-size:18px">Share the target market, venue setting, creative direction and the action you want to encourage. CityPulse reviews the opportunity and helps clarify available placements and terms.</p></div><div class="card"><p style="color:var(--ink);font-size:18px">Agency arrangements, multi-venue availability, category considerations, creative coordination and reporting are agreed for each opportunity.</p><a class="text-link" href="{R}campaign-planner/">Build a client campaign brief</a></div></div>''')}
 <section class="section dark"><div class="wrap">{head("A better brief makes the next step easier.")}
   <div class="cards"><div class="card"><h3>The market and setting.</h3><p>Share cities, venue contexts, the client's service area and any locations that matter to the plan.</p></div>
   <div class="card"><h3>The message and action.</h3><p>Bring the core offer, brand assets, landing page, desired timing and the creative approval contact.</p></div>
   <div class="card"><h3>The reporting question.</h3><p>Identify the delivery and business outcomes the client wants to understand, and confirm what can be reported.</p></div></div></div></section>
 {cta_band("One client. Several possibilities.", "Start with a venue context, a seasonal message or a local launch. We'll review the proposed campaign with you.")}'''
-page("agencies/", "For agencies & partners", "Spotlight kiosk advertising for agencies, local business groups and multi-location brands.", agencies)
+page("agencies/", "For agencies & partners", "CityPulse kiosk advertising for agencies, local business groups and multi-location brands.", agencies)
 
 # ================================================================ HOSTS
 hosts = page_hero([("For venues","venues/"),("Host a kiosk","hosts/")], "Upgrade your space. Keep it simple.",
   "A premium digital amenity at no cost for qualified venues. Help visitors find useful information while your team focuses on service.",
   btns(("Request a kiosk","#inquiry"),("Prepare your venue","resources/host-preparation/","btn-ghost")),
-  aside=f'<div class="hero-photo"><img src="{{R}}assets/kiosk-clubhouse-sm.jpg" alt="Matte black Spotlight kiosk beside a clubhouse front desk" width="900" height="450" style="object-position:25% 50%"></div>') + f'''
+  aside=f'<div class="hero-photo"><img src="{{R}}assets/kiosk-lobby-sm.jpg" alt="Silver CityPulse kiosk in a hotel lobby" width="900" height="600"></div>') + f'''
 <section class="section"><div class="wrap">
   {head("We bring the kiosk. You bring the space.")}
   <div class="path"><div class="path-main"><h3>Included in the host offering</h3>{check_list(["Kiosk hardware and software","Coordinated installation and setup","Your venue information and content updates","Routine maintenance and ongoing support"])}</div>
@@ -372,7 +367,7 @@ hosts = page_hero([("For venues","venues/"),("Host a kiosk","hosts/")], "Upgrade
     <h4 style="margin-top:26px">Participation and next steps</h4><p style="color:var(--muted-dark)">Every request is reviewed for suitability and availability. Participation requires a signed Host Agreement. Installation timing and terms are confirmed with your team.</p></div></div>
 </div></section>
 <section class="section" style="padding-top:0"><div class="wrap">
-  {head("Good fits for a Spotlight kiosk.")}
+  {head("Good fits for a CityPulse kiosk.")}
   <div class="cards">{"".join(f'<a class="card" href="{{R}}venues/{v["slug"]}/"><span class="kind">{v["name"]}</span><h3>{v["h"]}</h3><p>{v["moment"]}.</p></a>' for v in VENUES[:3])}</div>
   <p style="margin-top:22px"><a class="text-link" href="{{R}}venues/">See all venue types</a> &nbsp; <a class="text-link" href="{{R}}resources/host-preparation/">Use the host preparation guide</a></p>
 </div></section>
@@ -385,15 +380,15 @@ venues = page_hero([("For venues","venues/")], "Useful in your space. Relevant t
   btns(("Request a kiosk","hosts/#inquiry"),("Read the host FAQs","faqs/?filter=hosts","btn-ghost"))) + f'''
 {section(head("Real places. Relevant possibilities.", "Explore the visitor moment in each venue type, then review the use case in more detail.") + venue_tabs())}
 {cta_band()}'''
-page("venues/", "Venues", "Spotlight kiosks for hotels, golf clubs, medical offices, car dealerships and restaurants.", venues)
+page("venues/", "Venues", "CityPulse kiosks for hotels, medical offices, car dealerships and restaurants.", venues)
 
 for v in VENUES:
     aside = (f'<div class="hero-photo"><img src="{{R}}assets/{v["photo"]}" alt="{v["photo_alt"]}" width="900" height="600"></div>' if v.get("photo")
              else f'<div class="moment" style="background:var(--stone)">{mini(v["venue"], v["tiles"], v["finish"])}<dl><dt>The visitor moment</dt><dd>{v["moment"]}</dd><dt>On screen</dt><dd>{v["mh"]}</dd></dl></div>')
     note = f'<div class="callout" style="margin-top:32px"><b>Keep healthcare content informational.</b><p>{v["note"].split(". ",1)[1]}</p></div>' if v.get("note") else ""
-    demo_venue = {"hotels": "the hotel lobby", "golf": "the golf clubhouse", "medical": "the medical office", "automotive": "the dealership lounge"}.get(v["slug"])
+    demo_venue = {"hotels": "the hotel lobby", "medical": "the medical office", "automotive": "the dealership lounge"}.get(v["slug"])
     right = (f'<div class="moment">{mini(v["venue"], v["tiles"], v["finish"])}<dl><dt>The visitor moment</dt><dd>{v["moment"]}</dd><dt>On screen</dt><dd>{v["mh"]}</dd><dt>Ad space</dt><dd>Local businesses relevant to your visitors</dd></dl></div>' if v.get("photo")
-             else f'<div class="path-panel" style="border-radius:22px"><h4>On every screen</h4><dl class="brief"><div><dt>Top half</dt><dd>Your venue information, chosen with your team</dd></div><div><dt>Bottom half</dt><dd>Ad space for local businesses relevant to your visitors</dd></div><div><dt>Take-home</dt><dd>QR codes and send-to-phone links for the next step</dd></div><div><dt>Upkeep</dt><dd>Content updates and maintenance handled by Spotlight</dd></div></dl>' + (f'<p style="margin-top:18px"><a class="text-link" href="{{R}}kiosk/#demo">Try {demo_venue} in the kiosk demo</a></p>' if demo_venue else "") + '</div>')
+             else f'<div class="path-panel" style="border-radius:22px"><h4>On every screen</h4><dl class="brief"><div><dt>Top half</dt><dd>Your venue information, chosen with your team</dd></div><div><dt>Bottom half</dt><dd>Ad space for local businesses relevant to your visitors</dd></div><div><dt>Take-home</dt><dd>QR codes and send-to-phone links for the next step</dd></div><div><dt>Upkeep</dt><dd>Content updates and maintenance handled by CityPulse</dd></div></dl>' + (f'<p style="margin-top:18px"><a class="text-link" href="{{R}}kiosk/#demo">Try {demo_venue} in the kiosk demo</a></p>' if demo_venue else "") + '</div>')
     others = "".join(f'<a class="chip" href="{{R}}venues/{o["slug"]}/"{" aria-current=\"page\"" if o is v else ""}>{o["name"]}</a>' for o in VENUES)
     body = page_hero([("For venues","venues/"),(v["name"], f'venues/{v["slug"]}/')], v["h"], v["lede"], btns(("Start a venue inquiry","hosts/#inquiry"),("Try the kiosk demo","kiosk/#demo","btn-ghost")), aside=aside) + f'''
 <section class="section"><div class="wrap"><div class="tab-panel">
@@ -403,7 +398,7 @@ for v in VENUES:
 <section class="section dark"><div class="wrap">{head("Plan it around your space.")}
   <ol class="step-list"><li><h3>Review the setting.</h3><p>Discuss an accessible position, visitor flow, power and connectivity with your team.</p></li><li><h3>Choose the information.</h3><p>Agree on useful venue content and relevant local information for your visitors.</p></li><li><h3>Confirm participation.</h3><p>Review availability, the Host Agreement, installation planning and the support process.</p></li></ol></div></section>
 <section class="section"><div class="wrap"><h2 style="font-size:28px;margin-bottom:16px">Other venue types</h2><div class="presets">{others}</div></div></section>
-{cta_band("Could Spotlight fit your venue?", "Tell us about your space and we'll talk through the right setup.")}'''
+{cta_band("Could CityPulse fit your venue?", "Tell us about your space and we'll talk through the right setup.")}'''
     page(f'venues/{v["slug"]}/', v["name"], v["lede"], body, active="venues")
 
 # ================================================================ RESOURCES
@@ -416,7 +411,7 @@ resources = page_hero([("Resources","resources/")], "Good ideas. Useful next ste
   <div class="cards">{res_cards}</div>
   {empty_state("Clear the search to browse all guides and tools.")}
 </div></section>'''
-page("resources/", "Guides & resources", "Guides, tools and inspiration for Spotlight advertisers and host venues.", resources)
+page("resources/", "Guides & resources", "Guides, tools and inspiration for CityPulse advertisers and host venues.", resources)
 
 page("resources/first-local-campaign/", "Plan your first local kiosk campaign", "Turn a business goal into a useful venue, message and next step.", article(
   [("Resources","resources/"),("First campaign guide","resources/first-local-campaign/")], "Plan your first local kiosk campaign",
@@ -442,11 +437,11 @@ page("resources/screen-creative/", "Create a screen message people can read", "A
 
 checklist = '''<div class="checklist" id="checklist"><h2>Your preparation checklist</h2><p class="fine" style="margin-bottom:8px">Keep the useful details together. This checklist helps you prepare; it doesn't approve a venue.</p>
 ''' + "".join(f'<label><input type="checkbox"> {x}</label>' for x in ["Venue name, address and type", "Decision maker and how to reach them", "A possible visible, accessible placement", "Power location and a connectivity contact", "Useful venue information and a content contact", "Questions about the agreement and support"]) + '<p class="progress" role="status"></p></div>'
-page("resources/host-preparation/", "Get your venue ready for a Spotlight conversation", "What to prepare before a kiosk hosting conversation: space, power, connectivity, content and the agreement.", article(
-  [("Resources","resources/"),("Host preparation","resources/host-preparation/")], "Get your venue ready for a Spotlight conversation",
+page("resources/host-preparation/", "Get your venue ready for a CityPulse conversation", "What to prepare before a kiosk hosting conversation: space, power, connectivity, content and the agreement.", article(
+  [("Resources","resources/"),("Host preparation","resources/host-preparation/")], "Get your venue ready for a CityPulse conversation",
   "A useful kiosk setup begins with the venue. Prepare the details that help the team review your space, your visitors' needs and the right next step.", [
   ("Gather the venue details", "<p>Start with the venue name, type, street address, city and the person who can discuss participation. If someone else makes the final decision, include their name and how to reach them.</p><p>Describe where visitors normally pause and what they usually ask about. A hotel lobby, medical waiting area, dealership lounge and restaurant entrance each have a different visitor flow.</p>"),
-  ("Identify a visible, accessible position", "<p>Look for a spot people can notice and approach comfortably. Keep entrances, walkways, seating and staff work areas in mind. The final position is reviewed with the Spotlight team.</p><p>Photos, measurements and installation details can be shared with the team later in the process.</p>"),
+  ("Identify a visible, accessible position", "<p>Look for a spot people can notice and approach comfortably. Keep entrances, walkways, seating and staff work areas in mind. The final position is reviewed with the CityPulse team.</p><p>Photos, measurements and installation details can be shared with the team later in the process.</p>"),
   ("Review power and connectivity", "<p>A standard power outlet is part of the conversation. Know where it is in relation to the proposed position. Share whether internet is available and who can answer network questions.</p><p>Hardware configuration, connection method, installation timing and any site-specific work are confirmed during review.</p>"),
   ("Choose information visitors can use", "<p>Prepare accurate venue details: amenities, service information, menus, directions, common questions or local experiences. Name the person responsible for confirming content and keeping it current.</p><p>For medical settings, keep it to general visitor information and practice-approved educational content. Never include patient records or personal health information.</p>"),
   ("Confirm the agreement and support process", "<p>Qualified venues can discuss the managed, no-cost host offering. Suitability, availability and responsibilities are reviewed before a Host Agreement is signed.</p><p>Agree on installation planning, the support contact, routine maintenance and how content updates work.</p>"),
@@ -469,7 +464,7 @@ hiw = page_hero([("Resources","resources/"),("How it works","how-it-works/")], "
   <li><h3>Coordinate ongoing care</h3><p>Agree on support contacts, routine maintenance and content updates.</p></li></ol>
   {btns(("Start a host conversation","hosts/#inquiry"))}</div></section>
 {cta_band("Let's make the next step useful.", "Start with your campaign goal or tell us about your venue.")}'''
-page("how-it-works/", "How Spotlight works", "The steps for Spotlight advertisers and host venues, from a first brief to confirmed terms.", hiw, active="resources")
+page("how-it-works/", "How CityPulse works", "The steps for CityPulse advertisers and host venues, from a first brief to confirmed terms.", hiw, active="resources")
 
 # ================================================================ MEDIA KIT
 media = page_hero([("Resources","resources/"),("Media overview","media-kit/")], "The idea. The setting. The next step.",
@@ -477,15 +472,15 @@ media = page_hero([("Resources","resources/"),("Media overview","media-kit/")], 
   '<div class="btn-row"><button class="btn" type="button" data-download-overview>Download overview</button>' + btns(("Build a campaign brief","campaign-planner/","btn-ghost"))[21:]) + f'''
 <section class="section"><div class="wrap"><dl class="overview" id="overview">
   <div><dt>The concept</dt><dd>Managed interactive venue kiosks that combine visitor information, local discovery and advertising.</dd></div>
-  <div><dt>Venues</dt><dd>Hotels, golf and country clubs, medical offices, car dealerships, restaurants and other places where people spend time.</dd></div>
+  <div><dt>Venues</dt><dd>Hotels, medical offices, car dealerships, restaurants and other places where people spend time.</dd></div>
   <div><dt>Host offering</dt><dd>Kiosk equipment, software, coordinated setup, content updates and routine maintenance for qualified hosts, subject to review and a Host Agreement.</dd></div>
   <div><dt>Advertiser formats</dt><dd>The kiosk ad space along the bottom of the screen, featured banners, rotating panels and QR offer tiles. Available formats are confirmed for each venue.</dd></div>
   <div><dt>Pricing</dt><dd>$399 a year for one location, $1,099 for three locations, $1,200 for five, and $300 a year for each location after five. Monthly: $60 per location. Venue availability and final terms are confirmed in your quote.</dd></div>
   <div><dt>Reporting</dt><dd>Display impressions, screen interactions and QR activity where supported. Definitions and reporting terms are agreed for each campaign.</dd></div>
 </dl>
-<div class="cards four" style="margin-top:40px"><a class="card" href="{{R}}campaign-ideas/"><h3>Campaign ideas</h3><p>Eight playbooks to adapt.</p></a><a class="card" href="{{R}}creative-studio/"><h3>Preview your message</h3><p>See it in the ad space.</p></a><a class="card" href="{{R}}measurement/"><h3>Understand reporting</h3><p>What each number means.</p></a><a class="card" href="{{R}}contact/"><h3>Talk with Spotlight</h3><p>{PHONE}</p></a></div>
+<div class="cards four" style="margin-top:40px"><a class="card" href="{{R}}campaign-ideas/"><h3>Campaign ideas</h3><p>Eight playbooks to adapt.</p></a><a class="card" href="{{R}}creative-studio/"><h3>Preview your message</h3><p>See it in the ad space.</p></a><a class="card" href="{{R}}measurement/"><h3>Understand reporting</h3><p>What each number means.</p></a><a class="card" href="{{R}}contact/"><h3>Talk with CityPulse</h3><p>{PHONE}</p></a></div>
 </div></section>'''
-page("media-kit/", "Media overview", "Spotlight Kiosks at a glance: the concept, venues, host offering, ad formats, pricing and reporting.", media, active="resources")
+page("media-kit/", "Media overview", "CityPulse Kiosks at a glance: the concept, venues, host offering, ad formats, pricing and reporting.", media, active="resources")
 
 # ================================================================ MEASUREMENT
 meas = page_hero([("Resources","resources/"),("Measurement guide","measurement/")], "Know what the numbers mean.",
@@ -510,32 +505,32 @@ faqs = page_hero([("Resources","resources/"),("Common questions","faqs/")], "A l
   <div class="filters">{chips([("all","All questions"),("hosts","For hosts"),("advertisers","For advertisers")])}{search_box("Try pricing, installation or content","Search questions")}</div>
   <p class="result-count" data-count data-one="question" data-many="questions"></p>
   <div class="faq-list">{faq_html(FAQS, tags=True)}</div>
-  {empty_state("Try another search, or contact the team.", f' <a class="btn btn-small" href="{{R}}contact/">Contact Spotlight</a>')}
+  {empty_state("Try another search, or contact the team.", f' <a class="btn btn-small" href="{{R}}contact/">Contact CityPulse</a>')}
 </div></section>
 {cta_band()}'''
-page("faqs/", "Common questions", "Answers about hosting a Spotlight kiosk, advertising costs, ad updates and campaign measurement.", faqs, active="resources")
+page("faqs/", "Common questions", "Answers about hosting a CityPulse kiosk, advertising costs, ad updates and campaign measurement.", faqs, active="resources")
 
 # ================================================================ ABOUT
 about = page_hero([("About us","about/")], "Good places. Useful connections.",
   "We're building a simpler way for people to discover what's around them — and for local businesses to be part of that moment.",
-  btns(("How Spotlight works","how-it-works/"),("Our story","#story","btn-ghost")),
-  aside=f'<div class="hero-photo"><img src="{{R}}assets/kiosk-lobby-sm.jpg" alt="Silver Spotlight kiosk in a hotel lobby" width="900" height="600"></div>') + f'''
+  btns(("How CityPulse works","how-it-works/"),("Our story","#story","btn-ghost")),
+  aside=f'<div class="hero-photo"><img src="{{R}}assets/kiosk-lobby-sm.jpg" alt="Silver CityPulse kiosk in a hotel lobby" width="900" height="600"></div>') + f'''
 <section class="section"><div class="wrap faq-grid"><div><h2>Good places deserve to be found.</h2></div>
-  <div class="prose"><p style="font-size:20px;color:var(--ink)">A few minutes in a lobby or waiting area can become a useful connection.</p><p>Visitors might be choosing lunch, looking for directions, exploring a service or learning what a venue offers. Spotlight brings those possibilities together on a professionally managed touch screen.</p><p>Our purpose is practical: useful information for visitors, a modern amenity for venues and relevant visibility for the surrounding business community.</p></div></div></section>
-<section class="section dark"><div class="wrap">{head("Designed to work for everyone involved.", "The venue, the visitor and the local business each have a place in the Spotlight model.")}
+  <div class="prose"><p style="font-size:20px;color:var(--ink)">A few minutes in a lobby or waiting area can become a useful connection.</p><p>Visitors might be choosing lunch, looking for directions, exploring a service or learning what a venue offers. CityPulse brings those possibilities together on a professionally managed touch screen.</p><p>Our purpose is practical: useful information for visitors, a modern amenity for venues and relevant visibility for the surrounding business community.</p></div></div></section>
+<section class="section dark"><div class="wrap">{head("Designed to work for everyone involved.", "The venue, the visitor and the local business each have a place in the CityPulse model.")}
   <div class="cards"><div class="card"><h3>The visitor finds something useful.</h3><p>Venue information, local services and experiences from one approachable screen.</p><a class="text-link" href="{{R}}kiosk/">Explore the kiosk</a></div>
   <div class="card"><h3>The venue adds an amenity.</h3><p>Qualified hosts add a managed kiosk, with setup, content and routine maintenance included.</p><a class="text-link" href="{{R}}hosts/">See the host offering</a></div>
   <div class="card"><h3>The business is part of the moment.</h3><p>A relevant message in front of people deciding what to do, where to go or what to choose next.</p><a class="text-link" href="{{R}}advertise/">Explore advertising</a></div></div></div></section>
-<section class="section" id="story"><div class="wrap faq-grid"><div><h2>A focused start. A wider possibility.</h2><p class="lede" style="margin-top:16px">The idea began with hotel lobbies. Spotlight now looks well beyond hospitality.</p></div>
+<section class="section" id="story"><div class="wrap faq-grid"><div><h2>A focused start. A wider possibility.</h2><p class="lede" style="margin-top:16px">The idea began with hotel lobbies. CityPulse now looks well beyond hospitality.</p></div>
   <ol class="timeline"><li><b>2022–2023</b><h3>The Trident concept</h3><p>Early planning focused on hotel and motel lobbies: a digital concierge for guests, supported by local business advertising.</p></li>
-  <li><b>2025</b><h3>The Spotlight identity</h3><p>A new brand, website and host and advertiser offering, built around the same core opportunity.</p></li>
-  <li><b>2026</b><h3>A broader venue vision</h3><p>Hotels, golf clubs, medical offices, car dealerships, restaurants and other places where people spend time.</p></li></ol></div></section>
+  <li><b>2025</b><h3>Spotlight Kiosks</h3><p>A new brand, website and host and advertiser offering, built around the same core opportunity.</p></li>
+  <li><b>2026</b><h3>CityPulse Kiosks</h3><p>A new name for a national network — and a broader venue vision: hotels, medical offices, car dealerships, restaurants and other places where people spend time.</p></li></ol></div></section>
 <section class="section" style="background:#fff;border-top:1px solid var(--line)"><div class="wrap">{head("Simple. Relevant. Thoughtfully managed.")}
   <div class="cards"><div class="card"><h3>Useful comes first.</h3><p>Venue information gives visitors a reason to explore. Local promotions should add to that experience.</p></div>
   <div class="card"><h3>Keep it relevant.</h3><p>Content starts with the place, its visitors and the businesses that can help them take a useful next step.</p></div>
   <div class="card"><h3>Make it manageable.</h3><p>Hardware, setup, content updates and routine support belong in one coordinated host offering.</p></div></div></div></section>
 {cta_band("A useful connection starts here.", "Tell us about your venue or the people you want to reach.")}'''
-page("about/", "About us", "Spotlight Kiosks connects visitors, venues and local businesses through managed touch-screen kiosks.", about)
+page("about/", "About us", "CityPulse Kiosks connects visitors, venues and local businesses through managed touch-screen kiosks.", about)
 
 # ================================================================ CONTACT
 contact = page_hero([("Contact","contact/")], "Let's start a conversation.",
@@ -543,15 +538,15 @@ contact = page_hero([("Contact","contact/")], "Let's start a conversation.",
 <section class="section"><div class="wrap"><div class="contact-cards">
   <div class="card"><span class="kind">New opportunities</span><h3>Sales & partnerships</h3><p>Host opportunities, advertising placements and market availability.</p><a class="text-link" href="mailto:{EMAIL}">{EMAIL}</a></div>
   <div class="card"><span class="kind">Existing kiosks</span><h3>Service & support</h3><p>Equipment, content changes or an existing campaign.</p><a class="text-link" href="{{R}}support/">Get support</a></div>
-  <div class="card"><span class="kind">Call Spotlight</span><h3><a href="tel:{TEL}" style="text-decoration:none">{PHONE}</a></h3><p>Office<br>4750 S 44th Pl, Suite E20<br>Phoenix, AZ 85040</p><p style="margin-top:8px"><a class="text-link" href="https://maps.google.com/?q=4750+S+44th+Pl+Suite+E20+Phoenix+AZ+85040" target="_blank" rel="noopener">Get directions</a></p></div>
+  <div class="card"><span class="kind">Call CityPulse</span><h3><a href="tel:{TEL}" style="text-decoration:none">{PHONE}</a></h3><p>Office<br>4750 S 44th Pl, Suite E20<br>Phoenix, AZ 85040</p><p style="margin-top:8px"><a class="text-link" href="https://maps.google.com/?q=4750+S+44th+Pl+Suite+E20+Phoenix+AZ+85040" target="_blank" rel="noopener">Get directions</a></p></div>
 </div>
 </div></section>
-{form_section("message", "Send us a message.", "Questions about advertising, hosting a kiosk or an existing campaign — we'll get back to you within one business day.", ["Tell us what you need", "We reply by email or phone", "We set up the next step"], draft_form("contact-form", EMAIL, "Website message", [("Your message", [field("Your name", "Contact name", required=True), field("Email", "Email", "email", required=True), field("Phone", "Phone", "tel", opt=True), field("Business or venue", "Business", opt=True), field("What's this about?", "Topic", "select", options=["Advertising on a kiosk", "Hosting a kiosk", "Support for an existing kiosk or ad", "Partnerships", "Something else"], full=True), field("Message", "Message", "textarea", full=True, required=True)])], "It's okay for Spotlight to contact me about this message.", "Send message"), dark=True)}
+{form_section("message", "Send us a message.", "Questions about advertising, hosting a kiosk or an existing campaign — we'll get back to you within one business day.", ["Tell us what you need", "We reply by email or phone", "We set up the next step"], draft_form("contact-form", EMAIL, "Website message", [("Your message", [field("Your name", "Contact name", required=True), field("Email", "Email", "email", required=True), field("Phone", "Phone", "tel", opt=True), field("Business or venue", "Business", opt=True), field("What's this about?", "Topic", "select", options=["Advertising on a kiosk", "Hosting a kiosk", "Support for an existing kiosk or ad", "Partnerships", "Something else"], full=True), field("Message", "Message", "textarea", full=True, required=True)])], "It's okay for CityPulse to contact me about this message.", "Send message"), dark=True)}
 <section class="section"><div class="wrap">
 <h2 style="font-size:28px;margin:0 0 16px">Prefer a structured inquiry?</h2>
 <div class="cards"><a class="card" href="{{R}}hosts/#inquiry"><h3>Request a kiosk</h3><p>Tell us about your venue.</p></a><a class="card" href="{{R}}advertise/#inquiry"><h3>Plan an advertising campaign</h3><p>Share your market and goal.</p></a><a class="card" href="{{R}}support/#request"><h3>Prepare a support request</h3><p>For existing kiosks and campaigns.</p></a></div>
 </div></section>'''
-page("contact/", "Contact Spotlight", f"Contact Spotlight Kiosks sales and support. {EMAIL} · {PHONE}.", contact)
+page("contact/", "Contact CityPulse", f"Contact CityPulse Kiosks sales and support. {EMAIL} · {PHONE}.", contact)
 
 # ================================================================ SUPPORT
 support = page_hero([("Resources","resources/"),("Help & support","support/")], "Keep the experience working for you.",
@@ -561,11 +556,11 @@ support = page_hero([("Resources","resources/"),("Help & support","support/")], 
   <div class="card"><h3>Venue content</h3><p>Tell us which information needs attention and send the corrected wording.</p></div>
   <div class="card"><h3>Advertising campaigns</h3><p>Include your business or campaign reference and the change or question you have.</p></div></div>''' + f'<p style="margin-top:22px">Exploring a new venue or campaign? <a class="text-link" href="{{R}}contact/">Contact sales</a> &nbsp; <a class="text-link" href="{{R}}faqs/">Browse common questions</a></p>')}
 {form_section("request", "Tell us what you need.", "Include your venue or business name and a clear description so your request reaches the right person.", ["Choose the request type", "Add the location and useful details", "Review and send from your email"], support_form(), dark=True)}'''
-page("support/", "Help & support", "Support for existing Spotlight kiosks, venue content and advertising campaigns.", support, active="resources")
+page("support/", "Help & support", "Support for existing CityPulse kiosks, venue content and advertising campaigns.", support, active="resources")
 
 # ================================================================ WELCOME (after checkout)
 welcome = f'''<section class="page-hero"><div class="wrap narrow">
-  <h1>You're in. Welcome to Spotlight.</h1>
+  <h1>You're in. Welcome to CityPulse.</h1>
   <p class="lede" style="margin-top:20px">Thanks for your order. A receipt is on its way to your email.</p>
   <p class="co-order" id="welcome-order" hidden></p>
 </div></section>
@@ -580,7 +575,7 @@ welcome = f'''<section class="page-hero"><div class="wrap narrow">
   <div class="callout"><b>Need to change something?</b><p>Reply to your receipt or email <a href="mailto:{EMAIL}">{EMAIL}</a>. You can also call <a href="tel:{TEL}">{PHONE}</a>.</p></div>
   {btns(("Back to the home page",""),("Try the kiosk demo","kiosk/#demo","btn-ghost"))}
 </div></section>'''
-page("welcome/", "Welcome", "Thanks for your Spotlight Kiosks order.", welcome, extra_js=("checkout.js",))
+page("welcome/", "Welcome", "Thanks for your CityPulse Kiosks order.", welcome, extra_js=("checkout.js",))
 
 # ================================================================ LEGAL
 from legal import TERMS, PRIVACY, EFFECTIVE
@@ -589,11 +584,11 @@ def legal_page(path, title, lede, sections):
     body = "".join(f'<h2 id="l{i+1}">{i+1}. {h}</h2>{b}' for i, (h, b) in enumerate(sections))
     return page_hero([(title, path)], title, lede) .replace("</p></div></div>", f'</p><p class="updated">Effective {EFFECTIVE}</p></div></div>', 1) + f'''
 <section class="section"><div class="wrap legal"><aside class="toc"><b>Contents</b><ol>{toc}</ol></aside><div class="prose">{body}</div></div></section>'''
-page("terms/", "Terms & Conditions", "The terms that apply to your use of the Spotlight Kiosks website and kiosks.", legal_page("terms/", "Terms & Conditions", "The rules for using our website, our kiosks and the tools on this site.", TERMS))
-page("privacy/", "Privacy Policy", "How Spotlight Kiosks collects, uses and protects information on its website and kiosks.", legal_page("privacy/", "Privacy Policy", "What information we collect on our website and kiosks, how we use it and the choices you have.", PRIVACY))
+page("terms/", "Terms & Conditions", "The terms that apply to your use of the CityPulse Kiosks website and kiosks.", legal_page("terms/", "Terms & Conditions", "The rules for using our website, our kiosks and the tools on this site.", TERMS))
+page("privacy/", "Privacy Policy", "How CityPulse Kiosks collects, uses and protects information on its website and kiosks.", legal_page("privacy/", "Privacy Policy", "What information we collect on our website and kiosks, how we use it and the choices you have.", PRIVACY))
 
 # ================================================================ 404
-nf = f'''<section class="page-hero"><div class="wrap"><h1>This page took a different turn.</h1><p class="lede" style="margin-top:20px">The page you're looking for isn't here. Try one of these instead.</p>{btns(("Go to the home page",""),("Try the kiosk","kiosk/#demo","btn-ghost"),("Contact Spotlight","contact/","btn-ghost"))}</div></section>'''
+nf = f'''<section class="page-hero"><div class="wrap"><h1>This page took a different turn.</h1><p class="lede" style="margin-top:20px">The page you're looking for isn't here. Try one of these instead.</p>{btns(("Go to the home page",""),("Try the kiosk","kiosk/#demo","btn-ghost"),("Contact CityPulse","contact/","btn-ghost"))}</div></section>'''
 page("404/", "Page not found", "Page not found.", nf)
 import shutil
 src = os.path.join(OUT, "404", "index.html")

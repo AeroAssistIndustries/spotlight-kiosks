@@ -1,10 +1,10 @@
-"""Shared layout, components and content data for the Spotlight Kiosks site.
+"""Shared layout, components and content data for the CityPulse Kiosks site.
 Pages use {R} as a placeholder for the relative path back to the site root."""
 import html, os
 
-SITE = "Spotlight Kiosks"
-EMAIL = "sales@spotlightkiosks.com"
-SUPPORT = "support@spotlightkiosks.com"
+SITE = "CityPulse Kiosks"
+EMAIL = "sales@citypulsekiosks.com"
+SUPPORT = "support@citypulsekiosks.com"
 PHONE = "602-887-4058"
 TEL = "+16028874058"
 ADDR1 = "4750 S 44th Pl, Suite E20"
@@ -43,7 +43,7 @@ def icon(name, cls="ico"):
 NAV = [
   ("link", "The kiosk", "kiosk/"),
   ("menu", "Advertise", "advertise", [
-    ("Advertise with Spotlight", "advertise/", "Placements, pricing and how a campaign comes together", True),
+    ("Advertise with CityPulse", "advertise/", "Placements, pricing and how a campaign comes together", True),
     ("Pricing & calculator", "pricing/", "Annual rates and a multi-kiosk estimate"),
     ("Campaign planner", "campaign-planner/", "Build a brief step by step"),
     ("Creative studio", "creative-studio/", "Preview your message on the kiosk"),
@@ -54,10 +54,9 @@ NAV = [
   ]),
   ("menu", "For venues", "venues", [
     ("Host a kiosk", "hosts/", "The managed offering, at no cost for qualified venues", True),
-    ("Venues overview", "venues/", "Where Spotlight fits"),
+    ("Venues overview", "venues/", "Where CityPulse fits"),
     ("Prepare your venue", "resources/host-preparation/", "What to have ready for a first call"),
     ("Hotels & hospitality", "venues/hotels/", "A useful lobby experience"),
-    ("Golf & country clubs", "venues/golf/", "A concierge for the clubhouse"),
     ("Medical offices", "venues/medical/", "Information while visitors wait"),
     ("Car dealerships", "venues/automotive/", "Sales and service lounges"),
     ("Restaurants & venues", "venues/restaurants/", "Menus, events and local discovery"),
@@ -93,7 +92,7 @@ def header(active):
     return f'''<a class="skip" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="wrap header-inner">
-    <a class="brand" href="{{R}}" aria-label="Spotlight Kiosks home"><img src="{{R}}assets/logo.png" alt="Spotlight Kiosks" width="517" height="320"></a>
+    <a class="brand" href="{{R}}" aria-label="CityPulse Kiosks home"><img src="{{R}}assets/logo.svg" alt="CityPulse Kiosks" width="380" height="116"></a>
     <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav"><span class="sr">Menu</span><i></i><i></i></button>
     <nav id="site-nav" class="site-nav" aria-label="Main">
       {"".join(out)}
@@ -102,21 +101,26 @@ def header(active):
   </div>
 </header>'''
 
+# Add CityPulse social profiles here when they exist, e.g. ("Instagram", "https://www.instagram.com/citypulsekiosks/")
+SOCIALS = []
+def socials_html():
+    return ('<p class="socials">' + "".join(f'<a href="{u}" rel="noopener" target="_blank">{n}</a>' for n, u in SOCIALS) + '</p>') if SOCIALS else ""
+
 def footer():
     col = lambda title, links: f'<div><h2>{title}</h2><nav aria-label="{title}">' + "".join(f'<a href="{{R}}{h}">{t}</a>' for t, h in links) + "</nav></div>"
     return f'''<footer class="site-footer">
   <div class="wrap footer-grid">
-    <div class="footer-brand"><img src="{{R}}assets/logo-light.png" alt="Spotlight Kiosks" width="517" height="320"><p>Turning wait time into opportunity. Smart kiosks, useful information and local connection.</p></div>
-    {col("Explore Spotlight", [("The kiosk","kiosk/"),("Venues","venues/"),("Who you can reach","audience/"),("Market planning","locations/"),("How it works","how-it-works/"),("About us","about/")])}
+    <div class="footer-brand"><img src="{{R}}assets/logo-light.svg" alt="CityPulse Kiosks" width="380" height="116"><p>Turning wait time into opportunity. Smart kiosks, useful information and local connection.</p></div>
+    {col("Explore CityPulse", [("The kiosk","kiosk/"),("Venues","venues/"),("Who you can reach","audience/"),("Market planning","locations/"),("How it works","how-it-works/"),("About us","about/")])}
     {col("Advertise", [("Advertising options","advertise/"),("Pricing & calculator","pricing/"),("Campaign planner","campaign-planner/"),("Creative studio","creative-studio/"),("Campaign ideas","campaign-ideas/"),("Measurement guide","measurement/"),("For agencies","agencies/")])}
-    {col("Keep it useful", [("Request a kiosk","hosts/#inquiry"),("Guides & resources","resources/"),("Media overview","media-kit/"),("Common questions","faqs/"),("Contact Spotlight","contact/"),("Help & support","support/")])}
+    {col("Keep it useful", [("Request a kiosk","hosts/#inquiry"),("Guides & resources","resources/"),("Media overview","media-kit/"),("Common questions","faqs/"),("Contact CityPulse","contact/"),("Help & support","support/")])}
     <div class="footer-talk"><h2>Let's talk</h2>
       <a class="big" href="mailto:{EMAIL}">{EMAIL}</a><a class="big" href="tel:{TEL}">{PHONE}</a>
       <p class="footer-addr">{ADDR1}<br>{ADDR2}</p>
-      <p class="socials"><a href="https://www.instagram.com/spotlightkiosks/" rel="noopener" target="_blank">Instagram</a><a href="https://www.linkedin.com/company/spotlight-kiosks/" rel="noopener" target="_blank">LinkedIn</a><a href="https://www.facebook.com/profile.php?id=61581139512802" rel="noopener" target="_blank">Facebook</a><a href="https://x.com/spotlightkiosks" rel="noopener" target="_blank">X</a></p>
+      {socials_html()}
     </div>
   </div>
-  <div class="wrap footer-base"><span>© <span id="year">2026</span> Spotlight Kiosks. All rights reserved.</span><nav aria-label="Legal"><a href="{{R}}privacy/">Privacy Policy</a><a href="{{R}}terms/">Terms &amp; Conditions</a></nav></div>
+  <div class="wrap footer-base"><span>© <span id="year">2026</span> CityPulse Kiosks. All rights reserved.</span><nav aria-label="Legal"><a href="{{R}}privacy/">Privacy Policy</a><a href="{{R}}terms/">Terms &amp; Conditions</a></nav></div>
 </footer>'''
 
 PAGES = []
@@ -135,8 +139,11 @@ def page(path, title, desc, body, active=None, kiosk=False, extra_js=()):
 <meta name="description" content="{e(desc)}">
 <meta property="og:title" content="{e(full_title)}">
 <meta property="og:description" content="{e(desc)}">
-<meta property="og:image" content="{{R}}assets/kiosk-clubhouse.jpg">
-<link rel="icon" href="{{R}}assets/favicon.png" type="image/png">
+<meta property="og:image" content="https://aeroassistindustries.github.io/spotlight-kiosks/assets/og-card.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0F1C2B">
+<link rel="icon" href="{{R}}assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="{{R}}assets/favicon.png" type="image/png" sizes="64x64">
 <link rel="apple-touch-icon" href="{{R}}assets/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -187,7 +194,7 @@ def page_hero(trail, h1, lede, buttons="", aside="", dark=False):
   <div class="hero-grid{'' if aside else ' solo'}"><div><h1>{h1}</h1><p class="lede">{lede}</p>{buttons}</div>{aside_html}</div>
 </div></section>'''
 
-def cta_band(h="Let's put your space in the spotlight.", p="Host a useful amenity. Reach your next customer. Start with a conversation."):
+def cta_band(h="Let's put your business on the city's pulse.", p="Host a useful amenity. Reach your next customer. Start with a conversation."):
     return f'''<section class="cta-band"><div class="wrap cta-inner"><div><h2>{h}</h2><p>{p}</p></div>
   {btns(("Plan a campaign","campaign-planner/"),("Request a kiosk","hosts/#inquiry","btn-ghost"))}</div></section>'''
 
@@ -206,7 +213,6 @@ def check_list(items):
 TILEG = {
   "Dining": "linear-gradient(135deg,#7a3b1f,#c9773a)", "Amenities": "linear-gradient(135deg,#1f6f78,#7cc4c0)",
   "Local guide": "linear-gradient(120deg,#2b5876,#c2702f)", "Events": "linear-gradient(135deg,#2a2f5c,#8a64b0)",
-  "Course guide": "linear-gradient(135deg,#1f5a32,#8fbf5a)", "Tee times": "linear-gradient(135deg,#2f6b34,#b7d36a)",
   "Check-in": "linear-gradient(135deg,#1b6ca8,#62b6cb)", "Pharmacy": "linear-gradient(135deg,#227a5c,#8ccfa6)",
   "Service": "linear-gradient(135deg,#2d3436,#e17055)", "Vehicles": "linear-gradient(135deg,#24343f,#5f7a8a)",
   "Menu": "linear-gradient(135deg,#7a3b1f,#c9773a)", "Specials": "linear-gradient(135deg,#a2740a,#e8b923)",
@@ -229,8 +235,7 @@ def demo_block(heading="Try the kiosk.", hid="demo-title"):
       <p>This is the screen your guests use. Pick a venue and tap around the way a visitor would. The strip along the bottom of the screen is the ad space local businesses buy — swipe it, or tap "Your ad here" to see the packages.</p>
     </div>
     <div class="venue-switch" role="radiogroup" aria-label="Choose a venue">
-      <button role="radio" aria-checked="true" data-venue="golf">Golf clubhouse</button>
-      <button role="radio" aria-checked="false" data-venue="hotel">Hotel lobby</button>
+      <button role="radio" aria-checked="true" data-venue="hotel">Hotel lobby</button>
       <button role="radio" aria-checked="false" data-venue="medical">Medical office</button>
       <button role="radio" aria-checked="false" data-venue="auto">Dealership lounge</button>
     </div>
@@ -343,13 +348,13 @@ def advertiser_form():
             field("Website", "Website", "url", opt=True, ph="https://"),
             field("Anything else we should know?", "Notes", "textarea", full=True, opt=True),
         ]),
-    ], "I understand placement availability, pricing and campaign terms are confirmed by the Spotlight team.", "Review my inquiry", handoff=True)
+    ], "I understand placement availability, pricing and campaign terms are confirmed by the CityPulse team.", "Review my inquiry", handoff=True)
 
 def host_form():
     return draft_form("host-form", EMAIL, "Kiosk hosting inquiry", [
         ("Your venue", [
             field("Venue name", "Venue name", required=True),
-            field("Venue type", "Venue type", "select", options=["Hotel / resort", "Golf / country club", "Medical office", "Car dealership", "Restaurant / venue", "Vacation rental / condo", "Other"]),
+            field("Venue type", "Venue type", "select", options=["Hotel / resort", "Medical office", "Car dealership", "Restaurant / venue", "Vacation rental / condo", "Other"]),
             field("Street address", "Street address"),
             field("City / state", "City / state", required=True),
             field("Your role", "Role"),
@@ -417,11 +422,10 @@ def concept_card(i, full=False):
     <div class="concept-links"><a class="text-link" href="{{R}}campaign-planner/?idea={i["id"]}">Adapt this idea</a><a class="text-link" href="{{R}}creative-studio/?idea={i["id"]}">Preview the creative</a></div></div></article>'''
 
 VENUES = [
-  dict(slug="hotels", tab="Hotels", name="Hotels & hospitality", h="A better stay starts in the lobby.", lede="Help guests discover dining, attractions, transportation and your property's amenities from one welcoming screen.", bullets=["Digital concierge and local discovery", "Property amenities and useful FAQs", "Dining, activities and transportation information"], moment="Guests planning what to do next", mh="Discover your next local favorite.", venue="The Arden Hotel", tiles=("Dining", "Amenities", "Local guide", "Events"), finish="silver", photo="kiosk-lobby-sm.jpg", photo_alt="Silver Spotlight kiosk in a hotel lobby"),
-  dict(slug="golf", tab="Golf clubs", name="Golf & country clubs", h="A concierge for the clubhouse.", lede="Give members and guests course conditions, tee times, dining, events and the pro shop — plus the best of the neighborhood.", bullets=["Course guide, conditions and tee times", "Dining, events and membership information", "Pro shop highlights and local discovery"], moment="Members between rounds", mh="Everything about today, in one place.", venue="Saguaro Hills Golf Club", tiles=("Course guide", "Tee times", "Dining", "Events"), finish="black", photo="kiosk-clubhouse-sm.jpg", photo_alt="Matte black Spotlight kiosk in a golf clubhouse"),
+  dict(slug="hotels", tab="Hotels", name="Hotels & hospitality", h="A better stay starts in the lobby.", lede="Help guests discover dining, attractions, transportation and your property's amenities from one welcoming screen.", bullets=["Digital concierge and local discovery", "Property amenities and useful FAQs", "Dining, activities and transportation information"], moment="Guests planning what to do next", mh="Discover your next local favorite.", venue="The Arden Hotel", tiles=("Dining", "Amenities", "Local guide", "Events"), finish="silver", photo="kiosk-lobby-sm.jpg", photo_alt="Silver CityPulse kiosk in a hotel lobby"),
   dict(slug="medical", tab="Medical", name="Medical offices", h="Make the waiting room more useful.", lede="Give visitors an easy way to explore practice information, patient education, directions and relevant local services.", bullets=["Practice services and visitor FAQs", "General educational content selected by the practice", "Directions, wellness and local service information"], moment="Visitors looking for practical information", mh="Useful information while you wait.", venue="Camelback Family Health", tiles=("Check-in", "Pharmacy", "Wellness", "Local guide"), finish="silver", note="Keep healthcare content informational. This use case focuses on visitor information and practice-selected educational content. Kiosks don't collect patient records or personal health information."),
   dict(slug="automotive", tab="Automotive", name="Car dealerships", h="Put the waiting area to work.", lede="Showcase vehicle highlights, service information and relevant offers while customers spend time in your sales or service lounge.", bullets=["Featured vehicles and inventory highlights", "Financing, service and warranty information", "Promotions and QR links to take the next step"], moment="Sales and service customers considering their options", mh="Your next move starts here.", venue="Valley Motors", tiles=("Service", "Vehicles", "Dining", "Offers"), finish="black"),
-  dict(slug="restaurants", tab="Restaurants", name="Restaurants & venues", h="Give guests a reason to explore more.", lede="Spotlight menu highlights, specials, events and nearby experiences through a simple interactive display.", bullets=["Menu highlights and daily specials", "Events and promotional content", "Local attractions and partner visibility"], moment="Guests discovering menus, events and experiences", mh="There's more on the menu.", venue="Salt & Ember", tiles=("Menu", "Specials", "Events", "Local guide"), finish="black"),
+  dict(slug="restaurants", tab="Restaurants", name="Restaurants & venues", h="Give guests a reason to explore more.", lede="CityPulse menu highlights, specials, events and nearby experiences through a simple interactive display.", bullets=["Menu highlights and daily specials", "Events and promotional content", "Local attractions and partner visibility"], moment="Guests discovering menus, events and experiences", mh="There's more on the menu.", venue="Salt & Ember", tiles=("Menu", "Specials", "Events", "Local guide"), finish="black"),
 ]
 
 def venue_tabs(link_label=True):
@@ -437,7 +441,7 @@ def venue_tabs(link_label=True):
 FAQS = [
   ("Is there a cost to host a kiosk?", "Qualified venues get kiosk hardware, software, installation, content updates and ongoing maintenance at no cost. Participation depends on a site review and a signed Host Agreement.", "hosts"),
   ("What does my venue need to provide?", "A visible, accessible spot with a standard power outlet. We review internet availability and the right installation setup with your team.", "hosts"),
-  ("Who looks after the kiosk?", "Spotlight manages the equipment, software, content updates and routine maintenance. Contact support for installation or service questions.", "hosts"),
+  ("Who looks after the kiosk?", "CityPulse manages the equipment, software, content updates and routine maintenance. Contact support for installation or service questions.", "hosts"),
   ("Do host venues receive revenue sharing?", "The standard Host Agreement provides the kiosk at no cost and doesn't include payments or revenue sharing. Any separate arrangement has to be agreed in writing.", "hosts"),
   ("Can we choose what appears on our kiosk?", "Yes. Your venue information is planned with your team, and advertising is reviewed for fit with your setting. Category restrictions, such as competitors, can be discussed before you sign.", "hosts"),
   ("Who can advertise?", "Local businesses, restaurants and entertainment, medical and wellness services, automotive businesses and retail brands can ask about placements that fit.", "advertisers"),
@@ -457,7 +461,7 @@ RESOURCES = [
   ("creative", "Interactive tool", "Try the creative studio", "Write a message, see it in the kiosk ad space and download a concept.", "Live preview", "creative-studio/"),
   ("advertisers creative", "Campaign inspiration", "Explore campaign ideas", "Eight local campaign concepts to adapt for your business.", "8 playbooks", "campaign-ideas/"),
   ("advertisers", "Reporting guide", "Understand campaign measurement", "The difference between plays, impressions, interactions and outcomes.", "Plain-language guide", "measurement/"),
-  ("advertisers hosts", "Getting started", "Follow the Spotlight process", "The steps for hosts and advertisers, from first brief to confirmed terms.", "Process overview", "how-it-works/"),
+  ("advertisers hosts", "Getting started", "Follow the CityPulse process", "The steps for hosts and advertisers, from first brief to confirmed terms.", "Process overview", "how-it-works/"),
   ("advertisers hosts", "At a glance", "Read the media overview", "The concept, venues, formats and pricing in one place.", "Overview", "media-kit/"),
 ]
 
@@ -531,7 +535,7 @@ def us_map(link=True):
         aria = g["m"][0] if n == 1 else f'{name}: {", ".join(g["m"])}'
         pins += f'<circle class="pin{" multi" if n > 1 else ""}" cx="{g["x"]}" cy="{g["y"]}" r="{5 if n == 1 else 7}" tabindex="0" role="button" data-name="{e(name)}" data-markets="{e("|".join(g["m"]))}" data-state="{e(g["st"])}" aria-label="{e(aria)}"/>'
     return f'''<div class="usmap" data-usmap>
-  <svg viewBox="0 0 975 610" role="group" aria-label="Map of Spotlight kiosk markets in all 50 states">{paths}<g class="pins">{pins}</g></svg>
+  <svg viewBox="0 0 975 610" role="group" aria-label="Map of CityPulse kiosk markets in all 50 states">{paths}<g class="pins">{pins}</g></svg>
   <div class="map-tip" role="status" hidden><b></b><span class="tip-links"></span></div>
 </div>'''
 
@@ -541,7 +545,7 @@ N_MARKETS = sum(len(c) for _, c in MARKETS.values())
 CTAS = ["Visit us today", "View the menu", "Book now", "Call us", "Get the offer", "Learn more"]
 def checkout_section():
     cats = "".join(f"<option>{c}</option>" for c in CATEGORIES)
-    venues = "".join(f"<option>{v}</option>" for v in ["Any venue (fastest)", "Hotels & hospitality", "Golf & country clubs", "Medical offices", "Car dealerships", "Restaurants & venues"])
+    venues = "".join(f"<option>{v}</option>" for v in ["Any venue (fastest)", "Hotels & hospitality", "Medical offices", "Car dealerships", "Restaurants & venues"])
     ctas = "".join(f'<option value="{c}">' for c in CTAS)
     return f'''<section class="section checkout" id="get-started" aria-labelledby="co-title"><div class="wrap">
   <div class="section-head"><h2 id="co-title">Get on a kiosk today.</h2><p>One location, $399 a year. Pick your city, upload your logo or ad, and check out — it takes about five minutes. Want 3 or 5 locations? <a class="text-link" href="{{R}}pricing/">See packages</a></p></div>
@@ -622,7 +626,7 @@ JOURNEY = [
   ("pin", "Pick your kiosk location", "Choose a city — we have hosts in all 50 states."),
   ("upload", "Upload your ad", "Send a finished ad, or just your logo and we'll design it."),
   ("clock", "Live in about 2 days", "We review it, place it and switch it on — typically within two days."),
-  ("eye", "Guests see your ad", "Hotel guests, golfers, patients and customers browse the kiosk every day."),
+  ("eye", "Guests see your ad", "Hotel guests, patients, diners and customers browse the kiosk every day."),
   ("chart", "You get the numbers", "Views, taps and QR scans — counted for you."),
   ("dash", "Your own dashboard", "See how your ad is doing, any time, in one place."),
   ("users", "More customers", "Visitors walk through your door. That's the whole point."),

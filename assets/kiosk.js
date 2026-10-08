@@ -1,4 +1,4 @@
-/* Spotlight Kiosks — interactive kiosk demo.
+/* CityPulse Kiosks — interactive kiosk demo.
    All businesses are fictional demo content. Nothing leaves the page. */
 (function () {
   "use strict";
@@ -31,9 +31,7 @@
   const svg = (k, cls) => `<svg viewBox="0 0 24 24" aria-hidden="true"${cls ? ` class="${cls}"` : ""}>${P[k] || ""}</svg>`;
 
   const G = {
-    dining: "linear-gradient(135deg,#7a3b1f,#c9773a)", course: "linear-gradient(135deg,#1f5a32,#8fbf5a)",
-    teetimes: "linear-gradient(135deg,#2f6b34,#b7d36a)", events: "linear-gradient(135deg,#2a2f5c,#8a64b0)",
-    membership: "linear-gradient(135deg,#3b4a3f,#9aa77a)", proshop: "linear-gradient(135deg,#22384f,#4f7fa8)",
+    dining: "linear-gradient(135deg,#7a3b1f,#c9773a)",  events: "linear-gradient(135deg,#2a2f5c,#8a64b0)",
     local: "linear-gradient(120deg,#2b5876 10%,#c2702f 70%,#f2c46d)", amenities: "linear-gradient(135deg,#1f6f78,#7cc4c0)",
     getting: "linear-gradient(135deg,#34495e,#7f9bb5)", map: "linear-gradient(135deg,#4a5568,#9aa8bb)",
     checkin: "linear-gradient(135deg,#1b6ca8,#62b6cb)", pharmacy: "linear-gradient(135deg,#227a5c,#8ccfa6)",
@@ -82,23 +80,6 @@
       { id: "biz", n: "Business center", k: "Lobby level", m: "Open 24 hours", d: "Printing, two workstations and a small meeting room.", f: [["Printing", "Free"], ["Room", "Reserve"]] },
       { id: "valet", n: "Valet & parking", k: "Front drive", m: "In and out", d: "Valet is available at the front drive. Self-parking is in the garage off 2nd Street.", f: [["Valet", "$28/night"], ["Self", "$18/night"]] }
     ]),
-    cat("course", "Course guide", "flag", "Today on the course.", [
-      { id: "front", n: "Front nine", k: "Par 36 · 3,412 yd", m: "Pace 2 hr 05", d: "Opens with a generous par 4. Watch the water left on 7.", f: [["Greens", "Fast"], ["Carts", "Path only on 4"]] },
-      { id: "backnine", n: "Back nine", k: "Par 36 · 3,488 yd", m: "Pace 2 hr 10", d: "The signature 16th plays over the arroyo. Take one more club than you think.", f: [["Greens", "Fast"], ["Carts", "Anywhere"]] },
-      { id: "range", n: "Practice range", k: "Grass tees open", m: "6 am–6 pm", d: "Grass tees today. Short-game area and putting green next to the range.", f: [["Balls", "$12 bucket"], ["Targets", "6"]] },
-      { id: "cond", n: "Today's conditions", k: "Sunny, 84°", m: "Wind 6 mph SW", d: "Greens rolling quickly. Hole locations are in the middle of the green on most holes.", f: [["Stimp", "11"], ["Frost delay", "None"]] }
-    ]),
-    cat("membership", "Membership", "people", "Join the club or book a tour.", [
-      { id: "social", n: "Social membership", k: "Dining, pool & events", m: "Monthly", d: "Full access to dining, the pool and member events. Golf available at member guest rates.", f: [["Initiation", "Ask us"], ["Tour", "Weekdays"]] },
-      { id: "golfmem", n: "Golf membership", k: "Unlimited play", m: "Monthly", d: "Unlimited golf, priority tee times and access to the practice facility.", f: [["Initiation", "Ask us"], ["Tour", "Weekdays"]] },
-      { id: "junior", n: "Junior program", k: "Ages 8–17", m: "Spring & fall", d: "Weekly clinics and on-course play with our teaching staff.", f: [["Sessions", "8 weeks"], ["Ages", "8–17"]] }
-    ]),
-    cat("proshop", "Pro shop", "bag", "On the lower level, next to the starter.", [
-      { id: "fit", n: "Club fitting", k: "45 minutes", m: "$75", d: "Launch-monitor fitting with a PGA professional. Fee credited toward a purchase.", f: [["Book", "Pro shop"], ["Length", "45 min"]] },
-      { id: "lesson", n: "Lesson with a pro", k: "30 minutes", m: "$65", d: "Private lesson on the range or short-game area.", f: [["Book", "Pro shop"], ["Length", "30 min"]] },
-      { id: "polo", n: "Club logo polo", k: "Men's & women's", m: "$68", d: "Performance fabric with the club crest. Several colors in stock.", f: [["Sizes", "XS–XXL"], ["Colors", "5"]] },
-      { id: "rangefinder", n: "Rangefinder rental", k: "Per round", m: "$10", d: "Laser rangefinders available at the starter's window.", f: [["Pickup", "Starter"], ["Return", "After round"]] }
-    ]),
     cat("checkin", "Check-in help", "clip", "Make your visit a little faster.", [
       { id: "phonecheck", n: "Check in from your phone", k: "Skip the line", m: "2 minutes", d: "Scan the code to confirm your details and insurance before you're called.", f: [["Needs", "Photo ID"], ["Time", "2 min"]] },
       { id: "forms", n: "Forms & insurance", k: "New patients", m: "5 minutes", d: "New-patient forms and insurance card upload. You can finish them on your phone.", f: [["Needs", "Insurance card"], ["Time", "5 min"]] },
@@ -137,20 +118,11 @@
   Object.values(CATS).forEach(c => { c.items = c.items.map(it => it.ref ? I[it.ref] : it); });
 
   const SPECIAL = {
-    teetimes: { label: "Tee times", icon: "cal", g: G.teetimes },
     service: { label: "Service status", icon: "wrench", g: G.service },
     venuemap: { label: "Venue map", icon: "map", g: G.map }
   };
 
   const VENUES = {
-    golf: {
-      name: "Saguaro Hills Golf Club", short: "SAGUARO HILLS", finish: "black",
-      theme: { fg: "#1d2b45", sub: "#596577", accent: "#1f4d36", bg: "linear-gradient(180deg,#dbe6ef 0%,#f5f6f4 36%,#f3f3ef 100%)" },
-      tiles: ["course", "teetimes", "dining", "events", "membership", "proshop"],
-      wide: { to: "local", t: "Discover local", s: "Places our members love nearby" },
-      sponsors: ["willow", "bloom"],
-      rooms: ["Pro shop", "Locker rooms", "Grill room", "Starter", "Restrooms", "Event lawn"]
-    },
     hotel: {
       name: "The Arden Hotel", short: "THE ARDEN", finish: "silver",
       theme: { fg: "#1d2b45", sub: "#5a6578", accent: "#1d2b45", bg: "linear-gradient(180deg,#dfe8f1 0%,#f6f7f8 38%,#f4f4f2 100%)" },
@@ -182,10 +154,9 @@
   if (!screen) return;
   const ROOT = screen.dataset.root || "./";
   const S = {
-    venue: "golf", mode: "attract", stack: [], large: false,
+    venue: "hotel", mode: "attract", stack: [], large: false,
     stats: { sessions: 0, views: 0, impr: 0, scans: 0 },
     slide: 0, slides: [], idleT: null, visible: true, paused: false,
-    tee: { day: 0, players: 2, slot: null, held: false },
     svc: { step: 2 }, room: null, sent: {}
   };
   const IDLE_MS = 45000, SLIDE_MS = 5000;
@@ -317,7 +288,6 @@
     else if (top.view === "cat") body = viewCat(top.id);
     else if (top.view === "item") body = viewItem(top.id);
     else if (top.view === "adspace") body = viewAdspace();
-    else if (top.view === "teetimes") body = viewTee();
     else if (top.view === "service") body = viewService();
     else if (top.view === "venuemap") body = viewMap();
     view.className = "k-view" + (dir ? " " + dir : "");
@@ -372,18 +342,6 @@
       <div class="k-take"><div class="k-qr">${qr("advertise")}</div>
         <div><b>Scan or tap to get started</b><a class="k-btn" href="${ROOT}pricing/" target="_top">${svg("mega")}See packages</a></div>
       </div></div>`;
-  }
-  function viewTee() {
-    const t = S.tee, days = ["Today", "Tomorrow", "Sat"];
-    const base = ["7:20", "7:40", "8:10", "8:50", "9:30", "10:10", "11:00", "12:40", "1:20"];
-    const slots = base.map((tm, i) => ({ tm, full: (i + t.day) % 4 === 1 || (t.players > 3 && i % 3 === 0) }));
-    const sel = slots[t.slot];
-    return `${head(SPECIAL.teetimes)}
-      <div class="k-chips">${days.map((d, i) => `<button data-act="tee-day" data-v="${i}" aria-pressed="${t.day === i}">${d}</button>`).join("")}</div>
-      <div class="k-chips"><span class="k-label">Players</span>${[1, 2, 3, 4].map(n => `<button data-act="tee-pl" data-v="${n}" aria-pressed="${t.players === n}">${n}</button>`).join("")}</div>
-      <div class="k-slots">${slots.map((s, i) => `<button data-act="tee-slot" data-v="${i}" aria-pressed="${t.slot === i}" ${s.full ? "disabled" : ""}>${s.tm}<small>${s.full ? "Full" : (i < 7 ? "am" : "pm")}</small></button>`).join("")}</div>
-      ${t.held && sel ? `<div class="k-confirm"><b>Held: ${days[t.day]} at ${sel.tm}</b>${t.players} player${t.players > 1 ? "s" : ""}. Confirm at the starter within 10 minutes.</div>`
-        : `<button class="k-btn" data-act="tee-hold"${t.slot == null ? ' style="opacity:.5"' : ""}>${svg("cal")}Hold this time</button>`}`;
   }
   function viewService() {
     const steps = ["Checked in", "Multi-point inspection", "Oil & filter change", "Tire rotation", "Wash", "Ready for pickup"];
@@ -458,10 +416,6 @@
         S.sent[id] = true; stat("scans");
         log(id === "svc" ? "Asked for a text when the car is ready" : `Took ${I[id].n} to phone`, "scan");
         render(); toast(id === "svc" ? "We'll text you when it's ready." : "Link sent. It's on your phone now."); break;
-      case "tee-day": S.tee.day = +val; S.tee.slot = null; S.tee.held = false; render(); break;
-      case "tee-pl": S.tee.players = +val; S.tee.slot = null; S.tee.held = false; render(); break;
-      case "tee-slot": S.tee.slot = +val; S.tee.held = false; render(); break;
-      case "tee-hold": if (S.tee.slot == null) { toast("Choose a time first."); break; } S.tee.held = true; log("Held a tee time"); render(); break;
       case "room": S.room = +val; log(`Looked up directions to ${V().rooms[S.room]}`); render(); break;
     }
   });
@@ -483,7 +437,7 @@
       if (S.venue === btn.dataset.venue) return;
       document.querySelectorAll(".venue-switch [data-venue]").forEach(b => b.setAttribute("aria-checked", String(b === btn)));
       S.venue = btn.dataset.venue; S.stack = []; S.mode = "attract"; S.room = null; S.svc.step = 2;
-      S.tee = { day: 0, players: 2, slot: null, held: false }; S.sent = {};
+      S.sent = {};
       clearTimeout(S.idleT);
       log(`Switched to ${V().name}`); buildFrame();
     });
@@ -499,7 +453,7 @@
     S.stats = { sessions: 0, views: 0, impr: 0, scans: 0 };
     ["sessions", "views", "impr", "scans"].forEach(k => { const el = $("#st-" + k); if (el) el.textContent = "0"; });
     if (feed) feed.innerHTML = '<li class="feed-empty">Tap the kiosk screen to start a session.</li>';
-    S.mode = "attract"; S.stack = []; S.sent = {}; S.tee = { day: 0, players: 2, slot: null, held: false };
+    S.mode = "attract"; S.stack = []; S.sent = {};
     clearTimeout(S.idleT); buildFrame();
   });
 

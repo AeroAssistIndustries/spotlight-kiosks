@@ -1,8 +1,8 @@
-/* Spotlight Kiosks — one place that talks to outside services.
+/* CityPulse Kiosks — one place that talks to outside services.
    Forms and checkout call these helpers; providers are chosen in assets/config.js. */
 (function () {
   "use strict";
-  const CFG = window.SPOTLIGHT_CONFIG || {};
+  const CFG = window.CITYPULSE_CONFIG || {};
   const forms = CFG.forms || {}, pay = CFG.payments || {};
   const provider = forms.provider || "none";
 
@@ -76,5 +76,5 @@
     } catch (e) { return ""; }
   }
 
-  window.Spotlight = { formsReady, send, sendWithFiles, paymentLink, maxUploadMB: CFG.maxUploadMB || 5 };
+  window.CityPulse = { formsReady, send, sendWithFiles, paymentLink, maxUploadMB: CFG.maxUploadMB || 5 };
 })();

@@ -1,4 +1,4 @@
-/* Spotlight Kiosks — self-serve checkout for one location.
+/* CityPulse Kiosks — self-serve checkout for one location.
    Order details and files are delivered by the form service and payment happens
    on the hosted payment link — both set in assets/config.js, sent via assets/integrations.js. */
 (function () {
@@ -14,7 +14,7 @@
   /* ---------- welcome page: show the order number ---------- */
   const wo = $("#welcome-order");
   if (wo) {
-    const o = store.get("spotlight-order"), q = new URLSearchParams(location.search).get("order");
+    const o = store.get("citypulse-order"), q = new URLSearchParams(location.search).get("order");
     if (o && (!q || q === o.id)) { wo.textContent = `Order ${o.id} · ${o.plan} · ${o.market}`; wo.hidden = false; }
     else if (q) { wo.textContent = `Order ${q}`; wo.hidden = false; }
     return;
@@ -25,7 +25,7 @@
   const steps = $$(".co-step", form), marks = $$(".co-steps li", form);
   const err = $(".form-error", form);
   const back = $("[data-co=back]", form), next = $("[data-co=next]", form), pay = $("[data-co=pay]", form), label = $("[data-co=label]", form);
-  const MAXMB = (window.Spotlight && window.Spotlight.maxUploadMB) || 5, MAX = MAXMB * 1024 * 1024;
+  const MAXMB = (window.CityPulse && window.CityPulse.maxUploadMB) || 5, MAX = MAXMB * 1024 * 1024;
   const files = { logo: null, artwork: null };
   let cur = 0;
 
@@ -163,17 +163,17 @@
   marks.forEach((m, j) => m.addEventListener("click", () => { if (j < cur) go(j); }));
 
   /* ---------- submit ---------- */
-  const API = window.Spotlight || { formsReady: () => false, paymentLink: () => "", sendWithFiles: async () => false };
+  const API = window.CityPulse || { formsReady: () => false, paymentLink: () => "", sendWithFiles: async () => false };
   const planKey = () => billing() === "annual" ? "yearly" : "monthly";
   const stripeLink = () => API.paymentLink(planKey(), "", "");
-  function orderId() { const d = new Date(); return "SK-" + d.toISOString().slice(2, 10).replace(/-/g, "") + "-" + Math.random().toString(36).slice(2, 6).toUpperCase(); }
+  function orderId() { const d = new Date(); return "CP-" + d.toISOString().slice(2, 10).replace(/-/g, "") + "-" + Math.random().toString(36).slice(2, 6).toUpperCase(); }
 
   form.addEventListener("submit", async e => {
     e.preventDefault();
     if (!validate(3)) return;
     const id = orderId(), email = form.elements.email.value.trim();
     const order = { id, plan: planText(), market: market(), business: form.elements.business.value };
-    store.set("spotlight-order", order);
+    store.set("citypulse-order", order);
     const link = API.paymentLink(planKey(), email, id);
     const welcome = new URL(form.dataset.welcome, location.href); welcome.searchParams.set("order", id);
     const next = link || welcome.toString();
@@ -193,14 +193,14 @@
       const ok = await API.sendWithFiles(form, extra, next);
       if (!ok) {
         pay.disabled = false; pay.textContent = old; art.disabled = logo.disabled = false; sel.name = "market";
-        fail(null, `We couldn't send your order just now. Please try again, or email sales@spotlightkiosks.com with order ${id}.`);
+        fail(null, `We couldn't send your order just now. Please try again, or email sales@citypulsekiosks.com with order ${id}.`);
       }
       return;
     }
     // Forms aren't connected yet: hand the order over by email, then offer payment if a link exists
     const fd = new FormData(form); fd.set("market", market());
     const lines = [`Order: ${id}`, `Plan: ${planText()}`].concat([...fd.entries()].filter(([k, v]) => typeof v === "string" && v && !/^(_|agree|billing|market_other)/.test(k)).map(([k, v]) => `${k.replace(/_/g, " ")}: ${v}`));
-    const mail = `mailto:sales@spotlightkiosks.com?subject=${encodeURIComponent(`Kiosk order ${id} — ${order.business}`)}&body=${encodeURIComponent(`Hello Spotlight team,\n\n${lines.join("\n")}\n\n(My logo/artwork is attached.)`)}`;
+    const mail = `mailto:sales@citypulsekiosks.com?subject=${encodeURIComponent(`Kiosk order ${id} — ${order.business}`)}&body=${encodeURIComponent(`Hello CityPulse team,\n\n${lines.join("\n")}\n\n(My logo/artwork is attached.)`)}`;
     const done = $("#co-done");
     $("p", done).innerHTML = `Your order number is <b>${id}</b>. One last step: send us the email below with your logo or artwork attached${link ? ", then complete payment" : ""}.`;
     $(".btn-row", done).innerHTML = `<a class="btn" href="${mail}">Open the email</a>${link ? `<a class="btn btn-dark" href="${link}">Continue to payment</a>` : ""}<a class="btn btn-ghost" href="${welcome}">What happens next</a>`;

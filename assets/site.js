@@ -1,4 +1,4 @@
-/* Spotlight Kiosks — site behavior */
+/* CityPulse Kiosks — site behavior */
 (function () {
   "use strict";
   const $ = (s, r = document) => r.querySelector(s);
@@ -105,7 +105,7 @@
       const pin = $(`.pin[data-state="${CSS.escape(st.dataset.state)}"]`, m); if (pin) show(pin);
       if (root && root.querySelector("[data-filter-select]")) {
         const opt = [...root.querySelector("[data-filter-select]").options].find(o => o.text === st.dataset.state);
-        if (opt) root.dispatchEvent(new CustomEvent("spotlight:filter", { detail: opt.value }));
+        if (opt) root.dispatchEvent(new CustomEvent("citypulse:filter", { detail: opt.value }));
       }
     }));
   });
@@ -133,10 +133,11 @@
       const act = rail[i]; if (act && act.parentElement.scrollWidth > act.parentElement.clientWidth) act.parentElement.scrollTo({ left: act.offsetLeft - 16, behavior: "smooth" });
     }
     function tick() { clearTimeout(t); if (reduceMotion) return; t = setTimeout(() => { if (!paused && vis && !document.hidden) show(i + 1); tick(); }, DUR); }
-    rail.forEach((r, k) => $("button", r).addEventListener("click", () => { show(k); tick(); }));
+    let touched = false;
+    rail.forEach((r, k) => $("button", r).addEventListener("click", () => { touched = true; show(k); tick(); }));
     j.addEventListener("mouseenter", () => { paused = true; j.classList.remove("run"); });
     j.addEventListener("mouseleave", () => { paused = false; show(i); tick(); });
-    if ("IntersectionObserver" in window) new IntersectionObserver(es => { const was = vis; vis = es[0].isIntersecting; if (vis && !was) { show(0); tick(); } }, { threshold: .35 }).observe(j);
+    if ("IntersectionObserver" in window) new IntersectionObserver(es => { const was = vis; vis = es[0].isIntersecting; if (vis && !was && !touched) { show(0); tick(); } }, { threshold: .35 }).observe(j);
     show(0); tick();
   });
 
@@ -175,7 +176,7 @@
     chips.forEach(c => c.addEventListener("click", () => { active = c.dataset.filter; chips.forEach(x => x.setAttribute("aria-pressed", String(x === c))); apply(); }));
     const sel = $("[data-filter-select]", root);
     if (sel) sel.addEventListener("change", () => { active = sel.value; apply(); });
-    root.addEventListener("spotlight:filter", e => { active = e.detail; if (sel) sel.value = e.detail; if (search) search.value = ""; apply(); });
+    root.addEventListener("citypulse:filter", e => { active = e.detail; if (sel) sel.value = e.detail; if (search) search.value = ""; apply(); });
     if (search) search.addEventListener("input", apply);
     $$("[data-clear]", root).forEach(b => b.addEventListener("click", () => { active = "all"; if (search) search.value = ""; if (sel) sel.value = "all"; chips.forEach(x => x.setAttribute("aria-pressed", String(x.dataset.filter === "all"))); apply(); }));
     const pre = params.get("filter"); if (pre) { const c = chips.find(x => x.dataset.filter === pre); if (c) { active = pre; chips.forEach(x => x.setAttribute("aria-pressed", String(x === c))); } }
@@ -186,10 +187,10 @@
   $$(".draft-form").forEach(form => {
     const review = document.getElementById(form.dataset.review);
     const err = $(".form-error", form);
-    const handoff = store.get("spotlight-handoff");
+    const handoff = store.get("citypulse-handoff");
     if (handoff && form.dataset.handoff !== undefined) {
       Object.entries(handoff).forEach(([k, v]) => { const f = form.elements[k]; if (f && !f.value) f.value = v; });
-      store.del("spotlight-handoff");
+      store.del("citypulse-handoff");
     }
     params.forEach((v, k) => {
       const f = form.elements[k]; if (!f) return;
@@ -224,10 +225,10 @@
       });
       const nameField = form.elements[form.dataset.subjectField || "Business"] || form.elements["Venue name"] || form.elements["Venue / business"];
       const subject = form.dataset.subject + (nameField && nameField.value.trim() ? ` — ${nameField.value.trim()}` : "");
-      const body = `Hello Spotlight team,\n\n${lines.join("\n")}\n\nThank you.`;
+      const body = `Hello CityPulse team,\n\n${lines.join("\n")}\n\nThank you.`;
       review.dataset.subject = subject; review.dataset.body = body;
       $("pre", review).textContent = `To: ${form.dataset.to}\nSubject: ${subject}\n\n${body}`;
-      const btn = $("button[type=submit]", form), api = window.Spotlight;
+      const btn = $("button[type=submit]", form), api = window.CityPulse;
       let sent = false;
       if (api && api.formsReady()) {
         btn.disabled = true; const t = btn.textContent; btn.textContent = "Sending…";
@@ -247,7 +248,7 @@
         const a = b.dataset.draft, s = review.dataset.subject, body = review.dataset.body;
         if (a === "open") location.href = `mailto:${form.dataset.to}?subject=${encodeURIComponent(s)}&body=${encodeURIComponent(body)}`;
         if (a === "copy") { const ok = await copy(`Subject: ${s}\n\n${body}`); const m = $(".copied", review); m.textContent = ok ? "Copied to your clipboard." : "Couldn't copy. Select the text above instead."; }
-        if (a === "download") download("spotlight-inquiry.txt", `To: ${form.dataset.to}\nSubject: ${s}\n\n${body}`);
+        if (a === "download") download("citypulse-inquiry.txt", `To: ${form.dataset.to}\nSubject: ${s}\n\n${body}`);
         if (a === "edit") { review.hidden = true; form.hidden = false; form.querySelector("input,select,textarea").focus(); }
       }));
     }
@@ -302,11 +303,11 @@
     }
     back.addEventListener("click", () => show(cur - 1));
     next.addEventListener("click", () => show(cur + 1));
-    const briefText = () => "SPOTLIGHT CAMPAIGN BRIEF\n\n" + fields().map(([k, v]) => `${k}: ${v}`).join("\n");
-    $("[data-plan=download]").addEventListener("click", () => download("spotlight-campaign-brief.txt", briefText()));
+    const briefText = () => "CITYPULSE CAMPAIGN BRIEF\n\n" + fields().map(([k, v]) => `${k}: ${v}`).join("\n");
+    $("[data-plan=download]").addEventListener("click", () => download("citypulse-campaign-brief.txt", briefText()));
     $("[data-plan=inquiry]").addEventListener("click", () => {
       const f = Object.fromEntries(fields());
-      store.set("spotlight-handoff", { "Business": f["Business"] || "", "Category": f["Business category"] || "", "Target city / state": f["Target city / state"] || "", "Goal": f["Campaign goal"] || "", "Notes": briefText() });
+      store.set("citypulse-handoff", { "Business": f["Business"] || "", "Category": f["Business category"] || "", "Target city / state": f["Target city / state"] || "", "Goal": f["Campaign goal"] || "", "Notes": briefText() });
       location.href = planner.dataset.next;
     });
     show(0);
@@ -315,8 +316,8 @@
   /* ---------- creative studio ---------- */
   const studio = $("#studio");
   if (studio) {
-    const COLORS = { forest: ["#1F4433", false], sunset: ["linear-gradient(135deg,#c2502f,#f2a65b)", false], cobalt: ["linear-gradient(135deg,#1c3f8a,#3f7ad8)", false], lamp: ["#FFCE22", true] };
-    const SVGBG = { forest: "#1F4433", sunset: "#D9703F", cobalt: "#2557B0", lamp: "#FFCE22" };
+    const COLORS = { forest: ["#1F4433", false], sunset: ["linear-gradient(135deg,#c2502f,#f2a65b)", false], cobalt: ["linear-gradient(135deg,#1c3f8a,#3f7ad8)", false], lamp: ["#22C7B6", true] };
+    const SVGBG = { forest: "#1F4433", sunset: "#D9703F", cobalt: "#2557B0", lamp: "#22C7B6" };
     const f = studio.elements, pv = $("#studio-preview");
     const presets = $$("[data-preset]");
     function load(id) {
@@ -355,9 +356,9 @@
 <text x="90" y="${tall ? 100 : 140}" font-family="Helvetica, Arial, sans-serif" font-size="48" font-weight="600" fill="${fg}">${x(f.brand.value || "Your business")}</text>
 ${lines.map((l, i) => `<text x="90" y="${(tall ? 200 : 380) + i * fs * 1.08}" font-family="Helvetica, Arial, sans-serif" font-size="${fs}" font-weight="800" fill="${fg}">${x(l)}</text>`).join("\n")}
 <text x="90" y="${H - (tall ? 60 : 110)}" font-family="Helvetica, Arial, sans-serif" font-size="46" font-weight="600" fill="${fg}" text-decoration="underline">${x(f.action.value || "Learn more")}</text>
-<text x="${W - 90}" y="${H - 60}" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-size="26" fill="${fg}" fill-opacity=".7">Spotlight Kiosks creative concept</text>
+<text x="${W - 90}" y="${H - 60}" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-size="26" fill="${fg}" fill-opacity=".7">CityPulse Kiosks creative concept</text>
 </svg>`;
-      download("spotlight-creative-concept.svg", svg, "image/svg+xml");
+      download("citypulse-creative-concept.svg", svg, "image/svg+xml");
     });
     const startIdea = params.get("idea");
     if (startIdea && IDEAS[startIdea]) load(startIdea); else draw();
@@ -393,7 +394,7 @@ ${lines.map((l, i) => `<text x="90" y="${(tall ? 200 : 380) + i * fs * 1.08}" fo
     pre.forEach(p => p.addEventListener("click", () => { r.value = p.dataset.presetN; num.value = p.dataset.presetN; sync(num); }));
     $("[data-calc=carry]").addEventListener("click", () => {
       const opt = N <= 1 ? "1 location — $399/yr" : N <= 3 ? "3 locations — $1,099/yr" : N <= 5 ? "5 locations — $1,200/yr" : "More than 5 locations — $1,200 + $300 per extra location/yr";
-      store.set("spotlight-handoff", { "Pricing": opt, "Notes": `Estimate for ${N} location${N > 1 ? "s" : ""}: ${label(N)} = ${money(annual(N))}/year (or ${money(60 * N)}/month). Please confirm available venues and a quote.` });
+      store.set("citypulse-handoff", { "Pricing": opt, "Notes": `Estimate for ${N} location${N > 1 ? "s" : ""}: ${label(N)} = ${money(annual(N))}/year (or ${money(60 * N)}/month). Please confirm available venues and a quote.` });
       location.href = calc.dataset.next;
     });
     sync(num);
@@ -411,7 +412,7 @@ ${lines.map((l, i) => `<text x="90" y="${(tall ? 200 : 380) + i * fs * 1.08}" fo
   const mo = $("[data-download-overview]");
   if (mo) mo.addEventListener("click", () => {
     const rows = $$("#overview div").map(d => `${$("dt", d).textContent}\n${$("dd", d).textContent.trim()}\n`);
-    download("spotlight-media-overview.txt", `SPOTLIGHT KIOSKS — MEDIA OVERVIEW\n\n${rows.join("\n")}\nsales@spotlightkiosks.com · 602-887-4058\n`);
+    download("citypulse-media-overview.txt", `CITYPULSE KIOSKS — MEDIA OVERVIEW\n\n${rows.join("\n")}\nsales@citypulsekiosks.com · 602-887-4058\n`);
   });
 
   const y = $("#year"); if (y) y.textContent = new Date().getFullYear();
