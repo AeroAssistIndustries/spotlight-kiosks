@@ -224,3 +224,13 @@ File: `inc/fleet.php`.
 - **Privacy:** no IP addresses or personal data are stored. Only the last-seen time, the app version and the status.
 
 Tested with a stub harness (`/tmp/cp_fleettest/test.php`, 21 checks). It has not been tested on a live WordPress site or on a kiosk device.
+
+## 6F. Kiosk screen content and player (inc/media.php)
+
+- **Add content:** Hosts & kiosks → edit a kiosk → "Screen content (pictures and videos)" → "Add pictures or videos" (WordPress media library) → Update. Order is the order shown. Up to 40 items. PDFs and other files are ignored.
+- **Player page:** create a page with the slug `kiosk-player` and the shortcode `[citypulse_kiosk_player]`. Open it on the kiosk in Chrome, enter the kiosk's slug and device token once, then tap Full screen. The kiosk remembers them.
+- **What the player does:** loads the kiosk's pictures and videos, refreshes the list every 10 minutes, checks in every 5 minutes (Device column shows Online), and keeps the screen awake. Pictures change every 8 seconds; videos play to the end. Standby kiosks (Paused or Removed) receive no content.
+- **Server limits:** videos need the host's upload limit set high enough (typically 64 MB or more). Check `upload_max_filesize` and `post_max_size` with the host.
+- **Requirements:** HTTPS on the site (the kiosk's connection depends on it), and PHP 8.0 or newer.
+
+Tested with stub harnesses (`media_test.php`, 6 checks) and a browser test of the player with mocked site responses. Not yet tested on a live WordPress site or the ELO device.
