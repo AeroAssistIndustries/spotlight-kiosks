@@ -192,8 +192,9 @@ export default {
     } else {
       try {
         up = await env.AI.run(cfg(env, "CF_MODEL"), { messages: [{ role: "system", content: sys }, ...messages], max_tokens: LIMITS.maxTokens, temperature: 0.3, stream: true });
-      } catch (e) { return json(502, { error: "ai unavailable" }, origin); }
-      if (!up || typeof up.getReader !== "function") return json(502, { error: "ai unavailable" }, origin);
+      } catch (e) { return json(502, { error: "ai unavailable", detail: String((e && e.message) || e).slice(0, 300) }, origin); }
+      if (up && up.body && typeof up.body.getReader === "function") up = up.body;
+      if (!up || typeof up.getReader !== "function") return json(502, { error: "ai unavailable", detail: "unexpected response: " + Object.prototype.toString.call(up) }, origin);
     }
     return new Response(relayStream(up), { headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-store", ...cors(origin) } });
   }
