@@ -10,6 +10,9 @@ window.CP_VENUE = {
   address: "5268 Tujunga Ave, North Hollywood, CA 91601",
   ll: [34.1668794, -118.3787684],
   tz: "America/Los_Angeles",
+  /* Live AI concierge: the address of the relay (cloudflare/concierge-worker.js), for example
+     "https://citypulse-concierge.yourname.workers.dev". Leave empty to use the built-in answers only. */
+  ai: { endpoint: "" },
   phone: "(818) 821-3680",
   tel: "+18188213680",
   email: "lexennoho@gmail.com",

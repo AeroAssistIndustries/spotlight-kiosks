@@ -150,7 +150,7 @@ page("operations/", "Team library (demo)", "Demo of the CityPulse team library. 
 page("host/", "Host dashboard (demo)", "Demo of the host dashboard: kiosk status and visit counts. Sample data only.", '<section class="section"><div class="wrap"><div class="ops-app" id="host-app"><p>Loading…</p><noscript><p>Turn on JavaScript to open this page.</p></noscript></div></div></section>', extra_js=("host.js",))
 page("kiosk-test/", "Kiosk test", "Test page for a CityPulse kiosk: connection check and a test check-in to the website.", '<section class="section"><div class="wrap"><div class="ktest" id="ktest-app"><p>Loading…</p><noscript><p>Turn on JavaScript to run this test.</p></noscript></div></div></section>', extra_js=("kiosk-test.js",))
 page("kiosk-show/", "Kiosk slideshow", "Full-screen slideshow for a CityPulse kiosk. Plays pictures and videos from a USB stick.", '<section class="section"><div class="show-app" id="show-app" data-github="https://api.github.com/repos/AeroAssistIndustries/spotlight-kiosks/contents/content?ref=main"><noscript><p>Turn on JavaScript to run the slideshow.</p></noscript></div></section>', extra_js=("kiosk-show.js",))
-page("kiosk-app/", "Kiosk screen", "The CityPulse concierge kiosk screen, for a live kiosk.", '<link rel="stylesheet" href="{R}assets/cp-kiosk.css?v=3"><div class="cpk" id="cpk" data-root="{R}" lang="en"></div><button class="kapp-fs" id="kapp-fs" type="button" aria-label="Full screen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button><div class="kapp-modal" id="kapp-modal" hidden role="dialog" aria-modal="true" aria-labelledby="kapp-modal-t"><div class="kapp-box"><form id="kapp-form" autocomplete="off"><h2 id="kapp-modal-t">Staff menu</h2><p>Enter the staff password.</p><input type="password" id="kapp-pass" aria-label="Staff password" required><p class="kapp-msg" id="kapp-msg" role="status"></p><div class="kapp-row"><button type="button" class="kapp-btn-ghost" data-close>Cancel</button><button type="submit" class="kapp-btn">Continue</button></div></form><div id="kapp-stats" hidden></div></div></div>', extra_js=("vendor/qrcode-generator.js", "lexen-data.js?v=3", "cp-kiosk.js?v=3", "kiosk-app.js?v=3"))
+page("kiosk-app/", "Kiosk screen", "The CityPulse concierge kiosk screen, for a live kiosk.", '<link rel="stylesheet" href="{R}assets/cp-kiosk.css?v=4"><div class="cpk" id="cpk" data-root="{R}" lang="en"></div><button class="kapp-fs" id="kapp-fs" type="button" aria-label="Full screen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button><div class="kapp-modal" id="kapp-modal" hidden role="dialog" aria-modal="true" aria-labelledby="kapp-modal-t"><div class="kapp-box"><form id="kapp-form" autocomplete="off"><h2 id="kapp-modal-t">Staff menu</h2><p>Enter the staff password.</p><input type="password" id="kapp-pass" aria-label="Staff password" required><p class="kapp-msg" id="kapp-msg" role="status"></p><div class="kapp-row"><button type="button" class="kapp-btn-ghost" data-close>Cancel</button><button type="submit" class="kapp-btn">Continue</button></div></form><div id="kapp-stats" hidden></div></div></div>', extra_js=("vendor/qrcode-generator.js", "lexen-data.js?v=4", "cp-kiosk.js?v=4", "kiosk-app.js?v=4"))
 # The live kiosk gets its own locked-down page: no website header, footer or links, and a browser rule that only allows
 # this site's own files plus the weather service. Written over the website version of /kiosk-app/.
 KIOSK_BODY = '<div class="cpk" id="cpk" data-root="{R}" lang="en"></div><button class="kapp-fs" id="kapp-fs" type="button" aria-label="Full screen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button><div class="kapp-modal" id="kapp-modal" hidden role="dialog" aria-modal="true" aria-labelledby="kapp-modal-t"><div class="kapp-box"><form id="kapp-form" autocomplete="off"><h2 id="kapp-modal-t">Staff menu</h2><p>Enter the staff password.</p><input type="password" id="kapp-pass" aria-label="Staff password" required><p class="kapp-msg" id="kapp-msg" role="status"></p><div class="kapp-row"><button type="button" class="kapp-btn-ghost" data-close>Cancel</button><button type="submit" class="kapp-btn">Continue</button></div></form><div id="kapp-stats" hidden></div></div></div>'
@@ -159,27 +159,27 @@ KIOSK_DOC = f'''<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://api.weather.gov; font-src 'self'; media-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://api.weather.gov https://*.workers.dev; font-src 'self'; media-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#0B1622">
 <title>Lexen North Hollywood · Concierge</title>
 <link rel="icon" href="../assets/favicon.png" type="image/png">
-<link rel="stylesheet" href="../assets/styles.css?v=30261008b">
-<link rel="stylesheet" href="../assets/cp-kiosk.css?v=3">
+<link rel="stylesheet" href="../assets/styles.css?v=40261008b">
+<link rel="stylesheet" href="../assets/cp-kiosk.css?v=4">
 </head>
 <body class="kiosk-body">
 {KIOSK_BODY.replace("{R}", "../")}
 <script src="../assets/vendor/qrcode-generator.js"></script>
-<script src="../assets/lexen-data.js?v=3"></script>
-<script src="../assets/cp-kiosk.js?v=3"></script>
-<script src="../assets/kiosk-app.js?v=3"></script>
+<script src="../assets/lexen-data.js?v=4"></script>
+<script src="../assets/cp-kiosk.js?v=4"></script>
+<script src="../assets/kiosk-app.js?v=4"></script>
 </body>
 </html>
 '''
 with open(os.path.join(OUT, "kiosk-app", "index.html"), "w") as _f:
     _f.write(KIOSK_DOC)
-page("concierge/", "Your concierge", "Your CityPulse guide, opened from the kiosk's QR code: dining, amenities, local guide and events.", '<section class="section"><div class="wrap"><div class="cc-app" id="cc-app"><p>Loading your guide…</p><noscript><p>Turn on JavaScript to view this guide.</p></noscript></div></div></section>', extra_js=("lexen-data.js?v=1", "concierge.js?v=3"))
+page("concierge/", "Your concierge", "Your CityPulse guide, opened from the kiosk's QR code: dining, amenities, local guide and events.", '<section class="section"><div class="wrap"><div class="cc-app" id="cc-app"><p>Loading your guide…</p><noscript><p>Turn on JavaScript to view this guide.</p></noscript></div></div></section>', extra_js=("lexen-data.js?v=1", "concierge.js?v=4"))
 
 # ================================================================ ADVERTISE
 def pkg_link(v): return "{R}advertise/?Pricing=" + v.replace(" ", "+").replace("$", "%24").replace(",", "%2C").replace("—", "%E2%80%94").replace("/", "%2F") + "#inquiry"
@@ -635,3 +635,14 @@ PAGES.remove("404/")
 if __name__ != "__main__": pass
 
 print(f"Built {len(PAGES)} pages")
+
+# Venue data as JSON for the AI concierge relay (cloudflare/concierge-worker.js reads it). Needs Node.
+import subprocess as _sp
+try:
+    _src = os.path.join(OUT, "assets", "lexen-data.js")
+    _js = _sp.run(["node", "-e", "global.window={};require(process.argv[1]);process.stdout.write(JSON.stringify(window.CP_VENUE))", _src],
+                  capture_output=True, text=True, check=True).stdout
+    with open(os.path.join(OUT, "assets", "lexen-data.json"), "w") as _f:
+        _f.write(_js)
+except Exception as _ex:
+    print("lexen-data.json not updated:", _ex)

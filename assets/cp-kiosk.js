@@ -11,6 +11,8 @@
   const A = BASE + "assets/";
   const GUIDE = new URL(BASE + "concierge/?v=" + encodeURIComponent(V.id), location.href).href;
   const PRICING = new URL(BASE + "pricing/", location.href).href;
+  /* Live AI concierge relay (cloudflare/concierge-worker.js). Empty: built-in answers only. */
+  const AI = ((V.ai && V.ai.endpoint) || "").replace(/\/$/, "");
   const IDLE_MS = 60000, AD_MS = 8000;
   const TZ = V.tz || "America/Los_Angeles"; /* the venue's local time, whatever the kiosk's own clock is set to */
   const hourNow = () => +new Intl.DateTimeFormat("en-US", { hour: "numeric", hourCycle: "h23", timeZone: TZ }).format(new Date());
@@ -99,7 +101,7 @@
   }
 
   /* ---------- state ---------- */
-  const S = { mode: "attract", stack: [], panel: false, large: false, contrast: false, still: false, reach: false, ad: 0, idle: null, answer: null };
+  const S = { mode: "attract", stack: [], panel: false, large: false, contrast: false, still: false, reach: false, ad: 0, idle: null, chat: [], busy: false };
 
   /* ---------- frame ---------- */
   root.innerHTML = `
@@ -297,25 +299,92 @@
     });
     return best;
   }
+  /* Ask the concierge: a conversation. Live AI answers stream in when the relay is set up and reachable;
+     otherwise (or if it fails) the built-in answers reply instantly. */
+  const visible = raw => raw.replace(/\[\[[^\]]*\]\]/g, "").replace(/\[\[?[^\]]*$/, "").replace(/\s+$/, "");
+  function bubbleHTML(m, i) {
+    if (m.role === "user") return `<div class="cpk-msg me"><p>${esc(m.text)}</p></div>`;
+    const ids = (m.ids || []).filter(id => V.items[id]);
+    return `<div class="cpk-msg ai${m.pending ? " typing" : ""}" id="cpk-msg-${i}"${m.pending ? ' aria-busy="true"' : ""}>
+      <span class="cpk-msg-who">${svg("chat")}Concierge${m.quick ? " · quick answer" : ""}</span>
+      <p class="cpk-msg-t">${m.text ? esc(m.text) + (m.pending ? '<span class="cpk-caret"></span>' : "") : '<span class="cpk-dots" aria-label="Thinking"><i></i><i></i><i></i></span>'}</p>
+      ${ids.length && !m.pending ? `<div class="cpk-list compact">${ids.map(rowHTML).join("")}</div>` : ""}</div>`;
+  }
   function vAsk() {
-    const a = S.answer;
+    const chat = S.chat;
     const chips = V.faq.slice(0, 12).map((f, i) => `<button class="cpk-q" data-act="q" data-i="${i}">${esc(f.q)}</button>`).join("");
-    let ans = "";
-    if (a) {
-      ans = a.f ? `<div class="cpk-answer" role="status"><p class="cpk-kicker">Concierge</p><p class="cpk-ans-q">“${esc(a.q)}”</p><p class="cpk-ans-a">${esc(a.f.a)}</p>
-        ${a.f.items.length ? `<div class="cpk-list compact">${a.f.items.map(rowHTML).join("")}</div>` : ""}</div>`
-        : `<div class="cpk-answer" role="status"><p class="cpk-kicker">Concierge</p><p class="cpk-ans-q">“${esc(a.q)}”</p><p class="cpk-ans-a">I don't have an answer for that yet. The front desk is open 24 hours and happy to help, or call ${esc(V.phone)}.</p>
-        <div class="cpk-list compact">${rowHTML("lx-desk")}</div></div>`;
-    }
     return `<section class="cpk-ask">
       <h1 class="cpk-h2">Ask the concierge</h1>
+      <p class="cpk-ask-sub">${AI ? `<span class="cpk-live"><i></i>Live</span>Ask anything about the hotel or North Hollywood, in any language.` : "Answers about the hotel and North Hollywood."}</p>
+      ${chat.length ? `<div class="cpk-chat" id="cpk-chat">${chat.map(bubbleHTML).join("")}</div>` : ""}
       <form class="cpk-askform" data-form="ask" autocomplete="off">
-        ${svg("search")}<input id="cpk-q" type="text" enterkeyhint="search" placeholder="Type a question" aria-label="Your question" maxlength="120" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        ${svg("search")}<input id="cpk-q" type="text" enterkeyhint="send" placeholder="${chat.length ? "Ask a follow-up question" : "Type a question"}" aria-label="Your question" maxlength="300" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
         <button type="submit" class="cpk-askgo">Ask</button>
       </form>
-      ${ans}
-      <p class="cpk-kicker">Popular questions</p>
-      <div class="cpk-qs">${chips}</div></section>`;
+      ${chat.length ? `<button class="cpk-newchat" data-act="newchat">${svg("x")}<span>Start a new question</span></button>`
+        : `<p class="cpk-kicker">Popular questions</p><div class="cpk-qs">${chips}</div>`}
+      ${AI ? `<p class="cpk-ai-note">Answers come from an AI assistant and can be wrong. The front desk is open 24 hours at ${esc(V.phone)}.</p>` : ""}</section>`;
+  }
+  function onAskView() { const t = S.stack[S.stack.length - 1]; return S.mode === "session" && t && t.v === "ask"; }
+  function chatEnd() { if (onAskView()) { const c = root.querySelector("#cpk-chat"); if (c) view.scrollTop = c.offsetTop + c.offsetHeight - view.clientHeight * 0.55; } }
+  function updateMsg(m) {
+    if (!onAskView()) return;
+    const i = S.chat.indexOf(m), el = root.querySelector("#cpk-msg-" + i);
+    if (!el) return;
+    el.outerHTML = bubbleHTML(m, i).replace('class="cpk-msg ai', 'class="cpk-msg still ai'); /* no fade on each new word */
+    if (!m.pending) { const nc = root.querySelector(".cpk-newchat"); if (!nc) render(); }
+    chatEnd(); scrollHint();
+  }
+  function quick(m, q) {
+    const f = answer(q);
+    m.text = f ? f.a : `I don't have an answer for that yet. The front desk is open 24 hours and happy to help, or call ${V.phone}.`;
+    m.ids = f ? f.items.slice(0, 3) : ["lx-desk"];
+    m.quick = !!AI; m.pending = false; S.busy = false;
+    bump("questions", f ? f.q : "No answer: " + q.slice(0, 60));
+    updateMsg(m);
+  }
+  async function live(m, q) {
+    const ctl = new AbortController();
+    let got = false, raw = "";
+    const wait = setTimeout(() => { if (!got) ctl.abort(); }, 10000);
+    const hist = S.chat.filter(x => x !== m && x.text).slice(-8).map(x => ({ role: x.role, content: x.text }));
+    const res = await fetch(AI + "/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ venue: V.id, messages: hist }), signal: ctl.signal });
+    if (!res.ok || !res.body) throw new Error("status " + res.status);
+    const reader = res.body.getReader(), dec = new TextDecoder();
+    let buf = "", done = false;
+    while (!done) {
+      const r = await reader.read();
+      if (r.done) break;
+      buf += dec.decode(r.value, { stream: true });
+      let i;
+      while ((i = buf.indexOf("\n\n")) >= 0) {
+        const ev = buf.slice(0, i).trim(); buf = buf.slice(i + 2);
+        if (!ev.startsWith("data:")) continue;
+        const d = ev.slice(5).trim();
+        if (d === "[DONE]") { done = true; break; }
+        let o; try { o = JSON.parse(d); } catch (e) { continue; }
+        if (o.e) throw new Error(o.e);
+        if (o.t) { got = true; raw += o.t; m.text = visible(raw); updateMsg(m); armIdle(); }
+      }
+    }
+    clearTimeout(wait);
+    if (!visible(raw).trim()) throw new Error("empty");
+    m.ids = [...new Set([...raw.matchAll(/\[\[([a-z0-9-]+)\]\]/g)].map(x => x[1]).filter(id => V.items[id]))].slice(0, 3);
+    m.text = visible(raw).trim(); m.pending = false; S.busy = false;
+    bump("questions", "AI: " + q.slice(0, 60));
+    updateMsg(m);
+  }
+  function ask(q) {
+    q = String(q || "").replace(/\s+/g, " ").trim().slice(0, 300);
+    if (!q || S.busy) return;
+    S.busy = true;
+    S.chat.push({ role: "user", text: q });
+    const m = { role: "assistant", text: "", ids: [], pending: true };
+    S.chat.push(m);
+    if (S.chat.length > 16) S.chat.splice(0, S.chat.length - 16);
+    render(); chatEnd();
+    if (AI && navigator.onLine !== false) live(m, q).catch(() => quick(m, q));
+    else setTimeout(() => quick(m, q), 350);
   }
   function vTake() {
     return `<section class="cpk-takeview">
@@ -390,7 +459,7 @@
   function start() { S.mode = "session"; S.stack = [{ v: "home" }]; bump("sessions", "count"); render("fwd"); }
   function reset() {
     clearTimeout(S.idle); hideWarn();
-    S.mode = "attract"; S.stack = []; S.panel = false; S.answer = null;
+    S.mode = "attract"; S.stack = []; S.panel = false; S.chat = []; S.busy = false;
     S.large = S.contrast = S.reach = false;
     if (window.speechSynthesis) speechSynthesis.cancel();
     render();
@@ -428,8 +497,9 @@
       case "back": if (S.stack.length > 1) S.stack.pop(); render("back"); break;
       case "cat": bump("categories", b.dataset.id); go({ v: "cat", id: b.dataset.id }); break;
       case "item": bump("places", b.dataset.id); go({ v: "item", id: b.dataset.id }); break;
-      case "ask": S.answer = null; go({ v: "ask" }); setTimeout(() => { const i = root.querySelector("#cpk-q"); if (i) i.focus({ preventScroll: true }); }, 50); break;
-      case "q": { const f = V.faq[+b.dataset.i]; S.answer = { q: f.q, f }; bump("questions", f.q); render(); break; }
+      case "ask": if (!onAskView()) go({ v: "ask" }); setTimeout(() => { const i = root.querySelector("#cpk-q"); if (i) i.focus({ preventScroll: true }); }, 50); break;
+      case "q": ask(V.faq[+b.dataset.i].q); break;
+      case "newchat": if (!S.busy) { S.chat = []; render(); } break;
       case "take": bump("takeHome", "open"); go({ v: "take" }); break;
       case "panel": S.panel = !S.panel; render(); break;
       case "large": S.large = !S.large; render(); break;
@@ -445,12 +515,8 @@
     const f = e.target.closest("[data-form=ask]");
     if (!f) return;
     e.preventDefault();
-    const q = (root.querySelector("#cpk-q").value || "").trim();
-    if (!q) return;
-    const best = answer(q);
-    S.answer = { q, f: best };
-    bump("questions", best ? best.q : "No answer: " + q.slice(0, 60));
-    render();
+    const inp = root.querySelector("#cpk-q");
+    ask(inp ? inp.value : "");
   });
   ["pointerdown", "keydown", "scroll"].forEach(ev => root.addEventListener(ev, () => { if (S.mode !== "attract") armIdle(); }, { passive: true, capture: true }));
 

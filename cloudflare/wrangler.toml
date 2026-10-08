@@ -1,0 +1,12 @@
+# Optional: deploy from a terminal with `npx wrangler deploy` (the dashboard paste method in README.md also works).
+name = "citypulse-concierge"
+main = "concierge-worker.js"
+compatibility_date = "2026-09-01"
+
+[vars]
+VENUE_URL = "https://aeroassistindustries.github.io/spotlight-kiosks/assets/lexen-data.json"
+ALLOWED_ORIGINS = "https://aeroassistindustries.github.io"
+MODEL = "claude-haiku-5-5"
+
+# The API key is a secret. Add it with `npx wrangler secret put ANTHROPIC_API_KEY`
+# or in the dashboard: Worker > Settings > Variables and Secrets > Add > Secret.
