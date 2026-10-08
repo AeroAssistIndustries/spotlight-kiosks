@@ -1,10 +1,18 @@
 /* CityPulse Kiosks — mobile concierge page (opened from the kiosk's QR code).
-   Venue content is example data. Nothing is sent or stored. */
+   On WordPress, a kiosk link (?k=) loads that kiosk's guide and ads from the back end.
+   Otherwise a venue link (?v=) shows the example guide. Nothing personal is sent or stored. */
 (function () {
   "use strict";
   const app = document.getElementById("cc-app");
   if (!app) return;
+  const params = new URLSearchParams(location.search);
+  const kiosk = params.get("k") || "";
+  const venueKey = params.get("v") || "";
+  const item = params.get("i") || "";
+  const ajax = window.CITYPULSE_CONFIG && CITYPULSE_CONFIG.forms && CITYPULSE_CONFIG.forms.ajaxUrl;
+  const device = matchMedia("(max-width: 720px)").matches ? "phone" : "desktop";
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+
   const VENUES = {
     hotel: {
       name: "The Arden Hotel", welcome: "Your stay, planned in one place.",
@@ -34,32 +42,54 @@
       ]
     }
   };
-  const venue = VENUES[q()] || null;
-  /* Count the visit when the site is served by WordPress (the static site has no endpoint). Counts only. */
-  function track(key) {
-    const cfg = window.CITYPULSE_CONFIG && CITYPULSE_CONFIG.forms && CITYPULSE_CONFIG.forms.ajaxUrl;
-    if (!cfg) return;
-    const body = new URLSearchParams({ action: "citypulse_visit", venue: key, item: new URLSearchParams(location.search).get("i") || "", device: matchMedia("(max-width: 720px)").matches ? "phone" : "desktop" });
-    fetch(cfg, { method: "POST", body, credentials: "same-origin", keepalive: true }).catch(() => {});
-  }
-  function q() { return new URLSearchParams(location.search).get("v") || ""; }
+  const EXAMPLE_SPONSOR = { advertiser: "Example business", headline: "Local businesses on the CityPulse kiosk offer visitors something to try." };
 
-  if (venue) track(q());
-  if (!venue) {
+  function track(fields) {
+    if (!ajax) return;
+    const body = new URLSearchParams(Object.assign({ action: "citypulse_visit", device }, fields, item ? { item } : {}));
+    fetch(ajax, { method: "POST", body, credentials: "same-origin", keepalive: true }).catch(() => {});
+  }
+
+  function show(v, sponsor) {
+    const cards = v.guides.map(([t, d, f]) => `
+      <article class="cc-card"><h2>${esc(t)}</h2><p>${esc(d)}</p><small>${esc(f)}</small></article>`).join("");
+    const ad = sponsor ? `<article class="cc-card cc-sponsor"><small>Sponsored · ${esc(sponsor.advertiser)}</small><h2>${esc(sponsor.headline)}</h2></article>` : "";
+    app.innerHTML = `
+      <p class="cc-kicker">CityPulse concierge</p>
+      <h1 class="cc-h">${esc(v.name)}</h1>
+      <p class="cc-lede">${esc(v.welcome)}</p>
+      <div class="cc-list">${cards}${ad}</div>
+      <section class="cc-tip"><h2>Keep this guide</h2>
+        <p><b>iPhone:</b> tap Share, then Add to Home Screen.</p>
+        <p><b>Android:</b> open the browser menu, then Add to Home screen.</p></section>`;
+  }
+
+  function notFound() {
     app.innerHTML = `<h1 class="cc-h">Your CityPulse guide</h1>
       <p class="cc-lede">Scan the code on a CityPulse kiosk to open its guide here.</p>
       <p><a class="btn" href="../">See CityPulse Kiosks</a></p>`;
-    return;
   }
-  const cards = venue.guides.map(([t, d, f]) => `
-    <article class="cc-card"><h2>${esc(t)}</h2><p>${esc(d)}</p><small>${esc(f)}</small></article>`).join("");
-  app.innerHTML = `
-    <p class="cc-kicker">CityPulse concierge</p>
-    <h1 class="cc-h">${esc(venue.name)}</h1>
-    <p class="cc-lede">${esc(venue.welcome)}</p>
-    <div class="cc-list">${cards}</div>
-    <article class="cc-card cc-sponsor"><small>Sponsored · example business</small><h2>Your next stop</h2><p>Local businesses on the CityPulse kiosk offer visitors something to try.</p></article>
-    <section class="cc-tip"><h2>Keep this guide</h2>
-      <p><b>iPhone:</b> tap Share, then Add to Home Screen.</p>
-      <p><b>Android:</b> open the browser menu, then Add to Home screen.</p></section>`;
+
+  function fromVenue() {
+    const v = VENUES[venueKey];
+    if (!v) return notFound();
+    track({ venue: venueKey });
+    show(v, EXAMPLE_SPONSOR);
+  }
+
+  if (kiosk && ajax) {
+    const u = new URL(ajax);
+    u.searchParams.set("action", "citypulse_guide");
+    u.searchParams.set("k", kiosk);
+    fetch(u.href, { credentials: "same-origin" })
+      .then(r => r.json())
+      .then(j => {
+        if (!j || !j.success) return fromVenue();
+        track({ kiosk });
+        show({ name: j.data.name, welcome: "Local guide for this location.", guides: j.data.guides.map(g => [g.title, g.detail, g.hours]) }, j.data.sponsor);
+      })
+      .catch(fromVenue);
+  } else {
+    fromVenue();
+  }
 })();

@@ -125,6 +125,18 @@ Multi-location packages (3 for $1,099/yr, 5 for $1,200/yr, +$300/yr for each loc
 - View them under **Orders & inquiries → Concierge visits** (administrators only).
 - Counts are kept for one year.
 
+## 6C. Hosts & kiosks (back end)
+
+- **Hosts & kiosks** (admin menu) lists every host venue and kiosk. Administrators only.
+- Each kiosk records: host name, email and phone, venue address, venue type, status (Planned, Installing, Live, Paused, Removed), install date, package, and internal notes.
+- **Status controls what visitors see.** Only Live and Installing kiosks show a phone guide. Paused, Planned and Removed kiosks return "not found" to visitors.
+- **Phone guide:** up to 8 cards (title, detail, hours). Shown when a visitor scans that kiosk's code.
+- **Ad placements:** up to 6 per kiosk, with advertiser, headline, start and end dates, and an Active box. An ad shows only while it is active and within its dates.
+- **Phone link:** each saved kiosk shows its link, `/concierge/?k=<kiosk-slug>`. Use this link in the kiosk's QR code.
+- Host contact details and internal notes are never sent to visitors.
+- Kiosk visits are counted under **Orders & inquiries → Concierge visits**, in a Kiosks table.
+- Not included yet: live kiosk status from the hardware, ad tap reports per placement, and host logins. Those need the kiosk device software.
+
 ## 7. Theme structure
 
 ```
@@ -138,6 +150,7 @@ citypulse/
   inc/forms.php          Orders & inquiries post type, AJAX handler (citypulse_submit), private uploads
   inc/documents.php      Admin-only Company documents page (sign-in gate, PDF upload, private streaming)
   inc/visits.php         Concierge visit counts (AJAX endpoint citypulse_visit) and the report screen
+  inc/kiosks.php         Hosts & kiosks back end: kiosk records, phone guide, ad placements, guide endpoint
   content/pages.json     Original page content (used on activation and for "reset")
   assets/styles.css      All styles (design tokens at the top: navy #0F1C2B, teal #22C7B6)
   assets/site.js         Menus, tabs, filters, forms, planner, studio, calculator, map, slider, journey animation
