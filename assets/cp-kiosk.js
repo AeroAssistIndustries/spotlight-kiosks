@@ -11,7 +11,12 @@
   const A = BASE + "assets/";
   const GUIDE = new URL(BASE + "concierge/?v=" + encodeURIComponent(V.id), location.href).href;
   const PRICING = new URL(BASE + "pricing/", location.href).href;
+  /* Live AI concierge relay (cloudflare/concierge-worker.js). Empty: built-in answers only. */
+  const AI = ((V.ai && V.ai.endpoint) || "").replace(/\/$/, "");
   const IDLE_MS = 60000, AD_MS = 8000;
+  const TZ = V.tz || "America/Los_Angeles"; /* the venue's local time, whatever the kiosk's own clock is set to */
+  const hourNow = () => +new Intl.DateTimeFormat("en-US", { hour: "numeric", hourCycle: "h23", timeZone: TZ }).format(new Date());
+  const dayKey = d => new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(d || new Date());
 
   /* ---------- icons ---------- */
   const P = {
@@ -38,7 +43,14 @@
     speak: '<path d="M3 10v4h3l7 4V6L6 10H3zM16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/>',
     pause: '<rect x="6.5" y="5" width="3.5" height="14" rx="1"/><rect x="14" y="5" width="3.5" height="14" rx="1"/>',
     down: '<path d="M12 4v15M6 13l6 6 6-6"/>',
-    mega: '<path d="M3 10v4h3l7 4V6L6 10H3zM16 9a4 4 0 0 1 0 6"/>'
+    mega: '<path d="M3 10v4h3l7 4V6L6 10H3zM16 9a4 4 0 0 1 0 6"/>',
+    cloud: '<path d="M7 18h10a4 4 0 0 0 .5-7.97A5.5 5.5 0 0 0 7 9.5 4.25 4.25 0 0 0 7 18z"/>',
+    partly: '<circle cx="8" cy="8" r="3"/><path d="M8 2.5v1M2.5 8h1M4.1 4.1l.7.7M12 4.1l-.7.7"/><path d="M9 19h8.5a3.5 3.5 0 0 0 .3-7 4.8 4.8 0 0 0-9.2 1.2A2.9 2.9 0 0 0 9 19z"/>',
+    rain: '<path d="M7 15h10a4 4 0 0 0 .5-7.97A5.5 5.5 0 0 0 7 6.5 4.25 4.25 0 0 0 7 15z"/><path d="M8 18l-1 2.5M12 18l-1 2.5M16 18l-1 2.5"/>',
+    storm: '<path d="M7 15h10a4 4 0 0 0 .5-7.97A5.5 5.5 0 0 0 7 6.5 4.25 4.25 0 0 0 7 15z"/><path d="M12.5 15l-2 3.5h3l-2 3.5"/>',
+    fog: '<path d="M4 9h16M3 13h18M5 17h14"/>',
+    wind: '<path d="M3 9h11a3 3 0 1 0-3-3M3 15h15a3 3 0 1 1-3 3M3 12h8"/>',
+    moon: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>'
   };
   const svg = (k, cls) => `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"${cls ? ` class="${cls}"` : ""}>${P[k] || ""}</svg>`;
   const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -78,7 +90,7 @@
   const SKEY = "cpk-stats";
   function bump(group, key) {
     try {
-      const day = new Date().toLocaleDateString("en-CA");
+      const day = dayKey();
       const all = JSON.parse(localStorage.getItem(SKEY) || "{}");
       const d = all[day] || (all[day] = {});
       const g = d[group] || (d[group] = {});
@@ -89,83 +101,130 @@
   }
 
   /* ---------- state ---------- */
-  const S = { mode: "attract", stack: [], panel: false, large: false, contrast: false, still: false, reach: false, ad: 0, idle: null, answer: null };
+  const S = { mode: "attract", stack: [], panel: false, large: false, contrast: false, still: false, reach: false, ad: 0, idle: null, chat: [], busy: false };
 
   /* ---------- frame ---------- */
   root.innerHTML = `
     <div class="cpk-bg" aria-hidden="true">${V.photos.map((p, i) => `<span style="background-image:url('${A + p}');animation-delay:${i * 9}s"></span>`).join("")}</div>
     <div class="cpk-shade" aria-hidden="true"></div>
     <header class="cpk-top">
+      <div class="cpk-top-l" id="cpk-top-l"></div>
       <img class="cpk-logo" src="${A + V.logo}" alt="${esc(V.name)}">
       <div class="cpk-meta"><span class="cpk-wx" id="cpk-wx" hidden></span><span class="cpk-clock" id="cpk-clock"></span></div>
     </header>
     <main class="cpk-view" id="cpk-view" tabindex="-1"></main>
     <section class="cpk-ads" id="cpk-ads" aria-roledescription="carousel" aria-label="Featured"></section>
     <nav class="cpk-dock" id="cpk-dock" aria-label="Kiosk navigation"></nav>
-    <div class="cpk-sheet" id="cpk-sheet" hidden></div>`;
+    <div class="cpk-sheet" id="cpk-sheet" hidden></div>
+    <div class="cpk-warn" id="cpk-warn" hidden role="alertdialog" aria-modal="true" aria-labelledby="cpk-warn-t" aria-describedby="cpk-warn-d">
+      <div class="cpk-warn-box"><span class="cpk-warn-ring"><b id="cpk-cd">12</b></span>
+        <h2 id="cpk-warn-t">Are you still there?</h2>
+        <p id="cpk-warn-d">This screen will go back to the welcome screen for the next guest.</p>
+        <div class="cpk-warn-acts"><button class="cpk-btn-gold" data-act="stay">I'm still here</button><button class="cpk-btn-ghost" data-act="endnow">Start over</button></div>
+      </div></div>`;
+  const topL = root.querySelector("#cpk-top-l"), warnBox = root.querySelector("#cpk-warn");
   const view = root.querySelector("#cpk-view"), dock = root.querySelector("#cpk-dock"), ads = root.querySelector("#cpk-ads"), sheet = root.querySelector("#cpk-sheet");
 
   /* ---------- clock and weather ---------- */
   function tick() {
     const d = new Date();
-    root.querySelector("#cpk-clock").innerHTML = `<b>${d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</b><small>${d.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" })}</small>`;
+    root.querySelector("#cpk-clock").innerHTML = `<b>${d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: TZ })}</b><small>${d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: TZ })}</small>`;
   }
   tick(); setInterval(tick, 15000);
-  /* US National Weather Service (free, public). Hidden if it cannot be reached. */
+  /* Weather: US National Weather Service (free, public, no key). Now in the top bar, 7 days on the home screen.
+     The last forecast is kept on the kiosk, so it still shows if the internet drops. */
+  function wxIcon(t, night) {
+    t = (t || "").toLowerCase();
+    if (/thunder|storm/.test(t)) return "storm";
+    if (/rain|shower|drizzle/.test(t)) return "rain";
+    if (/fog|haze|smoke|dust/.test(t)) return "fog";
+    if (/wind|breez/.test(t)) return "wind";
+    if (/partly|mostly sunny|mostly clear|few clouds/.test(t)) return night ? "moon" : "partly";
+    if (/cloud|overcast/.test(t)) return "cloud";
+    return night ? "moon" : "sun";
+  }
+  const WKEY = "cpk-wx2";
+  S.wx = null;
+  try { S.wx = JSON.parse(localStorage.getItem(WKEY) || "null"); } catch (e) { /* ignore */ }
+  function showNow() {
+    const box = root.querySelector("#cpk-wx"), w = S.wx && S.wx.now;
+    if (!w) return;
+    box.hidden = false;
+    box.innerHTML = `${svg(wxIcon(w.s, !w.day))}<b>${esc(w.t)}°</b><small>${esc(w.s)}</small>`;
+  }
+  function weekHTML() {
+    const days = S.wx && S.wx.days;
+    if (!days || !days.length) return "";
+    return `<section class="cpk-week" aria-label="7-day forecast for North Hollywood">${days.slice(0, 7).map((d, i) => `
+      <div class="cpk-day${i === 0 ? " today" : ""}"><b>${esc(i === 0 ? "Today" : d.d)}</b>${svg(wxIcon(d.s, false))}
+        <span class="cpk-hi">${d.hi != null ? esc(d.hi) + "°" : "–"}</span><span class="cpk-lo">${d.lo != null ? esc(d.lo) + "°" : ""}</span>
+        <small>${esc(d.s)}</small></div>`).join("")}</section>`;
+  }
   function weather() {
-    const box = root.querySelector("#cpk-wx"), KEY = "cpk-wx";
-    const show = w => { if (!w) return; box.hidden = false; box.innerHTML = `${svg("sun")}<b>${esc(w.t)}°</b><small>${esc(w.s)}</small>`; };
-    try { const c = JSON.parse(localStorage.getItem(KEY) || "null"); if (c && Date.now() - c.at < 30 * 60000) { show(c); return; } if (c) show(c); } catch (e) { /* ignore */ }
+    showNow();
+    if (S.wx && Date.now() - S.wx.at < 30 * 60000) return;
     fetch(`https://api.weather.gov/points/${V.ll[0].toFixed(4)},${V.ll[1].toFixed(4)}`)
-      .then(r => r.json()).then(p => fetch(p.properties.forecastHourly)).then(r => r.json())
-      .then(f => {
-        const p = f.properties.periods[0];
-        const w = { t: p.temperature, s: p.shortForecast.split(" then ")[0].slice(0, 22), at: Date.now() };
-        try { localStorage.setItem(KEY, JSON.stringify(w)); } catch (e) { /* ignore */ }
-        show(w);
+      .then(r => r.json())
+      .then(p => Promise.all([fetch(p.properties.forecastHourly).then(r => r.json()), fetch(p.properties.forecast).then(r => r.json())]))
+      .then(([h, f]) => {
+        const p0 = h.properties.periods[0];
+        const short = t => t.split(" then ")[0].replace(/^Slight Chance /, "Chance ").slice(0, 20);
+        const byDay = {};
+        f.properties.periods.forEach(p => {
+          const k = dayKey(new Date(p.startTime));
+          const d = byDay[k] || (byDay[k] = { k, d: new Date(p.startTime).toLocaleDateString("en-US", { weekday: "short", timeZone: TZ }), hi: null, lo: null, s: "" });
+          if (p.isDaytime) { d.hi = p.temperature; d.s = short(p.shortForecast); }
+          else { d.lo = p.temperature; if (!d.s) d.s = short(p.shortForecast); }
+        });
+        const today = dayKey();
+        const days = Object.values(byDay).filter(d => d.k >= today).sort((a, b) => a.k < b.k ? -1 : 1).slice(0, 7);
+        S.wx = { at: Date.now(), now: { t: p0.temperature, s: short(p0.shortForecast), day: p0.isDaytime }, days };
+        try { localStorage.setItem(WKEY, JSON.stringify(S.wx)); } catch (e) { /* ignore */ }
+        showNow();
+        const wk = root.querySelector("#cpk-weekslot"); if (wk) wk.innerHTML = weekHTML();
       }).catch(() => {});
   }
   weather(); setInterval(weather, 30 * 60000);
 
-  /* ---------- ads ---------- */
-  function adSlides() {
-    const list = (V.sponsors || []).map(s => ({ type: "sp", s }));
-    if (list.length < 2) list.push({ type: "open" });
-    if (list.length < 3) list.push({ type: "pkg" });
-    return list;
+  /* ---------- ads ----------
+     Featured local businesses rotate on their own for equal exposure. Nothing here can be tapped:
+     each ad shows the business name, logo, website and a QR code that opens the site on the guest's phone. */
+  const SPONS = (V.sponsors || []).filter(x => x && x.name);
+  const SLIDES = SPONS.length ? SPONS : [{ name: "Your business here", kind: "Advertise on this screen", tagline: "Reach every guest at " + V.name + ". From $399 a year.", website: "citypulsekiosks.com", url: PRICING, house: true }];
+  const initials = n => n.replace(/^The /, "").split(/[\s.&]+/).filter(Boolean).slice(0, 2).map(w => w[0]).join("").toUpperCase();
+  function adHTML(sp, i) {
+    const it = sp.item && V.items[sp.item], f = it ? howFar(it) : null;
+    return `<div class="cpk-ad" role="group" aria-roledescription="slide" aria-label="${i + 1} of ${SLIDES.length}: ${esc(sp.name)}">
+      <div class="cpk-ad-logo${sp.logo ? " img" : ""}">${sp.logo ? `<img src="${A + esc(sp.logo)}" alt="">` : `<span>${esc(initials(sp.name))}</span>`}</div>
+      <div class="cpk-ad-body">
+        <span class="cpk-ad-tag">${sp.house ? "Advertise here" : "Featured nearby"}</span>
+        <span class="cpk-ad-t">${esc(sp.name)}</span>
+        <span class="cpk-ad-s">${esc(sp.kind)}${f ? " · " + esc(f.label) : ""}</span>
+        ${sp.tagline ? `<span class="cpk-ad-x">${esc(sp.tagline)}</span>` : ""}
+        <span class="cpk-ad-web">${esc(sp.website)}</span>
+      </div>
+      <div class="cpk-ad-qr">${qr(sp.url, "QR code: open " + sp.name + " on your phone")}<small>Scan to visit</small></div>
+    </div>`;
   }
-  const SLIDES = adSlides();
-  function adHTML(sl, i) {
-    if (sl.type === "sp") {
-      const s = sl.s;
-      return `<button class="cpk-ad cpk-ad-sp" data-act="ad" data-i="${i}"${s.image ? ` style="--img:url('${A + s.image}')"` : ""}>
-        <span class="cpk-ad-tag">Featured</span><span class="cpk-ad-t">${esc(s.title)}</span><span class="cpk-ad-s">${esc(s.text || "")}</span>
-        ${s.cta ? `<span class="cpk-ad-cta">${esc(s.cta)}${svg("chev")}</span>` : ""}</button>`;
-    }
-    if (sl.type === "open") {
-      return `<button class="cpk-ad cpk-ad-open" data-act="ad" data-i="${i}">
-        <span class="cpk-ad-tag">Advertise here</span><span class="cpk-ad-t">Your business, in front of every guest</span>
-        <span class="cpk-ad-s">Reach visitors at ${esc(V.name)} while they plan their day.</span>
-        <span class="cpk-ad-cta">From $399 a year${svg("chev")}</span></button>`;
-    }
-    return `<button class="cpk-ad cpk-ad-pkg" data-act="ad" data-i="${i}">
-      <span class="cpk-ad-tag">Local advertising</span><span class="cpk-ad-t">Be the place guests choose</span>
-      <span class="cpk-ad-pk"><span><b>$399</b><small>1 location / yr</small></span><span><b>$1,099</b><small>3 locations / yr</small></span><span><b>$1,200</b><small>5 locations / yr</small></span></span></button>`;
-  }
-  ads.innerHTML = `<div class="cpk-ad-track" id="cpk-ad-track">${SLIDES.map(adHTML).join("")}</div>
-    <div class="cpk-ad-dots">${SLIDES.map((_, i) => `<button data-act="addot" data-i="${i}" aria-label="Show ad ${i + 1}"><i></i></button>`).join("")}</div>`;
+  ads.setAttribute("aria-label", "Featured nearby businesses");
+  ads.innerHTML = `<div class="cpk-ad-track" id="cpk-ad-track" aria-live="off">${SLIDES.map(adHTML).join("")}</div>
+    <div class="cpk-ad-dots" aria-hidden="true">${SLIDES.map(() => "<i></i>").join("")}</div>
+    <div class="cpk-ad-bar" aria-hidden="true"><i id="cpk-ad-bar"></i></div>`;
   function showAd(i) {
     S.ad = (i + SLIDES.length) % SLIDES.length;
     root.querySelector("#cpk-ad-track").style.transform = `translateX(-${S.ad * 100}%)`;
-    ads.querySelectorAll(".cpk-ad").forEach((el, j) => { el.tabIndex = j === S.ad ? 0 : -1; el.setAttribute("aria-hidden", String(j !== S.ad)); });
-    ads.querySelectorAll(".cpk-ad-dots button").forEach((d, j) => d.setAttribute("aria-current", String(j === S.ad)));
-    bump("adShown", String(S.ad));
+    ads.querySelectorAll(".cpk-ad").forEach((el, j) => el.setAttribute("aria-hidden", String(j !== S.ad)));
+    ads.querySelectorAll(".cpk-ad-dots i").forEach((d, j) => d.classList.toggle("on", j === S.ad));
+    const bar = root.querySelector("#cpk-ad-bar");
+    if (bar) { bar.style.transition = "none"; bar.style.transform = "scaleX(0)"; void bar.offsetWidth; bar.style.transition = `transform ${AD_MS}ms linear`; bar.style.transform = S.still ? "scaleX(0)" : "scaleX(1)"; }
+    bump("adShown", SLIDES[S.ad].name);
   }
   showAd(0);
-  setInterval(() => { if (!S.still && !document.hidden && !ads.contains(document.activeElement)) showAd(S.ad + 1); }, AD_MS);
+  /* Rotates on its own, including on the welcome screen. "Stop moving images" in Accessibility pauses it (required for moving content). */
+  setInterval(() => { if (!S.still && !document.hidden && SLIDES.length > 1) showAd(S.ad + 1); }, AD_MS);
 
   /* ---------- views ---------- */
-  const greet = () => { const h = new Date().getHours(); return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"; };
+  const greet = () => { const h = hourNow(); return h < 5 ? "Good evening" : h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"; };
   const item = id => V.items[id];
   const ICON = {};
   Object.values(V.categories).forEach(c => c.items.forEach(i => { if (!ICON[i]) ICON[i] = c.icon; }));
@@ -189,6 +248,7 @@
       <h1 class="cpk-h1">${greet()}.</h1>
       <p class="cpk-lede">How can we help you today?</p>
       <button class="cpk-askbar" data-act="ask">${svg("search")}<span>Ask the concierge</span><em>Wi-Fi, check-out, food, Universal…</em></button>
+      <div id="cpk-weekslot">${weekHTML()}</div>
       <div class="cpk-tiles">${V.tiles.map(tileHTML).join("")}</div>
       <button class="cpk-take" data-act="take">
         <span class="cpk-take-qr">${qr(GUIDE, "QR code: open this guide on your phone")}</span>
@@ -239,25 +299,92 @@
     });
     return best;
   }
+  /* Ask the concierge: a conversation. Live AI answers stream in when the relay is set up and reachable;
+     otherwise (or if it fails) the built-in answers reply instantly. */
+  const visible = raw => raw.replace(/\[\[[^\]]*\]\]/g, "").replace(/\[\[?[^\]]*$/, "").replace(/\s+$/, "");
+  function bubbleHTML(m, i) {
+    if (m.role === "user") return `<div class="cpk-msg me"><p>${esc(m.text)}</p></div>`;
+    const ids = (m.ids || []).filter(id => V.items[id]);
+    return `<div class="cpk-msg ai${m.pending ? " typing" : ""}" id="cpk-msg-${i}"${m.pending ? ' aria-busy="true"' : ""}>
+      <span class="cpk-msg-who">${svg("chat")}Concierge${m.quick ? " · quick answer" : ""}</span>
+      <p class="cpk-msg-t">${m.text ? esc(m.text) + (m.pending ? '<span class="cpk-caret"></span>' : "") : '<span class="cpk-dots" aria-label="Thinking"><i></i><i></i><i></i></span>'}</p>
+      ${ids.length && !m.pending ? `<div class="cpk-list compact">${ids.map(rowHTML).join("")}</div>` : ""}</div>`;
+  }
   function vAsk() {
-    const a = S.answer;
+    const chat = S.chat;
     const chips = V.faq.slice(0, 12).map((f, i) => `<button class="cpk-q" data-act="q" data-i="${i}">${esc(f.q)}</button>`).join("");
-    let ans = "";
-    if (a) {
-      ans = a.f ? `<div class="cpk-answer" role="status"><p class="cpk-kicker">Concierge</p><p class="cpk-ans-q">“${esc(a.q)}”</p><p class="cpk-ans-a">${esc(a.f.a)}</p>
-        ${a.f.items.length ? `<div class="cpk-list compact">${a.f.items.map(rowHTML).join("")}</div>` : ""}</div>`
-        : `<div class="cpk-answer" role="status"><p class="cpk-kicker">Concierge</p><p class="cpk-ans-q">“${esc(a.q)}”</p><p class="cpk-ans-a">I don't have an answer for that yet. The front desk is open 24 hours and happy to help, or call ${esc(V.phone)}.</p>
-        <div class="cpk-list compact">${rowHTML("lx-desk")}</div></div>`;
-    }
     return `<section class="cpk-ask">
       <h1 class="cpk-h2">Ask the concierge</h1>
+      <p class="cpk-ask-sub">${AI ? `<span class="cpk-live"><i></i>Live</span>Ask anything about the hotel or North Hollywood, in any language.` : "Answers about the hotel and North Hollywood."}</p>
+      ${chat.length ? `<div class="cpk-chat" id="cpk-chat">${chat.map(bubbleHTML).join("")}</div>` : ""}
       <form class="cpk-askform" data-form="ask" autocomplete="off">
-        ${svg("search")}<input id="cpk-q" type="text" enterkeyhint="search" placeholder="Type a question" aria-label="Your question" maxlength="120">
+        ${svg("search")}<input id="cpk-q" type="text" enterkeyhint="send" placeholder="${chat.length ? "Ask a follow-up question" : "Type a question"}" aria-label="Your question" maxlength="300" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
         <button type="submit" class="cpk-askgo">Ask</button>
       </form>
-      ${ans}
-      <p class="cpk-kicker">Popular questions</p>
-      <div class="cpk-qs">${chips}</div></section>`;
+      ${chat.length ? `<button class="cpk-newchat" data-act="newchat">${svg("x")}<span>Start a new question</span></button>`
+        : `<p class="cpk-kicker">Popular questions</p><div class="cpk-qs">${chips}</div>`}
+      ${AI ? `<p class="cpk-ai-note">Answers come from an AI assistant and can be wrong. The front desk is open 24 hours at ${esc(V.phone)}.</p>` : ""}</section>`;
+  }
+  function onAskView() { const t = S.stack[S.stack.length - 1]; return S.mode === "session" && t && t.v === "ask"; }
+  function chatEnd() { if (onAskView()) { const c = root.querySelector("#cpk-chat"); if (c) view.scrollTop = c.offsetTop + c.offsetHeight - view.clientHeight * 0.55; } }
+  function updateMsg(m) {
+    if (!onAskView()) return;
+    const i = S.chat.indexOf(m), el = root.querySelector("#cpk-msg-" + i);
+    if (!el) return;
+    el.outerHTML = bubbleHTML(m, i).replace('class="cpk-msg ai', 'class="cpk-msg still ai'); /* no fade on each new word */
+    if (!m.pending) { const nc = root.querySelector(".cpk-newchat"); if (!nc) render(); }
+    chatEnd(); scrollHint();
+  }
+  function quick(m, q) {
+    const f = answer(q);
+    m.text = f ? f.a : `I don't have an answer for that yet. The front desk is open 24 hours and happy to help, or call ${V.phone}.`;
+    m.ids = f ? f.items.slice(0, 3) : ["lx-desk"];
+    m.quick = !!AI; m.pending = false; S.busy = false;
+    bump("questions", f ? f.q : "No answer: " + q.slice(0, 60));
+    updateMsg(m);
+  }
+  async function live(m, q) {
+    const ctl = new AbortController();
+    let got = false, raw = "";
+    const wait = setTimeout(() => { if (!got) ctl.abort(); }, 10000);
+    const hist = S.chat.filter(x => x !== m && x.text).slice(-8).map(x => ({ role: x.role, content: x.text }));
+    const res = await fetch(AI + "/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ venue: V.id, messages: hist }), signal: ctl.signal });
+    if (!res.ok || !res.body) throw new Error("status " + res.status);
+    const reader = res.body.getReader(), dec = new TextDecoder();
+    let buf = "", done = false;
+    while (!done) {
+      const r = await reader.read();
+      if (r.done) break;
+      buf += dec.decode(r.value, { stream: true });
+      let i;
+      while ((i = buf.indexOf("\n\n")) >= 0) {
+        const ev = buf.slice(0, i).trim(); buf = buf.slice(i + 2);
+        if (!ev.startsWith("data:")) continue;
+        const d = ev.slice(5).trim();
+        if (d === "[DONE]") { done = true; break; }
+        let o; try { o = JSON.parse(d); } catch (e) { continue; }
+        if (o.e) throw new Error(o.e);
+        if (o.t) { got = true; raw += o.t; m.text = visible(raw); updateMsg(m); armIdle(); }
+      }
+    }
+    clearTimeout(wait);
+    if (!visible(raw).trim()) throw new Error("empty");
+    m.ids = [...new Set([...raw.matchAll(/\[\[([a-z0-9-]+)\]\]/g)].map(x => x[1]).filter(id => V.items[id]))].slice(0, 3);
+    m.text = visible(raw).trim(); m.pending = false; S.busy = false;
+    bump("questions", "AI: " + q.slice(0, 60));
+    updateMsg(m);
+  }
+  function ask(q) {
+    q = String(q || "").replace(/\s+/g, " ").trim().slice(0, 300);
+    if (!q || S.busy) return;
+    S.busy = true;
+    S.chat.push({ role: "user", text: q });
+    const m = { role: "assistant", text: "", ids: [], pending: true };
+    S.chat.push(m);
+    if (S.chat.length > 16) S.chat.splice(0, S.chat.length - 16);
+    render(); chatEnd();
+    if (AI && navigator.onLine !== false) live(m, q).catch(() => quick(m, q));
+    else setTimeout(() => quick(m, q), 350);
   }
   function vTake() {
     return `<section class="cpk-takeview">
@@ -266,20 +393,6 @@
       <div class="cpk-qrbig">${qr(GUIDE, "QR code: open this guide on your phone")}</div>
       <ol class="cpk-steps"><li><b>1</b>Open your camera</li><li><b>2</b>Point it at the code</li><li><b>3</b>Tap the link</li></ol></section>`;
   }
-  function vAd(i) {
-    const sl = SLIDES[i];
-    if (sl && sl.type === "sp") {
-      const s = sl.s;
-      return `<section class="cpk-item"><p class="cpk-kicker">Featured</p><h1 class="cpk-h2">${esc(s.title)}</h1><p class="cpk-desc">${esc(s.text || "")}</p>
-        ${s.url ? `<div class="cpk-qrcard"><div class="cpk-qr">${qr(s.url, "QR code: open on your phone")}</div><div><b>${esc(s.cta || "Open on your phone")}</b><small>Point your phone camera at the code.</small></div></div>` : ""}</section>`;
-    }
-    return `<section class="cpk-item"><p class="cpk-kicker">Advertise on this screen</p>
-      <h1 class="cpk-h2">Put your business in front of every guest</h1>
-      <p class="cpk-desc">Your ad runs in this space on the ${esc(V.name)} kiosk, every day, for a full year. We design it for you.</p>
-      <div class="cpk-pkgs"><div><small>1 location</small><b>$399</b><span>per year · or $60 a month</span></div><div><small>3 locations</small><b>$1,099</b><span>per year · or $180 a month</span></div><div class="best"><small>5 locations · best value</small><b>$1,200</b><span>per year · or $300 a month</span></div></div>
-      <div class="cpk-qrcard"><div class="cpk-qr">${qr(PRICING, "QR code: CityPulse advertising packages")}</div><div><b>See packages on your phone</b><small>Point your phone camera at the code to see packages and get started.</small></div></div></section>`;
-  }
-
   function dockHTML() {
     if (S.mode === "attract") return "";
     return `<button data-act="home">${svg("home")}<span>Home</span></button>
@@ -311,11 +424,13 @@
       else if (top.v === "item") html = vItem(top.id);
       else if (top.v === "ask") html = vAsk();
       else if (top.v === "take") html = vTake();
-      else if (top.v === "ad") html = vAd(top.i);
     }
     view.innerHTML = html;
     view.className = "cpk-view" + (dir ? " in-" + dir : "");
-    view.scrollTop = 0;
+    const cur = S.stack[S.stack.length - 1];
+    view.scrollTop = dir === "back" && cur && cur.sc ? cur.sc : 0;
+    topL.innerHTML = topLeftHTML();
+    scrollHint();
     dock.innerHTML = dockHTML();
     sheet.hidden = !S.panel || S.mode === "attract";
     sheet.innerHTML = sheet.hidden ? "" : sheetHTML();
@@ -323,15 +438,44 @@
   }
 
   /* ---------- navigation ---------- */
-  function go(entry) { S.stack.push(entry); render("fwd"); }
+  function go(entry) { const cur = S.stack[S.stack.length - 1]; if (cur) cur.sc = view.scrollTop; S.stack.push(entry); render("fwd"); }
+  /* Where Back goes, shown in the top-left Back button. */
+  function labelOf(e) {
+    if (!e) return "";
+    if (e.v === "home") return "Home";
+    if (e.v === "cat") return V.categories[e.id].label;
+    if (e.v === "item") return V.items[e.id].n;
+    if (e.v === "ask") return "Ask the concierge";
+    if (e.v === "take") return "Take this guide";
+    return "Featured";
+  }
+  function topLeftHTML() {
+    if (S.mode === "attract" || S.stack.length < 2) return "";
+    return `<button class="cpk-topback" data-act="back" aria-label="Back to ${esc(labelOf(S.stack[S.stack.length - 2]))}">${svg("back")}<span><b>Back</b><small>${esc(labelOf(S.stack[S.stack.length - 2]))}</small></span></button>`;
+  }
+  /* Soft fade at the bottom when there is more to scroll. */
+  function scrollHint() { const more = view.scrollHeight - view.clientHeight - view.scrollTop > 16; view.classList.toggle("has-more", more); }
+  view.addEventListener("scroll", scrollHint, { passive: true });
   function start() { S.mode = "session"; S.stack = [{ v: "home" }]; bump("sessions", "count"); render("fwd"); }
   function reset() {
-    S.mode = "attract"; S.stack = []; S.panel = false; S.answer = null;
+    clearTimeout(S.idle); hideWarn();
+    S.mode = "attract"; S.stack = []; S.panel = false; S.chat = []; S.busy = false;
     S.large = S.contrast = S.reach = false;
     if (window.speechSynthesis) speechSynthesis.cancel();
     render();
   }
-  function armIdle() { clearTimeout(S.idle); S.idle = setTimeout(reset, IDLE_MS); }
+  /* Idle: warn 12 seconds before going back to the welcome screen. Longer when accessibility options are on. */
+  const WARN_S = 12;
+  const idleMs = () => (S.large || S.contrast || S.reach) ? IDLE_MS * 2 : IDLE_MS;
+  function hideWarn() { clearInterval(S.cd); if (!warnBox.hidden) warnBox.hidden = true; }
+  function armIdle() { clearTimeout(S.idle); hideWarn(); S.idle = setTimeout(warn, idleMs() - WARN_S * 1000); }
+  function warn() {
+    if (S.mode === "attract") return;
+    let n = WARN_S; const cd = root.querySelector("#cpk-cd");
+    cd.textContent = n; warnBox.hidden = false;
+    const stay = warnBox.querySelector("[data-act=stay]"); if (stay) stay.focus({ preventScroll: true });
+    S.cd = setInterval(() => { n--; cd.textContent = n; if (n <= 0) { hideWarn(); reset(); } }, 1000);
+  }
   function speak() {
     if (!window.speechSynthesis) return;
     speechSynthesis.cancel();
@@ -344,9 +488,7 @@
     if (!b) return;
     const act = b.dataset.act;
     if (S.mode === "attract") {
-      if (act === "ad") { start(); bump("adTaps", b.dataset.i); go({ v: "ad", i: +b.dataset.i }); }
-      else if (act === "addot") showAd(+b.dataset.i);
-      else start();
+      start();
       return;
     }
     armIdle();
@@ -355,38 +497,28 @@
       case "back": if (S.stack.length > 1) S.stack.pop(); render("back"); break;
       case "cat": bump("categories", b.dataset.id); go({ v: "cat", id: b.dataset.id }); break;
       case "item": bump("places", b.dataset.id); go({ v: "item", id: b.dataset.id }); break;
-      case "ask": S.answer = null; go({ v: "ask" }); setTimeout(() => { const i = root.querySelector("#cpk-q"); if (i) i.focus({ preventScroll: true }); }, 50); break;
-      case "q": { const f = V.faq[+b.dataset.i]; S.answer = { q: f.q, f }; bump("questions", f.q); render(); break; }
+      case "ask": if (!onAskView()) go({ v: "ask" }); setTimeout(() => { const i = root.querySelector("#cpk-q"); if (i) i.focus({ preventScroll: true }); }, 50); break;
+      case "q": ask(V.faq[+b.dataset.i].q); break;
+      case "newchat": if (!S.busy) { S.chat = []; render(); } break;
       case "take": bump("takeHome", "open"); go({ v: "take" }); break;
-      case "ad": bump("adTaps", b.dataset.i); go({ v: "ad", i: +b.dataset.i }); break;
-      case "addot": showAd(+b.dataset.i); break;
       case "panel": S.panel = !S.panel; render(); break;
       case "large": S.large = !S.large; render(); break;
       case "contrast": S.contrast = !S.contrast; render(); break;
       case "reach": S.reach = !S.reach; render(); break;
       case "still": S.still = !S.still; render(); break;
       case "speak": speak(); break;
+      case "stay": hideWarn(); break;
+      case "endnow": reset(); break;
     }
   });
   root.addEventListener("submit", e => {
     const f = e.target.closest("[data-form=ask]");
     if (!f) return;
     e.preventDefault();
-    const q = (root.querySelector("#cpk-q").value || "").trim();
-    if (!q) return;
-    const best = answer(q);
-    S.answer = { q, f: best };
-    bump("questions", best ? best.q : "No answer: " + q.slice(0, 60));
-    render();
+    const inp = root.querySelector("#cpk-q");
+    ask(inp ? inp.value : "");
   });
   ["pointerdown", "keydown", "scroll"].forEach(ev => root.addEventListener(ev, () => { if (S.mode !== "attract") armIdle(); }, { passive: true, capture: true }));
-
-  /* Swipe the ad strip. */
-  (function () {
-    let x0 = null;
-    ads.addEventListener("pointerdown", e => { x0 = e.clientX; });
-    ads.addEventListener("pointerup", e => { if (x0 == null) return; const dx = e.clientX - x0; x0 = null; if (Math.abs(dx) > 50) showAd(S.ad + (dx < 0 ? 1 : -1)); });
-  })();
 
   /* Keep the screen awake where supported. */
   try { if (navigator.wakeLock) navigator.wakeLock.request("screen").catch(() => {}); } catch (e) { /* not supported */ }
@@ -394,6 +526,20 @@
 
   /* Work offline after the first load (service worker in the kiosk folder). */
   if ("serviceWorker" in navigator && window.isSecureContext) navigator.serviceWorker.register("sw.js").catch(() => {});
+
+  /* ---------- lockdown ----------
+     Nothing on the kiosk opens a web page, a new tab or a browser menu. QR codes open links on the guest's own phone only. */
+  const stop = e => { e.preventDefault(); e.stopPropagation(); };
+  document.addEventListener("click", e => { if (e.target.closest && e.target.closest("a[href]")) stop(e); if (e.ctrlKey || e.metaKey || e.shiftKey) stop(e); }, true);
+  ["auxclick", "contextmenu", "dragstart", "drop", "gesturestart"].forEach(ev => document.addEventListener(ev, stop, true));
+  document.addEventListener("selectstart", e => { if (!(e.target.closest && e.target.closest("input"))) e.preventDefault(); }, true);
+  document.addEventListener("wheel", e => { if (e.ctrlKey) e.preventDefault(); }, { passive: false, capture: true });
+  document.addEventListener("keydown", e => {
+    const k = (e.key || "").toLowerCase();
+    if ((e.ctrlKey || e.metaKey || e.altKey) && k !== "control" && k !== "meta" && k !== "alt") stop(e);
+    if (/^f([1-9]|1[0-2])$/.test(k)) stop(e);
+  }, true);
+  try { window.open = () => null; } catch (e) { /* ignore */ }
 
   window.CPK = { reset, answer };
   render();
