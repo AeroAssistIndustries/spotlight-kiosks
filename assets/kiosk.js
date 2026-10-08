@@ -185,14 +185,19 @@
   const catOf = id => CATS[id] || SPECIAL[id];
   const clock = () => new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
   const initial = n => n.replace(/^The /, "").charAt(0);
-  function qr(seed) {
-    let h = 2166136261; for (const c of seed) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); }
-    const rnd = () => { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return (h >>> 0) / 4294967296; };
-    const N = 21; let r = "";
-    const finder = (x, y) => `<rect x="${x}" y="${y}" width="7" height="7" fill="#111"/><rect x="${x + 1}" y="${y + 1}" width="5" height="5" fill="#fff"/><rect x="${x + 2}" y="${y + 2}" width="3" height="3" fill="#111"/>`;
-    const inF = (x, y) => (x < 8 && y < 8) || (x > 12 && y < 8) || (x < 8 && y > 12);
-    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (!inF(x, y) && rnd() > .52) r += `<rect x="${x}" y="${y}" width="1" height="1"/>`;
-    return `<svg viewBox="0 0 21 21" role="img" aria-label="QR code" shape-rendering="crispEdges"><g fill="#111">${r}</g>${finder(0, 0)}${finder(14, 0)}${finder(0, 14)}</svg>`;
+  /* Real QR code for a link. Uses the vendored qrcode-generator (MIT). */
+  function qr(text) {
+    if (typeof qrcode !== "function") return "";
+    const q = qrcode(0, "M"); q.addData(text); q.make();
+    const N = q.getModuleCount(); let r = "";
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (q.isDark(y, x)) r += `<rect x="${x}" y="${y}" width="1" height="1"/>`;
+    return `<svg viewBox="0 0 ${N} ${N}" role="img" aria-label="QR code: scan to open on your phone" shape-rendering="crispEdges"><rect width="${N}" height="${N}" fill="#fff"/><g fill="#111">${r}</g></svg>`;
+  }
+  /* Link a phone opens. Concierge links carry the venue (and item) so the phone page matches the kiosk. */
+  function link(path, id) {
+    const u = new URL(ROOT + path, location.href);
+    if (path === "concierge/") { u.searchParams.set("v", S.venue); if (id) u.searchParams.set("i", id); }
+    return u.href;
   }
 
   /* ---------- frame (built once per venue) ---------- */
@@ -219,7 +224,7 @@
     const it = I[s.id];
     return `<button class="ad ad-sp" style="--g:${CATS[it.cat].g}" data-act="sponsor" data-id="${it.id}" data-i="${i}" aria-label="Ad: ${esc(it.n)}. ${esc(it.h)}">
       <span class="ad-txt"><span class="ad-chip">Example ad · ${esc(it.n)}</span><span class="ad-head">${esc(it.h)}</span><span class="ad-btn">${esc(it.c)}</span></span>
-      <span class="ad-qr">${qr(it.id)}</span>
+      <span class="ad-qr">${qr(link("concierge/", it.id))}</span>
     </button>`;
   }
   function buildFrame() {
@@ -288,6 +293,7 @@
     else if (top.view === "cat") body = viewCat(top.id);
     else if (top.view === "item") body = viewItem(top.id);
     else if (top.view === "adspace") body = viewAdspace();
+    else if (top.view === "take") body = viewTake();
     else if (top.view === "service") body = viewService();
     else if (top.view === "venuemap") body = viewMap();
     view.className = "k-view" + (dir ? " " + dir : "");
@@ -309,7 +315,8 @@
     return `<h2 class="k-welcome">Welcome</h2><p class="k-venue">to ${esc(v.name)}</p>
       <div class="k-tiles">${v.tiles.map(tile).join("")}
         <button class="k-tile wide" style="--g:${G.local}" data-act="open" data-id="${w.to}"><span>${esc(w.t)}</span><small>${esc(w.s)}</small></button>
-      </div>`;
+      </div>
+      <button class="k-btn k-cta" data-act="take">${svg("phone")}Take this concierge experience with me</button>`;
   }
   const head = c => `<div class="k-head"><span class="ico" style="--g:${c.g}">${svg(c.icon)}</span><h2>${esc(c.label)}</h2></div>`;
   function viewCat(id) {
@@ -330,16 +337,23 @@
       <p class="k-blurb">${esc(it.d)}</p>
       <div class="k-facts">${it.f.map(([a, b]) => `<div><small>${esc(a)}</small><b>${esc(b)}</b></div>`).join("")}</div>
       ${it.o ? `<div class="k-offer"><b>Kiosk offer</b>${esc(it.o)}</div>` : ""}
-      <div class="k-take"><div class="k-qr">${qr(it.id)}</div>
+      <div class="k-take"><div class="k-qr">${qr(link("concierge/", it.id))}</div>
         <div><b>Take it with you</b><button class="k-btn${sent ? " done" : ""}" data-act="send" data-id="${it.id}">${svg(sent ? "check" : "phone")}${sent ? "Sent to phone" : "Send to phone"}</button></div>
       </div></div>`;
+  }
+  function viewTake() {
+    return `<div class="k-detail">
+      <div class="k-detail-hero" style="--g:${V().theme.accent}"><div><h2>Take this concierge with you</h2><p>${esc(V().name)}</p></div></div>
+      <p class="k-blurb">Scan this code with your phone camera. Your phone opens the directory, offers and map for this venue. Nothing to install.</p>
+      <div class="k-take"><div class="k-qr">${qr(link("concierge/"))}</div>
+        <div><b>Scan to continue on your phone</b><small class="k-label">Opens in your phone's browser</small></div></div></div>`;
   }
   function viewAdspace() {
     return `<div class="k-detail">
       <div class="k-detail-hero" style="--g:linear-gradient(135deg,#17231E,#2f4a3d 60%,#c9a227)"><div><h2>Advertise on this kiosk</h2><p>Your ad runs in the space below, on every screen</p></div></div>
       <div class="k-pk-list">${PKGS.map(([l, p], j) => `<div class="${j === 2 ? "best" : ""}"><span><b>${l}</b><small>${j === 0 ? "Or $60 a month" : j === 1 ? "Or $180 a month" : "Best value · or $300 a month"}</small></span><strong>${p}<small>/yr</small></strong></div>`).join("")}</div>
       <p class="k-pk-note">Each location after 5 is $300 a year. Includes ad artwork, digital copy and 12 months on screen.</p>
-      <div class="k-take"><div class="k-qr">${qr("advertise")}</div>
+      <div class="k-take"><div class="k-qr">${qr(link("pricing/"))}</div>
         <div><b>Scan or tap to get started</b><a class="k-btn" href="${ROOT}pricing/" target="_top">${svg("mega")}See packages</a></div>
       </div></div>`;
   }
@@ -410,6 +424,7 @@
       case "open": { const entry = CATS[id] ? { view: "cat", id } : { view: id }; log(`Opened ${label(entry)}`); go(entry); break; }
       case "item": { const it = I[id]; log(`Viewed ${it.n}`, it.sp ? "sponsor" : null); go({ view: "item", id }); break; }
       case "sponsor": log(`Tapped ad: ${I[id].n}`, "sponsor"); go({ view: "item", id }); break;
+      case "take": log("Showed the concierge QR code", "scan"); go({ view: "take" }); break;
       case "adopen": log("Tapped the ad space packages", "open"); go({ view: "adspace" }); break;
       case "send":
         if (S.sent[id]) break;

@@ -146,6 +146,7 @@ kiosk_page = page_hero([("The kiosk","kiosk/")], "One screen. A world of possibi
   <div class="card"><h3>Maintenance & support</h3><p>Content updates and routine service are handled by CityPulse.</p></div></div>''')}
 {cta_band()}'''
 page("kiosk/", "The kiosk", "A digital concierge, information hub and local advertising platform in one managed touch-screen kiosk. Try the interactive demo.", kiosk_page, kiosk=True)
+page("concierge/", "Your concierge", "Your CityPulse guide, opened from the kiosk's QR code: dining, amenities, local guide and events.", '<section class="section"><div class="wrap"><div class="cc-app" id="cc-app"><p>Loading your guide…</p><noscript><p>Turn on JavaScript to view this guide.</p></noscript></div></div></section>', extra_js=("concierge.js",))
 
 # ================================================================ ADVERTISE
 def pkg_link(v): return "{R}advertise/?Pricing=" + v.replace(" ", "+").replace("$", "%24").replace(",", "%2C").replace("—", "%E2%80%94").replace("/", "%2F") + "#inquiry"
