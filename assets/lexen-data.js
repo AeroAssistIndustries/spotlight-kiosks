@@ -1,6 +1,6 @@
 /* Lexen North Hollywood: kiosk content.
-   Source: public hotel listing (Travelocity, hotel information page). Items marked "Ask the front desk"
-   are not listed publicly. Confirm everything with the hotel before the demo. */
+   Sources: hotel's own site text (address, phone, email); public hotel listings (check-in, parking, amenities, drive times).
+   Items marked "Ask the front desk" are not listed publicly. Confirm everything with the hotel before the demo. */
 window.CITYPULSE_VENUE_DATA = {
   venue: {
     name: "Lexen North Hollywood",
@@ -42,7 +42,7 @@ window.CITYPULSE_VENUE_DATA = {
       { id: "lx-events", n: "Current events", k: "Ask the front desk", m: "This week", d: "We do not list events here yet. The front desk can tell you what is on this week.", f: [["Help", "Front desk"]] }
     ] },
     { id: "getting", label: "Getting around", icon: "car", intro: "Getting to and from the hotel.", items: [
-      { id: "lx-address", n: "Hotel address", k: "5268 Tujunga Ave", m: "North Hollywood, CA 91601", d: "5268 Tujunga Ave, North Hollywood, CA 91601.", f: [["Address", "5268 Tujunga Ave"], ["City", "North Hollywood, CA 91601"]] },
+      { id: "lx-address", n: "Hotel address and contact", k: "5268 Tujunga Ave", m: "North Hollywood, CA 91601", d: "5268 Tujunga Ave, North Hollywood, CA 91601. Call (818) 821-3680 or email lexennoho@gmail.com.", f: [["Address", "5268 Tujunga Ave"], ["City", "North Hollywood, CA 91601"], ["Phone", "(818) 821-3680"], ["Email", "lexennoho@gmail.com"]] },
       { id: "lx-shuttle", n: "Airport shuttle", k: "Not offered", m: "Ask the front desk", d: "The hotel does not offer an airport shuttle. Ask the front desk about rideshare or taxi options.", f: [["Shuttle", "Not offered"], ["Help", "Front desk"]] },
       { id: "lx-taxi", n: "Taxi and rideshare", k: "Ask the front desk", m: "Any time", d: "The front desk can help you get a taxi or arrange a rideshare.", f: [["Help", "Front desk"]] }
     ] }
