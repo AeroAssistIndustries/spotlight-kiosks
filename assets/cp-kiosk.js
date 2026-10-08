@@ -197,7 +197,7 @@
     return `<div class="cpk-ad" role="group" aria-roledescription="slide" aria-label="${i + 1} of ${SLIDES.length}: ${esc(sp.name)}">
       <div class="cpk-ad-logo${sp.logo ? " img" : ""}">${sp.logo ? `<img src="${A + esc(sp.logo)}" alt="">` : `<span>${esc(initials(sp.name))}</span>`}</div>
       <div class="cpk-ad-body">
-        <span class="cpk-ad-tag">${sp.house ? "Advertise here" : "Featured nearby"}</span>
+        <span class="cpk-ad-tag">${sp.house ? "Advertise here" : sp.sponsored ? "Sponsored" : "Featured nearby"}</span>
         <span class="cpk-ad-t">${esc(sp.name)}</span>
         <span class="cpk-ad-s">${esc(sp.kind)}${f ? " · " + esc(f.label) : ""}</span>
         ${sp.tagline ? `<span class="cpk-ad-x">${esc(sp.tagline)}</span>` : ""}
