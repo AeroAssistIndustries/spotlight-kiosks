@@ -192,7 +192,9 @@ export default {
       if (!up.ok || !up.body) return json(502, { error: "ai unavailable", status: up.status }, origin);
     } else {
       try {
-        up = await env.AI.run(cfg(env, "CF_MODEL"), { messages: [{ role: "system", content: sys }, ...messages], max_tokens: LIMITS.maxTokens, temperature: 0.3, stream: true });
+        const input = { messages: [{ role: "system", content: sys }, ...messages], max_tokens: LIMITS.maxTokens, temperature: 0.3, stream: true, chat_template_kwargs: { enable_thinking: false } };
+        if (body && body.debug === "raw" && body.opts && typeof body.opts === "object") Object.assign(input, body.opts); /* temporary test switch */
+        up = await env.AI.run(cfg(env, "CF_MODEL"), input);
       } catch (e) { return json(502, { error: "ai unavailable", detail: String((e && e.message) || e).slice(0, 300) }, origin); }
       if (up && up.body && typeof up.body.getReader === "function") up = up.body;
       if (body && body.debug === "raw" && up && typeof up.getReader === "function") { /* temporary: show the model's raw stream (no secrets) */
