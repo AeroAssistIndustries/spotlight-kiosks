@@ -146,6 +146,7 @@ kiosk_page = page_hero([("The kiosk","kiosk/")], "One screen. A world of possibi
   <div class="card"><h3>Maintenance & support</h3><p>Content updates and routine service are handled by CityPulse.</p></div></div>''')}
 {cta_band()}'''
 page("kiosk/", "The kiosk", "A digital concierge, information hub and local advertising platform in one managed touch-screen kiosk. Try the interactive demo.", kiosk_page, kiosk=True)
+page("operations/", "Team library (demo)", "Demo of the CityPulse team library. Enter the access code to preview file names.", '<section class="section"><div class="wrap"><div class="ops-app" id="ops-app"><p>Loading…</p><noscript><p>Turn on JavaScript to open this page.</p></noscript></div></div></section>', extra_js=("operations.js",))
 page("concierge/", "Your concierge", "Your CityPulse guide, opened from the kiosk's QR code: dining, amenities, local guide and events.", '<section class="section"><div class="wrap"><div class="cc-app" id="cc-app"><p>Loading your guide…</p><noscript><p>Turn on JavaScript to view this guide.</p></noscript></div></div></section>', extra_js=("concierge.js",))
 
 # ================================================================ ADVERTISE
