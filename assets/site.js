@@ -74,6 +74,42 @@
     setInterval(() => { if (!vis || document.hidden) return; nodes.forEach((n, j) => n.classList.toggle("on", j === k)); k = (k + 1) % nodes.length; }, 1500);
   });
 
+  /* ---------- US markets map ---------- */
+  $$("[data-usmap]").forEach(m => {
+    const tip = $(".map-tip", m);
+    const home = (document.querySelector('.brand') || {}).getAttribute ? document.querySelector('.brand').getAttribute("href") : "./";
+    let hideT;
+    function show(pin) {
+      clearTimeout(hideT);
+      $$(".pin.on", m).forEach(p => p.classList.remove("on")); pin.classList.add("on");
+      const list = pin.dataset.markets.split("|");
+      $("b", tip).textContent = pin.dataset.name;
+      $(".tip-links", tip).innerHTML = list.map(mk => `<a href="${home}?market=${encodeURIComponent(mk)}#get-started">${list.length > 1 ? mk + " — " : ""}Advertise here${list.length > 1 ? "" : " — $399/yr"}</a>`).join("");
+      const r = pin.getBoundingClientRect(), b = m.getBoundingClientRect();
+      tip.hidden = false;
+      tip.style.left = Math.max(8, Math.min(b.width - tip.offsetWidth - 8, r.left - b.left + r.width / 2 - tip.offsetWidth / 2)) + "px";
+      tip.style.top = (r.top - b.top - tip.offsetHeight - 10) + "px";
+      $$(".st", m).forEach(st => st.classList.toggle("on", st.dataset.state === pin.dataset.state));
+    }
+    function hide() { hideT = setTimeout(() => { tip.hidden = true; $$(".pin.on", m).forEach(p => p.classList.remove("on")); $$(".st.on", m).forEach(s => s.classList.remove("on")); }, 400); }
+    $$(".pin", m).forEach(pin => {
+      pin.addEventListener("mouseenter", () => show(pin)); pin.addEventListener("mouseleave", hide);
+      pin.addEventListener("focus", () => show(pin)); pin.addEventListener("blur", hide);
+      pin.addEventListener("click", e => { e.stopPropagation(); show(pin); });
+      pin.addEventListener("keydown", e => { if (e.key === "Enter") { show(pin); const a = $(".tip-links a", tip); if (a) a.focus(); } });
+    });
+    tip.addEventListener("mouseenter", () => clearTimeout(hideT)); tip.addEventListener("mouseleave", hide);
+    // clicking a state filters the city list on the same page
+    const root = document.querySelector("[data-filter-root]");
+    $$(".st", m).forEach(st => st.addEventListener("click", () => {
+      const pin = $(`.pin[data-state="${CSS.escape(st.dataset.state)}"]`, m); if (pin) show(pin);
+      if (root && root.querySelector("[data-filter-select]")) {
+        const opt = [...root.querySelector("[data-filter-select]").options].find(o => o.text === st.dataset.state);
+        if (opt) root.dispatchEvent(new CustomEvent("spotlight:filter", { detail: opt.value }));
+      }
+    }));
+  });
+
   /* ---------- tabs ---------- */
   $$("[data-tabs]").forEach(root => {
     const tabs = $$("[role=tab]", root);
@@ -107,8 +143,11 @@
       if (empty) empty.hidden = n > 0;
     }
     chips.forEach(c => c.addEventListener("click", () => { active = c.dataset.filter; chips.forEach(x => x.setAttribute("aria-pressed", String(x === c))); apply(); }));
+    const sel = $("[data-filter-select]", root);
+    if (sel) sel.addEventListener("change", () => { active = sel.value; apply(); });
+    root.addEventListener("spotlight:filter", e => { active = e.detail; if (sel) sel.value = e.detail; if (search) search.value = ""; apply(); });
     if (search) search.addEventListener("input", apply);
-    $$("[data-clear]", root).forEach(b => b.addEventListener("click", () => { active = "all"; if (search) search.value = ""; chips.forEach(x => x.setAttribute("aria-pressed", String(x.dataset.filter === "all"))); apply(); }));
+    $$("[data-clear]", root).forEach(b => b.addEventListener("click", () => { active = "all"; if (search) search.value = ""; if (sel) sel.value = "all"; chips.forEach(x => x.setAttribute("aria-pressed", String(x.dataset.filter === "all"))); apply(); }));
     const pre = params.get("filter"); if (pre) { const c = chips.find(x => x.dataset.filter === pre); if (c) { active = pre; chips.forEach(x => x.setAttribute("aria-pressed", String(x === c))); } }
     apply();
   });

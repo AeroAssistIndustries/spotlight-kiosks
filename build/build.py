@@ -8,7 +8,7 @@ home = f'''
     <div class="hero2-copy">
       <h1>Turn wait time into opportunity.</h1>
       <p class="lede">Useful visitor information and local business advertising, together on one touch screen — in the lobbies, lounges and waiting rooms where people pause.</p>
-      {btns(("Advertise on a kiosk","pricing/"),("Host a kiosk for free","hosts/","btn-ghost"))}
+      {btns(("Get started — $399/yr","#get-started"),("Host a kiosk for free","hosts/","btn-ghost"))}
       <ul class="hero2-points"><li><b>From $399</b><span>a year, or $60 a month</span></li><li><b>Every tap</b><span>counted and reported</span></li><li><b>$0</b><span>for qualified host venues</span></li></ul>
     </div>
     <div class="slider" data-slider aria-roledescription="carousel" aria-label="Spotlight Kiosks highlights">
@@ -54,6 +54,14 @@ home = f'''
     {btns(("Choose a package","pricing/"),("Try the kiosk","#demo","btn-ghost"))}
   </div>
   {cycle("big")}
+</div></section>
+
+{checkout_section()}
+
+<section class="section markets" aria-labelledby="mk-title"><div class="wrap">
+  {head("Hosts in all 50 states.", f"Kiosks in hotel lobbies, clubhouses, medical offices and dealership lounges in {N_MARKETS} cities, from Anchorage to Miami. Tap a pin to advertise there.", "mk-title")}
+  {us_map()}
+  <p style="margin-top:18px"><a class="text-link" href="{{R}}locations/">See every market</a></p>
 </div></section>
 
 <nav class="jump" aria-label="Get started"><div class="wrap jump-grid">
@@ -134,7 +142,7 @@ home = f'''
 
 {cta_band()}
 '''
-page("", "Turn wait time into opportunity", "Touch-screen kiosks that give visitors useful venue information and put local businesses in front of them. Free for qualified venues. Local ads from $399 a year or $60 a month.", home, active="", kiosk=True)
+page("", "Turn wait time into opportunity", "Touch-screen kiosks that give visitors useful venue information and put local businesses in front of them. Free for qualified venues. Local ads from $399 a year or $60 a month.", home, active="", kiosk=True, extra_js=("config.js", "checkout.js"))
 
 # ================================================================ THE KIOSK
 kiosk_page = page_hero([("The kiosk","kiosk/")], "One screen. A world of possibility.",
@@ -342,20 +350,23 @@ page("audience/", "Who you can reach", "Hotel guests, club members, patients and
 
 # ================================================================ LOCATIONS
 loc_groups = ""
-for state, cities in LOCATIONS.items():
-    lis = "".join(f'<li data-item data-cat="{ABBR[state]}"><span>{c}, {ABBR[state]}</span><a href="{{R}}advertise/?Target+city+%2F+state={c.replace(" ","+")}%2C+{ABBR[state]}#inquiry">Ask about this market</a></li>' for c in cities)
+for state, (ab, cities) in MARKETS.items():
+    lis = "".join(f'<li data-item data-cat="{ab}"><span>{e(market_label(c, ab))}</span><a href="{{R}}?market={e(market_label(c, ab)).replace(" ", "+").replace(",", "%2C")}#get-started">Advertise here</a></li>' for c, _, _ in cities)
     loc_groups += f'<div class="loc-group" data-group><h3>{state}</h3><ul class="loc-list">{lis}</ul></div>'
-locations = page_hero([("Advertise","advertise/"),("Market planning","locations/")], "Find your place in the spotlight.",
-  "Start a conversation about the city or region where you want to host a kiosk or advertise.") + f'''
-<section class="section"><div class="wrap" data-filter-root>
-  <div class="filters">{chips([("all","All states")] + [(ABBR[s], s) for s in LOCATIONS])}{search_box("Try Phoenix, California or TX","Find a city or state")}</div>
-  <p class="result-count" data-count data-one="market" data-many="markets"></p>
+state_opts = '<option value="all">All states</option>' + "".join(f'<option value="{ab}">{st}</option>' for st, (ab, _) in MARKETS.items())
+locations = page_hero([("Advertise","advertise/"),("Locations","locations/")], "Hosts in all 50 states.",
+  f"Spotlight kiosks stand in hotel lobbies, golf clubhouses, medical offices, dealership lounges and restaurants in {N_MARKETS} cities across the country. Pick your city and get on a kiosk today.",
+  btns(("Get started — $399/yr","#get-started-link"),("Host a kiosk","hosts/","btn-ghost")).replace('href="#get-started-link"','href="{R}#get-started"')) + f'''
+<section class="section markets"><div class="wrap">{us_map()}</div></section>
+<section class="section" style="padding-top:0"><div class="wrap" data-filter-root>
+  <div class="filters"><label class="field" style="min-width:220px"><span class="sr">State</span><select data-filter-select>{state_opts}</select></label>{search_box("Try Phoenix, Texas or NY","Find a city")}</div>
+  <p class="result-count" data-count data-one="city" data-many="cities"></p>
   {loc_groups}
-  {empty_state("The team can talk about the area you have in mind.", f' <a class="btn btn-small" href="{{R}}contact/">Ask about availability</a>')}
-  <p class="fine">These markets come from our expansion plans. Kiosk availability changes as venues come on board, so ask the team to confirm what's live in your area.</p>
+  {empty_state("Don't see your city? We may still have a kiosk near you.", f' <a class="btn btn-small" href="{{R}}#get-started">Tell us your city</a>')}
+  <p class="fine">Exact venues are confirmed with you before your ad goes live.</p>
 </div></section>
-{cta_band("Have a location in mind?", "Ask about availability in your market, or tell us about your venue.")}'''
-page("locations/", "Market planning", "Cities and regions in Spotlight's plans across Arizona, California, Texas, Tennessee and Pennsylvania. Ask about kiosk availability in your market.", locations)
+{cta_band("Ready when you are.", "One location is $399 a year. Pick your city and check out in about five minutes.")}'''
+page("locations/", "Locations", f"Spotlight kiosk hosts in {N_MARKETS} cities across all 50 states. Find your city and advertise from $399 a year.", locations)
 
 # ================================================================ AGENCIES
 agencies = page_hero([("Advertise","advertise/"),("For agencies","agencies/")], "Give your local brief another useful setting.",
@@ -568,6 +579,25 @@ support = page_hero([("Resources","resources/"),("Help & support","support/")], 
   <div class="card"><h3>Advertising campaigns</h3><p>Include your business or campaign reference and the change or question you have.</p></div></div>''' + f'<p style="margin-top:22px">Exploring a new venue or campaign? <a class="text-link" href="{{R}}contact/">Contact sales</a> &nbsp; <a class="text-link" href="{{R}}faqs/">Browse common questions</a></p>')}
 {form_section("request", "Tell us what you need.", "Include your venue or business name and a clear description so your request reaches the right person.", ["Choose the request type", "Add the location and useful details", "Review and send from your email"], support_form(), dark=True)}'''
 page("support/", "Help & support", "Support for existing Spotlight kiosks, venue content and advertising campaigns.", support, active="resources")
+
+# ================================================================ WELCOME (after checkout)
+welcome = f'''<section class="page-hero"><div class="wrap narrow">
+  <h1>You're in. Welcome to Spotlight.</h1>
+  <p class="lede" style="margin-top:20px">Thanks for your order. A receipt is on its way to your email.</p>
+  <p class="co-order" id="welcome-order" hidden></p>
+</div></section>
+<section class="section"><div class="wrap narrow">
+  <h2 style="font-size:32px;margin-bottom:24px">What happens next</h2>
+  <ol class="step-list" style="grid-template-columns:1fr">
+    <li><h3>We review your ad</h3><p>Our team checks your logo or artwork. If you asked us to design it, we'll send a proof to approve.</p></li>
+    <li><h3>We match your kiosk</h3><p>We confirm a venue in the city you picked and email you the details.</p></li>
+    <li><h3>You go live</h3><p>Once you approve, your ad joins the rotation at the bottom of the kiosk screen.</p></li>
+    <li><h3>You see the results</h3><p>Your report shows how often your ad was shown, tapped and scanned.</p></li>
+  </ol>
+  <div class="callout"><b>Need to change something?</b><p>Reply to your receipt or email <a href="mailto:{EMAIL}">{EMAIL}</a>. You can also call <a href="tel:{TEL}">{PHONE}</a>.</p></div>
+  {btns(("Back to the home page",""),("Try the kiosk demo","kiosk/#demo","btn-ghost"))}
+</div></section>'''
+page("welcome/", "Welcome", "Thanks for your Spotlight Kiosks order.", welcome, extra_js=("checkout.js",))
 
 # ================================================================ LEGAL
 from legal import TERMS, PRIVACY, EFFECTIVE

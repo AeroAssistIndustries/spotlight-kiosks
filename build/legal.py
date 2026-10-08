@@ -1,5 +1,5 @@
 """Terms & Conditions and Privacy Policy content."""
-EFFECTIVE = "October 7, 2026"
+EFFECTIVE = "October 8, 2026"
 EMAIL = "sales@spotlightkiosks.com"
 SUPPORT = "support@spotlightkiosks.com"
 ADDRESS = "Spotlight Kiosks, 2150 N 1st St, Suite 432, San Jose, CA 95131"
@@ -27,9 +27,16 @@ TERMS = [
 
 ("QR codes and links to other websites", """<p>The Site and Kiosks may include links and QR codes that take you to websites run by others. We don't control those websites and aren't responsible for their content, availability, security or privacy practices. Your use of another website is governed by its own terms and policies.</p>"""),
 
-("Inquiries, quotes and agreements", f"""<p>Nothing on the Site is an offer to sell advertising or an agreement to install a Kiosk. Pricing, placements, venues, markets and features described on the Site are for information and planning, and are subject to availability.</p>
+("Inquiries, quotes and agreements", f"""<p>Except for self-serve orders placed through the Site's checkout (see “Self-serve orders, billing and renewal” below), nothing on the Site is an offer to sell advertising or an agreement to install a Kiosk. Package pricing, placements, venues, markets and features described on the Site are subject to availability.</p>
 <p>Advertising campaigns are governed by a separate written advertiser agreement or accepted quote. Kiosk hosting is governed by a separate signed Host Agreement. If anything on the Site conflicts with a signed agreement, the signed agreement controls.</p>
 <p>Prices shown are in US dollars and exclude applicable taxes unless stated otherwise. We may change published prices at any time; changes don't affect an agreement you've already signed.</p>"""),
+
+("Self-serve orders, billing and renewal", f"""<p><b>What you're buying.</b> A self-serve order buys an advertising placement in the kiosk ad space at one Kiosk location in the city you choose, on the plan you select: $399 per year, or $60 per month, plus any applicable taxes. The exact venue is confirmed with you by email before your ad goes live.</p>
+<p><b>Payment.</b> Payments are processed by Stripe. By completing checkout, you authorize us to charge your payment method for the plan you chose.</p>
+<p><b>Renewal.</b> Yearly plans renew automatically each year and monthly plans renew automatically each month, at the then-current price, until you cancel. We'll give you notice before any price change takes effect at renewal.</p>
+<p><b>Cancelling.</b> You can cancel at any time by emailing <a href="mailto:{EMAIL}">{EMAIL}</a>. Cancellation stops future renewals and takes effect at the end of the period you've already paid for. Except as described below or required by law, payments are non-refundable and we don't give partial refunds for unused time.</p>
+<p><b>Your ad and going live.</b> We review every ad for quality, legibility and suitability for the host venue, and we may ask for changes before it runs. If you choose “Design it for me,” we'll send a proof for your approval. We'll email you the venue and go-live date once your ad is approved.</p>
+<p><b>If we can't place your ad.</b> If we're unable to place your ad at a suitable Kiosk in your chosen city within 30 days of your order, we'll offer you a nearby alternative, and you may instead cancel for a full refund.</p>"""),
 
 ("Site tools and the drafts they create", """<p>The campaign planner, creative studio, pricing calculator and inquiry forms run in your browser. They help you prepare a brief, a creative concept, a planning estimate or an email draft. They don't submit anything to us, reserve inventory, purchase advertising or create an agreement. An inquiry only reaches us if you choose to send the email draft from your own email app.</p>
 <p>Estimates from the pricing calculator are for planning only. Creative concepts downloaded from the creative studio are drafts for discussion; production artwork must meet the specifications for your confirmed placement and is subject to review.</p>"""),
@@ -63,11 +70,13 @@ PRIVACY = [
 <ul><li>your name, job title, business or venue name, email address, phone number and website;</li>
 <li>venue details such as address, venue type, placement and connectivity information;</li>
 <li>campaign details such as your target market, goals, budget preferences, ad copy, logos and destination URLs;</li>
-<li>the contents of your messages, and billing details needed to invoice you under an agreement.</li></ul>
+<li>the contents of your messages, and billing details needed to invoice you under an agreement;</li>
+<li>when you order through the Site's checkout: your plan, chosen city and venue preference, business and contact details, ad text, destination link, and the logo or artwork files you upload.</li></ul>
 <p>Please don't send us patient information, health records, passwords or payment card numbers by email or through a Kiosk.</p>"""),
 
-("How the Site's forms and tools work", """<p>The inquiry forms, campaign planner, creative studio and pricing calculator run in your browser. What you type isn't sent to our servers. When you choose “Open in email,” the Site hands a draft to your own email app; we receive it only if you send it. “Copy text” places the draft on your clipboard, and “Download” saves a file to your device.</p>
-<p>When you move from the planner or calculator to an inquiry form, the Site uses your browser's session storage to carry your answers to the next page, then clears them. Session storage is deleted when you close the browser tab.</p>"""),
+("How the Site's forms and tools work", """<p><b>Checkout.</b> When you place an order, your order details and uploaded files are sent to Formspree, the form-processing service we use to receive orders, and then to us. You're then taken to Stripe to pay. Stripe collects and processes your card details under its own privacy policy; we never see or store your full card number. We receive confirmation of your payment, your email address and an order reference from Stripe.</p>
+<p><b>Other tools.</b> The inquiry forms, campaign planner, creative studio and pricing calculator run in your browser. What you type into them isn't sent to our servers. When you choose “Open in email,” the Site hands a draft to your own email app; we receive it only if you send it. “Copy text” places the draft on your clipboard, and “Download” saves a file to your device.</p>
+<p>When you move from the planner or calculator to an inquiry form, the Site uses your browser's session storage to carry your answers to the next page, then clears them. Checkout also keeps a short order summary in session storage to show your order number on the confirmation page. Session storage is deleted when you close the browser tab.</p>"""),
 
 ("Information collected automatically", """<p><b>On the Site.</b> The Site is hosted by GitHub Pages and uses fonts served by Google Fonts. When your browser loads a page, these providers receive standard technical information such as your IP address, browser type, device information and the page requested, and may keep it in server logs for security and operations. Their use of that information is governed by their own privacy policies. The Site doesn't set its own cookies or run analytics or advertising trackers.</p>
 <p><b>On Kiosks.</b> Kiosks record anonymous usage events — for example, screens viewed, buttons tapped, ads displayed and QR codes or “send to phone” links used — together with the time and Kiosk location. We use these records to operate and improve Kiosks and to give advertisers and host venues aggregated reports, such as how many times an ad was shown. These reports contain totals, not information that identifies you. If a Kiosk offers to send a link to your phone, we use the phone number or email address you enter only to send that link and don't use it for marketing.</p>"""),
@@ -81,14 +90,14 @@ PRIVACY = [
 <p>We don't sell your personal information, and we don't share it with third parties for their own marketing.</p>"""),
 
 ("How we share information", """<p>We share information only as needed:</p>
-<ul><li><b>Service providers</b> who help us run the business — for example, hosting, email, Kiosk software and maintenance, and accounting — under obligations to protect it;</li>
+<ul><li><b>Service providers</b> who help us run the business — for example, Stripe for payments, Formspree for receiving orders, hosting, email, Kiosk software and maintenance, and accounting — under obligations to protect it;</li>
 <li><b>Advertisers and host venues</b>, who receive aggregated, non-identifying Kiosk reports, and business contact details where needed to carry out an agreement with them;</li>
 <li><b>Legal and safety</b> reasons, when required by law, legal process or to protect rights, property or safety;</li>
 <li><b>Business transfers</b>, if Spotlight is involved in a merger, acquisition or sale of assets, in which case this policy continues to apply to the information transferred.</li></ul>"""),
 
 ("Third-party websites and QR codes", """<p>Ads and QR codes on Kiosks and links on the Site may take you to websites run by advertisers or other third parties. Their collection and use of your information is governed by their own privacy policies, not this one.</p>"""),
 
-("How long we keep information", """<p>We keep business contact and campaign records for as long as we have a relationship with you and for a reasonable period afterward to meet legal, tax and accounting requirements. Kiosk usage events are kept in a form that doesn't identify individuals and may be retained for reporting and trend analysis. Phone numbers or email addresses entered to receive a link at a Kiosk are deleted once the link is sent.</p>"""),
+("How long we keep information", """<p>We keep orders, uploaded artwork, business contact and campaign records for as long as we have a relationship with you and for a reasonable period afterward to meet legal, tax and accounting requirements. Kiosk usage events are kept in a form that doesn't identify individuals and may be retained for reporting and trend analysis. Phone numbers or email addresses entered to receive a link at a Kiosk are deleted once the link is sent.</p>"""),
 
 ("Your choices and rights", f"""<p>You can ask us to access, correct or delete personal information we hold about you, or to stop sending you marketing emails, by contacting <a href="mailto:{EMAIL}">{EMAIL}</a>. We'll respond within a reasonable time and may need to verify your identity. We won't discriminate against you for exercising your rights.</p>
 <p>Depending on where you live, including California, you may have additional rights under local law, such as the right to know what categories of personal information we collect and how we use them. This policy describes those categories and uses. As noted above, we don't sell or share personal information for cross-context behavioral advertising.</p>"""),

@@ -91,7 +91,7 @@ def header(active):
     <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav"><span class="sr">Menu</span><i></i><i></i></button>
     <nav id="site-nav" class="site-nav" aria-label="Main">
       {"".join(out)}
-      <a class="btn btn-small header-cta" href="{{R}}campaign-planner/">Plan a campaign</a>
+      <a class="btn btn-small header-cta" href="{{R}}#get-started">Get started — $399</a>
     </nav>
   </div>
 </header>'''
@@ -114,7 +114,7 @@ def footer():
 
 PAGES = []
 
-def page(path, title, desc, body, active=None, kiosk=False):
+def page(path, title, desc, body, active=None, kiosk=False, extra_js=()):
     """path like 'advertise/' or '' for home."""
     depth = path.count("/")
     root = "../" * depth if depth else "./"
@@ -143,6 +143,7 @@ def page(path, title, desc, body, active=None, kiosk=False):
 </main>
 {footer()}
 {'<script src="{R}assets/kiosk.js"></script>' if kiosk else ''}
+{''.join(f'<script src="{{R}}assets/{j}"></script>' for j in extra_js)}
 <script src="{{R}}assets/site.js"></script>
 </body>
 </html>
@@ -485,3 +486,124 @@ def cycle(variant="small"):
   {arr("r1", 0)}{arr("r2", 90)}{arr("r3", 180)}{arr("r4", 270)}
   <span class="cy-hub" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg><span>Every visit</span></span>
 </div>'''
+
+# ---------------------------------------------------------------- markets + map
+import json as _json
+from locations_data import MARKETS
+_MAP = _json.load(open(os.path.join(os.path.dirname(__file__), "usmap.json")))
+
+def market_label(city, ab):
+    return city if city.endswith("D.C.") else f"{city}, {ab}"
+
+def market_options(selected=""):
+    groups = []
+    for st, (ab, cities) in MARKETS.items():
+        opts = "".join(f'<option>{e(market_label(c, ab))}</option>' for c, _, _ in cities)
+        groups.append(f'<optgroup label="{e(st)}">{opts}</optgroup>')
+    return '<option value="">Choose a city</option>' + "".join(groups) + '<option value="other">Somewhere else — I\'ll type it</option>'
+
+def _clusters(radius=14):
+    groups = []
+    for c in _MAP["cities"]:
+        lab = market_label(c["c"], c["ab"])
+        for g in groups:
+            if (g["x"] - c["x"]) ** 2 + (g["y"] - c["y"]) ** 2 < radius ** 2 and g["st"] == c["st"]:
+                g["m"].append(lab); break
+        else:
+            groups.append({"x": c["x"], "y": c["y"], "st": c["st"], "m": [lab]})
+    return groups
+
+def us_map(link=True):
+    paths = "".join(f'<path class="st" data-state="{e(s["name"])}" d="{s["d"]}"><title>{e(s["name"])}</title></path>' for s in _MAP["states"])
+    pins = ""
+    for g in _clusters():
+        n = len(g["m"])
+        name = g["m"][0] if n == 1 else g["m"][0].split(",")[0] + " area"
+        aria = g["m"][0] if n == 1 else f'{name}: {", ".join(g["m"])}'
+        pins += f'<circle class="pin{" multi" if n > 1 else ""}" cx="{g["x"]}" cy="{g["y"]}" r="{5 if n == 1 else 7}" tabindex="0" role="button" data-name="{e(name)}" data-markets="{e("|".join(g["m"]))}" data-state="{e(g["st"])}" aria-label="{e(aria)}"/>'
+    return f'''<div class="usmap" data-usmap>
+  <svg viewBox="0 0 975 610" role="group" aria-label="Map of Spotlight kiosk markets in all 50 states">{paths}<g class="pins">{pins}</g></svg>
+  <div class="map-tip" role="status" hidden><b></b><span class="tip-links"></span></div>
+</div>'''
+
+N_MARKETS = sum(len(c) for _, c in MARKETS.values())
+
+# ---------------------------------------------------------------- self-serve checkout
+CTAS = ["Visit us today", "View the menu", "Book now", "Call us", "Get the offer", "Learn more"]
+def checkout_section():
+    cats = "".join(f"<option>{c}</option>" for c in CATEGORIES)
+    venues = "".join(f"<option>{v}</option>" for v in ["Any venue (fastest)", "Hotels & hospitality", "Golf & country clubs", "Medical offices", "Car dealerships", "Restaurants & venues"])
+    ctas = "".join(f'<option value="{c}">' for c in CTAS)
+    return f'''<section class="section checkout" id="get-started" aria-labelledby="co-title"><div class="wrap">
+  <div class="section-head"><h2 id="co-title">Get on a kiosk today.</h2><p>One location, $399 a year. Pick your city, upload your logo or ad, and check out — it takes about five minutes. Want 3 or 5 locations? <a class="text-link" href="{{R}}pricing/">See packages</a></p></div>
+  <div class="co-grid">
+  <form id="checkout" class="co-form" novalidate data-welcome="{{R}}welcome/">
+    <ol class="co-steps" aria-label="Checkout steps"><li class="on"><span>1</span>Plan</li><li><span>2</span>Business</li><li><span>3</span>Your ad</li><li><span>4</span>Pay</li></ol>
+
+    <fieldset class="co-step" data-step="1"><legend>Choose your plan and city</legend>
+      <div class="co-bill">
+        <label class="co-opt"><input type="radio" name="billing" value="annual" checked><span><b>Yearly — $399</b><small>Best price · about $1.09 a day</small></span></label>
+        <label class="co-opt"><input type="radio" name="billing" value="monthly"><span><b>Monthly — $60/mo</b><small>Billed every month</small></span></label>
+      </div>
+      <label class="field full"><span>City</span><select name="market" required data-label="City">{market_options()}</select><small>{N_MARKETS} cities across all 50 states. We'll confirm the exact venue before your ad goes live.</small></label>
+      <label class="field full" data-other hidden><span>Your city and state</span><input name="market_other" data-label="City (other)" placeholder="e.g. Bakersfield, CA"></label>
+      <div class="grid2">
+        <label class="field"><span>Venue preference</span><select name="venue_type">{venues}</select></label>
+        <label class="field"><span>Start date <span class="opt">(optional)</span></span><input type="date" name="start_date"></label>
+      </div>
+    </fieldset>
+
+    <fieldset class="co-step" data-step="2" hidden><legend>About your business</legend>
+      <div class="grid2">
+        <label class="field"><span>Business name</span><input name="business" required autocomplete="organization" data-label="Business name"></label>
+        <label class="field"><span>Category</span><select name="category"><option value="">Choose one</option>{cats}</select></label>
+        <label class="field"><span>Your name</span><input name="name" required autocomplete="name" data-label="Your name"></label>
+        <label class="field"><span>Email</span><input name="email" type="email" required autocomplete="email" data-label="Email"></label>
+        <label class="field"><span>Phone</span><input name="phone" type="tel" required autocomplete="tel" data-label="Phone"></label>
+        <label class="field"><span>Website <span class="opt">(optional)</span></span><input name="website" type="url" placeholder="https://" autocomplete="url"></label>
+      </div>
+    </fieldset>
+
+    <fieldset class="co-step" data-step="3" hidden><legend>Your ad</legend>
+      <div class="co-bill">
+        <label class="co-opt"><input type="radio" name="ad_source" value="design" checked><span><b>Design it for me</b><small>Included. Send your logo and a headline.</small></span></label>
+        <label class="co-opt"><input type="radio" name="ad_source" value="upload"><span><b>I have a finished ad</b><small>Upload artwork, 1080 × 480 px</small></span></label>
+      </div>
+      <div class="drop" data-drop="logo"><input type="file" name="logo" id="co-logo" accept="image/png,image/jpeg,image/svg+xml,image/webp,application/pdf" data-label="Logo">
+        <label for="co-logo"><b>Upload your logo</b><span>PNG, JPG, SVG or PDF · up to 10 MB</span></label><p class="drop-file" hidden></p></div>
+      <div class="drop" data-drop="artwork" hidden><input type="file" name="artwork" id="co-art" accept="image/png,image/jpeg,image/webp,application/pdf" data-label="Ad artwork">
+        <label for="co-art"><b>Upload your ad artwork</b><span>1080 × 480 px PNG or JPG (a PDF works too) · up to 10 MB</span></label><p class="drop-file" hidden></p></div>
+      <div class="grid2" data-design>
+        <label class="field full"><span>Headline <span class="count" id="co-hl-count">0 of 60</span></span><input name="headline" maxlength="60" placeholder="e.g. A good evening starts nearby." data-label="Headline"></label>
+        <label class="field"><span>Button text</span><input name="cta" list="co-ctas" placeholder="Visit us today"><datalist id="co-ctas">{ctas}</datalist></label>
+        <label class="field"><span>Offer <span class="opt">(optional)</span></span><input name="offer" maxlength="60" placeholder="e.g. 10% off your first visit"></label>
+      </div>
+      <label class="field full"><span>Where should the QR code go? <span class="opt">(optional)</span></span><input name="destination_url" type="url" placeholder="https://yourbusiness.com/offer"><small>Visitors scan it to take your ad home on their phone.</small></label>
+      <label class="field full"><span>Anything else for our designer? <span class="opt">(optional)</span></span><textarea name="notes" rows="3" placeholder="Colors, photos you like, what to avoid…"></textarea></label>
+    </fieldset>
+
+    <fieldset class="co-step" data-step="4" hidden><legend>Review and pay</legend>
+      <dl class="co-review" id="co-review"></dl>
+      <div class="co-total"><span id="co-due-label">Due today</span><b id="co-due">$399</b></div>
+      <label class="ack"><input type="checkbox" name="agree_terms" required data-label="Terms"> <span>I agree to the <a href="{{R}}terms/" target="_blank">Terms &amp; Conditions</a>, including billing and renewal.</span></label>
+      <label class="ack"><input type="checkbox" name="agree_rights" required data-label="Artwork rights"> <span>I own or have permission to use the logo and artwork I'm sending.</span></label>
+      <p class="fine">Payment is handled securely by Stripe. Your card details never touch our site.</p>
+    </fieldset>
+
+    <p class="form-error" role="alert" hidden></p>
+    <div class="co-nav"><button class="btn btn-ghost btn-small" type="button" data-co="back" disabled>Back</button><span class="fine" data-co="label">Step 1 of 4</span><button class="btn" type="button" data-co="next">Continue</button><button class="btn" type="submit" data-co="pay" hidden>Continue to secure payment</button></div>
+  </form>
+
+  <aside class="co-side" aria-label="Your order">
+    <div class="co-preview">
+      <div class="mini co-kiosk" data-finish="black"><div class="mini-head"><div class="mini-screen"><b>Welcome</b><small id="co-venue-name">to a venue near you</small><div class="mini-tiles"><span style="--g:{TILEG["Dining"]}">Dining</span><span style="--g:{TILEG["Events"]}">Events</span><span style="--g:{TILEG["Local guide"]}">Local guide</span><span style="--g:{TILEG["Amenities"]}">Amenities</span></div><div class="co-ad" id="co-ad"></div></div></div><div class="mini-pole"></div><div class="mini-base"></div></div>
+      <div class="co-ad-big" aria-label="Close-up of your ad"><div class="co-ad" id="co-ad-big"></div></div>
+      <p class="fine">Live preview of your ad on the kiosk</p>
+    </div>
+    <dl class="co-sum"><div><dt>Plan</dt><dd id="co-sum-plan">1 location · yearly</dd></div><div><dt>City</dt><dd id="co-sum-city">Not chosen yet</dd></div><div><dt>Total</dt><dd id="co-sum-total">$399/yr</dd></div></dl>
+    <ul class="check-list co-incl"><li>Ad design and copy included</li><li>12 months on screen (or month to month)</li><li>QR code to your website</li><li>Report of views, taps and scans</li></ul>
+  </aside>
+  </div>
+
+  <div class="co-done" id="co-done" hidden tabindex="-1"><h3>Order received.</h3><p></p><div class="btn-row"></div></div>
+</div></section>'''
