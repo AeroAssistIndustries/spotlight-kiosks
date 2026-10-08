@@ -1,5 +1,6 @@
 """Build every page of the Spotlight Kiosks site. Run: python3 build/build.py"""
 from lib import *
+from urllib.parse import quote_plus
 
 # ================================================================ HOME
 home = f'''
@@ -41,36 +42,30 @@ home = f'''
   </div>
 </section>
 
-<section class="section explain" aria-labelledby="explain-title"><div class="wrap explain-grid">
-  <div>
-    <h2 id="explain-title">Never seen kiosk advertising before? Here's the idea.</h2>
-    <p class="lede" style="margin-top:18px">People in a lobby or waiting room have a few minutes and a question: where to eat, what to do, how to get somewhere. Our kiosk answers it — and your ad sits on every screen while they look.</p>
-    <p class="lede" style="margin-top:14px">Unlike a flyer or a billboard, you can see what happened: how often your ad was shown, how many people tapped it and how many took it home on their phone.</p>
-    <div class="roi">
-      <div><b>$1.09</b><span>a day for one location ($399 a year)</span></div>
-      <div><b>$0.66</b><span>a day per location with 5 locations</span></div>
-      <div><b>1</b><span>new regular customer can pay for the whole year</span></div>
-    </div>
-    {btns(("Choose a package","pricing/"),("Try the kiosk","#demo","btn-ghost"))}
+<section class="section journey-sec" aria-labelledby="jy-title"><div class="wrap">
+  <div class="section-head"><h2 id="jy-title">How it works, start to finish.</h2><p>New to kiosk advertising? People in a lobby or waiting room have a few minutes and a question — where to eat, what to do. Our kiosk answers it, and your ad is on every screen while they look.</p></div>
+  {journey()}
+  <div class="roi">
+    <div><b>$1.09</b><span>a day for one location ($399 a year)</span></div>
+    <div><b>~2 days</b><span>from upload to live, typically</span></div>
+    <div><b>1</b><span>new regular customer can pay for the whole year</span></div>
   </div>
-  {cycle("big")}
+  <p class="fine" style="margin-top:12px">Figures in the animation are examples.</p>
 </div></section>
 
 {checkout_section()}
+
+
+
+
+
+{demo_block()}
 
 <section class="section markets" aria-labelledby="mk-title"><div class="wrap">
   {head("Hosts in all 50 states.", f"Kiosks in hotel lobbies, clubhouses, medical offices and dealership lounges in {N_MARKETS} cities, from Anchorage to Miami. Tap a pin to advertise there.", "mk-title")}
   {us_map()}
   <p style="margin-top:18px"><a class="text-link" href="{{R}}locations/">See every market</a></p>
 </div></section>
-
-<nav class="jump" aria-label="Get started"><div class="wrap jump-grid">
-  <a href="{{R}}campaign-planner/"><span class="ico">{icon("mega","")}</span><span><b>Plan a campaign</b><span>A local message with a clear next step. For advertisers.</span></span></a>
-  <a href="{{R}}hosts/"><span class="ico">{icon("home","")}</span><span><b>Host a kiosk</b><span>A useful amenity for your venue. For venue hosts.</span></span></a>
-  <a href="#demo"><span class="ico">{icon("screen","")}</span><span><b>Explore the kiosk</b><span>See the visitor experience in action.</span></span></a>
-</div></nav>
-
-{demo_block()}
 
 <section class="section" style="padding-top:0"><div class="wrap">
   {head("Two ways in. One local connection.", "Start with the opportunity that fits your business or venue.")}
@@ -105,11 +100,7 @@ home = f'''
   {venue_tabs()}
 </div></section>
 
-<section class="section"><div class="wrap">
-  {head("Give the next step a little spotlight.", "How a setting, a simple invitation and a useful destination shape a campaign concept.")}
-  <div class="concepts">{concept_card(IDEAS[0])}{concept_card(IDEAS[7])}</div>
-  <p class="fine" style="margin-top:18px">Example businesses for planning and inspiration. <a class="text-link" href="{{R}}campaign-ideas/">Explore all eight playbooks</a></p>
-</div></section>
+
 
 <section class="section dark"><div class="wrap">
   {head("Give your next idea some room to grow.", "Explore a local campaign, preview a message and bring a clear starting point to the conversation.")}
@@ -120,29 +111,18 @@ home = f'''
   </div>
 </div></section>
 
-<section class="section"><div class="wrap">
-  {head("Start with a place. Build the right fit.", "A useful first conversation, a relevant plan and confirmed details before you commit.")}
-  <ol class="step-list">
-    <li><h3>Find the right fit</h3><p>Share your venue or campaign goals. Review the setting, placement and availability with the team.</p></li>
-    <li><h3>Make it relevant</h3><p>Plan useful venue information or ad creative around the people and the place.</p></li>
-    <li><h3>Confirm the details</h3><p>Review the agreement, setup or campaign scope, timing, and how support and reporting work.</p></li>
-  </ol>
-  <p style="margin-top:24px"><a class="text-link" href="{{R}}how-it-works/">Follow the complete process</a></p>
-</div></section>
+
 
 <section class="section" style="background:#fff;border-top:1px solid var(--line)"><div class="wrap faq-grid">
   <div><h2>A little clarity before you start.</h2><a class="text-link" href="{{R}}faqs/">All common questions</a></div>
   <div class="faq-list">{faq_html([FAQS[0],FAQS[1],FAQS[2],FAQS[5],FAQS[6]])}</div>
 </div></section>
 
-<section class="section" style="padding-top:0;background:#fff"><div class="wrap">
-  <div class="teaser"><div><h2 style="font-size:clamp(30px,3.6vw,44px)">Start local. Plan your reach.</h2><p class="lede" style="margin-top:10px">One location for $399 a year, three for $1,099 or five for $1,200. Or $60 a month.</p></div>
-  <p class="price"><span>$399</span>/ year</p><a class="btn btn-dark" href="{{R}}pricing/">Explore pricing</a></div>
-</div></section>
+
 
 {cta_band()}
 '''
-page("", "Turn wait time into opportunity", "Touch-screen kiosks that give visitors useful venue information and put local businesses in front of them. Free for qualified venues. Local ads from $399 a year or $60 a month.", home, active="", kiosk=True, extra_js=("config.js", "checkout.js"))
+page("", "Turn wait time into opportunity", "Touch-screen kiosks that give visitors useful venue information and put local businesses in front of them. Free for qualified venues. Local ads from $399 a year or $60 a month.", home, active="", kiosk=True, extra_js=("checkout.js",))
 
 # ================================================================ THE KIOSK
 kiosk_page = page_hero([("The kiosk","kiosk/")], "One screen. A world of possibility.",
@@ -351,7 +331,7 @@ page("audience/", "Who you can reach", "Hotel guests, club members, patients and
 # ================================================================ LOCATIONS
 loc_groups = ""
 for state, (ab, cities) in MARKETS.items():
-    lis = "".join(f'<li data-item data-cat="{ab}"><span>{e(market_label(c, ab))}</span><a href="{{R}}?market={e(market_label(c, ab)).replace(" ", "+").replace(",", "%2C")}#get-started">Advertise here</a></li>' for c, _, _ in cities)
+    lis = "".join(f'<li data-item data-cat="{ab}"><span>{e(market_label(c, ab))}</span><a href="{{R}}?market={quote_plus(market_label(c, ab))}#get-started">Advertise here</a></li>' for c, _, _ in cities)
     loc_groups += f'<div class="loc-group" data-group><h3>{state}</h3><ul class="loc-list">{lis}</ul></div>'
 state_opts = '<option value="all">All states</option>' + "".join(f'<option value="{ab}">{st}</option>' for st, (ab, _) in MARKETS.items())
 locations = page_hero([("Advertise","advertise/"),("Locations","locations/")], "Hosts in all 50 states.",
@@ -563,9 +543,12 @@ contact = page_hero([("Contact","contact/")], "Let's start a conversation.",
 <section class="section"><div class="wrap"><div class="contact-cards">
   <div class="card"><span class="kind">New opportunities</span><h3>Sales & partnerships</h3><p>Host opportunities, advertising placements and market availability.</p><a class="text-link" href="mailto:{EMAIL}">{EMAIL}</a></div>
   <div class="card"><span class="kind">Existing kiosks</span><h3>Service & support</h3><p>Equipment, content changes or an existing campaign.</p><a class="text-link" href="{{R}}support/">Get support</a></div>
-  <div class="card"><span class="kind">Call Spotlight</span><h3><a href="tel:{TEL}" style="text-decoration:none">{PHONE}</a></h3><p>Mailing address<br>2150 N 1st St, Suite 432<br>San Jose, CA 95131</p></div>
+  <div class="card"><span class="kind">Call Spotlight</span><h3><a href="tel:{TEL}" style="text-decoration:none">{PHONE}</a></h3><p>Office<br>4750 S 44th Pl, Suite E20<br>Phoenix, AZ 85040</p><p style="margin-top:8px"><a class="text-link" href="https://maps.google.com/?q=4750+S+44th+Pl+Suite+E20+Phoenix+AZ+85040" target="_blank" rel="noopener">Get directions</a></p></div>
 </div>
-<h2 style="font-size:28px;margin:56px 0 16px">Prefer a structured inquiry?</h2>
+</div></section>
+{form_section("message", "Send us a message.", "Questions about advertising, hosting a kiosk or an existing campaign — we'll get back to you within one business day.", ["Tell us what you need", "We reply by email or phone", "We set up the next step"], draft_form("contact-form", EMAIL, "Website message", [("Your message", [field("Your name", "Contact name", required=True), field("Email", "Email", "email", required=True), field("Phone", "Phone", "tel", opt=True), field("Business or venue", "Business", opt=True), field("What's this about?", "Topic", "select", options=["Advertising on a kiosk", "Hosting a kiosk", "Support for an existing kiosk or ad", "Partnerships", "Something else"], full=True), field("Message", "Message", "textarea", full=True, required=True)])], "It's okay for Spotlight to contact me about this message.", "Send message"), dark=True)}
+<section class="section"><div class="wrap">
+<h2 style="font-size:28px;margin:0 0 16px">Prefer a structured inquiry?</h2>
 <div class="cards"><a class="card" href="{{R}}hosts/#inquiry"><h3>Request a kiosk</h3><p>Tell us about your venue.</p></a><a class="card" href="{{R}}advertise/#inquiry"><h3>Plan an advertising campaign</h3><p>Share your market and goal.</p></a><a class="card" href="{{R}}support/#request"><h3>Prepare a support request</h3><p>For existing kiosks and campaigns.</p></a></div>
 </div></section>'''
 page("contact/", "Contact Spotlight", f"Contact Spotlight Kiosks sales and support. {EMAIL} · {PHONE}.", contact)

@@ -42,11 +42,11 @@
   <fieldset><legend>Your request</legend><label class="field"><span>Venue or business name</span><input type="text" name="Venue / business" required></label><label class="field"><span>What can we help with?</span><select name="Request type" required><option value="">Choose an option</option><option>Kiosk equipment</option><option>Venue information / content</option><option>Advertising creative / campaign</option><option>Installation question</option><option>Other</option></select></label><label class="field"><span>City / state</span><input type="text" name="City / state"></label><label class="field"><span>Kiosk or campaign reference <span class="opt">(optional)</span></span><input type="text" name="Reference"></label><label class="field full"><span>Describe your request</span><textarea name="Details" rows="4" required></textarea></label></fieldset><fieldset><legend>Your contact details</legend><label class="field"><span>Your name</span><input type="text" name="Contact name" required autocomplete="name"></label><label class="field"><span>Email</span><input type="email" name="Email" required autocomplete="email"></label><label class="field"><span>Phone <span class="opt">(optional)</span></span><input type="tel" name="Phone" autocomplete="tel"></label></fieldset>
   <label class="ack"><input type="checkbox" name="ack" required> <span>I'll keep patient information, passwords and payment details out of this request.</span></label>
   <p class="form-error" role="alert" hidden></p>
-  <div class="form-foot"><button class="btn" type="submit">Review my request</button><span class="fine">Nothing is sent until you send it from your email app.</span></div>
+  <div class="form-foot"><button class="btn" type="submit">Review my request</button><span class="fine">We reply within one business day.</span></div>
 </form>
 <div class="draft-review" id="support-form-review" hidden>
   <h3 tabindex="-1">Your email is ready.</h3>
-  <p>Check the details, then open it in your email app and press send. You can also copy or save it.</p>
+  <p class="review-lede">Check the details, then open it in your email app and press send. You can also copy or save it.</p>
   <pre></pre>
   <div class="btn-row"><button class="btn" type="button" data-draft="open">Open in email</button><button class="btn btn-ghost" type="button" data-draft="copy">Copy text</button><button class="btn btn-ghost" type="button" data-draft="download">Download</button><button class="btn btn-ghost" type="button" data-draft="edit">Edit details</button></div>
   <p class="copied" role="status"></p>
@@ -61,12 +61,15 @@
     <div><h2>Keep it useful</h2><nav aria-label="Keep it useful"><a href="../hosts/#inquiry">Request a kiosk</a><a href="../resources/">Guides & resources</a><a href="../media-kit/">Media overview</a><a href="../faqs/">Common questions</a><a href="../contact/">Contact Spotlight</a><a href="../support/">Help & support</a></nav></div>
     <div class="footer-talk"><h2>Let's talk</h2>
       <a class="big" href="mailto:sales@spotlightkiosks.com">sales@spotlightkiosks.com</a><a class="big" href="tel:+16028874058">602-887-4058</a>
+      <p class="footer-addr">4750 S 44th Pl, Suite E20<br>Phoenix, AZ 85040</p>
       <p class="socials"><a href="https://www.instagram.com/spotlightkiosks/" rel="noopener" target="_blank">Instagram</a><a href="https://www.linkedin.com/company/spotlight-kiosks/" rel="noopener" target="_blank">LinkedIn</a><a href="https://www.facebook.com/profile.php?id=61581139512802" rel="noopener" target="_blank">Facebook</a><a href="https://x.com/spotlightkiosks" rel="noopener" target="_blank">X</a></p>
     </div>
   </div>
   <div class="wrap footer-base"><span>© <span id="year">2026</span> Spotlight Kiosks. All rights reserved.</span><nav aria-label="Legal"><a href="../privacy/">Privacy Policy</a><a href="../terms/">Terms &amp; Conditions</a></nav></div>
 </footer>
 
+<script src="../assets/config.js"></script>
+<script src="../assets/integrations.js"></script>
 
 <script src="../assets/site.js"></script>
 </body>

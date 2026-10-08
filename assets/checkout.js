@@ -1,9 +1,8 @@
 /* Spotlight Kiosks — self-serve checkout for one location.
-   Order details and files go to Formspree; payment happens on Stripe.
-   Settings live in assets/config.js. */
+   Order details and files are delivered by the form service and payment happens
+   on the hosted payment link — both set in assets/config.js, sent via assets/integrations.js. */
 (function () {
   "use strict";
-  const CFG = window.SPOTLIGHT_CONFIG || {};
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -15,8 +14,9 @@
   /* ---------- welcome page: show the order number ---------- */
   const wo = $("#welcome-order");
   if (wo) {
-    const o = store.get("spotlight-order");
-    if (o) { wo.textContent = `Order ${o.id} · ${o.plan} · ${o.market}`; wo.hidden = false; }
+    const o = store.get("spotlight-order"), q = new URLSearchParams(location.search).get("order");
+    if (o && (!q || q === o.id)) { wo.textContent = `Order ${o.id} · ${o.plan} · ${o.market}`; wo.hidden = false; }
+    else if (q) { wo.textContent = `Order ${q}`; wo.hidden = false; }
     return;
   }
 
@@ -25,7 +25,7 @@
   const steps = $$(".co-step", form), marks = $$(".co-steps li", form);
   const err = $(".form-error", form);
   const back = $("[data-co=back]", form), next = $("[data-co=next]", form), pay = $("[data-co=pay]", form), label = $("[data-co=label]", form);
-  const MAX = 10 * 1024 * 1024;
+  const MAXMB = (window.Spotlight && window.Spotlight.maxUploadMB) || 5, MAX = MAXMB * 1024 * 1024;
   const files = { logo: null, artwork: null };
   let cur = 0;
 
@@ -87,7 +87,7 @@
     const box = input.closest(".drop"), out = $(".drop-file", box), key = box.dataset.drop;
     input.addEventListener("change", () => {
       const f = input.files[0];
-      if (f && f.size > MAX) { input.value = ""; files[key] = null; out.hidden = false; out.className = "drop-file bad"; out.textContent = `${f.name} is over 10 MB. Try a smaller file.`; preview(); return; }
+      if (f && f.size > MAX) { input.value = ""; files[key] = null; out.hidden = false; out.className = "drop-file bad"; out.textContent = `${f.name} is over ${MAXMB} MB. Try a smaller file, or email it to us after checkout.`; preview(); return; }
       files[key] = f || null;
       if (key === "logo") { if (logoURL) URL.revokeObjectURL(logoURL); logoURL = url(f); }
       else { if (artURL) URL.revokeObjectURL(artURL); artURL = url(f); }
@@ -163,49 +163,47 @@
   marks.forEach((m, j) => m.addEventListener("click", () => { if (j < cur) go(j); }));
 
   /* ---------- submit ---------- */
-  const stripeLink = () => (billing() === "annual" ? CFG.stripeYearly : CFG.stripeMonthly) || "";
+  const API = window.Spotlight || { formsReady: () => false, paymentLink: () => "", sendWithFiles: async () => false };
+  const planKey = () => billing() === "annual" ? "yearly" : "monthly";
+  const stripeLink = () => API.paymentLink(planKey(), "", "");
   function orderId() { const d = new Date(); return "SK-" + d.toISOString().slice(2, 10).replace(/-/g, "") + "-" + Math.random().toString(36).slice(2, 6).toUpperCase(); }
 
   form.addEventListener("submit", async e => {
     e.preventDefault();
     if (!validate(3)) return;
-    const id = orderId();
-    const fd = new FormData(form);
-    if (!files.logo) fd.delete("logo");
-    if (!files.artwork || adSource() !== "upload") fd.delete("artwork");
-    fd.set("market", market()); fd.delete("market_other");
-    fd.set("order_id", id); fd.set("plan", planText());
-    fd.set("_subject", `New kiosk order ${id} — ${form.elements.business.value} (${market()})`);
+    const id = orderId(), email = form.elements.email.value.trim();
     const order = { id, plan: planText(), market: market(), business: form.elements.business.value };
     store.set("spotlight-order", order);
-    pay.disabled = true; const old = pay.textContent; pay.textContent = "Sending your order…";
+    const link = API.paymentLink(planKey(), email, id);
+    const welcome = new URL(form.dataset.welcome, location.href); welcome.searchParams.set("order", id);
+    const next = link || welcome.toString();
+    const extra = {
+      _subject: `New kiosk order ${id} — ${order.business} (${order.market})`, _replyto: email,
+      order_id: id, plan: planText(), market: order.market, payment: link ? "Sent to online payment" : "Invoice the customer"
+    };
 
-    if (CFG.formspree) {
-      try {
-        const r = await fetch(CFG.formspree, { method: "POST", body: fd, headers: { Accept: "application/json" } });
-        if (!r.ok) throw new Error(String(r.status));
-      } catch (x) {
-        pay.disabled = false; pay.textContent = old;
-        fail(null, `We couldn't send your order just now. Please try again, or email ${"sales@spotlightkiosks.com"} with order ${id}.`);
-        return;
+    if (API.formsReady()) {
+      // name the main upload "attachment" so every form service treats it as a file attachment
+      const logo = $("#co-logo"), art = $("#co-art"), sel = form.elements.market;
+      const useArt = adSource() === "upload" && files.artwork;
+      art.name = useArt ? "attachment" : "artwork"; art.disabled = !useArt;
+      logo.name = useArt ? "attachment_logo" : "attachment"; logo.disabled = !files.logo;
+      sel.name = "market_choice"; form.elements.market_other && (form.elements.market_other.disabled = true);
+      pay.disabled = true; const old = pay.textContent; pay.textContent = link ? "Sending your order, then on to payment…" : "Sending your order…";
+      const ok = await API.sendWithFiles(form, extra, next);
+      if (!ok) {
+        pay.disabled = false; pay.textContent = old; art.disabled = logo.disabled = false; sel.name = "market";
+        fail(null, `We couldn't send your order just now. Please try again, or email sales@spotlightkiosks.com with order ${id}.`);
       }
-    }
-    const link = stripeLink();
-    if (link) {
-      const u = new URL(link);
-      u.searchParams.set("prefilled_email", form.elements.email.value.trim());
-      u.searchParams.set("client_reference_id", id);
-      location.href = u.toString();
       return;
     }
-    // No payment link yet: confirm the order and offer an email copy
-    const lines = [...fd.entries()].filter(([k, v]) => typeof v === "string" && !k.startsWith("_") && !k.startsWith("agree") && v).map(([k, v]) => `${k.replace(/_/g, " ")}: ${v}`);
-    const mail = `mailto:sales@spotlightkiosks.com?subject=${encodeURIComponent(`Kiosk order ${id} — ${order.business}`)}&body=${encodeURIComponent(`Hello Spotlight team,\n\n${lines.join("\n")}\n\n(I'll attach my logo/artwork to this email.)`)}`;
+    // Forms aren't connected yet: hand the order over by email, then offer payment if a link exists
+    const fd = new FormData(form); fd.set("market", market());
+    const lines = [`Order: ${id}`, `Plan: ${planText()}`].concat([...fd.entries()].filter(([k, v]) => typeof v === "string" && v && !/^(_|agree|billing|market_other)/.test(k)).map(([k, v]) => `${k.replace(/_/g, " ")}: ${v}`));
+    const mail = `mailto:sales@spotlightkiosks.com?subject=${encodeURIComponent(`Kiosk order ${id} — ${order.business}`)}&body=${encodeURIComponent(`Hello Spotlight team,\n\n${lines.join("\n")}\n\n(My logo/artwork is attached.)`)}`;
     const done = $("#co-done");
-    $("p", done).innerHTML = CFG.formspree
-      ? `Your order number is <b>${id}</b>. We've received your details and files, and we'll email your invoice for ${esc(planText())} shortly.`
-      : `Your order number is <b>${id}</b>. Send it to us to finish: the email below has your details filled in — just attach your logo or artwork and press send.`;
-    $(".btn-row", done).innerHTML = CFG.formspree ? `<a class="btn" href="${form.dataset.welcome}">See what happens next</a>` : `<a class="btn" href="${mail}">Open the email</a><a class="btn btn-ghost" href="${form.dataset.welcome}">What happens next</a>`;
+    $("p", done).innerHTML = `Your order number is <b>${id}</b>. One last step: send us the email below with your logo or artwork attached${link ? ", then complete payment" : ""}.`;
+    $(".btn-row", done).innerHTML = `<a class="btn" href="${mail}">Open the email</a>${link ? `<a class="btn btn-dark" href="${link}">Continue to payment</a>` : ""}<a class="btn btn-ghost" href="${welcome}">What happens next</a>`;
     form.closest(".co-grid").hidden = true; done.hidden = false; done.focus();
   });
 

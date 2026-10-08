@@ -110,6 +110,36 @@
     }));
   });
 
+  /* ---------- customer journey ---------- */
+  $$("[data-journey]").forEach(j => {
+    const stages = $$(".js", j), rail = $$(".jr", j), DUR = 3400;
+    let i = 0, t = null, paused = false, vis = true;
+    function countUp(stage) {
+      $$("[data-count-to]", stage).forEach(el => {
+        const to = +el.dataset.countTo, t0 = performance.now();
+        const step = now => { const k = Math.min(1, (now - t0) / 1400); el.textContent = Math.round(to * (1 - Math.pow(1 - k, 3))).toLocaleString(); if (k < 1) requestAnimationFrame(step); };
+        if (reduceMotion) el.textContent = to.toLocaleString(); else requestAnimationFrame(step);
+      });
+    }
+    function show(n) {
+      i = (n + stages.length) % stages.length;
+      stages.forEach((s, k) => { s.classList.remove("on"); s.setAttribute("aria-hidden", String(k !== i)); });
+      void j.offsetWidth;
+      stages[i].classList.add("on");
+      rail.forEach((r, k) => { r.classList.toggle("on", k === i); r.classList.toggle("done", k < i); $("button", r).setAttribute("aria-current", k === i ? "step" : "false"); });
+      countUp(stages[i]);
+      j.classList.remove("run"); void j.offsetWidth;
+      if (!reduceMotion && !paused) { j.style.setProperty("--jdur", DUR + "ms"); j.classList.add("run"); }
+      const act = rail[i]; if (act && act.parentElement.scrollWidth > act.parentElement.clientWidth) act.parentElement.scrollTo({ left: act.offsetLeft - 16, behavior: "smooth" });
+    }
+    function tick() { clearTimeout(t); if (reduceMotion) return; t = setTimeout(() => { if (!paused && vis && !document.hidden) show(i + 1); tick(); }, DUR); }
+    rail.forEach((r, k) => $("button", r).addEventListener("click", () => { show(k); tick(); }));
+    j.addEventListener("mouseenter", () => { paused = true; j.classList.remove("run"); });
+    j.addEventListener("mouseleave", () => { paused = false; show(i); tick(); });
+    if ("IntersectionObserver" in window) new IntersectionObserver(es => { const was = vis; vis = es[0].isIntersecting; if (vis && !was) { show(0); tick(); } }, { threshold: .35 }).observe(j);
+    show(0); tick();
+  });
+
   /* ---------- tabs ---------- */
   $$("[data-tabs]").forEach(root => {
     const tabs = $$("[role=tab]", root);
@@ -171,7 +201,7 @@
       const l = el.closest("label"); if (!l) return el.name;
       const c = l.cloneNode(true); $$("input,select,textarea,small,.opt", c).forEach(x => x.remove()); return c.textContent.trim();
     }
-    form.addEventListener("submit", e => {
+    form.addEventListener("submit", async e => {
       e.preventDefault();
       let bad = null;
       $$("[aria-invalid]", form).forEach(x => x.removeAttribute("aria-invalid"));
@@ -184,18 +214,31 @@
         err.hidden = false; bad.focus(); return;
       }
       err.hidden = true;
-      const lines = [];
+      const lines = [], fields = {};
       $$("input,select,textarea", form).forEach(el => {
         if (!el.name || el.type === "checkbox" || el.type === "radio" && !el.checked) return;
         const v = el.value.trim(); if (!v) return;
         const L = labelFor(el).replace(/[?:]$/, "");
         lines.push(el.tagName === "TEXTAREA" ? `\n${L}:\n${v}` : `${L}: ${v}`);
+        if (el.type === "email") fields.email = v; else fields[L] = v;
       });
       const nameField = form.elements[form.dataset.subjectField || "Business"] || form.elements["Venue name"] || form.elements["Venue / business"];
       const subject = form.dataset.subject + (nameField && nameField.value.trim() ? ` — ${nameField.value.trim()}` : "");
       const body = `Hello Spotlight team,\n\n${lines.join("\n")}\n\nThank you.`;
       review.dataset.subject = subject; review.dataset.body = body;
       $("pre", review).textContent = `To: ${form.dataset.to}\nSubject: ${subject}\n\n${body}`;
+      const btn = $("button[type=submit]", form), api = window.Spotlight;
+      let sent = false;
+      if (api && api.formsReady()) {
+        btn.disabled = true; const t = btn.textContent; btn.textContent = "Sending…";
+        sent = await api.send(Object.assign({ _subject: subject }, fields));
+        btn.disabled = false; btn.textContent = t;
+      }
+      review.classList.toggle("sent", sent);
+      $("h3", review).textContent = sent ? "Thanks — your message is on its way." : "Your email is ready.";
+      $(".review-lede", review).textContent = sent
+        ? `We'll reply to ${fields.email || "you"} within one business day. Need us sooner? Call 602-887-4058.`
+        : (api && api.formsReady() ? "We couldn't send it automatically just now. Open it in your email app and press send — or copy it." : "Check the details, then open it in your email app and press send. You can also copy or save it.");
       form.hidden = true; review.hidden = false; review.scrollIntoView({ behavior: "smooth", block: "start" });
       $("h3", review).focus();
     });

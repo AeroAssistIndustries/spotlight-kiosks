@@ -81,11 +81,11 @@
   <fieldset><legend>Your campaign</legend><label class="field"><span>Business name</span><input type="text" name="Business" required></label><label class="field"><span>Business category</span><select name="Category"><option value="">Choose an option</option><option>Dining &amp; entertainment</option><option>Medical &amp; wellness</option><option>Automotive services</option><option>Retail &amp; lifestyle</option><option>Travel &amp; local experiences</option><option>Professional services</option><option>Events &amp; community</option><option>Other</option></select></label><label class="field"><span>Target city / state</span><input type="text" name="Target city / state" required placeholder="e.g. Phoenix, AZ"></label><label class="field"><span>Placement interest</span><select name="Placement"><option value="">Choose an option</option><option>Help me choose</option><option>Kiosk ad space (lower screen)</option><option>Featured banner</option><option>Rotating panel</option><option>QR offer tile</option></select></label><label class="field"><span>Campaign goal</span><select name="Goal"><option value="">Choose an option</option><option>Local awareness</option><option>Visits / local discovery</option><option>Offer / QR engagement</option><option>Calls / inquiries</option><option>Other</option></select></label><label class="field"><span>Pricing</span><select name="Pricing"><option value="">Choose an option</option><option>Help me choose</option><option>1 location — $399/yr</option><option>3 locations — $1,099/yr</option><option>5 locations — $1,200/yr</option><option>More than 5 locations — $1,200 + $300 per extra location/yr</option><option>Monthly — $60 per location per month</option></select></label><label class="field"><span>Desired start date <span class="opt">(optional)</span></span><input type="date" name="Desired start date"></label></fieldset><fieldset><legend>Your contact details</legend><label class="field"><span>Your name</span><input type="text" name="Contact name" required autocomplete="name"></label><label class="field"><span>Email</span><input type="email" name="Email" required autocomplete="email"></label><label class="field"><span>Phone <span class="opt">(optional)</span></span><input type="tel" name="Phone" autocomplete="tel"></label><label class="field"><span>Website <span class="opt">(optional)</span></span><input type="url" name="Website" placeholder="https://" autocomplete="url"></label><label class="field full"><span>Anything else we should know? <span class="opt">(optional)</span></span><textarea name="Notes" rows="4"></textarea></label></fieldset>
   <label class="ack"><input type="checkbox" name="ack" required> <span>I understand placement availability, pricing and campaign terms are confirmed by the Spotlight team.</span></label>
   <p class="form-error" role="alert" hidden></p>
-  <div class="form-foot"><button class="btn" type="submit">Review my inquiry</button><span class="fine">Nothing is sent until you send it from your email app.</span></div>
+  <div class="form-foot"><button class="btn" type="submit">Review my inquiry</button><span class="fine">We reply within one business day.</span></div>
 </form>
 <div class="draft-review" id="inquiry-form-review" hidden>
   <h3 tabindex="-1">Your email is ready.</h3>
-  <p>Check the details, then open it in your email app and press send. You can also copy or save it.</p>
+  <p class="review-lede">Check the details, then open it in your email app and press send. You can also copy or save it.</p>
   <pre></pre>
   <div class="btn-row"><button class="btn" type="button" data-draft="open">Open in email</button><button class="btn btn-ghost" type="button" data-draft="copy">Copy text</button><button class="btn btn-ghost" type="button" data-draft="download">Download</button><button class="btn btn-ghost" type="button" data-draft="edit">Edit details</button></div>
   <p class="copied" role="status"></p>
@@ -100,12 +100,15 @@
     <div><h2>Keep it useful</h2><nav aria-label="Keep it useful"><a href="../hosts/#inquiry">Request a kiosk</a><a href="../resources/">Guides & resources</a><a href="../media-kit/">Media overview</a><a href="../faqs/">Common questions</a><a href="../contact/">Contact Spotlight</a><a href="../support/">Help & support</a></nav></div>
     <div class="footer-talk"><h2>Let's talk</h2>
       <a class="big" href="mailto:sales@spotlightkiosks.com">sales@spotlightkiosks.com</a><a class="big" href="tel:+16028874058">602-887-4058</a>
+      <p class="footer-addr">4750 S 44th Pl, Suite E20<br>Phoenix, AZ 85040</p>
       <p class="socials"><a href="https://www.instagram.com/spotlightkiosks/" rel="noopener" target="_blank">Instagram</a><a href="https://www.linkedin.com/company/spotlight-kiosks/" rel="noopener" target="_blank">LinkedIn</a><a href="https://www.facebook.com/profile.php?id=61581139512802" rel="noopener" target="_blank">Facebook</a><a href="https://x.com/spotlightkiosks" rel="noopener" target="_blank">X</a></p>
     </div>
   </div>
   <div class="wrap footer-base"><span>© <span id="year">2026</span> Spotlight Kiosks. All rights reserved.</span><nav aria-label="Legal"><a href="../privacy/">Privacy Policy</a><a href="../terms/">Terms &amp; Conditions</a></nav></div>
 </footer>
 
+<script src="../assets/config.js"></script>
+<script src="../assets/integrations.js"></script>
 
 <script src="../assets/site.js"></script>
 </body>

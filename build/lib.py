@@ -7,6 +7,8 @@ EMAIL = "sales@spotlightkiosks.com"
 SUPPORT = "support@spotlightkiosks.com"
 PHONE = "602-887-4058"
 TEL = "+16028874058"
+ADDR1 = "4750 S 44th Pl, Suite E20"
+ADDR2 = "Phoenix, AZ 85040"
 OUT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 e = html.escape
 
@@ -26,6 +28,10 @@ _IC = {
   "tap": '<path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11m0-1.5a1.5 1.5 0 0 1 3 0V12m0-1a1.5 1.5 0 0 1 3 0v3.5a6.5 6.5 0 0 1-6.5 6.5h-.6a6 6 0 0 1-4.6-2.2L4.6 14.6a1.6 1.6 0 0 1 2.4-2.1L9 14"/>',
   "chart": '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
   "trend": '<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+  "upload": '<path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/>',
+  "clock": '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  "dash": '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 13v4M12 12v5M16 14v3"/>',
+  "users": '<circle cx="8" cy="8" r="3"/><path d="M2.5 19c.5-3 2.6-5 5.5-5s5 2 5.5 5"/><path d="M17 8v6M14 11h6"/>',
   "arrow": '<path d="M5 12h14M13 6l6 6-6 6"/>',
   "arrowl": '<path d="M19 12H5M11 6l-6 6 6 6"/>',
   "wrench": '<path d="M14.5 6.5a4 4 0 0 0 5 5L12 19a2.1 2.1 0 0 1-3-3l7.5-7.5"/><path d="M14.5 6.5L17 4l3 3-2.5 2.5"/>',
@@ -106,6 +112,7 @@ def footer():
     {col("Keep it useful", [("Request a kiosk","hosts/#inquiry"),("Guides & resources","resources/"),("Media overview","media-kit/"),("Common questions","faqs/"),("Contact Spotlight","contact/"),("Help & support","support/")])}
     <div class="footer-talk"><h2>Let's talk</h2>
       <a class="big" href="mailto:{EMAIL}">{EMAIL}</a><a class="big" href="tel:{TEL}">{PHONE}</a>
+      <p class="footer-addr">{ADDR1}<br>{ADDR2}</p>
       <p class="socials"><a href="https://www.instagram.com/spotlightkiosks/" rel="noopener" target="_blank">Instagram</a><a href="https://www.linkedin.com/company/spotlight-kiosks/" rel="noopener" target="_blank">LinkedIn</a><a href="https://www.facebook.com/profile.php?id=61581139512802" rel="noopener" target="_blank">Facebook</a><a href="https://x.com/spotlightkiosks" rel="noopener" target="_blank">X</a></p>
     </div>
   </div>
@@ -143,6 +150,8 @@ def page(path, title, desc, body, active=None, kiosk=False, extra_js=()):
 </main>
 {footer()}
 {'<script src="{R}assets/kiosk.js"></script>' if kiosk else ''}
+<script src="{{R}}assets/config.js"></script>
+<script src="{{R}}assets/integrations.js"></script>
 {''.join(f'<script src="{{R}}assets/{j}"></script>' for j in extra_js)}
 <script src="{{R}}assets/site.js"></script>
 </body>
@@ -293,11 +302,11 @@ def draft_form(fid, to, subject, fieldsets, ack, button, handoff=False, subject_
   {fs}
   <label class="ack"><input type="checkbox" name="ack" required> <span>{ack}</span></label>
   <p class="form-error" role="alert" hidden></p>
-  <div class="form-foot"><button class="btn" type="submit">{button}</button><span class="fine">Nothing is sent until you send it from your email app.</span></div>
+  <div class="form-foot"><button class="btn" type="submit">{button}</button><span class="fine">We reply within one business day.</span></div>
 </form>
 <div class="draft-review" id="{fid}-review" hidden>
   <h3 tabindex="-1">Your email is ready.</h3>
-  <p>Check the details, then open it in your email app and press send. You can also copy or save it.</p>
+  <p class="review-lede">Check the details, then open it in your email app and press send. You can also copy or save it.</p>
   <pre></pre>
   <div class="btn-row"><button class="btn" type="button" data-draft="open">Open in email</button><button class="btn btn-ghost" type="button" data-draft="copy">Copy text</button><button class="btn btn-ghost" type="button" data-draft="download">Download</button><button class="btn btn-ghost" type="button" data-draft="edit">Edit details</button></div>
   <p class="copied" role="status"></p>
@@ -570,9 +579,9 @@ def checkout_section():
         <label class="co-opt"><input type="radio" name="ad_source" value="upload"><span><b>I have a finished ad</b><small>Upload artwork, 1080 × 480 px</small></span></label>
       </div>
       <div class="drop" data-drop="logo"><input type="file" name="logo" id="co-logo" accept="image/png,image/jpeg,image/svg+xml,image/webp,application/pdf" data-label="Logo">
-        <label for="co-logo"><b>Upload your logo</b><span>PNG, JPG, SVG or PDF · up to 10 MB</span></label><p class="drop-file" hidden></p></div>
+        <label for="co-logo"><b>Upload your logo</b><span>PNG, JPG, SVG or PDF · up to 5 MB</span></label><p class="drop-file" hidden></p></div>
       <div class="drop" data-drop="artwork" hidden><input type="file" name="artwork" id="co-art" accept="image/png,image/jpeg,image/webp,application/pdf" data-label="Ad artwork">
-        <label for="co-art"><b>Upload your ad artwork</b><span>1080 × 480 px PNG or JPG (a PDF works too) · up to 10 MB</span></label><p class="drop-file" hidden></p></div>
+        <label for="co-art"><b>Upload your ad artwork</b><span>1080 × 480 px PNG or JPG (a PDF works too) · up to 5 MB</span></label><p class="drop-file" hidden></p></div>
       <div class="grid2" data-design>
         <label class="field full"><span>Headline <span class="count" id="co-hl-count">0 of 60</span></span><input name="headline" maxlength="60" placeholder="e.g. A good evening starts nearby." data-label="Headline"></label>
         <label class="field"><span>Button text</span><input name="cta" list="co-ctas" placeholder="Visit us today"><datalist id="co-ctas">{ctas}</datalist></label>
@@ -607,3 +616,40 @@ def checkout_section():
 
   <div class="co-done" id="co-done" hidden tabindex="-1"><h3>Order received.</h3><p></p><div class="btn-row"></div></div>
 </div></section>'''
+
+# ---------------------------------------------------------------- customer journey (animated)
+JOURNEY = [
+  ("pin", "Pick your kiosk location", "Choose a city — we have hosts in all 50 states."),
+  ("upload", "Upload your ad", "Send a finished ad, or just your logo and we'll design it."),
+  ("clock", "Live in about 2 days", "We review it, place it and switch it on — typically within two days."),
+  ("eye", "Guests see your ad", "Hotel guests, golfers, patients and customers browse the kiosk every day."),
+  ("chart", "You get the numbers", "Views, taps and QR scans — counted for you."),
+  ("dash", "Your own dashboard", "See how your ad is doing, any time, in one place."),
+  ("users", "More customers", "Visitors walk through your door. That's the whole point."),
+]
+def _scene(i):
+    if i == 0:
+        dots = "".join(f'<i style="left:{x}%;top:{y}%"></i>' for x, y in [(14,30),(30,58),(44,26),(58,48),(70,22),(82,62),(24,74),(66,78),(88,36)])
+        return f'<div class="sc sc-map">{dots}<span class="sc-pin">{icon("pin","")}<em>Phoenix, AZ</em></span></div>'
+    if i == 1:
+        return f'<div class="sc sc-upload"><span class="sc-file">{icon("upload","")}<em>my-ad.png</em></span><span class="sc-strip"><b>YOUR AD</b></span><span class="sc-bar"><i></i></span></div>'
+    if i == 2:
+        days = "".join(f'<span class="d{n}"><small>{d}</small><b>{n+1}</b></span>' for n, d in enumerate(["Mon", "Tue", "Wed"]))
+        return f'<div class="sc sc-live"><div class="sc-days">{days}</div><span class="sc-badge">Live</span></div>'
+    if i == 3:
+        ppl = "".join(f'<i style="--d:{n*0.12}s">{icon("eye","")}</i>' for n in range(6))
+        return f'<div class="sc sc-eyes"><div class="sc-ppl">{ppl}</div><p><b data-count-to="1284">0</b> views this month</p></div>'
+    if i == 4:
+        bars = "".join(f'<div><span>{l}</span><i style="--w:{w}%"></i><b>{v}</b></div>' for l, w, v in [("Views", 92, "1,284"), ("Taps", 46, "212"), ("QR scans", 22, "64")])
+        return f'<div class="sc sc-bars">{bars}</div>'
+    if i == 5:
+        return '<div class="sc sc-dash"><div class="sc-win"><span class="sc-top"><i></i><i></i><i></i></span><div class="sc-kpis"><b>1,284<small>views</small></b><b>212<small>taps</small></b><b>64<small>scans</small></b></div><svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0 52 L25 46 L50 48 L75 36 L100 38 L125 26 L150 28 L175 14 L200 10"/></svg></div></div>'
+    return f'<div class="sc sc-shop"><span class="sc-door">{icon("home","")}</span>' + "".join(f'<i style="--d:{n*0.35}s">{icon("people","")}</i>' for n in range(3)) + '<em>+ new customers</em></div>'
+
+def journey():
+    rail = "".join(f'<li class="jr{" on" if i == 0 else ""}"><button type="button" data-j="{i}" aria-label="Step {i+1}: {t}"><span class="jr-n">{i+1}</span><span class="jr-t">{t}</span></button></li>' for i, (_, t, _) in enumerate(JOURNEY))
+    stages = "".join(f'<div class="js{" on" if i == 0 else ""}" data-js="{i}"><div class="js-txt"><span class="js-step">Step {i+1} of {len(JOURNEY)}</span><h3>{t}</h3><p>{d}</p></div>{_scene(i)}</div>' for i, (_, t, d) in enumerate(JOURNEY))
+    return f'''<div class="journey" data-journey>
+  <div class="j-stage" aria-live="polite">{stages}<div class="j-prog"><i></i></div></div>
+  <ol class="j-rail">{rail}</ol>
+</div>'''

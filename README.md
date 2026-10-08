@@ -21,21 +21,35 @@ python3 build/build.py
 
 Then commit the regenerated `index.html` files along with your changes. No other build step or dependencies.
 
-## Self-serve checkout (home page, "Get on a kiosk today")
+## Integrations (forms + payments)
 
-One-location orders ($399/yr or $60/mo) go through a four-step checkout on the home page. To switch it on, fill in `assets/config.js`:
+Everything that talks to an outside service goes through two files:
 
-1. **Stripe** — in the Stripe dashboard create two Payment Links for "Spotlight kiosk ad — 1 location":
-   a recurring yearly price of $399 and a recurring monthly price of $60.
-   Under *After payment*, choose "Don't show confirmation page" and redirect to
-   `https://aeroassistindustries.github.io/spotlight-kiosks/welcome/`.
-   Paste the links into `stripeYearly` and `stripeMonthly`.
-2. **Formspree** — create a form at formspree.io (file uploads need a paid plan), set the notification email
-   to sales@spotlightkiosks.com, and paste the form endpoint into `formspree`.
+- `assets/config.js` — the settings. **This is the only file you edit to connect services.**
+- `assets/integrations.js` — the code that sends forms and builds payment links. Pages never call a provider directly.
 
-The checkout sends the order details and uploaded logo/artwork to Formspree, then sends the customer to Stripe with
-their email pre-filled and the order number as the `client_reference_id`, so each Stripe payment matches a Formspree order.
-If a value is empty, that step falls back to email.
+### Forms (currently live)
+
+`forms.provider` is `"formsubmit"` and `forms.to` is `sarvesh.joshiaz@gmail.com`. Every inquiry form (Advertise, Host a kiosk,
+Support, Contact) and every kiosk order is emailed there.
+
+- **First use:** the first submission sends an activation email from FormSubmit to that inbox. Click *Activate form* once.
+  Until then, submissions are held.
+- **Orders** arrive with the uploaded logo/artwork attached (up to `maxUploadMB`, default 5 MB) and an order number like `SK-261008-AB12`.
+- **To change the inbox,** edit `forms.to`. **To move to Formspree,** set `provider: "formspree"` and `endpoint: "https://formspree.io/f/xxxx"`.
+- If delivery fails, the form opens an email draft in the visitor's own email app instead, so nothing is lost.
+
+### Payments (ready for Stripe)
+
+In Stripe create two Payment Links for "Spotlight kiosk ad — 1 location": $399 recurring yearly and $60 recurring monthly.
+Under *After payment* redirect to `https://aeroassistindustries.github.io/spotlight-kiosks/welcome/`. Paste the links into
+`payments.yearly` and `payments.monthly`.
+
+Checkout then: delivers the order (with files) to your inbox → sends the customer to Stripe with their email pre-filled and the
+order number as `client_reference_id` → Stripe returns them to the welcome page. Match the order number in the email to the
+Stripe payment. With the links empty, checkout still delivers the order and you invoice the customer.
+
+Other processors with hosted checkout links (Square, PayPal) work the same way — paste their links.
 
 ## Markets
 
@@ -46,5 +60,4 @@ Map pins are pre-projected into `build/usmap.json` (generated with d3-geo's Albe
 
 ## Notes
 
-- Inquiry forms build an email draft in the visitor's browser (open in email, copy or download). Nothing is posted to a server.
 - Businesses shown inside the kiosk demo and campaign examples are fictional.

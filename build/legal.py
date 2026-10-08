@@ -2,7 +2,7 @@
 EFFECTIVE = "October 8, 2026"
 EMAIL = "sales@spotlightkiosks.com"
 SUPPORT = "support@spotlightkiosks.com"
-ADDRESS = "Spotlight Kiosks, 2150 N 1st St, Suite 432, San Jose, CA 95131"
+ADDRESS = "Spotlight Kiosks, 4750 S 44th Pl, Suite E20, Phoenix, AZ 85040"
 
 TERMS = [
 ("About these terms", f"""<p>These Terms &amp; Conditions (“Terms”) apply to your use of spotlightkiosks.com and its related pages (the “Site”), the interactive tools on the Site, and the Spotlight touch-screen kiosks installed in host venues (the “Kiosks”). The Site and Kiosks are operated by Spotlight Kiosks (“Spotlight,” “we,” “us” or “our”).</p>
@@ -38,7 +38,7 @@ TERMS = [
 <p><b>Your ad and going live.</b> We review every ad for quality, legibility and suitability for the host venue, and we may ask for changes before it runs. If you choose “Design it for me,” we'll send a proof for your approval. We'll email you the venue and go-live date once your ad is approved.</p>
 <p><b>If we can't place your ad.</b> If we're unable to place your ad at a suitable Kiosk in your chosen city within 30 days of your order, we'll offer you a nearby alternative, and you may instead cancel for a full refund.</p>"""),
 
-("Site tools and the drafts they create", """<p>The campaign planner, creative studio, pricing calculator and inquiry forms run in your browser. They help you prepare a brief, a creative concept, a planning estimate or an email draft. They don't submit anything to us, reserve inventory, purchase advertising or create an agreement. An inquiry only reaches us if you choose to send the email draft from your own email app.</p>
+("Site tools and the drafts they create", """<p>The campaign planner, creative studio and pricing calculator run in your browser. They help you prepare a brief, a creative concept or a planning estimate, and don't submit anything to us on their own. Inquiry and contact forms deliver your message to us so we can reply. None of these tools reserves inventory, purchases advertising or creates an agreement — only a self-serve order or a signed agreement does.</p>
 <p>Estimates from the pricing calculator are for planning only. Creative concepts downloaded from the creative studio are drafts for discussion; production artwork must meet the specifications for your confirmed placement and is subject to review.</p>"""),
 
 ("Content you send us", """<p>If you send us ad copy, logos, images, URLs or other materials (“Your Content”), you confirm that you own it or have permission to use it, that it's accurate, and that it doesn't infringe anyone's rights or break any law. You give Spotlight a non-exclusive, royalty-free license to use, copy, adapt and display Your Content to respond to you, prepare proposals and, if you become an advertiser, to run your campaign as set out in your advertiser agreement.</p>
@@ -74,8 +74,9 @@ PRIVACY = [
 <li>when you order through the Site's checkout: your plan, chosen city and venue preference, business and contact details, ad text, destination link, and the logo or artwork files you upload.</li></ul>
 <p>Please don't send us patient information, health records, passwords or payment card numbers by email or through a Kiosk.</p>"""),
 
-("How the Site's forms and tools work", """<p><b>Checkout.</b> When you place an order, your order details and uploaded files are sent to Formspree, the form-processing service we use to receive orders, and then to us. You're then taken to Stripe to pay. Stripe collects and processes your card details under its own privacy policy; we never see or store your full card number. We receive confirmation of your payment, your email address and an order reference from Stripe.</p>
-<p><b>Other tools.</b> The inquiry forms, campaign planner, creative studio and pricing calculator run in your browser. What you type into them isn't sent to our servers. When you choose “Open in email,” the Site hands a draft to your own email app; we receive it only if you send it. “Copy text” places the draft on your clipboard, and “Download” saves a file to your device.</p>
+("How the Site's forms and tools work", """<p><b>Checkout.</b> When you place an order, your order details and uploaded files are sent through our form-delivery service (currently FormSubmit) to our inbox. You're then taken to Stripe to pay. Stripe collects and processes your card details under its own privacy policy; we never see or store your full card number. We receive confirmation of your payment, your email address and an order reference from Stripe.</p>
+<p><b>Inquiry and contact forms.</b> When you press send, what you entered is delivered to our inbox through the same form-delivery service. If delivery isn't available, the form instead opens a draft in your own email app, and nothing is sent until you send it.</p>
+<p><b>Other tools.</b> The campaign planner, creative studio and pricing calculator run in your browser. What you type into them isn't sent to us unless you carry it into an inquiry and send it. When you choose “Open in email,” the Site hands a draft to your own email app; we receive it only if you send it. “Copy text” places the draft on your clipboard, and “Download” saves a file to your device.</p>
 <p>When you move from the planner or calculator to an inquiry form, the Site uses your browser's session storage to carry your answers to the next page, then clears them. Checkout also keeps a short order summary in session storage to show your order number on the confirmation page. Session storage is deleted when you close the browser tab.</p>"""),
 
 ("Information collected automatically", """<p><b>On the Site.</b> The Site is hosted by GitHub Pages and uses fonts served by Google Fonts. When your browser loads a page, these providers receive standard technical information such as your IP address, browser type, device information and the page requested, and may keep it in server logs for security and operations. Their use of that information is governed by their own privacy policies. The Site doesn't set its own cookies or run analytics or advertising trackers.</p>
@@ -90,7 +91,7 @@ PRIVACY = [
 <p>We don't sell your personal information, and we don't share it with third parties for their own marketing.</p>"""),
 
 ("How we share information", """<p>We share information only as needed:</p>
-<ul><li><b>Service providers</b> who help us run the business — for example, Stripe for payments, Formspree for receiving orders, hosting, email, Kiosk software and maintenance, and accounting — under obligations to protect it;</li>
+<ul><li><b>Service providers</b> who help us run the business — for example, Stripe for payments, FormSubmit (or Formspree) for delivering orders and messages, hosting, email, Kiosk software and maintenance, and accounting — under obligations to protect it;</li>
 <li><b>Advertisers and host venues</b>, who receive aggregated, non-identifying Kiosk reports, and business contact details where needed to carry out an agreement with them;</li>
 <li><b>Legal and safety</b> reasons, when required by law, legal process or to protect rights, property or safety;</li>
 <li><b>Business transfers</b>, if Spotlight is involved in a merger, acquisition or sale of assets, in which case this policy continues to apply to the information transferred.</li></ul>"""),
