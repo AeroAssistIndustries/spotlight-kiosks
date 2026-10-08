@@ -19,7 +19,7 @@ const SCHEMA = [
   "CREATE TABLE IF NOT EXISTS events (day TEXT NOT NULL, venue TEXT NOT NULL, kiosk TEXT NOT NULL, type TEXT NOT NULL, key TEXT NOT NULL, n INTEGER NOT NULL, PRIMARY KEY (day, venue, kiosk, type, key))",
   "CREATE TABLE IF NOT EXISTS kiosks (venue TEXT NOT NULL, kiosk TEXT NOT NULL, first_seen TEXT, last_seen TEXT NOT NULL, version INTEGER, ua TEXT, PRIMARY KEY (venue, kiosk))"
 ];
-const EVENT_TYPES = ["sessions", "categories", "places", "questions", "takeHome", "adShown", "qr"];
+const EVENT_TYPES = ["sessions", "categories", "places", "questions", "takeHome", "adShown", "adEngaged", "adReach", "qr"];
 const ICONS = ["fork", "bell", "coffee", "spark", "bag", "car", "home", "pin", "star", "walk", "phone", "chat", "sun"];
 const MAX_MEDIA = 1024 * 1024, MAX_CONTENT = 300 * 1024, HISTORY_KEEP = 40;
 const ID_RE = /^[a-z0-9][a-z0-9-]{0,40}$/, KIOSK_RE = /^[A-Za-z0-9][A-Za-z0-9-]{0,31}$/, DAY_RE = /^\d{4}-\d{2}-\d{2}$/;

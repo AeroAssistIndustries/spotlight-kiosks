@@ -200,12 +200,13 @@
   function keysOf(type) { return (stats ? stats.byKey : []).filter(r => r.type === type); }
   function nameOf(id) { const it = D.items[id]; return it ? it.n : id; }
   function adRows() {
-    const views = {}, scans = {};
-    keysOf("adShown").forEach(r => { views[r.key] = (views[r.key] || 0) + r.n; });
+    const tally = type => { const o = {}; keysOf(type).forEach(r => { o[r.key] = (o[r.key] || 0) + r.n; }); return o; };
+    const views = tally("adShown"), engaged = tally("adEngaged"), reach = tally("adReach"), scans = {};
     keysOf("qr").forEach(r => { if (r.key.startsWith("ad:")) scans[r.key.slice(3)] = (scans[r.key.slice(3)] || 0) + r.n; });
-    const rows = D.sponsors.map(s => ({ id: s.id, name: s.name, active: s.active !== false, views: (views[s.id] || 0) + (views[s.name] || 0), scans: scans[s.id] || 0 }));
+    const row = (id, name, active) => ({ id, name, active, views: views[id] || 0, engaged: engaged[id] || 0, reach: reach[id] || 0, scans: scans[id] || 0 });
+    const rows = D.sponsors.map(s => { const r = row(s.id, s.name, s.active !== false); if (s.name !== s.id) { r.views += views[s.name] || 0; } return r; });
     const known = new Set(D.sponsors.flatMap(s => [s.id, s.name]));
-    Object.keys(views).filter(k => !known.has(k)).forEach(k => rows.push({ id: k, name: k + " (removed)", active: false, views: views[k], scans: scans[k] || 0 }));
+    Object.keys(views).filter(k => !known.has(k)).forEach(k => rows.push(row(k, k + " (removed)", false)));
     return rows;
   }
   function topList(rows, label, nameFn) {
@@ -241,23 +242,23 @@
       ${kiosks.length > 1 ? `<select id="range-kiosk" aria-label="Kiosk" style="width:auto"><option value="">All kiosks</option>${kiosks.map(k => `<option value="${esc(k.kiosk)}"${k.kiosk === kioskFilter ? " selected" : ""}>${esc(k.kiosk)}</option>`).join("")}</select>` : ""}</div>`;
     if (statsErr) return head + `<div class="card"><div class="msg" role="alert">${esc(statsErr)}</div></div>`;
     if (!stats) return head + `<div class="card loading">Loading numbers…</div>`;
-    const ads = adRows(), adViews = ads.reduce((a, r) => a + r.views, 0), scans = sumType("qr");
+    const ads = adRows(), adViews = ads.reduce((a, r) => a + r.views, 0), adEngaged = ads.reduce((a, r) => a + r.engaged, 0), scans = sumType("qr");
     const placeScans = keysOf("qr").filter(r => r.key.startsWith("place:")).map(r => ({ key: r.key.slice(6), n: r.n }));
     const card = (label, n, sub) => `<div class="card stat"><span>${label}</span><b>${fmt(n)}</b>${sub ? `<small>${sub}</small>` : ""}</div>`;
-    const maxV = Math.max(1, ...ads.map(r => r.views));
+    const maxV = Math.max(1, ...ads.map(r => r.engaged));
     return head + `
       <div class="grid g5">
         ${card("Guest sessions", sumType("sessions"), "Someone tapped Start")}
         ${card("Places viewed", sumType("places"))}
         ${card("Questions asked", sumType("questions"))}
-        ${card("Ad views", adViews, "Each time an ad was on screen")}
+        ${card("Ad views with a guest", adEngaged, `${fmt(adViews)} in total, including an empty lobby`)}
         ${card("QR scans", scans, "Phones that opened a link")}
       </div>
       <div class="card"><div class="card-head"><div><h2>Activity</h2></div><div class="legend"><span><i style="background:var(--blue)"></i>Guest sessions</span><span><i style="background:var(--gold)"></i>QR scans</span></div></div>${chart()}</div>
-      <div class="card"><div class="card-head"><div><h2>Advertisers</h2><p>Proof of exposure for each business. Views count each time the ad was shown; scans count phones that opened the business's link from its QR code.</p></div>
+      <div class="card"><div class="card-head"><div><h2>Advertisers</h2><p>Proof of exposure for each business. <b>Total views</b> count every time the ad came on screen, even with nobody there. <b>With a guest</b> counts only times someone was using the kiosk while it showed. <b>Guests reached</b> counts each guest session once. <b>QR scans</b> are phones that opened the business's link.</p></div>
         <button class="btn small" data-act="csv">Download report (CSV)</button></div>
-        ${ads.length ? `<div class="table-wrap"><table><thead><tr><th>Business</th><th class="num">Ad views</th><th style="width:22%"></th><th class="num">QR scans</th><th class="num">Scans per 1,000 views</th></tr></thead><tbody>
-          ${ads.map(r => `<tr><td>${esc(r.name)}${r.active ? "" : ` <span class="pill off">Not showing</span>`}</td><td class="num">${fmt(r.views)}</td><td><div class="bar"><i style="width:${Math.round(r.views / maxV * 100)}%"></i></div></td><td class="num">${fmt(r.scans)}</td><td class="num">${r.views ? (r.scans / r.views * 1000).toFixed(1) : "–"}</td></tr>`).join("")}
+        ${ads.length ? `<div class="table-wrap"><table><thead><tr><th>Business</th><th class="num">Total views</th><th class="num">With a guest</th><th style="width:16%"></th><th class="num">Guests reached</th><th class="num">QR scans</th><th class="num">Scans per 100 guests</th></tr></thead><tbody>
+          ${ads.map(r => `<tr><td>${esc(r.name)}${r.active ? "" : ` <span class="pill off">Not showing</span>`}</td><td class="num muted">${fmt(r.views)}</td><td class="num"><b>${fmt(r.engaged)}</b></td><td><div class="bar"><i style="width:${Math.round(r.engaged / maxV * 100)}%"></i></div></td><td class="num">${fmt(r.reach)}</td><td class="num">${fmt(r.scans)}</td><td class="num">${r.reach ? (r.scans / r.reach * 100).toFixed(1) : "–"}</td></tr>`).join("")}
         </tbody></table></div>` : `<div class="empty">No ads yet. Add one in the Ads tab.</div>`}
       </div>
       <div class="grid g2">
@@ -268,7 +269,7 @@
       </div>`;
   }
   function csv() {
-    const rows = [["Business", "Ad views", "QR scans", "Scans per 1000 views", "From", "To"]].concat(adRows().map(r => [r.name, r.views, r.scans, r.views ? (r.scans / r.views * 1000).toFixed(1) : "", stats.from, stats.to]));
+    const rows = [["Business", "Total ad views", "Views with a guest using the kiosk", "Guests reached", "QR scans", "Scans per 100 guests reached", "From", "To"]].concat(adRows().map(r => [r.name, r.views, r.engaged, r.reach, r.scans, r.reach ? (r.scans / r.reach * 100).toFixed(1) : "", stats.from, stats.to]));
     const text = rows.map(r => r.map(c => /[",\n]/.test(String(c)) ? `"${String(c).replace(/"/g, '""')}"` : c).join(",")).join("\r\n");
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([text], { type: "text/csv" }));
