@@ -15,3 +15,11 @@ binding = "AI"
 
 # Optional: to use Claude instead of the free model, add a secret ANTHROPIC_API_KEY
 # with `npx wrangler secret put ANTHROPIC_API_KEY` or in the dashboard.
+
+# Staff dashboard and live content (backend.js): a free D1 database bound as DB.
+# Create it once (Cloudflare > Storage & Databases > D1 > Create, name: citypulse), then put its id below.
+# Tables are created automatically. The staff password is a secret named ADMIN_PASSWORD, set in the dashboard.
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "citypulse"
+# database_id = "PASTE-THE-DATABASE-ID-HERE"

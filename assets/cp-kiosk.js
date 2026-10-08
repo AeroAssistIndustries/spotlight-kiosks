@@ -9,6 +9,10 @@
 
   const BASE = root.dataset.root || "../";
   const A = BASE + "assets/";
+  /* Live content from the staff dashboard (assets/cp-content.js): uploaded images, counted QR links, visit counts. */
+  const LIVE = window.CP_LIVE || null;
+  const IMG = p => LIVE ? LIVE.img(p, A) : A + p;
+  const GO = (kind, id, fallback) => (LIVE && LIVE.go(kind, id)) || fallback;
   const GUIDE = new URL(BASE + "concierge/?v=" + encodeURIComponent(V.id), location.href).href;
   const PRICING = new URL(BASE + "pricing/", location.href).href;
   /* Live AI concierge relay (cloudflare/concierge-worker.js). Empty: built-in answers only. */
@@ -88,7 +92,8 @@
 
   /* ---------- tap counts (this device only, for staff) ---------- */
   const SKEY = "cpk-stats";
-  function bump(group, key) {
+  function bump(group, key, liveKey) {
+    if (LIVE && liveKey !== null) LIVE.count(group, liveKey === undefined ? key : liveKey);
     try {
       const day = dayKey();
       const all = JSON.parse(localStorage.getItem(SKEY) || "{}");
@@ -105,11 +110,11 @@
 
   /* ---------- frame ---------- */
   root.innerHTML = `
-    <div class="cpk-bg" aria-hidden="true">${V.photos.map((p, i) => `<span style="background-image:url('${A + p}');animation-delay:${i * 9}s"></span>`).join("")}</div>
+    <div class="cpk-bg" aria-hidden="true">${V.photos.map((p, i) => `<span style="background-image:url('${IMG(p)}');animation-delay:${i * 9}s"></span>`).join("")}</div>
     <div class="cpk-shade" aria-hidden="true"></div>
     <header class="cpk-top">
       <div class="cpk-top-l" id="cpk-top-l"></div>
-      <img class="cpk-logo" src="${A + V.logo}" alt="${esc(V.name)}">
+      <img class="cpk-logo" src="${esc(IMG(V.logo))}" alt="${esc(V.name)}">
       <div class="cpk-meta"><span class="cpk-wx" id="cpk-wx" hidden></span><span class="cpk-clock" id="cpk-clock"></span></div>
     </header>
     <main class="cpk-view" id="cpk-view" tabindex="-1"></main>
@@ -189,13 +194,13 @@
   /* ---------- ads ----------
      Featured local businesses rotate on their own for equal exposure. Nothing here can be tapped:
      each ad shows the business name, logo, website and a QR code that opens the site on the guest's phone. */
-  const SPONS = (V.sponsors || []).filter(x => x && x.name);
+  const SPONS = (V.sponsors || []).filter(x => x && x.name && x.active !== false);
   const SLIDES = SPONS.length ? SPONS : [{ name: "Your business here", kind: "Advertise on this screen", tagline: "Reach every guest at " + V.name + ". From $399 a year.", website: "citypulsekiosks.com", url: PRICING, house: true }];
   const initials = n => n.replace(/^The /, "").split(/[\s.&]+/).filter(Boolean).slice(0, 2).map(w => w[0]).join("").toUpperCase();
   function adHTML(sp, i) {
     const it = sp.item && V.items[sp.item], f = it ? howFar(it) : null;
     return `<div class="cpk-ad" role="group" aria-roledescription="slide" aria-label="${i + 1} of ${SLIDES.length}: ${esc(sp.name)}">
-      <div class="cpk-ad-logo${sp.logo ? " img" : ""}">${sp.logo ? `<img src="${A + esc(sp.logo)}" alt="">` : `<span>${esc(initials(sp.name))}</span>`}</div>
+      <div class="cpk-ad-logo${sp.logo ? " img" : ""}">${sp.logo ? `<img src="${esc(IMG(sp.logo))}" alt="">` : `<span>${esc(initials(sp.name))}</span>`}</div>
       <div class="cpk-ad-body">
         <span class="cpk-ad-tag">${sp.house ? "Advertise here" : sp.sponsored ? "Sponsored" : "Featured nearby"}</span>
         <span class="cpk-ad-t">${esc(sp.name)}</span>
@@ -203,7 +208,7 @@
         ${sp.tagline ? `<span class="cpk-ad-x">${esc(sp.tagline)}</span>` : ""}
         <span class="cpk-ad-web">${esc(sp.website)}</span>
       </div>
-      <div class="cpk-ad-qr">${qr(sp.url, "QR code: open " + sp.name + " on your phone")}<small>Scan to visit</small></div>
+      <div class="cpk-ad-qr">${qr(sp.house || !sp.id ? sp.url : GO("ad", sp.id, sp.url), "QR code: open " + sp.name + " on your phone")}<small>Scan to visit</small></div>
     </div>`;
   }
   ads.setAttribute("aria-label", "Featured nearby businesses");
@@ -217,7 +222,7 @@
     ads.querySelectorAll(".cpk-ad-dots i").forEach((d, j) => d.classList.toggle("on", j === S.ad));
     const bar = root.querySelector("#cpk-ad-bar");
     if (bar) { bar.style.transition = "none"; bar.style.transform = "scaleX(0)"; void bar.offsetWidth; bar.style.transition = `transform ${AD_MS}ms linear`; bar.style.transform = S.still ? "scaleX(0)" : "scaleX(1)"; }
-    bump("adShown", SLIDES[S.ad].name);
+    bump("adShown", SLIDES[S.ad].name, SLIDES[S.ad].house ? null : SLIDES[S.ad].id || SLIDES[S.ad].name);
   }
   showAd(0);
   /* Rotates on its own, including on the welcome screen. "Stop moving images" in Accessibility pauses it (required for moving content). */
@@ -238,7 +243,7 @@
       <span class="cpk-a-touch"><span class="cpk-ring"></span>Touch anywhere to begin</span></button>`;
   }
   function tileHTML(t) {
-    return `<button class="cpk-tile${t.photo ? " photo" : ""}" data-act="cat" data-id="${t.id}"${t.photo ? ` style="--img:url('${A + t.photo}')"` : ""}>
+    return `<button class="cpk-tile${t.photo ? " photo" : ""}" data-act="cat" data-id="${t.id}"${t.photo ? ` style="--img:url('${IMG(t.photo)}')"` : ""}>
       <span class="cpk-tile-ico">${svg(t.icon)}</span>
       <span class="cpk-tile-txt"><b>${esc(t.label)}</b><small>${esc(t.sub)}</small></span>
       <span class="cpk-tile-go">${svg("chev")}</span></button>`;
@@ -251,7 +256,7 @@
       <div id="cpk-weekslot">${weekHTML()}</div>
       <div class="cpk-tiles">${V.tiles.map(tileHTML).join("")}</div>
       <button class="cpk-take" data-act="take">
-        <span class="cpk-take-qr">${qr(GUIDE, "QR code: open this guide on your phone")}</span>
+        <span class="cpk-take-qr">${qr(GO("guide", "", GUIDE), "QR code: open this guide on your phone")}</span>
         <span class="cpk-take-txt"><b>Take this guide with you</b><small>Scan with your phone camera. Directions, places and hotel info, with nothing to install.</small></span>
       </button></section>`;
   }
@@ -271,7 +276,7 @@
   }
   function vItem(id) {
     const it = item(id), f = howFar(it);
-    const link = it.ll ? mapsUrl(it) : guideUrl(id);
+    const link = it.ll ? GO("place", id, mapsUrl(it)) : GO("guide", id, guideUrl(id));
     const facts = [];
     if (f) facts.push(f.walk ? ["Walking time", f.label.replace(" walk", "")] : ["Distance", f.label], f.walk ? ["Distance", f.short] : ["Getting there", f.short]);
     (it.f || []).forEach(x => facts.push(x));
@@ -340,7 +345,7 @@
     m.text = f ? f.a : `I don't have an answer for that yet. The front desk is open 24 hours and happy to help, or call ${V.phone}.`;
     m.ids = f ? f.items.slice(0, 3) : ["lx-desk"];
     m.quick = !!AI; m.pending = false; S.busy = false;
-    bump("questions", f ? f.q : "No answer: " + q.slice(0, 60));
+    bump("questions", f ? f.q : "No answer: " + q.slice(0, 60), f ? f.q : "No built-in answer"); /* the dashboard never gets the guest's own words */
     updateMsg(m);
   }
   async function live(m, q) {
@@ -371,7 +376,7 @@
     if (!visible(raw).trim()) throw new Error("empty");
     m.ids = [...new Set([...raw.matchAll(/\[\[([a-z0-9-]+)\]\]/g)].map(x => x[1]).filter(id => V.items[id]))].slice(0, 3);
     m.text = visible(raw).trim(); m.pending = false; S.busy = false;
-    bump("questions", "AI: " + q.slice(0, 60));
+    bump("questions", "AI: " + q.slice(0, 60), "Answered by the AI concierge");
     updateMsg(m);
   }
   function ask(q) {
@@ -390,7 +395,7 @@
     return `<section class="cpk-takeview">
       <h1 class="cpk-h2">Take this guide with you</h1>
       <p class="cpk-desc">Point your phone camera at the code and tap the link. The guide opens in your browser with every place, directions and hotel information. Nothing to download, and no sign-up.</p>
-      <div class="cpk-qrbig">${qr(GUIDE, "QR code: open this guide on your phone")}</div>
+      <div class="cpk-qrbig">${qr(GO("guide", "", GUIDE), "QR code: open this guide on your phone")}</div>
       <ol class="cpk-steps"><li><b>1</b>Open your camera</li><li><b>2</b>Point it at the code</li><li><b>3</b>Tap the link</li></ol></section>`;
   }
   function dockHTML() {
@@ -462,6 +467,7 @@
     S.mode = "attract"; S.stack = []; S.panel = false; S.chat = []; S.busy = false;
     S.large = S.contrast = S.reach = false;
     if (window.speechSynthesis) speechSynthesis.cancel();
+    if (LIVE) LIVE.flush();
     render();
   }
   /* Idle: warn 12 seconds before going back to the welcome screen. Longer when accessibility options are on. */
@@ -541,6 +547,6 @@
   }, true);
   try { window.open = () => null; } catch (e) { /* ignore */ }
 
-  window.CPK = { reset, answer };
+  window.CPK = { reset, answer, isIdle: () => S.mode === "attract" && !S.busy };
   render();
 })();

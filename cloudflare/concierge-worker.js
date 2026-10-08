@@ -8,13 +8,22 @@
      - Claude (optional): add the secret ANTHROPIC_API_KEY and the relay uses Claude instead.
    No key is ever sent to the kiosk.
 
+   The same worker is also the kiosks' back end (backend.js): the staff dashboard at /admin, live content,
+   uploaded logos, and visit and QR counts across all kiosks. That part needs a D1 database bound as DB and a
+   secret ADMIN_PASSWORD (see README.md).
+
    Settings (Cloudflare dashboard > Worker > Settings > Variables):
      ANTHROPIC_API_KEY  optional secret; switches the relay to Claude
      VENUE_URL          venue data JSON (default: the Lexen data on the CityPulse GitHub site)
      ALLOWED_ORIGINS    comma-separated sites allowed to call this relay (default: the CityPulse GitHub site)
      MODEL              Claude model (default: claude-haiku-5-5)
      CF_MODEL           Workers AI model (default: @cf/google/gemma-4-26b-a4b-it)
+     ADMIN_PASSWORD     secret; the staff dashboard password
+     VENUE_ID           the venue the dashboard manages (default: lexen)
+     GUIDE_URL          the phone guide (default: the CityPulse GitHub site's /concierge/)
 */
+
+import { handle as backend, getContent, venueId } from "./backend.js";
 
 const DEFAULTS = {
   VENUE_URL: "https://aeroassistindustries.github.io/spotlight-kiosks/assets/lexen-data.json",
@@ -32,7 +41,7 @@ let venueCache = { at: 0, data: null }, wxCache = { at: 0, text: "" };
 
 const cfg = (env, k) => (env && env[k]) || DEFAULTS[k];
 function cors(origin) {
-  return { "Access-Control-Allow-Origin": origin, "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type", "Access-Control-Max-Age": "86400", "Vary": "Origin" };
+  return { "Access-Control-Allow-Origin": origin, "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type", "Access-Control-Max-Age": "86400", "Vary": "Origin" };
 }
 function json(status, obj, origin) {
   return new Response(JSON.stringify(obj), { status, headers: { "Content-Type": "application/json", ...(origin ? cors(origin) : {}) } });
@@ -70,13 +79,21 @@ async function cachePut(key, data, seconds) {
   try { await caches.default.put(CACHE_BASE + key, new Response(JSON.stringify(data), { headers: { "Content-Type": "application/json", "Cache-Control": "max-age=" + seconds } })); } catch (e) { /* cache unavailable */ }
 }
 
+async function fetchVenueFile(env) {
+  const r = await withTimeout(fetch(cfg(env, "VENUE_URL"), { cf: { cacheTtl: 300 } }), 6000);
+  if (!r.ok) throw new Error("venue " + r.status);
+  return r.json();
+}
+
 async function venue(env) {
+  /* With the back end set up, the content staff edit in the dashboard is the source. */
+  if (env && env.DB) {
+    try { const c = await getContent(env, venueId(env), () => fetchVenueFile(env)); if (c) return c.data; } catch (e) { /* database unavailable: fall back to the website copy */ }
+  }
   if (venueCache.data && Date.now() - venueCache.at < 10 * 60000) return venueCache.data;
   const cached = await cacheGet("venue");
   if (cached) { venueCache = { at: Date.now(), data: cached }; return cached; }
-  const r = await withTimeout(fetch(cfg(env, "VENUE_URL"), { cf: { cacheTtl: 300 } }), 6000);
-  if (!r.ok) throw new Error("venue " + r.status);
-  venueCache = { at: Date.now(), data: await r.json() };
+  venueCache = { at: Date.now(), data: await fetchVenueFile(env) };
   await cachePut("venue", venueCache.data, 600);
   return venueCache.data;
 }
@@ -118,7 +135,7 @@ function systemPrompt(v, wx) {
     places.push(`- [${id}] ${it.n}: ${it.k}${it.price ? ", " + it.price : ""}. ${it.addr}. ${dist}. ${it.d}${facts ? " " + facts + "." : ""}`);
   }
   const faq = (v.faq || []).map(f => `Q: ${f.q} A: ${f.a}`).join("\n");
-  const featured = (v.sponsors || []).map(s => s.name).join(", ");
+  const featured = (v.sponsors || []).filter(s => s.active !== false).map(s => s.name).join(", ");
   return `You are the concierge on the touch-screen kiosk in the lobby of ${v.name}, ${v.address}. Guests are standing at the kiosk, often in a hurry.
 
 Right now it is ${now} (Pacific time). Weather forecast for North Hollywood (US National Weather Service): ${wx}.
@@ -188,6 +205,8 @@ export default {
     const allowed = cfg(env, "ALLOWED_ORIGINS").split(",").map(s => s.trim()).filter(Boolean);
     const ok = allowed.includes(origin);
     if (url.pathname === "/health") return json(200, { ok: true });
+    const b = await backend(req, env, ctx, { origin, allowedOrigin: ok, fetchSeed: () => fetchVenueFile(env) });
+    if (b) return b;
     if (req.method === "OPTIONS") return ok ? new Response(null, { status: 204, headers: cors(origin) }) : new Response(null, { status: 403 });
     if (url.pathname !== "/chat" || req.method !== "POST") return json(404, { error: "not found" });
     if (!ok) return json(403, { error: "origin not allowed" });
