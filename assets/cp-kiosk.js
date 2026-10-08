@@ -346,7 +346,7 @@
   async function live(m, q) {
     const ctl = new AbortController();
     let got = false, raw = "";
-    const wait = setTimeout(() => { if (!got) ctl.abort(); }, 10000);
+    const wait = setTimeout(() => { if (!got) ctl.abort(); }, 12000);
     const hist = S.chat.filter(x => x !== m && x.text).slice(-8).map(x => ({ role: x.role, content: x.text }));
     const res = await fetch(AI + "/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ venue: V.id, messages: hist }), signal: ctl.signal });
     if (!res.ok || !res.body) throw new Error("status " + res.status);
