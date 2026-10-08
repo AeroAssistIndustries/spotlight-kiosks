@@ -6,6 +6,7 @@
                    The very first submission sends an activation email to that inbox —
                    click "Activate" once and every form starts delivering.
      "formspree":  set `endpoint` to your Formspree form URL (https://formspree.io/f/xxxx).
+     "wordpress":  WordPress theme only — saved in the WP admin and emailed (set in Settings → CityPulse).
      "none":       forms fall back to opening an email draft in the visitor's own email app.
 
    PAYMENTS — where checkout sends the customer to pay.

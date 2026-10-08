@@ -124,9 +124,11 @@ def footer():
 </footer>'''
 
 PAGES = []
+PAGE_DATA = []  # used by build/export_wp.py
 
 def page(path, title, desc, body, active=None, kiosk=False, extra_js=()):
     """path like 'advertise/' or '' for home."""
+    PAGE_DATA.append(dict(path=path, title=title, desc=desc, body=body, active=active, kiosk=kiosk, extra_js=list(extra_js)))
     depth = path.count("/")
     root = "../" * depth if depth else "./"
     full_title = f"{title} | {SITE}" if path else f"{SITE} — {title}"
@@ -305,6 +307,7 @@ def draft_form(fid, to, subject, fieldsets, ack, button, handoff=False, subject_
     sf = f' data-subject-field="{subject_field}"' if subject_field else ""
     return f'''<form class="draft-form" id="{fid}" data-to="{to}" data-subject="{e(subject)}" data-review="{fid}-review"{ho}{sf} novalidate>
   {fs}
+  <input type="text" name="_gotcha" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
   <label class="ack"><input type="checkbox" name="ack" required> <span>{ack}</span></label>
   <p class="form-error" role="alert" hidden></p>
   <div class="form-foot"><button class="btn" type="submit">{button}</button><span class="fine">We reply within one business day.</span></div>
@@ -551,6 +554,7 @@ def checkout_section():
   <div class="section-head"><h2 id="co-title">Get on a kiosk today.</h2><p>One location, $399 a year. Pick your city, upload your logo or ad, and check out — it takes about five minutes. Want 3 or 5 locations? <a class="text-link" href="{{R}}pricing/">See packages</a></p></div>
   <div class="co-grid">
   <form id="checkout" class="co-form" novalidate data-welcome="{{R}}welcome/">
+    <input type="text" name="_gotcha" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
     <ol class="co-steps" aria-label="Checkout steps"><li class="on"><span>1</span>Plan</li><li><span>2</span>Business</li><li><span>3</span>Your ad</li><li><span>4</span>Pay</li></ol>
 
     <fieldset class="co-step" data-step="1"><legend>Choose your plan and city</legend>

@@ -219,6 +219,7 @@
       $$("input,select,textarea", form).forEach(el => {
         if (!el.name || el.type === "checkbox" || el.type === "radio" && !el.checked) return;
         const v = el.value.trim(); if (!v) return;
+        if (el.name === "_gotcha") { fields._gotcha = v; return; }
         const L = labelFor(el).replace(/[?:]$/, "");
         lines.push(el.tagName === "TEXTAREA" ? `\n${L}:\n${v}` : `${L}: ${v}`);
         if (el.type === "email") fields.email = v; else fields[L] = v;

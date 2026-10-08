@@ -9,6 +9,7 @@
   function formsReady() {
     if (provider === "formsubmit") return /@/.test(forms.to || "");
     if (provider === "formspree") return /^https:\/\//.test(forms.endpoint || "");
+    if (provider === "wordpress") return !!forms.ajaxUrl;
     return false;
   }
 
@@ -28,6 +29,13 @@
       if (provider === "formspree") {
         const r = await fetch(forms.endpoint, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify(data) });
         return r.ok;
+      }
+      if (provider === "wordpress") {
+        const fd = new FormData(); fd.set("action", "citypulse_submit");
+        Object.entries(data).forEach(([k, v]) => fd.set(k, v));
+        const r = await fetch(forms.ajaxUrl, { method: "POST", body: fd, credentials: "same-origin" });
+        const j = await r.json().catch(() => ({}));
+        return r.ok && j.success === true;
       }
     } catch (e) { /* network error */ }
     return false;
@@ -49,6 +57,16 @@
       form.method = "POST"; form.enctype = "multipart/form-data";
       HTMLFormElement.prototype.submit.call(form);
       return true;
+    }
+    if (provider === "wordpress") {
+      const fd = new FormData(form); fd.set("action", "citypulse_submit");
+      Object.entries(fields).forEach(([k, v]) => fd.set(k, v));
+      try {
+        const r = await fetch(forms.ajaxUrl, { method: "POST", body: fd, credentials: "same-origin" });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok || j.success !== true) return false;
+        location.href = next; return true;
+      } catch (e) { return false; }
     }
     if (provider === "formspree") {
       const fd = new FormData(form);

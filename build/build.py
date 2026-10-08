@@ -598,5 +598,6 @@ html404 = html404.replace('="../', '="/spotlight-kiosks/')
 with open(os.path.join(OUT, "404.html"), "w") as f: f.write(html404)
 shutil.rmtree(os.path.join(OUT, "404"))
 PAGES.remove("404/")
+if __name__ != "__main__": pass
 
 print(f"Built {len(PAGES)} pages")

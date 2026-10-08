@@ -58,6 +58,13 @@ pins: export the cities to `cities.json`, run `node build/make-map.mjs build/usm
 
 Map pins are pre-projected into `build/usmap.json` (generated with d3-geo's Albers USA projection and us-atlas state shapes).
 
+## WordPress version
+
+`python3 build/export_wp.py` turns the same pages into an installable WordPress theme (`dist/citypulse-theme.zip`).
+`python3 build/package_handoff.py` bundles it with the developer handoff (`build/HANDOFF.md` → md + pdf) and brand files
+into `dist/citypulse-wordpress-handoff.zip`. In WordPress, forms default to "WordPress" delivery (saved under
+Orders & inquiries and emailed) and payment links are set in Settings → CityPulse. See HANDOFF.md for details.
+
 ## Notes
 
 - Businesses shown inside the kiosk demo and campaign examples are fictional.

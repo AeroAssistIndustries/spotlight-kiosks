@@ -1155,3 +1155,4 @@ a.card:hover{border-color:var(--ink)}
 .path-panel .text-link{color:var(--lamp);border-color:var(--lamp)}
 .prose a.btn{color:var(--ink)}
 .prose a.btn-dark{color:var(--paper)}
+.hp{position:absolute!important;left:-9999px!important;width:1px;height:1px;opacity:0}
