@@ -47,7 +47,7 @@
       <tr>
         <td>${esc(k.name)}<br><small>${esc(k.address)}</small></td>
         <td>${esc(statusLabel[k.status])}</td>
-        <td>${esc(seenText(k))}</td>
+        <td><span class="cp-dot ${k.lastSeen === null ? '' : (online(k) ? 'on' : 'off')}"></span>${esc(seenText(k))}</td>
         <td>${k.visits}</td>
         <td><button class="ops-view" data-i="${i}">Check in now</button> <button class="ops-view" data-i="${i}" data-off="1">Power off</button></td>
       </tr>`).join("");
