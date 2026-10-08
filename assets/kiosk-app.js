@@ -55,3 +55,19 @@
     if (b) b.click();
   });
 })();
+
+/* Sliding hotel photos behind the kiosk screen (exterior, room, lounge). */
+(function () {
+  const k = document.getElementById("kapp");
+  if (!k || k.querySelector(".kapp-slides")) return;
+  const d = document.createElement("div");
+  d.className = "kapp-slides";
+  d.setAttribute("aria-hidden", "true");
+  ["exterior", "room", "lounge"].forEach(function (n, i) {
+    const s = document.createElement("span");
+    s.style.backgroundImage = 'url("../assets/lexen/' + n + '.jpg")';
+    s.style.animationDelay = (i * 8) + "s";
+    d.appendChild(s);
+  });
+  k.prepend(d);
+})();

@@ -1292,27 +1292,27 @@ button:focus-visible, [tabindex]:focus-visible { outline: 3px solid #0F1C2B !imp
 
 /* ===== Premium kiosk look (kiosk-app only). Palette and type match the website. ===== */
 /* Background photo: replace kiosk-lobby.jpg with a North Hollywood photo by setting --venue-bg. */
-.kapp{--serif:"Bricolage Grotesque","Helvetica Neue",Arial,sans-serif;--venue-bg:url("kiosk-lobby.jpg");background:#F4F8FA;color:#0F1C2B}
+.kapp{--serif:"Fraunces",Georgia,serif,"Helvetica Neue",Arial,sans-serif;--venue-bg:url("kiosk-lobby.jpg");background:#F4F8FA;color:#0F1C2B}
 .kapp::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(244,248,250,.94) 0%,rgba(244,248,250,.86) 45%,rgba(244,248,250,.97) 100%),var(--venue-bg) center/cover no-repeat;z-index:0;pointer-events:none}
 .kapp .screen{background:transparent;z-index:1}
-.kapp .k{--k-bg:transparent;--k-card:#ffffff;--k-fg:#0F1C2B;--k-sub:#5b6b7b;--k-accent:#0F1C2B;font-family:"Instrument Sans",system-ui,sans-serif;background:transparent}
-.kapp .k-status{padding-top:4.6cqw;color:#0F1C2B;font-family:"Bricolage Grotesque",sans-serif;font-weight:700;letter-spacing:.14em}
-.kapp .k-welcome{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;letter-spacing:-.035em;font-size:12cqw;line-height:.95;color:#0F1C2B}
+.kapp .k{--k-bg:transparent;--k-card:#ffffff;--k-fg:#0F1C2B;--k-sub:#5b6b7b;--k-accent:#0F1C2B;font-family:"Inter",system-ui,sans-serif;background:transparent}
+.kapp .k-status{padding-top:4.6cqw;color:#0F1C2B;font-family:"Fraunces",Georgia,serif;font-weight:700;letter-spacing:.14em}
+.kapp .k-welcome{font-family:"Fraunces",Georgia,serif;font-weight:800;letter-spacing:-.035em;font-size:12cqw;line-height:.95;color:#0F1C2B}
 .kapp .k-venue{color:#5b6b7b;font-size:3.4cqw;letter-spacing:.02em}
 .kapp .k-tiles{gap:2.4cqw}
 .kapp .k-tile{background:#fff!important;color:#0F1C2B;border:1px solid rgba(15,28,43,.07);border-radius:2.6cqw;box-shadow:0 1px 2px rgba(15,28,43,.05),0 12px 30px rgba(15,28,43,.09);transition:transform .15s,box-shadow .15s}
 .kapp .k-tile::before{display:none}
 .kapp .k-tile:active{transform:scale(.98)}
 .kapp .k-tile svg{stroke:#22C7B6;width:7.4cqw;height:7.4cqw;margin-bottom:1.6cqw}
-.kapp .k-tile span{color:#0F1C2B;text-shadow:none;font:700 3.3cqw/1.15 "Bricolage Grotesque",sans-serif;letter-spacing:-.01em}
+.kapp .k-tile span{color:#0F1C2B;text-shadow:none;font:700 3.3cqw/1.15 "Fraunces",Georgia,serif;letter-spacing:-.01em}
 .kapp .k-tile.wide{background:radial-gradient(ellipse 70% 120% at 100% 0%,rgba(34,199,182,.35),transparent 60%),#0F1C2B!important;color:#fff;border-color:transparent}
-.kapp .k-tile.wide span{color:#fff;font:800 6cqw/1.05 "Bricolage Grotesque",sans-serif}
+.kapp .k-tile.wide span{color:#fff;font:800 6cqw/1.05 "Fraunces",Georgia,serif}
 .kapp .k-tile.wide small{color:#b8c7d4;font-size:3cqw}
 .kapp .k-ads{margin:2cqw 4cqw 2cqw;height:auto;min-height:40cqw;border-radius:4cqw;overflow:hidden;background:#0F1C2B;box-shadow:0 24px 60px rgba(15,28,43,.25)}
 .kapp .ad-open{background:radial-gradient(ellipse 60% 90% at 0% 0%,rgba(34,199,182,.28),transparent 70%),#0F1C2B!important;padding:4.4cqw 4.4cqw 9cqw!important}
 .kapp .ad-frame{border:0;border-radius:0;padding:0}
-.kapp .ad-big{font:800 7.4cqw/1 "Bricolage Grotesque",sans-serif;letter-spacing:-.03em;color:#fff}
-.kapp .ad-big::before{content:"Sponsored  ";display:block;font:700 2.6cqw/1 "Instrument Sans",sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#22C7B6;margin-bottom:2cqw}
+.kapp .ad-big{font:800 7.4cqw/1 "Fraunces",Georgia,serif;letter-spacing:-.03em;color:#fff}
+.kapp .ad-big::before{content:"Sponsored  ";display:block;font:700 2.6cqw/1 "Inter",sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#22C7B6;margin-bottom:2cqw}
 .kapp .ad-sub{color:#c9d6e2;font-size:3.2cqw}
 .kapp .ad-cta{background:#22C7B6;color:#0F1C2B;border-radius:3cqw;padding:2.6cqw 3.8cqw}
 .kapp .ad-ico{stroke:#22C7B6}
@@ -1321,16 +1321,16 @@ button:focus-visible, [tabindex]:focus-visible { outline: 3px solid #0F1C2B !imp
 .kapp .k-nav svg{stroke:#0F1C2B}
 .kapp .k-btn,.kapp .k-cta{background:#0F1C2B!important;color:#fff!important;border-radius:999px!important;box-shadow:0 10px 24px rgba(15,28,43,.2)}
 .kapp .k-attract{background:transparent}
-.kapp .k-attract .a-welcome{font:800 15cqw/.95 "Bricolage Grotesque",sans-serif;letter-spacing:-.04em;color:#0F1C2B}
+.kapp .k-attract .a-welcome{font:800 15cqw/.95 "Fraunces",Georgia,serif;letter-spacing:-.04em;color:#0F1C2B}
 .kapp .k-attract .a-venue{color:#5b6b7b}
 .kapp .k-attract .a-touch{background:#0F1C2B;color:#fff;box-shadow:0 14px 36px rgba(15,28,43,.25)}
 .kapp .k-attract .ring{border-color:#22C7B6}
 .kapp .k-detail-hero{background:#0F1C2B!important;color:#fff}
 .kapp .k-item,.kapp .k-facts div,.kapp .k-take,.kapp .k-map,.kapp .k-pk-list div{background:#fff;border:1px solid rgba(15,28,43,.06);box-shadow:0 8px 24px rgba(15,28,43,.07)}
 .kapp .k-item .thumb{background:#0F1C2B}
-.kapp .k-head h2{font:800 9cqw/1 "Bricolage Grotesque",sans-serif;letter-spacing:-.03em}
+.kapp .k-head h2{font:800 9cqw/1 "Fraunces",Georgia,serif;letter-spacing:-.03em}
 .kapp .k-head .ico{background:#22C7B6}
-.kapp-a11y,.kapp-fs{top:1.4cqw;font-family:"Instrument Sans",sans-serif}
+.kapp-a11y,.kapp-fs{top:1.4cqw;font-family:"Inter",sans-serif}
 
 /* ===== Lexen hotel look: photo background, hotel logo, gold-accent luxury buttons ===== */
 .kapp{--venue-bg:url("lexen/exterior.jpg");--gold:#C9A96E;--gold-deep:#8F6F3A}
@@ -1362,3 +1362,51 @@ button:focus-visible, [tabindex]:focus-visible { outline: 3px solid #0F1C2B !imp
 .kapp .k-ads{height:44cqw;min-height:0;margin:1.6cqw 4cqw 2.4cqw}
 .kapp .k-tile{aspect-ratio:1.42}
 .kapp .k-tile.wide{aspect-ratio:4.2}
+/* Hotel logo: transparent PNG, no black box */
+.kapp .k-status b{gap:2.6cqw}
+.kapp .k-status b::before{width:19cqw;height:auto;aspect-ratio:1254/1254;max-height:11cqw;background:url("lexen/logo-transparent.png") center/contain no-repeat;border-radius:0;box-shadow:none;margin-right:0}
+.kapp .k-status b{font-family:"Inter",sans-serif;font-weight:700}
+.kapp .k-welcome{font-family:"Fraunces",Georgia,serif;font-weight:600;letter-spacing:-.02em}
+.kapp .k-head h2,.kapp .ad-big,.kapp .k-tile.wide span,.kapp .k-tile span{font-family:"Inter",sans-serif}
+.kapp .k-tile span{font-weight:600;letter-spacing:0}
+.kapp .k-tile.wide span{font:600 6cqw/1.1 "Fraunces",Georgia,serif}
+.kapp .k-head h2{font:600 8.4cqw/1.05 "Fraunces",Georgia,serif;letter-spacing:-.02em}
+.kapp .ad-big{font-weight:700;letter-spacing:-.01em}
+.kapp .k-status{gap:2cqw;padding-left:5cqw;padding-right:5cqw}
+.kapp .k-status b{font-size:2.3cqw;letter-spacing:.12em}
+.kapp .k-status b::before{width:auto;height:8.5cqw;max-height:none;aspect-ratio:auto;background-size:contain;margin-right:1cqw}
+.kapp .k-status span{font-size:2.6cqw;white-space:nowrap}
+.kapp::before{background:linear-gradient(180deg,rgba(244,248,250,.62) 0%,rgba(244,248,250,.48) 45%,rgba(244,248,250,.70) 100%),var(--venue-bg) center/cover no-repeat}
+.kapp .k-status{gap:2cqw;padding-left:5cqw;padding-right:5cqw}
+.kapp .k-status b{font-size:2.3cqw;letter-spacing:.12em}
+.kapp .k-status b::before{width:auto;height:8.5cqw;max-height:none;aspect-ratio:auto;background-size:contain;margin-right:1cqw}
+.kapp .k-status span{font-size:2.6cqw;white-space:nowrap}
+.kapp .k-status b::before{width:15cqw;height:9.5cqw;background-size:contain}
+.kapp::before{background:linear-gradient(180deg,rgba(244,248,250,.50) 0%,rgba(244,248,250,.34) 45%,rgba(244,248,250,.58) 100%),var(--venue-bg) center/cover no-repeat}
+
+/* ===== Lexen kiosk: sliding hotel photos, readable overlay, ADA sizing ===== */
+.kapp{--venue-bg:none}
+.kapp-slides{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.kapp-slides span{position:absolute;inset:0;background:center/cover no-repeat;opacity:0;animation:kslide 24s infinite,kzoom 24s infinite linear}
+@keyframes kslide{0%{opacity:0}4%{opacity:1}30%{opacity:1}38%{opacity:0}100%{opacity:0}}
+@keyframes kzoom{0%{transform:scale(1.02)}100%{transform:scale(1.10)}}
+.kapp::before{background:linear-gradient(180deg,rgba(10,20,32,.78) 0%,rgba(10,20,32,.42) 38%,rgba(10,20,32,.30) 70%,rgba(10,20,32,.62) 100%)!important}
+.kapp .k-status{color:#fff}
+.kapp .k-status b{color:#fff}
+.kapp .k-status span{color:#fff}
+.kapp .k-welcome{color:#fff;text-shadow:0 2px 18px rgba(0,0,0,.35)}
+.kapp .k-venue{color:#e6edf3}
+.kapp .k-attract .a-welcome{color:#fff;text-shadow:0 2px 18px rgba(0,0,0,.35)}
+.kapp .k-attract .a-venue{color:#e6edf3}
+/* ADA sizing: every touch target at least 44 x 44 px */
+.kapp .k-nav button,.kapp .k-btn,.kapp .k-cta,.kapp .a-touch,.kapp .ad-cta,.kapp-fs,.kapp-a11y,.kapp-btn,.kapp-btn-ghost{min-height:44px;min-width:44px}
+.kapp .k-nav button{padding:1.2cqw 3.6cqw}
+.kapp .k-btn,.kapp .k-cta,.kapp .a-touch{padding-top:2.4cqw!important;padding-bottom:2.4cqw!important}
+.kapp-fs,.kapp-a11y{padding:.7rem 1.3rem!important;font-size:1rem!important}
+.kapp .k-dots button{min-width:44px;min-height:44px;background-clip:content-box!important;padding:0!important}
+.kapp .k-tile{min-height:44px}
+.kapp button:focus-visible,.kapp .k-tile:focus-visible{outline:3px solid #C9A96E;outline-offset:3px}
+.kapp .k-tile span{font-size:3.4cqw}
+.kapp .device[data-finish] .device-head{background:none!important;box-shadow:none!important}
+.kapp .device{background:none!important}
+.kapp .k-attract .a-venue,.kapp .k-venue{text-shadow:0 1px 10px rgba(0,0,0,.45);font-weight:600}
