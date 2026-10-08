@@ -225,29 +225,30 @@
   }
 
   /* ---------- frame (built once per venue) ---------- */
+  const PKGS = [["1 location", "$399"], ["3 locations", "$1,099"], ["5 locations", "$1,200"]];
   function buildSlides() {
     const v = V();
-    S.slides = [{ type: "open", v: 1 }, { type: "sp", id: v.sponsors[0] }, { type: "open", v: 2 }, { type: "sp", id: v.sponsors[1] }];
+    S.slides = [{ type: "open" }, { type: "sp", id: v.sponsors[0] }, { type: "pkg" }, { type: "sp", id: v.sponsors[1] }];
   }
   function slideHTML(s, i) {
     if (s.type === "open") {
-      const sub = s.v === 1
-        ? "Put your business in front of every visitor at this kiosk."
-        : `Seen by guests at ${esc(V().name)} every day.`;
-      return `<button class="ad ad-open${s.v === 2 ? " alt" : ""}" data-act="adopen" data-i="${i}" aria-label="Your ad here. This ad space is available. Tap to learn more.">
-        <span class="ad-frame">
-          ${svg("mega", "ad-ico")}
-          <span class="ad-big">YOUR AD HERE</span>
-          <span class="ad-sub">${sub}</span>
-          <span class="ad-cta">12 months from $399 · Tap to learn more</span>
+      return `<button class="ad ad-open" data-act="adopen" data-i="${i}" aria-label="Your ad here. This ad space is available from $399 a year. Tap to see packages.">
+        <span class="ad-frame">${svg("mega", "ad-ico")}
+          <span class="ad-txt"><span class="ad-big">YOUR AD HERE</span><span class="ad-sub">Put your business in front of every visitor at ${esc(V().name)}.</span></span>
+          <span class="ad-cta">From $399/yr<small>Tap to see packages</small></span>
         </span></button>`;
+    }
+    if (s.type === "pkg") {
+      return `<button class="ad ad-pkg" data-act="adopen" data-i="${i}" aria-label="Advertise on this kiosk. 1 location $399 a year, 3 locations $1,099 a year, 5 locations $1,200 a year, or $60 a month per location. Tap to learn more.">
+        <span class="ad-pkg-head"><b>Advertise on this kiosk</b><span>Tap to choose a package</span></span>
+        <span class="ad-pkgs">${PKGS.map(([l, p], j) => `<span class="pk${j === 2 ? " best" : ""}"><small>${l}</small><b>${p}</b><em>per year</em></span>`).join("")}</span>
+        <span class="ad-pkg-foot">Or $60/month per location · Each location after 5 is $300/yr</span>
+      </button>`;
     }
     const it = I[s.id];
     return `<button class="ad ad-sp" style="--g:${CATS[it.cat].g}" data-act="sponsor" data-id="${it.id}" data-i="${i}" aria-label="Ad: ${esc(it.n)}. ${esc(it.h)}">
-      <span class="ad-chip">Example ad</span>
-      <span class="ad-name">${esc(it.n)}</span>
-      <span class="ad-head">${esc(it.h)}</span>
-      <span class="ad-row"><span class="ad-btn">${esc(it.c)}</span><span class="ad-qr">${qr(it.id)}</span></span>
+      <span class="ad-txt"><span class="ad-chip">Example ad · ${esc(it.n)}</span><span class="ad-head">${esc(it.h)}</span><span class="ad-btn">${esc(it.c)}</span></span>
+      <span class="ad-qr">${qr(it.id)}</span>
     </button>`;
   }
   function buildFrame() {
@@ -365,10 +366,11 @@
   }
   function viewAdspace() {
     return `<div class="k-detail">
-      <div class="k-detail-hero" style="--g:linear-gradient(135deg,#17231E,#2f4a3d 60%,#c9a227)"><div><h2>This space is available</h2><p>The ad space below runs on every screen of this kiosk</p></div></div>
-      <div class="k-facts"><div><small>Annual placement</small><b>From $399</b></div><div><small>Term</small><b>12 months</b></div><div><small>Includes</small><b>Artwork & copy</b></div><div><small>Reporting</small><b>Views & QR scans</b></div></div>
+      <div class="k-detail-hero" style="--g:linear-gradient(135deg,#17231E,#2f4a3d 60%,#c9a227)"><div><h2>Advertise on this kiosk</h2><p>Your ad runs in the space below, on every screen</p></div></div>
+      <div class="k-pk-list">${PKGS.map(([l, p], j) => `<div class="${j === 2 ? "best" : ""}"><span><b>${l}</b><small>${j === 0 ? "Or $60 a month" : j === 1 ? "Or $180 a month" : "Best value · or $300 a month"}</small></span><strong>${p}<small>/yr</small></strong></div>`).join("")}</div>
+      <p class="k-pk-note">Each location after 5 is $300 a year. Includes ad artwork, digital copy and 12 months on screen.</p>
       <div class="k-take"><div class="k-qr">${qr("advertise")}</div>
-        <div><b>Advertise here</b><a class="k-btn" href="${ROOT}advertise/" target="_top">${svg("mega")}See advertising options</a></div>
+        <div><b>Scan or tap to get started</b><a class="k-btn" href="${ROOT}pricing/" target="_top">${svg("mega")}See packages</a></div>
       </div></div>`;
   }
   function viewTee() {
@@ -450,7 +452,7 @@
       case "open": { const entry = CATS[id] ? { view: "cat", id } : { view: id }; log(`Opened ${label(entry)}`); go(entry); break; }
       case "item": { const it = I[id]; log(`Viewed ${it.n}`, it.sp ? "sponsor" : null); go({ view: "item", id }); break; }
       case "sponsor": log(`Tapped ad: ${I[id].n}`, "sponsor"); go({ view: "item", id }); break;
-      case "adopen": log("Tapped the open ad space", "open"); go({ view: "adspace" }); break;
+      case "adopen": log("Tapped the ad space packages", "open"); go({ view: "adspace" }); break;
       case "send":
         if (S.sent[id]) break;
         S.sent[id] = true; stat("scans");

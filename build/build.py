@@ -3,25 +3,58 @@ from lib import *
 
 # ================================================================ HOME
 home = f'''
-<section class="hero">
-  <div class="wrap hero-copy">
-    <h1>Turn wait time into opportunity.</h1>
-    <div>
+<section class="hero2">
+  <div class="wrap hero2-grid">
+    <div class="hero2-copy">
+      <h1>Turn wait time into opportunity.</h1>
       <p class="lede">Useful visitor information and local business advertising, together on one touch screen — in the lobbies, lounges and waiting rooms where people pause.</p>
-      {btns(("Plan a campaign","campaign-planner/"),("Host a kiosk","hosts/","btn-ghost"))}
+      {btns(("Advertise on a kiosk","pricing/"),("Host a kiosk for free","hosts/","btn-ghost"))}
+      <ul class="hero2-points"><li><b>From $399</b><span>a year, or $60 a month</span></li><li><b>Every tap</b><span>counted and reported</span></li><li><b>$0</b><span>for qualified host venues</span></li></ul>
+    </div>
+    <div class="slider" data-slider aria-roledescription="carousel" aria-label="Spotlight Kiosks highlights">
+      <div class="slides">
+        <figure class="slide slide-photo" aria-roledescription="slide" aria-label="1 of 4">
+          <img src="{{R}}assets/kiosk-clubhouse.jpg" alt="Matte black Spotlight kiosk in a golf clubhouse lobby" width="1774" height="887" fetchpriority="high" style="object-position:30% 50%">
+          <span class="slide-beam" aria-hidden="true"></span>
+          <figcaption><b>The Clubhouse Concierge</b><span>Course guide, tee times, dining — and your ad.</span></figcaption>
+        </figure>
+        <div class="slide slide-cycle" aria-roledescription="slide" aria-label="2 of 4" hidden>
+          <div class="slide-cycle-in"><p class="slide-kicker">New to kiosk advertising?</p><h2>Here's how it pays off.</h2>{cycle("small")}</div>
+        </div>
+        <figure class="slide slide-photo" aria-roledescription="slide" aria-label="3 of 4" hidden>
+          <img src="{{R}}assets/kiosk-lobby.jpg" alt="Silver Spotlight kiosk in a marble hotel lobby" width="1536" height="1024" loading="lazy" style="object-position:72% 50%">
+          <figcaption><b>The Guest Directory</b><span>Dining, amenities and local guides for hotel guests.</span></figcaption>
+        </figure>
+        <div class="slide slide-ad" aria-roledescription="slide" aria-label="4 of 4" hidden>
+          <div class="slide-ad-in">{mini("your venue", ("Dining","Amenities","Local guide","Events"), "black")}
+            <div><p class="slide-kicker">Your business here</p><h2>On every screen, all year.</h2>
+              <ul class="slide-pkgs"><li><span>1 location</span><b>$399/yr</b></li><li><span>3 locations</span><b>$1,099/yr</b></li><li class="best"><span>5 locations</span><b>$1,200/yr</b></li></ul>
+              <p class="slide-note">Or $60 a month per location.</p><a class="btn btn-dark btn-small" href="{{R}}pricing/">See packages</a></div></div>
+        </div>
+      </div>
+      <div class="slider-ctrl">
+        <button class="sl-prev" type="button" aria-label="Previous slide">{icon("arrowl","")}</button>
+        <div class="sl-dots" role="tablist" aria-label="Choose a slide"><button role="tab" aria-selected="true" aria-label="Clubhouse kiosk"></button><button role="tab" aria-selected="false" aria-label="How it pays off"></button><button role="tab" aria-selected="false" aria-label="Hotel lobby kiosk"></button><button role="tab" aria-selected="false" aria-label="Advertising packages"></button></div>
+        <button class="sl-next" type="button" aria-label="Next slide">{icon("arrow","")}</button>
+      </div>
     </div>
   </div>
-  <figure class="stage">
-    <img src="{{R}}assets/kiosk-clubhouse.jpg" alt="A matte black Spotlight kiosk in a golf clubhouse lobby, showing course guide, tee times, dining and events on its screen" width="1774" height="887" fetchpriority="high">
-    <div class="stage-light" aria-hidden="true"></div>
-    <figcaption class="wrap"><span>Clubhouse Concierge, matte black</span><a href="#demo">Tap through one below</a></figcaption>
-  </figure>
-  <div class="wrap facts">
-    <div><strong>For visitors</strong><p>Amenities, directions and answers in one place.</p></div>
-    <div><strong>For local businesses</strong><p>Your ad on screen when people decide where to go next.</p></div>
-    <div><strong>For venues</strong><p>Hardware, setup and upkeep handled for you.</p></div>
-  </div>
 </section>
+
+<section class="section explain" aria-labelledby="explain-title"><div class="wrap explain-grid">
+  <div>
+    <h2 id="explain-title">Never seen kiosk advertising before? Here's the idea.</h2>
+    <p class="lede" style="margin-top:18px">People in a lobby or waiting room have a few minutes and a question: where to eat, what to do, how to get somewhere. Our kiosk answers it — and your ad sits on every screen while they look.</p>
+    <p class="lede" style="margin-top:14px">Unlike a flyer or a billboard, you can see what happened: how often your ad was shown, how many people tapped it and how many took it home on their phone.</p>
+    <div class="roi">
+      <div><b>$1.09</b><span>a day for one location ($399 a year)</span></div>
+      <div><b>$0.66</b><span>a day per location with 5 locations</span></div>
+      <div><b>1</b><span>new regular customer can pay for the whole year</span></div>
+    </div>
+    {btns(("Choose a package","pricing/"),("Try the kiosk","#demo","btn-ghost"))}
+  </div>
+  {cycle("big")}
+</div></section>
 
 <nav class="jump" aria-label="Get started"><div class="wrap jump-grid">
   <a href="{{R}}campaign-planner/"><span class="ico">{icon("mega","")}</span><span><b>Plan a campaign</b><span>A local message with a clear next step. For advertisers.</span></span></a>
@@ -95,13 +128,13 @@ home = f'''
 </div></section>
 
 <section class="section" style="padding-top:0;background:#fff"><div class="wrap">
-  <div class="teaser"><div><h2 style="font-size:clamp(30px,3.6vw,44px)">Start local. Plan your reach.</h2><p class="lede" style="margin-top:10px">One ad on one kiosk, or a campaign across many. Build an estimate in the calculator.</p></div>
+  <div class="teaser"><div><h2 style="font-size:clamp(30px,3.6vw,44px)">Start local. Plan your reach.</h2><p class="lede" style="margin-top:10px">One location for $399 a year, three for $1,099 or five for $1,200. Or $60 a month.</p></div>
   <p class="price"><span>$399</span>/ year</p><a class="btn btn-dark" href="{{R}}pricing/">Explore pricing</a></div>
 </div></section>
 
 {cta_band()}
 '''
-page("", "Turn wait time into opportunity", "Touch-screen kiosks that give visitors useful venue information and put local businesses in front of them. Free for qualified venues. Local ads from $399 a year.", home, active="", kiosk=True)
+page("", "Turn wait time into opportunity", "Touch-screen kiosks that give visitors useful venue information and put local businesses in front of them. Free for qualified venues. Local ads from $399 a year or $60 a month.", home, active="", kiosk=True)
 
 # ================================================================ THE KIOSK
 kiosk_page = page_hero([("The kiosk","kiosk/")], "One screen. A world of possibility.",
@@ -132,35 +165,42 @@ kiosk_page = page_hero([("The kiosk","kiosk/")], "One screen. A world of possibi
 page("kiosk/", "The kiosk", "A digital concierge, information hub and local advertising platform in one managed touch-screen kiosk. Try the interactive demo.", kiosk_page, kiosk=True)
 
 # ================================================================ ADVERTISE
-price_cards = f'''<div class="price-cards">
-  <div class="price-card lamp"><span class="label">Local annual advertising</span><h3>One business. A full year on screen.</h3>
-    <p class="price"><span>$399</span>/ year</p><p>A simple annual offer that includes the ad and its creative.</p>
-    <ul><li>Ad artwork and digital copy</li><li>Your logo and business details</li><li>12 months of display placement</li></ul>
-    <a class="btn" href="{{R}}advertise/?Pricing=Local+annual+ad+%E2%80%94+%24399+per+year#inquiry">Ask about this offer</a>
-    <p class="fine">Number of kiosks, ad format and reporting are confirmed in your quote.</p></div>
-  <div class="price-card"><span class="label">Multi-kiosk campaign</span><h3>More places. One campaign plan.</h3>
-    <p class="price"><span>$499</span>/ ad, per kiosk, per year</p><p>An annual rate that scales with the number of kiosks and ad placements.</p>
-    <ul><li>One ad on one kiosk: $499 a year</li><li>Three ads on one kiosk: $1,497 a year</li><li>25 kiosks × three ads: $37,425 a year</li></ul>
-    <a class="btn btn-dark" href="{{R}}pricing/#calculator">Build an estimate</a>
-    <p class="fine">Available locations and deliverables are confirmed in your quote.</p></div>
-</div>'''
+def pkg_link(v): return "{R}advertise/?Pricing=" + v.replace(" ", "+").replace("$", "%24").replace(",", "%2C").replace("—", "%E2%80%94").replace("/", "%2F") + "#inquiry"
+INCL = "<ul><li>Ad artwork and digital copy</li><li>Your logo and business details</li><li>12 months in the kiosk ad space</li></ul>"
+price_cards = f'''<div class="price-cards three">
+  <div class="price-card"><span class="label">Single location</span><h3>One kiosk. A full year on screen.</h3>
+    <p class="price"><span>$399</span>/ year</p><p>Or $60 a month.</p>{INCL}
+    <a class="btn btn-dark" href="{pkg_link(PRICING[1])}">Choose 1 location</a></div>
+  <div class="price-card"><span class="label">3 locations</span><h3>Three kiosks near your customers.</h3>
+    <p class="price"><span>$1,099</span>/ year</p><p>About $366 per location — save $98. Or $180 a month.</p>{INCL}
+    <a class="btn btn-dark" href="{pkg_link(PRICING[2])}">Choose 3 locations</a></div>
+  <div class="price-card lamp"><span class="label">5 locations · Best value</span><h3>Five kiosks, one simple price.</h3>
+    <p class="price"><span>$1,200</span>/ year</p><p>Just $240 per location — save $795. Or $300 a month.</p>{INCL}
+    <a class="btn" href="{pkg_link(PRICING[3])}">Choose 5 locations</a></div>
+</div>
+<div class="pkg-notes">
+  <p><b>More than 5 locations?</b> Each location after 5 is $300 a year.</p>
+  <p><b>Prefer monthly?</b> $60 per location, per month.</p>
+  <p><b>Need 2 or 4?</b> The 3- and 5-location packages cover them, with a spare location included.</p>
+</div>
+<p class="fine" style="margin-top:14px">A location is one Spotlight kiosk venue. Available venues and final terms are confirmed in your quote. <a class="text-link" href="{{R}}pricing/#calculator">Build an estimate</a></p>'''
 
 adv = page_hero([("Advertise","advertise/")], "Your next customer could be right nearby.",
   "Reach people while they wait, browse, plan and decide. Put a relevant local message in a space they already spend time.",
   btns(("Plan a campaign","campaign-planner/"),("Discuss an opportunity","#inquiry","btn-ghost")),
-  aside=f'<div class="moment" style="background:var(--stone)">{mini("The Arden Hotel", ("Dining","Amenities","Local guide","Events"), "silver")}<dl><dt>Where your ad runs</dt><dd>The lower half of every kiosk screen</dd><dt>Who sees it</dt><dd>Guests, patients and customers who stop to tap</dd></dl></div>') + f'''
+  aside=f'<div class="moment" style="background:var(--stone)">{mini("The Arden Hotel", ("Dining","Amenities","Local guide","Events"), "silver")}<dl><dt>Where your ad runs</dt><dd>The bottom of every kiosk screen</dd><dt>Who sees it</dt><dd>Guests, patients and customers who stop to tap</dd></dl></div>') + f'''
 <nav class="jump" aria-label="Advertising tools"><div class="wrap jump-grid">
-  <a href="{{R}}pricing/"><span class="ico">{icon("mega","")}</span><span><b>Explore annual pricing</b><span>From $399 a year, with a multi-kiosk calculator.</span></span></a>
+  <a href="{{R}}pricing/"><span class="ico">{icon("mega","")}</span><span><b>Choose a package</b><span>$399 a year for one location, or $60 a month.</span></span></a>
   <a href="{{R}}campaign-planner/"><span class="ico">{icon("pin","")}</span><span><b>Build a campaign brief</b><span>Four short steps to a brief you can share.</span></span></a>
   <a href="{{R}}creative-studio/"><span class="ico">{icon("spark","")}</span><span><b>Preview your creative</b><span>See your message in the kiosk ad space.</span></span></a>
 </div></nav>
 {section(head("Choose the right way to be seen.", "Placement and campaign availability are confirmed for your chosen market.") + f'''<div class="placements">
-  <div class="placement">{mini("your venue",("Dining","Events"),"black")}<h3>Kiosk ad space</h3><p>The lower half of the screen: a rotating slider every visitor sees while they browse.</p><a class="text-link" href="{{R}}advertise/?Placement=Kiosk+ad+space+%28lower+screen%29#inquiry">Plan this placement</a></div>
+  <div class="placement">{mini("your venue",("Dining","Events"),"black")}<h3>Kiosk ad space</h3><p>The bottom quarter of the screen: a rotating slider every visitor sees while they browse.</p><a class="text-link" href="{{R}}advertise/?Placement=Kiosk+ad+space+%28lower+screen%29#inquiry">Plan this placement</a></div>
   <div class="placement">{placement_mini("ph-banner")}<h3>Featured banner</h3><p>A prominent visual message to introduce your business or offer.</p><a class="text-link" href="{{R}}advertise/?Placement=Featured+banner#inquiry">Plan this placement</a></div>
   <div class="placement">{placement_mini("ph-qr")}<h3>QR offer tile</h3><p>A local promotion with a QR link to information or your next step.</p><a class="text-link" href="{{R}}advertise/?Placement=QR+offer+tile#inquiry">Plan this placement</a></div>
 </div><p style="margin-top:22px"><a class="text-link" href="{{R}}audience/">Explore who you can reach</a> &nbsp; <a class="text-link" href="{{R}}locations/">Find your target market</a></p>''')}
 <section class="section" style="background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)"><div class="wrap">
-  {head("One local message. Or a wider campaign.", "Final pricing, available venues and placement scope are confirmed in your campaign quote.")}
+  {head("Pick a package. Grow your reach.", "Annual packages for one, three or five locations — or pay monthly.")}
   {price_cards}
 </div></section>
 {section(head("A campaign that fits. Start with a place.", "Tell us your location, audience and goal. The team helps scope placements, creative, timing and reporting.") + '''<div class="cards">
@@ -173,26 +213,31 @@ adv = page_hero([("Advertise","advertise/")], "Your next customer could be right
   <p style="margin-top:18px"><a class="text-link" href="{{R}}campaign-ideas/">Explore all eight playbooks</a> &nbsp; <a class="text-link" href="{{R}}media-kit/">Review the media overview</a></p>
 </div></section>
 {form_section("inquiry", "Plan your next placement.", "Start with your business, market and goal. The team confirms the right placement and campaign terms.", ["Tell us your market and goal", "Confirm placements and pricing", "Plan creative, timing and reporting"], advertiser_form(), dark=True)}'''
-page("advertise/", "Advertise with Spotlight", "Put your local business on screen in hotel lobbies, clubhouses, medical offices and dealership lounges. Annual placements from $399.", adv)
+page("advertise/", "Advertise with Spotlight", "Put your local business on screen in hotel lobbies, clubhouses, medical offices and dealership lounges. From $399 a year or $60 a month.", adv)
 
 # ================================================================ PRICING
-pricing = page_hero([("Advertise","advertise/"),("Pricing & calculator","pricing/")], "A clear structure. A useful starting point.",
-  "Explore the annual offer for a single business, plan a campaign across multiple kiosks, and see what hosting costs (nothing, for qualified venues).",
-  btns(("Estimate a campaign","#calculator"),("Ask about the annual offer","advertise/#inquiry","btn-ghost"))) + f'''
-{section(head("One local message. Or a wider campaign.", "Final pricing, available venues and placement scope are confirmed in your campaign quote.") + price_cards)}
+pricing = page_hero([("Advertise","advertise/"),("Pricing & calculator","pricing/")], "Simple packages. Room to grow.",
+  "$399 a year for one location, $1,099 for three, $1,200 for five — or $60 a month per location. Hosting a kiosk costs qualified venues nothing.",
+  btns(("Estimate your price","#calculator"),("Talk to us about a package","advertise/#inquiry","btn-ghost"))) + f'''
+{section(head("Pick a package. Grow your reach.", "Every package includes ad artwork, digital copy and 12 months in the kiosk ad space.") + price_cards)}
 <section class="section" id="calculator" style="background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)"><div class="wrap">
-  {head("Your campaign. At the scale you choose.", "Plan with the $499 per-ad, per-kiosk annual rate. This estimate is a starting point for your inquiry.")}
+  {head("Your price. At the scale you choose.", "Pick how many locations you want. We'll match you to the best package and show the monthly option too.")}
   <div class="calc" id="calc" data-next="{{R}}advertise/#inquiry">
-    <div class="calc-in"><h3>Choose your campaign scope</h3>
-      <div class="presets" role="group" aria-label="Presets"><button type="button" data-preset-k="1" data-preset-a="1">Single placement</button><button type="button" data-preset-k="25" data-preset-a="3">25-kiosk pilot</button><button type="button" data-preset-k="300" data-preset-a="1">300-kiosk plan</button></div>
-      <div class="range-row"><label for="k-range">Kiosks <output id="k-out" for="k-range"><input id="k-num" type="number" min="1" max="300" value="25" aria-label="Number of kiosks" style="width:90px;font:800 22px/1 var(--display);border:1.5px solid var(--line);border-radius:8px;padding:4px 8px;text-align:right"></output></label><input id="k-range" type="range" min="1" max="300" value="25"><small>1 to 300 kiosks</small></div>
-      <div class="range-row"><label for="a-range">Ads per kiosk <output for="a-range"><input id="a-num" type="number" min="1" max="3" value="3" aria-label="Ads per kiosk" style="width:70px;font:800 22px/1 var(--display);border:1.5px solid var(--line);border-radius:8px;padding:4px 8px;text-align:right"></output></label><input id="a-range" type="range" min="1" max="3" value="3"><small>1 to 3 ad placements on each kiosk</small></div>
-      <p class="fine">Annual rate × kiosks × ads per kiosk. Creative, reporting, taxes, payment terms and available locations are confirmed in your quote.</p>
+    <div class="calc-in"><h3>How many locations?</h3>
+      <div class="presets" role="group" aria-label="Presets"><button type="button" data-preset-n="1">1 location</button><button type="button" data-preset-n="3">3 locations</button><button type="button" data-preset-n="5">5 locations</button><button type="button" data-preset-n="10">10 locations</button></div>
+      <div class="range-row"><label for="n-range">Locations <input id="n-num" type="number" min="1" max="100" value="5" aria-label="Number of locations" class="num-in"></label><input id="n-range" type="range" min="1" max="50" value="5"><small>1 to 50 on the slider · type up to 100</small></div>
+      <ul class="tier-list" id="tiers">
+        <li data-tier="1"><span>1 location</span><b>$399/yr</b></li>
+        <li data-tier="3"><span>2–3 locations</span><b>$1,099/yr</b></li>
+        <li data-tier="5"><span>4–5 locations</span><b>$1,200/yr</b></li>
+        <li data-tier="6"><span>Each location after 5</span><b>+$300/yr</b></li>
+        <li data-tier="m"><span>Monthly, any number</span><b>$60/location/mo</b></li>
+      </ul>
     </div>
-    <div class="calc-out" aria-live="polite"><span>Your annual planning estimate</span><p class="big" id="c-total">$37,425<small>/ year</small></p><p id="c-eq" style="color:var(--muted-dark)">25 kiosks × 3 ads × $499 per year</p>
-      <dl><div><dt>Total ad placements</dt><dd id="c-ads">75</dd></div><div><dt>Monthly equivalent</dt><dd id="c-month">$3,119</dd></div><div><dt>Campaign term</dt><dd>12 months</dd></div></dl>
-      <button class="btn" type="button" data-calc="carry">Use this estimate in an inquiry</button>
-      <p class="fine" style="margin-top:14px">An estimate doesn't reserve inventory or purchase advertising.</p></div>
+    <div class="calc-out" aria-live="polite"><span>Your annual price</span><p class="big" id="c-total">$1,200<small>/ year</small></p><p id="c-eq" style="color:var(--muted-dark)">5-location package</p>
+      <dl><div><dt>Per location</dt><dd id="c-per">$240</dd></div><div><dt>Or pay monthly</dt><dd id="c-month">$300/mo</dd></div><div style="grid-column:1/-1"><dt>Annual saves you</dt><dd id="c-save">$2,400 vs. monthly</dd></div></dl>
+      <button class="btn" type="button" data-calc="carry">Use this in an inquiry</button>
+      <p class="fine" style="margin-top:14px">An estimate doesn't reserve kiosks or purchase advertising. Available venues are confirmed in your quote.</p></div>
   </div>
   <p style="margin-top:22px"><a class="text-link" href="{{R}}locations/">Explore market planning</a></p>
 </div></section>
@@ -200,9 +245,9 @@ pricing = page_hero([("Advertise","advertise/"),("Pricing & calculator","pricing
   <div><span style="color:var(--lamp);font-weight:600">For qualified host venues</span><h2 style="font-size:clamp(30px,3.6vw,44px);margin-top:6px">A useful amenity. At no kiosk cost.</h2><p style="color:var(--muted-dark);margin-top:10px">Equipment, installation, service and maintenance at no cost, subject to a site review and a signed Host Agreement. Your venue supplies suitable space, power and available connectivity.</p></div>
   <p class="price"><span>$0</span></p><a class="btn" href="{{R}}hosts/">Explore the host offering</a></div></div></section>
 <section class="section" style="padding-top:0"><div class="wrap faq-grid"><div><h2>A little pricing clarity.</h2><a class="text-link" href="{{R}}faqs/">All common questions</a></div>
-  <div class="faq-list">{faq_html([FAQS[7], ("Does $399 cover every kiosk in the network?", "No. The annual offer covers the kiosks and ad placements set out in your quote. For a campaign across several kiosks, the multi-kiosk rate is $499 × the number of kiosks × the ads on each kiosk, for 12 months.", "advertisers"), FAQS[8], FAQS[9], FAQS[3]])}</div></div></section>
+  <div class="faq-list">{faq_html([FAQS[7], ("What counts as a location?", "One location is one Spotlight kiosk venue — for example, a hotel lobby or a clubhouse. Your quote lists the exact venues your ad runs in.", "advertisers"), ("What if I want 2 or 4 locations?", "Two locations are covered by the 3-location package ($1,099), and four by the 5-location package ($1,200), so you get a spare location included at no extra cost.", "advertisers"), FAQS[8], FAQS[9], FAQS[3]])}</div></div></section>
 {cta_band("Bring your next local idea.", "Choose a starting point, plan the scale and discuss a campaign that fits.")}'''
-page("pricing/", "Pricing & calculator", "Local kiosk advertising from $399 a year, multi-kiosk campaigns at $499 per ad, per kiosk, per year, and free hosting for qualified venues.", pricing)
+page("pricing/", "Pricing & calculator", "Kiosk advertising packages: $399 a year for one location, $1,099 for three, $1,200 for five, or $60 a month per location. Free hosting for qualified venues.", pricing)
 
 # ================================================================ CAMPAIGN PLANNER
 def choice(name, value, sub, need=False):
@@ -249,7 +294,7 @@ studio = page_hero([("Advertise","advertise/"),("Creative studio","creative-stud
     <label class="field"><span>Headline <span class="count" id="hl-count">29 of 65 characters</span></span><input name="headline" value="A good evening starts nearby." maxlength="90"></label>
     <label class="field">Call to action<input name="action" value="Explore the menu" maxlength="30"></label>
     <label class="field"><span>Destination URL <span class="opt">(optional)</span></span><input name="url" type="url" placeholder="https://yourbusiness.com/offer"><small>Add a destination to test the link from the preview.</small></label>
-    <label class="field">Format<select name="format"><option value="tile">Kiosk ad space · portrait</option><option value="banner">Featured banner · landscape</option><option value="panel">Rotating panel · landscape</option></select></label>
+    <label class="field">Format<select name="format"><option value="tile">Kiosk ad space · bottom of screen</option><option value="banner">Featured banner · landscape</option><option value="panel">Rotating panel · landscape</option></select></label>
     <fieldset style="border:0;padding:0;margin:0"><legend class="field" style="margin-bottom:8px">Color</legend><div class="swatches">
       <label><input type="radio" name="color" value="forest" checked><i style="--sw:#1F4433"></i>Forest</label>
       <label><input type="radio" name="color" value="sunset"><i style="--sw:linear-gradient(135deg,#c2502f,#f2a65b)"></i>Sunset</label>
@@ -258,7 +303,7 @@ studio = page_hero([("Advertise","advertise/"),("Creative studio","creative-stud
     <div class="btn-row" style="margin-top:4px"><button class="btn" type="button" data-studio="download">Download SVG concept</button><a class="btn btn-ghost" href="{{R}}campaign-planner/">Build the brief</a></div>
     <p class="fine">Final artwork dimensions and accepted formats are confirmed for your placement. Your changes stay in this page.</p>
   </form>
-  <div class="studio-preview" aria-live="polite"><div class="lbl"><span>Live preview</span><span id="fmt-label">Kiosk ad space · portrait</span></div><div id="studio-preview" style="width:100%;display:flex;justify-content:center"></div><a class="text-link" id="studio-link" href="#" target="_blank" rel="noopener" hidden>Test your destination link</a><p class="fine">One business identity. One main message. One clear next step.</p></div>
+  <div class="studio-preview" aria-live="polite"><div class="lbl"><span>Live preview</span><span id="fmt-label">Kiosk ad space · bottom of screen</span></div><div id="studio-preview" style="width:100%;display:flex;justify-content:center"></div><a class="text-link" id="studio-link" href="#" target="_blank" rel="noopener" hidden>Test your destination link</a><p class="fine">One business identity. One main message. One clear next step.</p></div>
 </div></section>
 <section class="section" style="background:#fff;border-top:1px solid var(--line)"><div class="wrap">
   {head("Make the message easy to understand.", "Three checks before artwork is final.")}
@@ -443,8 +488,8 @@ media = page_hero([("Resources","resources/"),("Media overview","media-kit/")], 
   <div><dt>The concept</dt><dd>Managed interactive venue kiosks that combine visitor information, local discovery and advertising.</dd></div>
   <div><dt>Venues</dt><dd>Hotels, golf and country clubs, medical offices, car dealerships, restaurants and other places where people spend time.</dd></div>
   <div><dt>Host offering</dt><dd>Kiosk equipment, software, coordinated setup, content updates and routine maintenance for qualified hosts, subject to review and a Host Agreement.</dd></div>
-  <div><dt>Advertiser formats</dt><dd>The kiosk ad space on the lower half of the screen, featured banners, rotating panels and QR offer tiles. Available formats are confirmed for each venue.</dd></div>
-  <div><dt>Pricing</dt><dd>Local annual ads from $399 a year. Multi-kiosk campaigns at $499 per ad, per kiosk, per year. Venue availability and final rates are confirmed in your quote.</dd></div>
+  <div><dt>Advertiser formats</dt><dd>The kiosk ad space along the bottom of the screen, featured banners, rotating panels and QR offer tiles. Available formats are confirmed for each venue.</dd></div>
+  <div><dt>Pricing</dt><dd>$399 a year for one location, $1,099 for three locations, $1,200 for five, and $300 a year for each location after five. Monthly: $60 per location. Venue availability and final terms are confirmed in your quote.</dd></div>
   <div><dt>Reporting</dt><dd>Display impressions, screen interactions and QR activity where supported. Definitions and reporting terms are agreed for each campaign.</dd></div>
 </dl>
 <div class="cards four" style="margin-top:40px"><a class="card" href="{{R}}campaign-ideas/"><h3>Campaign ideas</h3><p>Eight playbooks to adapt.</p></a><a class="card" href="{{R}}creative-studio/"><h3>Preview your message</h3><p>See it in the ad space.</p></a><a class="card" href="{{R}}measurement/"><h3>Understand reporting</h3><p>What each number means.</p></a><a class="card" href="{{R}}contact/"><h3>Talk with Spotlight</h3><p>{PHONE}</p></a></div>

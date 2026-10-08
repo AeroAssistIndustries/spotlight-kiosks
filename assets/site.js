@@ -43,6 +43,37 @@
   });
   document.addEventListener("click", e => { if (!e.target.closest(".nav-item")) closeAll(); });
 
+  /* ---------- home slider ---------- */
+  const reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  $$("[data-slider]").forEach(sl => {
+    const slides = $$(".slide", sl), dots = $$(".sl-dots button", sl);
+    let i = 0, paused = false, x0 = null;
+    slides.forEach(s => s.removeAttribute("hidden"));
+    function show(n) {
+      i = (n + slides.length) % slides.length;
+      slides.forEach((s, j) => { s.classList.toggle("on", j === i); s.setAttribute("aria-hidden", String(j !== i)); $$("a,button", s).forEach(el => { el.tabIndex = j === i ? 0 : -1; }); });
+      dots.forEach((d, j) => { d.setAttribute("aria-selected", String(j === i)); d.tabIndex = j === i ? 0 : -1; });
+    }
+    $(".sl-prev", sl).addEventListener("click", () => show(i - 1));
+    $(".sl-next", sl).addEventListener("click", () => show(i + 1));
+    dots.forEach((d, j) => d.addEventListener("click", () => show(j)));
+    sl.addEventListener("mouseenter", () => { paused = true; }); sl.addEventListener("mouseleave", () => { paused = false; });
+    sl.addEventListener("focusin", () => { paused = true; }); sl.addEventListener("focusout", () => { paused = false; });
+    sl.addEventListener("pointerdown", e => { x0 = e.clientX; });
+    sl.addEventListener("pointerup", e => { if (x0 == null) return; const dx = e.clientX - x0; x0 = null; if (Math.abs(dx) > 40) show(i + (dx < 0 ? 1 : -1)); });
+    sl.addEventListener("keydown", e => { if (e.key === "ArrowRight") show(i + 1); if (e.key === "ArrowLeft") show(i - 1); });
+    show(0); sl.classList.add("ready");
+    if (!reduceMotion) setInterval(() => { if (!paused && !document.hidden) show(i + 1); }, 6500);
+  });
+
+  /* ---------- ad cycle highlight ---------- */
+  $$("[data-cycle]").forEach(c => {
+    const nodes = $$(".cy-node", c); let k = 0, vis = true;
+    if (reduceMotion) return;
+    if ("IntersectionObserver" in window) new IntersectionObserver(es => { vis = es[0].isIntersecting; }).observe(c);
+    setInterval(() => { if (!vis || document.hidden) return; nodes.forEach((n, j) => n.classList.toggle("on", j === k)); k = (k + 1) % nodes.length; }, 1500);
+  });
+
   /* ---------- tabs ---------- */
   $$("[data-tabs]").forEach(root => {
     const tabs = $$("[role=tab]", root);
@@ -218,7 +249,7 @@
       const col = f.color.value, [bg, light] = COLORS[col], fmt = f.format.value;
       const n = f.headline.value.length, cnt = $("#hl-count"); cnt.textContent = `${n} of 65 characters`; cnt.classList.toggle("over", n > 65);
       const ad = `<div class="studio-ad${light ? " light" : ""}" style="--sbg:${bg}"><span class="sa-brand">${esc(f.brand.value || "Your business")}</span><span class="sa-head">${esc(f.headline.value || "Your headline")}</span><span class="sa-cta">${esc(f.action.value || "Learn more")}${f.url.value ? " ↗" : ""}</span></div>`;
-      const fmtName = { tile: "Kiosk ad space · portrait", banner: "Featured banner · landscape", panel: "Rotating panel · landscape" }[fmt];
+      const fmtName = { tile: "Kiosk ad space · bottom of screen", banner: "Featured banner · landscape", panel: "Rotating panel · landscape" }[fmt];
       $("#fmt-label").textContent = fmtName;
       pv.innerHTML = fmt === "tile"
         ? `<div class="mini studio-kiosk" data-finish="black"><div class="mini-head"><div class="mini-screen"><b>Welcome</b><small>to your venue</small><div class="mini-tiles"><span style="--g:linear-gradient(135deg,#7a3b1f,#c9773a)">Dining</span><span style="--g:linear-gradient(135deg,#2a2f5c,#8a64b0)">Events</span></div>${ad}</div></div><div class="mini-pole"></div><div class="mini-base"></div></div>`
@@ -230,18 +261,18 @@
     presets.forEach(p => p.addEventListener("click", () => load(p.dataset.preset)));
     $("[data-studio=download]").addEventListener("click", () => {
       const col = f.color.value, light = COLORS[col][1], fg = light ? "#1B1F1D" : "#FFFFFF";
-      const tall = f.format.value === "tile", W = tall ? 1080 : 1920, H = tall ? 960 : 1080;
+      const tall = f.format.value === "tile", W = tall ? 1080 : 1920, H = tall ? 480 : 1080;
       const words = (f.headline.value || "Your headline").split(/\s+/), lines = []; let line = "";
-      const max = tall ? 18 : 24;
+      const max = tall ? 26 : 24;
       words.forEach(w => { if ((line + " " + w).trim().length > max) { lines.push(line.trim()); line = w; } else line += " " + w; }); lines.push(line.trim());
-      const fs = tall ? 104 : 112;
+      const fs = tall ? 72 : 112;
       const x = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
 <rect width="${W}" height="${H}" fill="${SVGBG[col]}"/>
-<circle cx="${W - 60}" cy="60" r="${tall ? 240 : 300}" fill="none" stroke="${fg}" stroke-opacity=".14" stroke-width="${tall ? 80 : 100}"/>
-<text x="90" y="140" font-family="Helvetica, Arial, sans-serif" font-size="48" font-weight="600" fill="${fg}">${x(f.brand.value || "Your business")}</text>
-${lines.map((l, i) => `<text x="90" y="${(tall ? 330 : 380) + i * fs * 1.08}" font-family="Helvetica, Arial, sans-serif" font-size="${fs}" font-weight="800" fill="${fg}">${x(l)}</text>`).join("\n")}
-<text x="90" y="${H - 110}" font-family="Helvetica, Arial, sans-serif" font-size="46" font-weight="600" fill="${fg}" text-decoration="underline">${x(f.action.value || "Learn more")}</text>
+<circle cx="${W - 60}" cy="60" r="${tall ? 160 : 300}" fill="none" stroke="${fg}" stroke-opacity=".14" stroke-width="${tall ? 80 : 100}"/>
+<text x="90" y="${tall ? 100 : 140}" font-family="Helvetica, Arial, sans-serif" font-size="48" font-weight="600" fill="${fg}">${x(f.brand.value || "Your business")}</text>
+${lines.map((l, i) => `<text x="90" y="${(tall ? 200 : 380) + i * fs * 1.08}" font-family="Helvetica, Arial, sans-serif" font-size="${fs}" font-weight="800" fill="${fg}">${x(l)}</text>`).join("\n")}
+<text x="90" y="${H - (tall ? 60 : 110)}" font-family="Helvetica, Arial, sans-serif" font-size="46" font-weight="600" fill="${fg}" text-decoration="underline">${x(f.action.value || "Learn more")}</text>
 <text x="${W - 90}" y="${H - 60}" text-anchor="end" font-family="Helvetica, Arial, sans-serif" font-size="26" fill="${fg}" fill-opacity=".7">Spotlight Kiosks creative concept</text>
 </svg>`;
       download("spotlight-creative-concept.svg", svg, "image/svg+xml");
@@ -253,29 +284,37 @@ ${lines.map((l, i) => `<text x="90" y="${(tall ? 330 : 380) + i * fs * 1.08}" fo
   /* ---------- pricing calculator ---------- */
   const calc = $("#calc");
   if (calc) {
-    const RATE = 499, k = $("#k-range"), kn = $("#k-num"), a = $("#a-range"), an = $("#a-num");
-    const fmt = n => "$" + n.toLocaleString("en-US");
-    const pre = $$("[data-preset-k]", calc);
+    const r = $("#n-range"), num = $("#n-num"), pre = $$("[data-preset-n]", calc), tiers = $$("#tiers li");
+    const money = n => "$" + Math.round(n).toLocaleString("en-US");
+    const annual = n => n <= 1 ? 399 : n <= 3 ? 1099 : n <= 5 ? 1200 : 1200 + 300 * (n - 5);
+    const label = n => n <= 1 ? "Single location" : n <= 3 ? `3-location package${n === 2 ? " (covers up to 3)" : ""}` : n <= 5 ? `5-location package${n === 4 ? " (covers up to 5)" : ""}` : `5-location package + ${n - 5} extra location${n - 5 > 1 ? "s" : ""} × $300`;
+    let N = 5;
     function sync(src) {
-      if (src === kn) k.value = kn.value; else kn.value = k.value;
-      if (src === an) a.value = an.value; else an.value = a.value;
-      let K = Math.max(1, Math.min(300, parseInt(k.value, 10) || 1)), A = Math.max(1, Math.min(3, parseInt(a.value, 10) || 1));
-      const total = K * A * RATE;
-      $("#c-total").innerHTML = `${fmt(total)}<small>/ year</small>`;
-      $("#c-eq").textContent = `${K} kiosk${K > 1 ? "s" : ""} × ${A} ad${A > 1 ? "s" : ""} × $499 per year`;
-      $("#c-ads").textContent = (K * A).toLocaleString();
-      $("#c-month").textContent = fmt(Math.round(total / 12));
-      pre.forEach(p => p.setAttribute("aria-pressed", String(+p.dataset.presetK === K && +p.dataset.presetA === A)));
-      calc.dataset.k = K; calc.dataset.a = A; calc.dataset.total = total;
+      const raw = parseInt(src === num ? num.value : r.value, 10);
+      if (isNaN(raw)) return;
+      N = Math.max(1, Math.min(100, raw));
+      if (src !== num) num.value = N;
+      r.value = Math.min(50, N);
+      const A = annual(N), M = 60 * N;
+      $("#c-total").innerHTML = `${money(A)}<small>/ year</small>`;
+      $("#c-eq").textContent = label(N);
+      $("#c-per").textContent = money(A / N);
+      $("#c-month").textContent = `${money(M)}/mo`;
+      $("#c-save").textContent = `${money(M * 12 - A)} vs. monthly`;
+      const t = N <= 1 ? "1" : N <= 3 ? "3" : N <= 5 ? "5" : "6";
+      tiers.forEach(li => li.classList.toggle("on", li.dataset.tier === t));
+      pre.forEach(p => p.setAttribute("aria-pressed", String(+p.dataset.presetN === N)));
     }
-    [k, kn, a, an].forEach(el => el.addEventListener("input", () => sync(el)));
-    pre.forEach(p => p.addEventListener("click", () => { k.value = p.dataset.presetK; a.value = p.dataset.presetA; sync(k); }));
+    r.addEventListener("input", () => sync(r));
+    num.addEventListener("input", () => sync(num));
+    num.addEventListener("blur", () => { num.value = N; });
+    pre.forEach(p => p.addEventListener("click", () => { r.value = p.dataset.presetN; num.value = p.dataset.presetN; sync(num); }));
     $("[data-calc=carry]").addEventListener("click", () => {
-      const K = calc.dataset.k, A = calc.dataset.a, T = (+calc.dataset.total).toLocaleString("en-US");
-      store.set("spotlight-handoff", { "Pricing": "Multi-kiosk plan — $499 per ad, per kiosk, per year", "Notes": `Planning estimate: ${K} kiosk(s) × ${A} ad(s) per kiosk × $499/year = $${T}/year. Please confirm availability and a quote.` });
+      const opt = N <= 1 ? "1 location — $399/yr" : N <= 3 ? "3 locations — $1,099/yr" : N <= 5 ? "5 locations — $1,200/yr" : "More than 5 locations — $1,200 + $300 per extra location/yr";
+      store.set("spotlight-handoff", { "Pricing": opt, "Notes": `Estimate for ${N} location${N > 1 ? "s" : ""}: ${label(N)} = ${money(annual(N))}/year (or ${money(60 * N)}/month). Please confirm available venues and a quote.` });
       location.href = calc.dataset.next;
     });
-    sync(k);
+    sync(num);
   }
 
   /* ---------- host checklist ---------- */

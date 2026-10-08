@@ -22,6 +22,12 @@ _IC = {
   "search": '<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>',
   "mail": '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6l8.5 7 8.5-7"/>',
   "phone": '<path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2"/>',
+  "eye": '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  "tap": '<path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11m0-1.5a1.5 1.5 0 0 1 3 0V12m0-1a1.5 1.5 0 0 1 3 0v3.5a6.5 6.5 0 0 1-6.5 6.5h-.6a6 6 0 0 1-4.6-2.2L4.6 14.6a1.6 1.6 0 0 1 2.4-2.1L9 14"/>',
+  "chart": '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+  "trend": '<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+  "arrow": '<path d="M5 12h14M13 6l6 6-6 6"/>',
+  "arrowl": '<path d="M19 12H5M11 6l-6 6 6 6"/>',
   "wrench": '<path d="M14.5 6.5a4 4 0 0 0 5 5L12 19a2.1 2.1 0 0 1-3-3l7.5-7.5"/><path d="M14.5 6.5L17 4l3 3-2.5 2.5"/>',
 }
 def icon(name, cls="ico"):
@@ -210,7 +216,7 @@ def demo_block(heading="Try the kiosk.", hid="demo-title"):
   <div class="wrap">
     <div class="demo-head">
       <h2 id="{hid}">{heading}</h2>
-      <p>This is the screen your guests use. Pick a venue and tap around the way a visitor would. The lower half of the screen is the ad space local businesses buy — swipe it, or tap "Your ad here".</p>
+      <p>This is the screen your guests use. Pick a venue and tap around the way a visitor would. The strip along the bottom of the screen is the ad space local businesses buy — swipe it, or tap "Your ad here" to see the packages.</p>
     </div>
     <div class="venue-switch" role="radiogroup" aria-label="Choose a venue">
       <button role="radio" aria-checked="true" data-venue="golf">Golf clubhouse</button>
@@ -227,7 +233,7 @@ def demo_block(heading="Try the kiosk.", hid="demo-title"):
       <aside class="console" aria-labelledby="console-title">
         <h3 id="console-title">Behind the screen</h3>
         <p class="console-note">Counts update as you tap. Reports show totals, never who tapped.</p>
-        <div class="ad-note"><div><b>The bottom half is for sale.</b>Every visitor sees the ad space while they browse. Annual placements start at $399. <a href="{{R}}advertise/">See advertising options</a></div></div>
+        <div class="ad-note"><div><b>The bottom of the screen is for sale.</b>Every visitor sees the ad space while they browse. $399 a year for one location, $1,099 for three, $1,200 for five — or $60 a month. <a href="{{R}}pricing/">See packages</a></div></div>
         <dl class="stats">
           <div><dt>Sessions</dt><dd id="st-sessions">0</dd></div>
           <div><dt>Screens viewed</dt><dd id="st-views">0</dd></div>
@@ -307,7 +313,7 @@ def form_section(fid, h2, p, steps, form_html, dark=False):
 
 CATEGORIES = ["Dining & entertainment", "Medical & wellness", "Automotive services", "Retail & lifestyle", "Travel & local experiences", "Professional services", "Events & community", "Other"]
 PLACEMENTS = ["Help me choose", "Kiosk ad space (lower screen)", "Featured banner", "Rotating panel", "QR offer tile"]
-PRICING = ["Help me choose", "Local annual ad — $399 per year", "Multi-kiosk plan — $499 per ad, per kiosk, per year"]
+PRICING = ["Help me choose", "1 location — $399/yr", "3 locations — $1,099/yr", "5 locations — $1,200/yr", "More than 5 locations — $1,200 + $300 per extra location/yr", "Monthly — $60 per location per month"]
 
 def advertiser_form():
     return draft_form("inquiry-form", EMAIL, "Advertising inquiry", [
@@ -425,9 +431,9 @@ FAQS = [
   ("Do host venues receive revenue sharing?", "The standard Host Agreement provides the kiosk at no cost and doesn't include payments or revenue sharing. Any separate arrangement has to be agreed in writing.", "hosts"),
   ("Can we choose what appears on our kiosk?", "Yes. Your venue information is planned with your team, and advertising is reviewed for fit with your setting. Category restrictions, such as competitors, can be discussed before you sign.", "hosts"),
   ("Who can advertise?", "Local businesses, restaurants and entertainment, medical and wellness services, automotive businesses and retail brands can ask about placements that fit.", "advertisers"),
-  ("What does advertising cost?", "Local annual placements start at $399 a year, including ad artwork, digital copy and 12 months of display. Multi-kiosk campaigns are $499 per ad, per kiosk, per year. Your quote confirms the venues, format and terms.", "advertisers"),
-  ("What's included in the $399 annual ad?", "Ad artwork and digital copy, your logo and business details, and 12 months of display placement. The number of kiosks, ad format and reporting are confirmed in your quote.", "advertisers"),
-  ("Can I pay monthly?", "Rates are annual. Payment timing can be discussed with the team and is set out in your advertiser agreement.", "advertisers"),
+  ("What does advertising cost?", "$399 a year for one location, $1,099 a year for three locations and $1,200 a year for five. Each location after five is $300 a year. You can also pay monthly at $60 per location. Every package includes ad artwork, digital copy and 12 months on screen.", "advertisers"),
+  ("What's included in a package?", "Ad artwork and digital copy, your logo and business details, and 12 months in the kiosk ad space at each location. Your quote confirms the exact venues, ad format and reporting.", "advertisers"),
+  ("Can I pay monthly?", "Yes. Monthly is $60 per location, per month — $60 for one location, $180 for three, $300 for five. Paying annually costs less.", "advertisers"),
   ("Can I update my ad?", "Creative changes and seasonal offers can be discussed with the team. Your campaign agreement sets the process, schedule and number of updates.", "advertisers"),
   ("How are campaign results measured?", "Reporting covers display impressions, screen interactions and QR activity where supported. A display impression doesn't identify a unique viewer or confirm a sale. See the measurement guide for what each number means.", "advertisers"),
   ("Is every market on the map available now?", "Availability changes as kiosks are placed. Contact the team to check current kiosks in your market.", "advertisers"),
@@ -462,3 +468,20 @@ def article(trail, title, lede, sections, after="", meta="", cta=None):
   <aside class="toc"><b>In this guide</b><ol>{toc}</ol><p class="meta">{meta}</p><p class="meta"><a class="text-link" href="{{R}}resources/">All resources</a></p></aside>
   <div class="prose">{body}{after}{cta_html}</div>
 </div></section>'''
+
+# ---------------------------------------------------------------- ad cycle graphic
+CYCLE = [
+  ("eye", "Ad viewed", "Visitors see your ad every time they use the kiosk."),
+  ("tap", "Customer taps", "They tap your ad or scan the QR code to take it with them."),
+  ("chart", "Trackable data", "Every view, tap and scan is counted in your report."),
+  ("trend", "High ROI", "From about $1.09 a day per location — one new customer can cover the year."),
+]
+def cycle(variant="small"):
+    areas = ["a", "b", "c", "d"]
+    nodes = "".join(f'<li class="cy-node" style="grid-area:{areas[i]}"><span class="cy-ico">{icon(ic, "")}<i>{i+1}</i></span><span class="cy-txt"><b>{t}</b><span class="cy-d">{d}</span></span></li>' for i, (ic, t, d) in enumerate(CYCLE))
+    arr = lambda area, rot: f'<span class="cy-arr" style="grid-area:{area};--r:{rot}deg" aria-hidden="true">{icon("arrow", "")}</span>'
+    return f'''<div class="cycle cycle-{variant}" data-cycle role="group" aria-label="How kiosk advertising works">
+  <ol class="cy-list">{nodes}</ol>
+  {arr("r1", 0)}{arr("r2", 90)}{arr("r3", 180)}{arr("r4", 270)}
+  <span class="cy-hub" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg><span>Every visit</span></span>
+</div>'''
