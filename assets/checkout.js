@@ -144,6 +144,8 @@
     if (i === 3) {
       if (!form.elements.agree_terms.checked) return fail(form.elements.agree_terms, "Agree to the Terms & Conditions to continue.");
       if (!form.elements.agree_rights.checked) return fail(form.elements.agree_rights, "Confirm you have the rights to your logo and artwork.");
+      if (!form.elements.agree_advertiser.checked) return fail(form.elements.agree_advertiser, "Accept the Advertiser Agreement to continue.");
+      if (form.elements.sign_name.value.trim().length < 2) return fail(form.elements.sign_name, "Type your full legal name to sign.");
     }
     err.hidden = true; return true;
   }
@@ -199,7 +201,7 @@
     }
     // Forms aren't connected yet: hand the order over by email, then offer payment if a link exists
     const fd = new FormData(form); fd.set("market", market());
-    const lines = [`Order: ${id}`, `Plan: ${planText()}`].concat([...fd.entries()].filter(([k, v]) => typeof v === "string" && v && !/^(_|agree|billing|market_other)/.test(k)).map(([k, v]) => `${k.replace(/_/g, " ")}: ${v}`));
+    const lines = [`Order: ${id}`, `Plan: ${planText()}`, `Advertiser Agreement accepted and signed by: ${fd.get("sign_name") || "—"} on ${new Date().toISOString()}`].concat([...fd.entries()].filter(([k, v]) => typeof v === "string" && v && !/^(_|agree|billing|market_other)/.test(k)).map(([k, v]) => `${k.replace(/_/g, " ")}: ${v}`));
     const mail = `mailto:sales@citypulsekiosks.com?subject=${encodeURIComponent(`Kiosk order ${id} — ${order.business}`)}&body=${encodeURIComponent(`Hello CityPulse team,\n\n${lines.join("\n")}\n\n(My logo/artwork is attached.)`)}`;
     const done = $("#co-done");
     $("p", done).innerHTML = `Your order number is <b>${id}</b>. One last step: send us the email below with your logo or artwork attached${link ? ", then complete payment" : ""}.`;
