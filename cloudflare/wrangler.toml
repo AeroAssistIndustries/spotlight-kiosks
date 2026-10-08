@@ -7,6 +7,11 @@ compatibility_date = "2026-09-01"
 VENUE_URL = "https://aeroassistindustries.github.io/spotlight-kiosks/assets/lexen-data.json"
 ALLOWED_ORIGINS = "https://aeroassistindustries.github.io"
 MODEL = "claude-haiku-5-5"
+CF_MODEL = "@cf/meta/llama-3.1-8b-instruct"
 
-# The API key is a secret. Add it with `npx wrangler secret put ANTHROPIC_API_KEY`
-# or in the dashboard: Worker > Settings > Variables and Secrets > Add > Secret.
+# Free AI: Cloudflare Workers AI. No key needed.
+[ai]
+binding = "AI"
+
+# Optional: to use Claude instead of the free model, add a secret ANTHROPIC_API_KEY
+# with `npx wrangler secret put ANTHROPIC_API_KEY` or in the dashboard.

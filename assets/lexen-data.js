@@ -124,10 +124,10 @@ window.CP_VENUE = {
      item: the matching place above (adds the walking time). logo: a file in assets/ (for example "lexen/ads/granville.png");
      without a logo the ad shows the business initials. Websites checked October 2026. */
   sponsors: [
-    { name: "Granville", kind: "Restaurant and bar", tagline: "Modern American dining and cocktails in the NoHo Arts District.", website: "granvillerestaurants.com", url: "https://www.granvillerestaurants.com/", item: "granville" },
-    { name: "El Portal Theatre", kind: "Live theatre", tagline: "Plays, comedy and concerts in a historic NoHo theatre.", website: "elportaltheatre.com", url: "https://elportaltheatre.com/", item: "elportal" },
-    { name: "NoHo Diner", kind: "Breakfast and diner classics", tagline: "Around the corner on Magnolia Blvd.", website: "@thenohodiner on Instagram", url: "https://www.instagram.com/thenohodiner/", item: "nohodiner" },
-    { name: "Warner Bros. Studio Tour Hollywood", kind: "Studio tour", tagline: "Go behind the scenes of a working film and TV studio.", website: "wbstudiotour.com", url: "https://www.wbstudiotour.com/", item: "warner" }
+    { name: "Granville", kind: "Restaurant and bar", tagline: "Modern American dining and cocktails in the NoHo Arts District.", website: "granville.com", url: "https://www.granville.com/", item: "granville", logo: "lexen/ads/granville.png" },
+    { name: "El Portal Theatre", kind: "Live theatre", tagline: "Plays, comedy and concerts in a historic NoHo theatre.", website: "elportaltheatre.com", url: "https://elportaltheatre.com/", item: "elportal", logo: "lexen/ads/elportal.png" },
+    { name: "NoHo Diner", kind: "Breakfast and diner classics", tagline: "Around the corner on Magnolia Blvd.", website: "@thenohodiner on Instagram", url: "https://www.instagram.com/thenohodiner/", item: "nohodiner", logo: "lexen/ads/nohodiner.png" },
+    { name: "Warner Bros. Studio Tour Hollywood", kind: "Studio tour", tagline: "Go behind the scenes of a working film and TV studio.", website: "wbstudiotour.com", url: "https://www.wbstudiotour.com/", item: "warner", logo: "lexen/ads/warnerbros.png" }
   ],
 
   /* Built-in concierge answers. "keys" are words that match a guest's question; "items" link to places. */
