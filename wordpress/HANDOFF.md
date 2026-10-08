@@ -234,3 +234,13 @@ Tested with a stub harness (`/tmp/cp_fleettest/test.php`, 21 checks). It has not
 - **Requirements:** HTTPS on the site (the kiosk's connection depends on it), and PHP 8.0 or newer.
 
 Tested with stub harnesses (`media_test.php`, 6 checks) and a browser test of the player with mocked site responses. Not yet tested on a live WordPress site or the ELO device.
+
+## 6G. Live concierge kiosk (Lexen North Hollywood)
+
+- **Kiosk screen:** `/kiosk-app/`. Built by `assets/cp-kiosk.js` and `assets/cp-kiosk.css`. The website demo kiosk (`/kiosk/`, `assets/kiosk.js`) is separate and unchanged.
+- **Content:** all text, places, tiles and concierge answers are in `assets/lexen-data.js`. Edit that file, push to `main`, and the kiosk updates on its next load.
+- **Selling an ad:** add the business to `sponsors` in `assets/lexen-data.js`, for example `{ title: "Granville", text: "Happy hour 3 to 6 PM daily", cta: "See the menu", url: "https://example.com", image: "lexen/ads/granville.jpg" }`. The ad rotates in the ad space, and its QR code opens `url` on the guest's phone. Until two ads are sold, the "Advertise here" slides fill the space.
+- **Phone guide:** every "Take this guide with you" QR code opens `/concierge/?v=lexen`. Each place's QR code opens Google Maps directions.
+- **Offline:** `kiosk-app/sw.js` keeps the kiosk working if the internet drops. When you change `cp-kiosk.js`, `cp-kiosk.css` or `lexen-data.js`, raise the `?v=` number in `build/build.py` and in `CORE` in `sw.js`, and change `CACHE` (for example `cpk-v2`).
+- **Staff menu:** hold the hotel logo for 3 seconds, or tap the corner button while in full screen. After the staff password, it shows the last 7 days of activity on that kiosk (sessions, places opened, questions, ad views and taps). These counts stay on the kiosk; reporting across kiosks needs the WordPress back end.
+- **Weather:** from the US National Weather Service (free, no key). Hidden if it cannot be reached.

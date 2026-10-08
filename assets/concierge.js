@@ -77,6 +77,41 @@
     show(v, EXAMPLE_SPONSOR);
   }
 
+  /* Live venue guide (for example ?v=lexen with assets/lexen-data.js): every place, directions and hotel info. */
+  const LV = window.CP_VENUE;
+  if (LV && venueKey === LV.id) {
+    document.body.classList.add("cg-body");
+    const miles = ll => {
+      if (!ll) return null;
+      const R = 3958.8, r = d => d * Math.PI / 180, a = LV.ll;
+      const x = Math.sin(r(ll[0] - a[0]) / 2) ** 2 + Math.cos(r(a[0])) * Math.cos(r(ll[0])) * Math.sin(r(ll[1] - a[1]) / 2) ** 2;
+      return 2 * R * Math.asin(Math.sqrt(x));
+    };
+    const far = it => { const m = miles(it.ll); if (m == null) return ""; return m <= 1.2 ? `${Math.max(1, Math.round(m * 24))} min walk` : `${m < 10 ? m.toFixed(1) : Math.round(m)} mi`; };
+    const maps = it => "https://www.google.com/maps/dir/?api=1&origin=" + encodeURIComponent(LV.address) + "&destination=" + encodeURIComponent(it.n + ", " + it.addr) + "&travelmode=" + ((miles(it.ll) || 9) <= 1.2 ? "walking" : "driving");
+    const card = id => {
+      const it = LV.items[id]; if (!it) return "";
+      const d = far(it);
+      return `<details class="cg-item" id="${esc(id)}"><summary><span><b>${esc(it.n)}</b><small>${esc(it.k)}${it.price ? " · " + esc(it.price) : ""}</small></span>${d ? `<em>${esc(d)}</em>` : it.hotel ? "<em>Hotel</em>" : ""}</summary>
+        <div class="cg-body-in"><p>${esc(it.d)}</p>${it.addr ? `<p class="cg-addr">${esc(it.addr)}</p>` : ""}
+        ${(it.f || []).length ? `<dl>${it.f.map(([a, b]) => `<div><dt>${esc(a)}</dt><dd>${esc(b)}</dd></div>`).join("")}</dl>` : ""}
+        <div class="cg-acts">${it.ll ? `<a class="cg-btn" href="${maps(it)}" target="_blank" rel="noopener">Directions</a>` : ""}${it.hotel ? `<a class="cg-btn ghost" href="tel:${esc(LV.tel)}">Call the front desk</a>` : ""}</div></div></details>`;
+    };
+    const order = ["hotel", "eat", "coffee", "todo", "getting", "essentials"];
+    app.innerHTML = `
+      <header class="cg-head"><img src="../assets/${esc(LV.logo)}" alt="${esc(LV.name)}"><p>${esc(LV.address)}</p>
+        <div class="cg-quick"><a class="cg-btn" href="tel:${esc(LV.tel)}">Call ${esc(LV.phone)}</a><a class="cg-btn ghost" href="mailto:${esc(LV.email)}">Email</a></div></header>
+      <nav class="cg-nav" aria-label="Sections">${order.filter(k => LV.categories[k]).map(k => `<a href="#cat-${k}">${esc(LV.categories[k].label)}</a>`).join("")}</nav>
+      ${order.filter(k => LV.categories[k]).map(k => { const c = LV.categories[k]; return `<section class="cg-sec" id="cat-${k}"><h2>${esc(c.label)}</h2><p class="cg-intro">${esc(c.intro)}</p>${c.items.map(card).join("")}</section>`; }).join("")}
+      <section class="cg-sec"><h2>Keep this guide</h2><p class="cg-intro"><b>iPhone:</b> tap Share, then Add to Home Screen. <b>Android:</b> open the browser menu, then Add to Home screen.</p></section>
+      <p class="cg-foot">Guide by CityPulse Kiosks. Hours change; check directions for today's hours.</p>`;
+    const open = decodeURIComponent((location.hash || "").slice(1));
+    const el = open && document.getElementById(open);
+    if (el && el.tagName === "DETAILS") { el.open = true; setTimeout(() => el.scrollIntoView({ block: "start" }), 50); }
+    track({ venue: LV.id });
+    return;
+  }
+
   if (kiosk && ajax) {
     const u = new URL(ajax);
     u.searchParams.set("action", "citypulse_guide");
