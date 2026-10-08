@@ -211,3 +211,16 @@ Edit content in `build/build.py`, shared parts in `build/lib.py`, legal text in 
 - [ ] Analytics (GA4 or similar) added, if wanted; then add it to the Privacy Policy
 - [ ] Submit sitemap (`/wp-sitemap.xml`) to Google Search Console
 - [ ] Backups and security plugin configured
+
+## 6E. Kiosk fleet (device heartbeat, host logins, offline alerts)
+
+File: `inc/fleet.php`.
+
+- **Device token:** each kiosk has a token, generated when the kiosk is first saved (or when "Generate a new token" is ticked). It's shown once in the kiosk's "Device and host login" box. Only a keyed hash is stored.
+- **Heartbeat:** the device POSTs to `/wp-admin/admin-ajax.php?action=citypulse_heartbeat` with `kiosk` (the kiosk slug), `token` and `version`, every 2 to 5 minutes. The reply is `{"action":"run"}` for Live or Installing kiosks and `{"action":"standby"}` otherwise, so the device knows whether to show the program.
+- **Online:** a kiosk is online if its last heartbeat was within 15 minutes. The kiosks list shows the device status.
+- **Host login:** create a user with the role "Kiosk host", then choose that user in the kiosk's "Host login" box. Create a page with the slug `host` and the shortcode `[citypulse_host]`. Hosts see only their kiosks: status, device status, and phone and desktop visits for the last 30 days. Hosts are sent away from wp-admin.
+- **Offline alerts:** every 10 minutes, the administrator email gets a message for each Live kiosk that hasn't checked in for 15 minutes. At most one alert per kiosk every 6 hours.
+- **Privacy:** no IP addresses or personal data are stored. Only the last-seen time, the app version and the status.
+
+Tested with a stub harness (`/tmp/cp_fleettest/test.php`, 21 checks). It has not been tested on a live WordPress site or on a kiosk device.

@@ -13,6 +13,7 @@ require get_theme_file_path( 'inc/forms.php' );
 require get_theme_file_path( 'inc/documents.php' );
 require get_theme_file_path( 'inc/visits.php' );
 require get_theme_file_path( 'inc/kiosks.php' );
+require get_theme_file_path( 'inc/fleet.php' );
 require get_theme_file_path( 'inc/access.php' );
 
 add_action( 'after_setup_theme', function () {
