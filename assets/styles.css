@@ -1212,3 +1212,22 @@ a.card:hover{border-color:var(--ink)}
 @media (prefers-reduced-motion: reduce) {
   .ops-table tbody tr, .cp-dot.on, .ktest-stage i { animation: none; }
 }
+
+/* Kiosk slideshow (USB): full screen, touch-friendly. */
+.kshow-wrap { position: fixed; inset: 0; background: #0F1C2B; color: #fff; z-index: 10000; display: grid; place-items: center; font-family: "Instrument Sans", system-ui, sans-serif; }
+.kshow-stage { position: absolute; inset: 0; }
+.kshow-stage img, .kshow-stage video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: 0; transition: opacity .8s ease; }
+.kshow-stage .on { opacity: 1; }
+.kshow-tap { position: absolute; top: 0; bottom: 0; width: 30%; z-index: 2; background: none; border: 0; cursor: pointer; }
+.kshow-tap.prev { left: 0; } .kshow-tap.next { right: 0; }
+.kshow-dots { position: absolute; bottom: 1.2rem; left: 0; right: 0; display: flex; gap: .5rem; justify-content: center; z-index: 3; }
+.kshow-dots span { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,.35); }
+.kshow-dots span.on { background: #22C7B6; }
+.kshow-bar { position: absolute; top: .8rem; right: .8rem; z-index: 4; display: flex; gap: .5rem; }
+.kshow-bar button { background: rgba(15,28,43,.7); color: #fff; border: 1px solid rgba(255,255,255,.4); border-radius: 999px; padding: .5rem 1rem; font: inherit; cursor: pointer; }
+.kshow-start { text-align: center; max-width: 560px; padding: 2rem; }
+.kshow-start h1 { font-family: "Bricolage Grotesque", sans-serif; font-size: clamp(2rem, 5vw, 3.2rem); margin: 0 0 .75rem; }
+.kshow-start p { color: rgba(255,255,255,.8); font-size: 1.15rem; }
+.kshow-start label { display: inline-block; margin-top: 1.5rem; background: #22C7B6; color: #0F1C2B; font-weight: 700; padding: 1rem 2rem; border-radius: 999px; cursor: pointer; font-size: 1.15rem; }
+.kshow-start input { display: none; }
+@media (prefers-reduced-motion: reduce) { .kshow-stage img, .kshow-stage video { transition: none; } }
