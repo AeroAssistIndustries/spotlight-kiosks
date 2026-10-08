@@ -1,0 +1,11 @@
+{
+  "type": "interactive",
+  "title": "Explore the lobby",
+  "intro": "Tap a card to learn more.",
+  "cards": [
+    { "title": "Restaurants", "short": "Open 7am to 10pm", "detail": "Breakfast, lunch and dinner on the ground floor. Ask the front desk for a table." },
+    { "title": "Spa and pool", "short": "Open 8am to 8pm", "detail": "Pool deck on level 2. Towels are at the spa desk." },
+    { "title": "Airport shuttle", "short": "Every 30 minutes", "detail": "Pick-up at the front entrance. Ask the front desk for the schedule." },
+    { "title": "Sponsored: Sample Coffee Co.", "short": "Tap for an offer", "detail": "Show this screen at the coffee bar for a free pastry with any drink. Sample offer for demonstration." }
+  ]
+}
