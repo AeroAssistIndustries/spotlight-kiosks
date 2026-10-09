@@ -6,7 +6,7 @@
   const fmt = n => Number(n || 0).toLocaleString("en-US");
   const clone = o => JSON.parse(JSON.stringify(o));
 
-  const TABS = [["overview", "Overview"], ["ads", "Ads"], ["places", "Places"], ["answers", "Answers"], ["hotel", "Hotel"], ["kiosks", "Kiosks"], ["history", "History"]];
+  const TABS = [["overview", "Overview"], ["ads", "Ads"], ["places", "Places"], ["answers", "Answers"], ["hotel", "Hotel"], ["notices", "Announcements"], ["kiosks", "Kiosks"], ["history", "History"]];
   const LOGO = cls => `<span class="logo${cls ? " " + cls : ""}"><img class="on-light" src="/admin/brand/logo.svg" alt="CityPulse Kiosks"><img class="on-dark" src="/admin/brand/logo-light.svg" alt="CityPulse Kiosks"></span>`;
   const ICONS = { fork: "Dining", bell: "Hotel", coffee: "Coffee", spark: "Things to do", bag: "Shopping", car: "Transport", pin: "Pin", star: "Star", walk: "Walking", sun: "Outdoors" };
 
@@ -16,6 +16,7 @@
   let open = null, placeQuery = "";
   let range = 7, kioskFilter = "", stats = null, statsErr = "";
   let busy = false;
+  let deals = {}; /* private advertiser deal details, saved separately from what kiosks show */
 
   /* ---------- server ---------- */
   async function api(path, opts) {
@@ -76,6 +77,8 @@
     try {
       const c = await api("content");
       saved = c.data; D = clone(c.data); base = c.version; meta = { assets: c.assets, media: c.media, history: c.history, updated_at: c.updated_at };
+      if (!D.notices) { D.notices = []; saved.notices = []; }
+      try { deals = (await api("deals")).deals || {}; } catch (e) { deals = {}; }
     } catch (e) {
       if (e.message === "signed out") return;
       app.innerHTML = `<div class="login"><div class="login-card"><h1>Almost there</h1><div class="msg" role="alert">${esc(e.message)}</div></div></div>`;
@@ -114,7 +117,7 @@
     document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-current", b.dataset.tab === tab ? "page" : "false"));
     const y = window.scrollY;
     document.body.classList.toggle("is-report", tab === "report");
-    view.innerHTML = ({ overview: vOverview, ads: vAds, places: vPlaces, answers: vAnswers, hotel: vHotel, kiosks: vKiosks, history: vHistory, report: vReport })[tab]();
+    view.innerHTML = ({ overview: vOverview, ads: vAds, places: vPlaces, answers: vAnswers, hotel: vHotel, notices: vNotices, kiosks: vKiosks, history: vHistory, report: vReport })[tab]();
     window.scrollTo(0, y);
   }
 
@@ -125,6 +128,7 @@
     if (k("sponsors")) a.push("ads");
     if (k("items") || k("categories")) a.push("places");
     if (k("faq")) a.push("answers");
+    if (k("notices")) a.push("announcements");
     if (["name", "short", "address", "ll", "phone", "tel", "email", "logo", "photos", "tiles"].some(k)) a.push("hotel info");
     return a;
   }
@@ -167,13 +171,15 @@
     const c = el.closest("label") && el.closest("label").querySelector("[data-count]");
     if (c && el.maxLength > 0) c.textContent = `${el.value.length} / ${el.maxLength}`;
     if (el.dataset.title) { const t = document.getElementById(el.dataset.title); if (t) t.textContent = el.value || "Untitled"; }
+    const mn = el.dataset.bind.match(/^notices\.(\d+)\./);
+    if (mn) { const pv = document.getElementById("notice-prev-" + mn[1]); if (pv) pv.innerHTML = noticePreview(D.notices[+mn[1]]); }
     const m = el.dataset.bind.match(/^sponsors\.(\d+)\./);
     if (m) { const pv = document.getElementById("ad-prev-" + m[1]); if (pv) pv.innerHTML = adPreview(D.sponsors[+m[1]]); }
     markDirty();
   }
   function onChange(e) {
     const el = e.target;
-    if (el.dataset.bind && (el.type === "checkbox" || el.tagName === "SELECT" || el.type === "date")) { setPath(D, el.dataset.bind, readVal(el)); markDirty(); if (el.dataset.rerender || /^sponsors\.\d+\.(active|start|end|item)$/.test(el.dataset.bind)) render(); }
+    if (el.dataset.bind && (el.type === "checkbox" || el.tagName === "SELECT" || el.type === "date")) { setPath(D, el.dataset.bind, readVal(el)); markDirty(); if (el.dataset.rerender || /^(sponsors|notices)\.\d+\.(active|start|end|item)$/.test(el.dataset.bind)) render(); }
     if (el.dataset.cat) { toggleCat(el.dataset.item, el.dataset.cat, el.checked); markDirty(); }
     if (el.id === "range-kiosk") { kioskFilter = el.value; loadStats(); }
     if (el.dataset.addchip) { const v = el.value; if (v) { const arr = getPath(D, el.dataset.addchip) || []; if (!arr.includes(v)) arr.push(v); setPath(D, el.dataset.addchip, arr); markDirty(); render(); } }
@@ -251,7 +257,7 @@
         const hs = s[i] / max * (H - 8), hq = q[i] / max * (H - 8), w = Math.max(2, bw * (n > 40 ? 0.42 : 0.34));
         return `<rect x="${i * bw + bw / 2 - w - 1}" y="${H - hs}" width="${w}" height="${hs}" rx="2" fill="var(--blue)"><title>${lab(d)}: ${s[i]} sessions</title></rect>
           <rect x="${i * bw + bw / 2 + 1}" y="${H - hq}" width="${w}" height="${hq}" rx="2" fill="var(--gold)"><title>${lab(d)}: ${q[i]} QR scans</title></rect>
-          ${i % every === 0 ? `<text x="${i * bw + bw / 2}" y="${H + 15}" text-anchor="middle">${lab(d)}</text>` : ""}`;
+          ${i % every === 0 ? `<text x="${i === 0 ? 0 : i * bw + bw / 2}" y="${H + 15}" text-anchor="${i === 0 ? "start" : "middle"}">${lab(d)}</text>` : ""}`;
       }).join("")}
     </svg>`;
   }
@@ -270,7 +276,9 @@
     const alerts = [];
     (stats.kiosks || []).filter(kioskOffline).forEach(k => alerts.push(`<b>${esc(k.kiosk)}</b> hasn't checked in since ${esc(ago(k.last_seen))}. Check that the screen is on and connected to Wi-Fi.`));
     D.sponsors.forEach(s => { const [cls, label] = adStatus(s); if (cls === "warn" && /^Ends/.test(label)) alerts.push(`<b>${esc(s.name)}</b>: ad ${esc(label.toLowerCase())}. Time to talk renewal.`); });
+    const rev = monthlyRevenue();
     return head + (alerts.length ? `<div class="alerts" role="status">${alerts.map(a => `<p>${a}</p>`).join("")}</div>` : "") + `
+      ${rev.count ? `<div class="revenue"><div><span>Monthly ad revenue</span><b>$${fmt(rev.total)}</b><small>from ${rev.count} active advertiser${rev.count > 1 ? "s" : ""} · $${fmt(rev.total * 12)} a year</small></div>${rev.pending ? `<div><span>Pending deals</span><b>$${fmt(rev.pending)}</b><small>a month, not yet active</small></div>` : ""}</div>` : ""}
       <div class="grid g5">
         ${card("Guest sessions", sumType("sessions"), "Someone tapped Start")}
         ${card("Places viewed", sumType("places"))}
@@ -323,7 +331,7 @@
     const kpi = (label, val, sub) => `<div class="kpi"><span>${label}</span><b>${val}</b>${sub ? `<small>${sub}</small>` : ""}</div>`;
     const seg = [[7, "7 days"], [30, "30 days"], [90, "90 days"]].map(([d, l]) => `<button data-act="range" data-days="${d}" aria-pressed="${range === d}">${l}</button>`).join("");
     const kiosksN = (stats.kiosks || []).length;
-    return `<div class="no-print report-bar"><button class="btn small" data-act="back-overview">← Back to overview</button><div class="seg" role="group" aria-label="Period">${seg}</div><button class="btn primary small" data-act="print">Print or save as PDF</button></div>
+    return `<div class="no-print report-bar"><button class="btn small" data-act="back-overview">← Back to overview</button><div class="seg" role="group" aria-label="Period">${seg}</div><button class="btn small" data-act="share" data-id="${esc(reportId)}">Copy live link</button><button class="btn primary small" data-act="print">Print or save as PDF</button></div>
     <article class="report">
       <header class="report-head">${LOGO("report-logo")}<div class="report-title"><span>Advertising report</span><b>${esc(niceDay(stats.from))} – ${esc(niceDay(stats.to))}</b></div></header>
       <div class="report-biz">${s.logo ? `<div class="logo-box"><img src="${esc(imgUrl(s.logo))}" alt="${esc(s.name)} logo"></div>` : ""}
@@ -337,7 +345,7 @@
       <section><h2>Day by day</h2><div class="legend"><span><i style="background:var(--blue)"></i>Views with a guest</span><span><i style="background:var(--gold)"></i>QR scans</span></div>
       <svg class="chart" viewBox="0 0 ${W} ${H + 20}" role="img" aria-label="Views with a guest and QR scans per day">
         ${days.map((d, i) => { const w = Math.max(2, bw * 0.34), he = eng[i] / max * (H - 8), hq = qrs[i] / max * (H - 8);
-          return `<rect x="${i * bw + bw / 2 - w - 1}" y="${H - he}" width="${w}" height="${he}" rx="2" fill="var(--blue)"><title>${lab(d)}: ${eng[i]} views with a guest</title></rect><rect x="${i * bw + bw / 2 + 1}" y="${H - hq}" width="${w}" height="${hq}" rx="2" fill="var(--gold)"><title>${lab(d)}: ${qrs[i]} QR scans</title></rect>${i % every === 0 ? `<text x="${i * bw + bw / 2}" y="${H + 15}" text-anchor="middle">${lab(d)}</text>` : ""}`; }).join("")}
+          return `<rect x="${i * bw + bw / 2 - w - 1}" y="${H - he}" width="${w}" height="${he}" rx="2" fill="var(--blue)"><title>${lab(d)}: ${eng[i]} views with a guest</title></rect><rect x="${i * bw + bw / 2 + 1}" y="${H - hq}" width="${w}" height="${hq}" rx="2" fill="var(--gold)"><title>${lab(d)}: ${qrs[i]} QR scans</title></rect>${i % every === 0 ? `<text x="${i === 0 ? 0 : i * bw + bw / 2}" y="${H + 15}" text-anchor="${i === 0 ? "start" : "middle"}">${lab(d)}</text>` : ""}`; }).join("")}
         <line x1="0" x2="${W}" y1="${H}" y2="${H}" stroke="currentColor" stroke-opacity=".12"/></svg></section>
       <section><h2>Your ad</h2><div class="preview-wrap">${adPreview(s)}</div></section>
       ${n <= 31 ? `<section><h2>Daily figures</h2><div class="table-wrap"><table><thead><tr><th>Date</th><th class="num">Guests reached</th><th class="num">Views with a guest</th><th class="num">Total views</th><th class="num">QR scans</th></tr></thead><tbody>
@@ -406,6 +414,7 @@
               ${field("Linked place", p + ".item", { options: placeOpts, help: "Shows the walking time on the ad." })}
               <div class="dates">${field("Campaign starts", p + ".start", { type: "date", help: "Optional. Leave empty to start now." })}${field("Campaign ends", p + ".end", { type: "date", help: "Optional. The ad comes off the kiosks after this day." })}</div>
             </div>
+            ${s.id ? dealHTML(s) : `<p class="muted" style="font-size:14px;margin-top:14px">Publish this ad once to add deal details and a report link.</p>`}
             <div class="item-actions">
               ${s.id ? `<button class="btn small" data-act="report" data-id="${esc(s.id)}">Advertiser report</button>` : ""}
               <span class="grow"></span>
@@ -416,6 +425,72 @@
           </div></div></div>`;
       }).join("") || `<div class="card empty">No ads yet.</div>`}`;
   }
+  /* ---------- deals (private: never sent to kiosks) ---------- */
+  function monthlyRevenue() {
+    let total = 0, count = 0, pending = 0;
+    D.sponsors.forEach(s => { const d = deals[s.id]; if (!d || d.price == null) return; if (d.status === "Active") { total += +d.price; count++; } else if (d.status === "Pending") pending += +d.price; });
+    return { total, count, pending };
+  }
+  function dealHTML(s) {
+    const d = deals[s.id] || {}, id = esc(s.id), isOpen = open === "d:" + s.id;
+    const f = (label, key, type, extra) => `<label class="f"><span>${label}</span><input type="${type || "text"}" data-deal="${id}" data-key="${key}" value="${esc(d[key] == null ? "" : d[key])}"${extra || ""}></label>`;
+    const summary = [d.status || "", d.price != null ? `$${fmt(d.price)}/month` : "", d.contact || ""].filter(Boolean).join(" · ");
+    return `<div class="deal${isOpen ? " open" : ""}">
+      <button class="deal-head" data-act="open" data-key="d:${id}" aria-expanded="${isOpen}"><span>🔒 Deal details <em>private, never shown on kiosks</em></span><small>${esc(summary || "Add contact and price")}</small></button>
+      ${isOpen ? `<div class="fields" style="margin-top:12px">
+        ${f("Contact name", "contact", "text", ' maxlength="80"')}${f("Monthly price (USD)", "price", "number", ' min="0" step="1" inputmode="decimal"')}
+        ${f("Email", "email", "email", ' maxlength="120"')}${f("Phone", "phone", "tel", ' maxlength="30"')}
+        <label class="f"><span>Status</span><select data-deal="${id}" data-key="status">${["Active", "Pending", "Paused", "Ended"].map(o => `<option${(d.status || "Active") === o ? " selected" : ""}>${o}</option>`).join("")}</select></label>
+        <label class="f full"><span>Notes</span><textarea data-deal="${id}" data-key="notes" maxlength="1000" rows="3" placeholder="Package, renewal date, who to talk to…">${esc(d.notes || "")}</textarea></label>
+      </div>
+      <div class="item-actions" style="border-top:0;padding-top:0"><span class="grow muted" style="font-size:13px">${d.updated_at ? "Saved " + esc(ago(d.updated_at)) : "Not saved yet"}</span>
+        <button class="btn small" data-act="share" data-id="${id}">Copy report link</button><button class="btn small primary" data-act="save-deal" data-id="${id}">Save deal</button></div>` : ""}
+    </div>`;
+  }
+  async function saveDeal(id) {
+    const deal = {};
+    document.querySelectorAll(`[data-deal="${CSS.escape(id)}"]`).forEach(el => { deal[el.dataset.key] = el.value; });
+    try { const r = await api("deals", { method: "PUT", json: { sponsor: id, deal } }); deals[id] = r.deal; render(); toast("Deal saved."); }
+    catch (e) { if (e.message !== "signed out") toast(e.message, true); }
+  }
+  async function shareLink(id) {
+    try {
+      const r = await api("share?sponsor=" + encodeURIComponent(id));
+      let copied = false;
+      try { await navigator.clipboard.writeText(r.url); copied = true; } catch (e) { /* clipboard blocked */ }
+      showShare(r.url, copied);
+    } catch (e) { if (e.message !== "signed out") toast(e.message, true); }
+  }
+  function showShare(link, copied) {
+    let m = document.getElementById("share");
+    if (!m) { m = document.createElement("div"); m.id = "share"; m.className = "share"; document.body.appendChild(m); }
+    m.innerHTML = `<div class="share-box" role="dialog" aria-modal="true" aria-labelledby="share-t"><h3 id="share-t">Live report link</h3>
+      <p>${copied ? "Copied. " : ""}Send this private link to the business. It shows their own up-to-date numbers, with no sign-in. Changing the staff password turns all report links off.</p>
+      <input type="text" readonly value="${esc(link)}" id="share-url" aria-label="Report link">
+      <div class="item-actions" style="border-top:0"><span class="grow"></span><button class="btn small" data-act="close-share">Close</button></div></div>`;
+    m.hidden = false;
+    const u = document.getElementById("share-url"); u.focus(); u.select();
+  }
+
+  /* ---------- announcements ---------- */
+  function vNotices() {
+    return `<div class="head"><div><h1>Announcements</h1><p>Short notices shown at the top of the kiosk's welcome and home screens, like "Pool closed today for maintenance" or "Happy hour 5 to 7 PM in the lobby". Up to two show at a time.</p></div>
+      <button class="btn primary" data-act="add-notice">Add an announcement</button></div>
+      ${D.notices.length ? D.notices.map((n, i) => {
+        const p = `notices.${i}`, st = adStatus(n);
+        return `<div class="card"><div class="ad-top"><h3>Announcement ${i + 1}</h3><span class="pill ${st[0]}"><i></i>${esc(st[1])}</span>
+            <label class="switch"><input type="checkbox" data-bind="${p}.active" ${n.active !== false ? "checked" : ""} aria-label="Show on kiosks">Show on kiosks</label></div>
+          <div class="fields">${field("Message", p + ".text", { max: 120, full: true, placeholder: "Pool closed today for maintenance" })}
+            <div class="dates">${field("Show from", p + ".start", { type: "date", help: "Optional." })}${field("Show until", p + ".end", { type: "date", help: "Optional. It comes off the kiosks after this day." })}</div></div>
+          <div class="notice-prev" id="notice-prev-${i}">${noticePreview(n)}</div>
+          <div class="item-actions"><span class="grow"></span>
+            <button class="icon-btn" data-act="move" data-list="notices" data-i="${i}" data-d="-1" aria-label="Move up" ${i === 0 ? "disabled" : ""}>↑</button>
+            <button class="icon-btn" data-act="move" data-list="notices" data-i="${i}" data-d="1" aria-label="Move down" ${i === D.notices.length - 1 ? "disabled" : ""}>↓</button>
+            ${armed("del-notice", "Delete", ` data-i="${i}"`)}</div></div>`;
+      }).join("") : `<div class="card empty">No announcements. Add one to show a message on the kiosks.</div>`}`;
+  }
+  const noticePreview = n => `<div class="knotice"><span aria-hidden="true">📣</span><b>${esc(n.text || "Your message")}</b></div>`;
+
   const initials = n => String(n || "?").split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join("").toUpperCase();
 
   /* ---------- places ---------- */
@@ -569,13 +644,14 @@
   }
   function vKiosks() {
     const list = stats ? stats.kiosks : null;
-    return `<div class="head"><div><h1>Kiosks</h1><p>Every screen running your kiosk. Kiosks check in every 5 minutes and pick up published changes the next time they're on the welcome screen.</p></div>
-      <button class="btn small" data-act="refresh">Refresh</button></div>
-      <div class="card">${!list ? `<div class="loading">Loading…</div>` : list.length ? `<div class="table-wrap"><table><thead><tr><th>Kiosk</th><th>Status</th><th>Last check-in</th><th>Content</th><th>Screen</th><th>Device</th></tr></thead><tbody>
+    return `<div class="head"><div><h1>Kiosks</h1><p>Every screen running your kiosk. Kiosks check in every 2 minutes and pick up published changes the next time they're on the welcome screen. <b>Restart</b> reloads a kiosk remotely, when nobody is using it.</p></div>
+      <button class="btn small" data-act="refresh">Update this list</button>${list && list.length ? `<button class="btn small" data-act="kiosk-reload" data-k="*">Restart all kiosks</button>` : ""}</div>
+      <div class="card">${!list ? `<div class="loading">Loading…</div>` : list.length ? `<div class="table-wrap"><table><thead><tr><th>Kiosk</th><th>Status</th><th>Last check-in</th><th>Content</th><th>Screen</th><th>Device</th><th></th></tr></thead><tbody>
         ${list.map(k => { const off = kioskOffline(k), cur = k.version === base;
           return `<tr><td><b>${esc(k.kiosk)}</b></td><td>${!off ? `<span class="pill ok"><i></i>Online</span>` : `<span class="pill bad"><i></i>Offline</span>`}</td>
           <td>${esc(ago(k.last_seen))}</td><td>${cur ? `<span class="pill ok">Up to date</span>` : `<span class="pill">Version ${esc(k.version || "–")}, updating</span>`}</td>
-          <td class="muted">${k.screen ? esc(k.screen.replace("x", " × ")) : "–"}${k.app ? `<br><small>Kiosk software ${esc(k.app)}</small>` : ""}</td><td class="muted">${esc(device(k.ua))}</td></tr>`; }).join("")}
+          <td class="muted">${k.screen ? esc(k.screen.replace("x", " × ")) : "–"}${k.app ? `<br><small>Kiosk software ${esc(k.app)}</small>` : ""}</td><td class="muted">${esc(device(k.ua))}</td>
+          <td class="num nowrap"><button class="btn small" data-act="kiosk-reload" data-k="${esc(k.kiosk)}" title="Reloads the kiosk page within about 2 minutes, when nobody is using it">Restart</button> ${armed("kiosk-remove", "Remove", ` data-k="${esc(k.kiosk)}" title="Removes it from this list. Its numbers stay in the totals."`)}</td></tr>`; }).join("")}
       </tbody></table></div>` : `<div class="empty">No kiosk has checked in yet.</div>`}</div>
       <div class="card"><h3>Naming a kiosk</h3><p>Each kiosk gets a code name the first time it starts. To give one a clear name, open the kiosk page once on that screen with <b>?kiosk=</b> and a name at the end of the address, for example <b>…/kiosk-app/?kiosk=lobby</b>. Use letters, numbers and dashes.</p></div>`;
   }
@@ -643,6 +719,13 @@
       case "report": reportId = d.id; tab = "report"; history.replaceState(null, "", "#overview"); window.scrollTo(0, 0); if (!stats || stats.days < 7) { range = 30; stats = null; loadStats(); } render(); return;
       case "back-overview": tab = "overview"; render(); return;
       case "print": return window.print();
+      case "save-deal": return saveDeal(d.id);
+      case "share": return shareLink(d.id);
+      case "close-share": { const m = document.getElementById("share"); if (m) m.hidden = true; return; }
+      case "add-notice": D.notices.unshift({ text: "", active: true }); break;
+      case "del-notice": D.notices.splice(i, 1); break;
+      case "kiosk-reload": try { const r = await api("kiosk-action", { json: { kiosk: d.k, action: "reload" } }); toast(d.k === "*" ? `Restarting ${r.kiosks} kiosk${r.kiosks === 1 ? "" : "s"} within about 2 minutes, when nobody is using them.` : `${d.k} will restart within about 2 minutes, when nobody is using it.`); } catch (e) { if (e.message !== "signed out") toast(e.message, true); } return;
+      case "kiosk-remove": try { await api("kiosk-action", { json: { kiosk: d.k, action: "remove" } }); toast(`${d.k} removed from the list.`); stats = null; render(); loadStats(); } catch (e) { if (e.message !== "signed out") toast(e.message, true); } return;
       case "maps": return findOnMaps(d.id);
       case "open": open = open === d.key ? null : d.key; render(); return;
       case "move": { const list = getPath(D, d.list), j = i + +d.d; if (j < 0 || j >= list.length) return; [list[i], list[j]] = [list[j], list[i]]; break; }

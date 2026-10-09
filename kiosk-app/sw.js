@@ -1,16 +1,16 @@
 /* CityPulse kiosk: keeps the kiosk working if the internet drops.
    Pages load fresh when online and fall back to the saved copy when offline.
    Photos, scripts and styles are served from the saved copy and refreshed in the background. */
-const CACHE = "cpk-v12";
+const CACHE = "cpk-v13";
 const MEDIA = "cpk-media-v1"; /* logos and photos uploaded in the staff dashboard; they never change, so they are kept */
 const CORE = [
   "./",
   "../assets/styles.css?v=20261008b",
-  "../assets/cp-kiosk.css?v=12",
-  "../assets/cp-kiosk.js?v=12",
+  "../assets/cp-kiosk.css?v=13",
+  "../assets/cp-kiosk.js?v=13",
   "../assets/kiosk-app.js?v=10",
   "../assets/lexen-data.js?v=10",
-  "../assets/cp-content.js?v=11",
+  "../assets/cp-content.js?v=13",
   "../assets/vendor/qrcode-generator.js",
   "../assets/favicon.png",
   "../assets/lexen/logo-transparent.png",
