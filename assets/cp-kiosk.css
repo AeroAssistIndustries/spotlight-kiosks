@@ -328,7 +328,8 @@ body.kiosk-body { margin: 0; overflow: hidden; background: #0B1622; overscroll-b
 .cpk-home .cpk-take-qr { width: 5.6em; height: 5.6em; }
 /* compact forecast strip on the home screen: day, icon and temperatures on one line */
 .cpk-home .cpk-week { margin: -.4em 0 1em; padding: .4em; gap: .3em; }
-.cpk-home .cpk-day { flex-direction: row; justify-content: center; gap: .4em; padding: .55em .3em; flex-wrap: nowrap; white-space: nowrap; overflow: hidden; }
+.cpk-home .cpk-day { flex-direction: row; justify-content: center; gap: .45em; padding: .55em .3em; flex-wrap: wrap; }
+@media (min-aspect-ratio: 1/1) { .cpk-home .cpk-day { flex-wrap: nowrap; white-space: nowrap; overflow: hidden; gap: .4em; } }
 .cpk-home .cpk-day svg { width: 1.5em; height: 1.5em; margin: 0; }
 .cpk-home .cpk-day small { display: none; }
 .cpk-home .cpk-day .cpk-lo { font-size: .85em; }
@@ -399,3 +400,119 @@ body.kiosk-body { margin: 0; overflow: hidden; background: #0B1622; overscroll-b
 .cpk-notice-p { display: block; font-size: 1.1em; font-weight: 600; line-height: 1.35; }
 .cpk-notice-p + .cpk-notice-p { margin-top: .35em; }
 .cpk-attract .cpk-notice { max-width: 92%; margin: 0 0 1.6em; }
+
+/* =====================================================================
+   v14 · "Lucid" polish: quieter, more cinematic, more space, finer lines
+   ===================================================================== */
+.cpk { --hair: rgba(255,255,255,.14); --teal: #7EEBDD; --ease: cubic-bezier(.22,.8,.22,1); }
+/* softer, deeper glass with a hairline highlight */
+.cpk-askbar, .cpk-tile, .cpk-take, .cpk-row, .cpk-qrcard, .cpk-dock, .cpk-feat, .cpk-week { border-color: var(--hair) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 18px 50px rgba(0,0,0,.28) !important; }
+/* cinematic page change: fade, slight rise and focus */
+.cpk-view.in-fwd > * { animation: cpkLux .55s var(--ease) both; }
+.cpk-view.in-back > * { animation: cpkLuxBack .5s var(--ease) both; }
+@keyframes cpkLux { from { opacity: 0; transform: translateY(1.2%) scale(.992); filter: blur(6px) } to { opacity: 1; transform: none; filter: none } }
+@keyframes cpkLuxBack { from { opacity: 0; transform: translateY(-1%) scale(1.004); filter: blur(4px) } to { opacity: 1; transform: none; filter: none } }
+.cpk.is-still .cpk-view > * { animation: none !important; }
+/* buttons respond like hardware: a soft press and glow */
+.cpk button { transition: transform .18s var(--ease), background-color .25s, box-shadow .25s, border-color .25s; }
+.cpk button:active { transform: scale(.975); }
+/* typography: light display weight, wide-tracked eyebrows */
+.cpk-eyebrow { font-size: .82em; letter-spacing: .32em; text-transform: uppercase; color: var(--gold-2); font-weight: 600; margin: .2em 0 .6em; }
+.cpk-display { font-size: 3em; font-weight: 300; letter-spacing: -.035em; line-height: 1.02; margin: 0 0 .3em; }
+.cpk-display em { font-style: normal; font-weight: 600; background: linear-gradient(90deg, #fff, var(--gold-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.cpk-h1 { font-weight: 300 !important; letter-spacing: -.04em !important; }
+.cpk-a-name { font-weight: 250 !important; letter-spacing: -.045em !important; }
+.cpk-a-kicker { font-weight: 500; letter-spacing: .5em !important; font-size: 1em !important; }
+/* a slow light passing over the hotel's name on the welcome screen */
+.cpk-a-name { background: linear-gradient(100deg, #fff 0%, #fff 42%, #FFF3D6 50%, #fff 58%, #fff 100%); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: cpkSheen 7s ease-in-out infinite; text-shadow: none !important; filter: drop-shadow(0 4px 24px rgba(0,0,0,.45)); }
+@keyframes cpkSheen { 0%, 30% { background-position: 120% 0 } 70%, 100% { background-position: -20% 0 } }
+.cpk.is-still .cpk-a-name { animation: none; }
+.cpk-a-touch { box-shadow: 0 0 0 1px rgba(255,255,255,.35) inset, 0 24px 60px rgba(0,0,0,.45), 0 0 60px rgba(217,183,110,.35) !important; }
+
+/* ---------- home: feature row ---------- */
+.cpk-home .cpk-take { margin-top: 0; }
+.cpk-feats { display: grid; grid-template-columns: 1.15fr 1.15fr 1fr; gap: 1em; flex: none; margin-top: auto; }
+.cpk-feat { position: relative; overflow: hidden; display: flex !important; align-items: center; gap: 1em; padding: .9em 1.1em; border-radius: var(--r); border: 1px solid var(--hair);
+  background: linear-gradient(135deg, rgba(126,235,221,.16), rgba(255,255,255,.05) 60%); -webkit-backdrop-filter: blur(22px) saturate(150%); backdrop-filter: blur(22px) saturate(150%); min-height: 6.6em; }
+.cpk-feat.plan { background: linear-gradient(135deg, rgba(217,183,110,.24), rgba(255,255,255,.05) 60%); }
+.cpk-feat-art { flex: none; width: 4.8em; height: 4.8em; border-radius: 50%; display: grid; place-items: center; background: rgba(8,16,26,.55); box-shadow: inset 0 0 0 1px var(--hair); overflow: hidden; }
+.cpk-feat-art .cpk-map { width: 118%; height: 118%; }
+.cpk-feat-art .ring-l, .cpk-feat-art .north { display: none; }
+.cpk-feat-art.route svg { width: 2.2em; height: 2.2em; color: var(--gold-2); stroke-width: 1.5; }
+.cpk-feat-txt { display: flex; flex-direction: column; gap: .1em; min-width: 0; }
+.cpk-feat-txt em { font-style: normal; font-size: .72em; letter-spacing: .22em; text-transform: uppercase; color: var(--teal); font-weight: 700; }
+.cpk-feat.plan .cpk-feat-txt em { color: var(--gold-2); }
+.cpk-feat-txt b { font-size: 1.22em; font-weight: 600; letter-spacing: -.01em; line-height: 1.15; }
+.cpk-feat-txt small { color: var(--sub); font-size: .86em; line-height: 1.3; }
+.cpk-feats .cpk-take { padding: .8em 1em; gap: .9em; }
+.cpk-feats .cpk-take-qr { width: 4.6em !important; height: 4.6em !important; }
+.cpk-feats .cpk-take-txt b { font-size: 1.05em; }
+.cpk-feats .cpk-take-txt small { font-size: .82em; }
+@media (max-aspect-ratio: 1/1) { .cpk-feats { grid-template-columns: 1fr 1fr; } .cpk-feats .cpk-take { grid-column: 1 / -1; } }
+
+/* ---------- the walking-minutes map ---------- */
+.cpk-mapwrap { position: relative; width: min(100%, 34em); aspect-ratio: 1; margin: .6em auto 1.2em; border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, rgba(126,235,221,.10), rgba(8,16,26,.0) 60%), radial-gradient(circle, rgba(8,16,26,.72), rgba(8,16,26,.86)); box-shadow: inset 0 0 0 1px var(--hair), 0 30px 80px rgba(0,0,0,.4); }
+.cpk-mapwrap.small { width: 100%; max-width: 22em; margin: 0 auto 1em; }
+.cpk-sweep { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, rgba(126,235,221,.0) 0deg, rgba(126,235,221,.0) 300deg, rgba(126,235,221,.18) 355deg, rgba(126,235,221,0) 360deg); animation: cpkSweep 9s linear infinite; pointer-events: none; }
+@keyframes cpkSweep { to { transform: rotate(360deg) } }
+.cpk-map { position: relative; width: 100%; height: 100%; display: block; overflow: visible; stroke: none; }
+.cpk-map .ring { fill: none; stroke: rgba(255,255,255,.16); stroke-width: .35; stroke-dasharray: 1 1.4; animation: cpkRingIn .9s var(--ease) both; transform-origin: 0 0; }
+@keyframes cpkRingIn { from { opacity: 0; transform: scale(.85) } to { opacity: 1; transform: none } }
+.cpk-map .ring-l { fill: rgba(255,255,255,.45); font-size: 4px; text-anchor: middle; letter-spacing: .05em; }
+.cpk-map .north { fill: var(--gold); }
+.cpk-map .pt { cursor: pointer; animation: cpkPtIn .6s var(--ease) both; }
+@keyframes cpkPtIn { from { opacity: 0; transform-box: fill-box; } to { opacity: 1 } }
+.cpk-map .pt .hit { fill: transparent; }
+.cpk-map .pt .dot { fill: var(--c); filter: drop-shadow(0 0 2.5px var(--c)); transition: r .3s; }
+.cpk-map .pt .spon { fill: none; stroke: var(--gold-2); stroke-width: .5; opacity: .9; }
+.cpk-map .pt.sel .dot { stroke: #0B1622; stroke-width: .8; }
+.cpk-map .pt-l { fill: #fff; font-size: 5px; font-weight: 600; paint-order: stroke; stroke: rgba(8,16,26,.85); stroke-width: 1.6px; stroke-linejoin: round; }
+.cpk-map .stop-n { fill: #0B1622; font-size: 5px; font-weight: 800; text-anchor: middle; }
+.cpk-map .route { fill: none; stroke: var(--gold-2); stroke-width: 1.1; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 3 2.4; animation: cpkDash 1.6s linear infinite; filter: drop-shadow(0 0 2px rgba(240,217,164,.7)); }
+@keyframes cpkDash { to { stroke-dashoffset: -10.8 } }
+.cpk-map .home-pt .core { fill: #fff; }
+.cpk-map .home-pt .pulse { fill: none; stroke: #fff; stroke-width: .6; animation: cpkPulse 2.4s ease-out infinite; transform-origin: 0 0; }
+@keyframes cpkPulse { 0% { opacity: .9; transform: scale(.6) } 100% { opacity: 0; transform: scale(2.4) } }
+.cpk.is-still .cpk-map *, .cpk.is-still .cpk-sweep { animation: none !important; }
+.cpk-mapcard { position: absolute; left: 50%; bottom: -1.2em; transform: translateX(-50%); display: flex; align-items: center; gap: .8em; padding: .6em .7em .6em 1em; border-radius: 999px; min-width: 60%; max-width: 92%;
+  background: rgba(10,18,28,.86); border: 1px solid var(--hair); box-shadow: 0 18px 40px rgba(0,0,0,.4); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); }
+.cpk-mapcard div { flex: 1; min-width: 0; } .cpk-mapcard b { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .cpk-mapcard small { color: var(--sub); }
+.cpk-mapcard.hint { justify-content: center; color: var(--sub); padding: .8em 1.2em; } .cpk-mapcard.hint svg { color: var(--teal); }
+.cpk-mapcard-dot { width: .9em; height: .9em; border-radius: 50%; background: var(--c); box-shadow: 0 0 10px var(--c); flex: none; }
+.cpk-pill-btn { display: inline-flex !important; align-items: center; gap: .3em; padding: .6em 1.1em; border-radius: 999px; background: linear-gradient(180deg, #F3DFAE, var(--gold)); color: var(--ink); font-weight: 700; min-height: 2.8em; }
+.cpk-chips { display: flex; flex-wrap: wrap; gap: .5em; margin: .4em 0 .6em; }
+.cpk-chipbtn { display: inline-flex !important; align-items: center; gap: .5em; padding: .55em 1em; min-height: 2.75em; border-radius: 999px; border: 1px solid var(--hair) !important; background: rgba(255,255,255,.06); color: var(--sub); font-size: .95em; }
+.cpk-chipbtn i { width: .6em; height: .6em; border-radius: 50%; background: var(--c); box-shadow: 0 0 8px var(--c); }
+.cpk-chipbtn.on { background: rgba(255,255,255,.16); color: #fff; border-color: rgba(255,255,255,.4) !important; }
+.cpk-near .cpk-kicker { margin-top: 2.2em; }
+
+/* ---------- plan my evening ---------- */
+.cpk-plan-ctl { display: flex; flex-wrap: wrap; gap: .8em; align-items: center; margin: .2em 0 1.2em; }
+.cpk-plan-ctl .cpk-chips { margin: 0; }
+.cpk-seg { display: inline-flex; padding: .3em; border-radius: 999px; background: rgba(255,255,255,.08); border: 1px solid var(--hair); }
+.cpk-seg-b { padding: .55em 1.1em; min-height: 2.6em; border-radius: 999px; color: var(--sub); font-weight: 600; }
+.cpk-seg-b.on { background: #fff; color: var(--ink); }
+.cpk-plan-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 1.6em; align-items: start; }
+@media (max-aspect-ratio: 1/1) { .cpk-plan-grid { grid-template-columns: 1fr; } }
+.cpk-timeline { list-style: none; margin: 0; padding: 0 0 0 .2em; position: relative; }
+.cpk-timeline::before { content: ""; position: absolute; left: 1.35em; top: 1.2em; bottom: 1.2em; width: 2px; background: linear-gradient(180deg, var(--gold-2), rgba(126,235,221,.6)); opacity: .55; }
+.cpk-stop { position: relative; padding-left: 3.4em; margin-bottom: 1em; animation: cpkLux .6s var(--ease) both; }
+.cpk-stop-n { position: absolute; left: 0; top: 1.9em; width: 2.7em; height: 2.7em; border-radius: 50%; display: grid; place-items: center; font-weight: 800; color: var(--ink); background: linear-gradient(180deg, #F3DFAE, var(--gold)); box-shadow: 0 0 0 .3em rgba(8,16,26,.85), 0 0 24px rgba(217,183,110,.5); }
+.cpk-stop.end .cpk-stop-n { top: 0; background: #fff; } .cpk-stop.end .cpk-stop-n svg { width: 1.2em; height: 1.2em; }
+.cpk-stop.end .cpk-stop-walk { padding-top: .7em; }
+.cpk-stop-walk { display: flex; align-items: center; gap: .4em; color: var(--sub); font-size: .9em; margin-bottom: .4em; }
+.cpk-stop-walk svg { color: var(--teal); }
+.cpk-stop-card { width: 100%; display: flex !important; align-items: center; gap: 1em; padding: 1em 1.1em; border-radius: var(--r); background: var(--glass); border: 1px solid var(--hair); -webkit-backdrop-filter: blur(22px); backdrop-filter: blur(22px); box-shadow: inset 0 1px 0 rgba(255,255,255,.08); }
+.cpk-stop-time { flex: none; font-size: 1.05em; font-weight: 700; color: var(--gold-2); font-variant-numeric: tabular-nums; min-width: 5.2em; }
+.cpk-stop-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.cpk-stop-txt b { font-size: 1.2em; font-weight: 600; } .cpk-stop-txt small { color: var(--sub); }
+.cpk-spon { font-style: normal; color: var(--gold-2); font-weight: 600; }
+.cpk-qrcard.plan { margin: 0; }
+.cpk-plan .cpk-askabout { margin-top: 1.2em; }
+.cpk svg.cpk-map { width: 100%; height: 100%; stroke: none; fill: none; stroke-width: 0; }
+.cpk-mapwrap.small { max-width: 17em; }
+@media (max-aspect-ratio: 1/1) { .cpk-mapwrap.small { max-width: 22em; } }
+.cpk-qrcard.plan { margin: 0 0 1.2em; }
+.cpk-qrcard.plan .cpk-qr { width: 9.5em; height: 9.5em; }
+@media (min-aspect-ratio: 1/1) { .cpk-mapwrap.small { max-width: 15em; } }

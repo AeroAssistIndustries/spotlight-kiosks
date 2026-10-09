@@ -54,7 +54,10 @@
     storm: '<path d="M7 15h10a4 4 0 0 0 .5-7.97A5.5 5.5 0 0 0 7 6.5 4.25 4.25 0 0 0 7 15z"/><path d="M12.5 15l-2 3.5h3l-2 3.5"/>',
     fog: '<path d="M4 9h16M3 13h18M5 17h14"/>',
     wind: '<path d="M3 9h11a3 3 0 1 0-3-3M3 15h15a3 3 0 1 1-3 3M3 12h8"/>',
-    moon: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>'
+    moon: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
+    map: '<path d="M9 4L3 6.5v13L9 17l6 2.5 6-2.5v-13L15 6.5z"/><path d="M9 4v13M15 6.5v13"/>',
+    route: '<circle cx="6" cy="19" r="2.2"/><circle cx="18" cy="5" r="2.2"/><path d="M8 19h7a3.5 3.5 0 0 0 0-7H9a3.5 3.5 0 0 1 0-7h7"/>',
+    compass: '<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>'
   };
   const svg = (k, cls) => `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"${cls ? ` class="${cls}"` : ""}>${P[k] || ""}</svg>`;
   const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -287,10 +290,13 @@
       <button class="cpk-askbar" data-act="ask">${svg("search")}<span>Ask the concierge</span><em>Wi-Fi, check-out, food, Universal…</em></button>
       <div id="cpk-weekslot">${weekHTML()}</div>
       <div class="cpk-tiles">${V.tiles.map(tileHTML).join("")}</div>
-      <button class="cpk-take" data-act="take">
-        <span class="cpk-take-qr">${qr(GO("guide", "", GUIDE), "QR code: open this guide on your phone")}</span>
-        <span class="cpk-take-txt"><b>Take this guide with you</b><small>Scan with your phone camera. Directions, places and hotel info, with nothing to install.</small></span>
-      </button></section>`;
+      <div class="cpk-feats">
+        <button class="cpk-feat map" data-act="near"><span class="cpk-feat-art">${mapSVG({ labels: false })}</span><span class="cpk-feat-txt"><em>New</em><b>Your neighborhood</b><small>Everything in walking minutes</small></span></button>
+        <button class="cpk-feat plan" data-act="plan"><span class="cpk-feat-art route">${svg("route")}</span><span class="cpk-feat-txt"><em>One tap</em><b>Plan my ${partOfDay()}</b><small>${esc(PLANS[partOfDay()].map(p => p.t).slice(0, 2).join(" · "))}</small></span></button>
+        <button class="cpk-take" data-act="take">
+          <span class="cpk-take-qr">${qr(GO("guide", "", GUIDE), "QR code: open this guide on your phone")}</span>
+          <span class="cpk-take-txt"><b>Take this guide with you</b><small>Scan with your phone camera.</small></span>
+        </button></div></section>`;
   }
   function rowHTML(id) {
     const it = item(id), f = howFar(it);
@@ -316,6 +322,168 @@
     if (!ids.length) return "";
     return `<p class="cpk-kicker" style="margin-top:1.4em">More ${esc(cat.label.toLowerCase())}</p><div class="cpk-list">${ids.map(rowHTML).join("")}</div>`;
   }
+  /* ================= Neighborhood in walking minutes =================
+     A living map of the area: the hotel at the center, rings for 5, 10, 20 and 30 minutes on foot,
+     and every place as a point of light at its real direction and walking time. No map service needed. */
+  const CAT_COLOR = { eat: "#E6C27A", coffee: "#D79A6A", todo: "#7EEBDD", essentials: "#9DB8FF", getting: "#C9B6FF", hotel: "#FFFFFF" };
+  const CAT_OF = {}; Object.entries(V.categories).forEach(([k, c]) => c.items.forEach(i => { if (!CAT_OF[i]) CAT_OF[i] = k; }));
+  const walkMin = it => { const m = miles(it.ll); return m == null ? null : m * 24; };
+  function plot(it, maxMin) {
+    const mn = walkMin(it); if (mn == null) return null;
+    maxMin = maxMin || 30;
+    const lat0 = V.ll[0] * Math.PI / 180;
+    const dx = (it.ll[1] - V.ll[1]) * Math.cos(lat0), dy = it.ll[0] - V.ll[0];
+    const a = Math.atan2(dx, dy), r = Math.sqrt(Math.min(mn, maxMin) / maxMin) * 88;
+    return { x: Math.sin(a) * r, y: -Math.cos(a) * r, mn };
+  }
+  S.mapCat = "all"; S.mapSel = null;
+  function mapSVG(opts) {
+    opts = opts || {};
+    const route = opts.route || [];
+    /* zoom in when showing only a few nearby stops (a plan) */
+    const far = opts.only ? Math.max(1, ...opts.only.map(id => walkMin(item(id)) || 0)) : 30;
+    const maxMin = [5, 10, 15, 20, 30].find(m => m >= far + 1) || 30;
+    const rings = maxMin === 30 ? [5, 10, 20, 30] : [2, 5, 10, 15, 20].filter(m => m <= maxMin && (maxMin <= 10 || m >= 5));
+    const ids = Object.keys(V.items).filter(id => {
+      const it = item(id); if (!it || it.hotel || !it.ll) return false;
+      if (walkMin(it) > 30) return false;
+      return opts.only ? opts.only.includes(id) : (S.mapCat === "all" || CAT_OF[id] === S.mapCat);
+    });
+    const pts = ids.map(id => ({ id, p: plot(item(id), maxMin) })).filter(x => x.p);
+    const rp = route.map(id => plot(item(id), maxMin)).filter(Boolean);
+    const path = rp.length ? "M0 0 " + rp.map(p => `L${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(" ") : "";
+    return `<svg class="cpk-map" viewBox="-100 -100 200 200" role="img" aria-label="Map of places around the hotel by walking time">
+      <defs><radialGradient id="cpk-glow${opts.only ? "2" : ""}"><stop offset="0" stop-color="#7EEBDD" stop-opacity=".35"/><stop offset="1" stop-color="#7EEBDD" stop-opacity="0"/></radialGradient></defs>
+      ${rings.map((m, i) => { const r = Math.sqrt(m / maxMin) * 88; return `<circle r="${r.toFixed(1)}" class="ring" style="animation-delay:${i * 90}ms"/><text x="0" y="${(-r + 4.5).toFixed(1)}" class="ring-l">${m} min</text>`; }).join("")}
+      <path d="M0 -97 L2.6 -91 L-2.6 -91 Z" class="north"/>
+      <circle r="16" fill="url(#cpk-glow${opts.only ? "2" : ""})"/>
+      ${path ? `<path d="${path}" class="route"/>` : ""}
+      ${pts.map(({ id, p }, i) => {
+        const c = CAT_COLOR[CAT_OF[id]] || "#fff", sel = S.mapSel === id || route.includes(id);
+        const sp = (V.sponsors || []).some(x => x.item === id && x.active !== false), n = route.indexOf(id);
+        const nm = item(id).n.length > 22 ? item(id).n.slice(0, 21) + "…" : item(id).n, right = p.x > 35;
+        return `<g class="pt${sel ? " sel" : ""}" data-act="mappt" data-id="${esc(id)}" style="--c:${c};animation-delay:${200 + i * 25}ms" transform="translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})">
+          <circle r="7.5" class="hit"/>${sp ? `<circle r="5.2" class="spon"/>` : ""}<circle r="${n >= 0 ? 5 : sel ? 3.6 : 2.4}" class="dot"/>
+          ${n >= 0 ? `<text class="stop-n" y="2.2">${n + 1}</text>` : ""}
+          ${sel || opts.labels ? `<text class="pt-l" x="${right ? -7 : 7}" y="-6" text-anchor="${right ? "end" : "start"}">${esc(nm)}</text>` : ""}</g>`;
+      }).join("")}
+      <g class="home-pt"><circle r="6" class="pulse"/><circle r="3.6" class="core"/></g>
+    </svg>`;
+  }
+  function vNear() {
+    const cats = Object.entries(V.categories).filter(([k]) => k !== "hotel");
+    const chips = [["all", "Everything", "#fff"]].concat(cats.map(([k, c]) => [k, c.label, CAT_COLOR[k] || "#fff"]))
+      .map(([k, l, c]) => `<button class="cpk-chipbtn${S.mapCat === k ? " on" : ""}" data-act="mapcat" data-id="${esc(k)}" style="--c:${c}"><i></i>${esc(l)}</button>`).join("");
+    const sel = S.mapSel && item(S.mapSel);
+    const inCat = id => S.mapCat === "all" || CAT_OF[id] === S.mapCat;
+    const near = Object.keys(V.items).filter(id => { const it = item(id); return it && !it.hotel && it.ll && walkMin(it) <= 30 && inCat(id); }).sort((a, b) => walkMin(item(a)) - walkMin(item(b)));
+    const far = Object.keys(V.items).filter(id => { const it = item(id); return it && it.ll && walkMin(it) > 30 && inCat(id); }).sort((a, b) => walkMin(item(a)) - walkMin(item(b)));
+    return `<section class="cpk-near">
+      <p class="cpk-eyebrow">Your neighborhood</p>
+      <h1 class="cpk-display">Everything, in <em>walking minutes</em>.</h1>
+      <p class="cpk-lede">The hotel is at the center, north is up. Tap a light to see the place.</p>
+      <div class="cpk-chips">${chips}</div>
+      <div class="cpk-mapwrap">${S.still ? "" : `<div class="cpk-sweep" aria-hidden="true"></div>`}${mapSVG({})}
+        ${sel ? `<div class="cpk-mapcard"><span class="cpk-mapcard-dot" style="--c:${CAT_COLOR[CAT_OF[S.mapSel]] || "#fff"}"></span><div><b>${esc(sel.n)}</b><small>${esc(sel.k)} · ${esc(howFar(sel).label)}</small></div><button class="cpk-pill-btn" data-act="item" data-id="${esc(S.mapSel)}">Open${svg("chev")}</button></div>`
+          : `<div class="cpk-mapcard hint">${svg("compass")}<span>Tap any light on the map</span></div>`}
+      </div>
+      <p class="cpk-kicker">Nearest first</p>
+      <div class="cpk-list">${near.slice(0, 8).map(rowHTML).join("")}</div>
+      ${far.length ? `<p class="cpk-kicker" style="margin-top:1.4em">A short ride away</p><div class="cpk-list">${far.slice(0, 5).map(rowHTML).join("")}</div>` : ""}
+    </section>`;
+  }
+
+  /* ================= Plan my morning / afternoon / evening =================
+     One tap builds a short walking plan from the hotel's own list of places, with times,
+     a route on the map, and one QR code that opens the whole route on the guest's phone. */
+  const PLANS = {
+    morning: [
+      { t: "Breakfast & coffee", steps: [["eat", /breakfast|diner|brunch/i, 60], ["coffee", /coffee|caf/i, 20]] },
+      { t: "Coffee & a park walk", steps: [["coffee", /coffee/i, 20], ["todo", /park/i, 45]] },
+      { t: "Brunch & the Arts District", steps: [["coffee", /brunch|muffin|sandwich/i, 50], ["todo", /arts|galler/i, 60]] }
+    ],
+    afternoon: [
+      { t: "Coffee & the Arts District", steps: [["coffee", /coffee/i, 20], ["todo", /arts|galler/i, 60]] },
+      { t: "Park & a bite", steps: [["todo", /park/i, 45], ["eat", /burger|pizza/i, 45]] },
+      { t: "Late lunch & a stroll", steps: [["eat", /salad|sushi|japanese|american/i, 60], ["todo", /arts|park/i, 45]] }
+    ],
+    evening: [
+      { t: "Dinner & a show", steps: [["eat", /restaurant|bar|american|sushi/i, 75], ["todo", /theat|show/i, 120]] },
+      { t: "Sushi & the Arts District", steps: [["eat", /sushi|japanese/i, 60], ["todo", /arts|galler/i, 45]] },
+      { t: "Burgers & a nightcap", steps: [["eat", /burger|pizza|diner/i, 45], ["eat", /\bbar\b/i, 60]] }
+    ]
+  };
+  const partOfDay = () => { const h = hourNow(); return h >= 5 && h < 11 ? "morning" : h >= 11 && h < 17 ? "afternoon" : "evening"; };
+  S.planDay = null; S.planI = 0;
+  function between(a, b) { const R = 3958.8, r = d => d * Math.PI / 180; const q = Math.sin(r(b[0] - a[0]) / 2) ** 2 + Math.cos(r(a[0])) * Math.cos(r(b[0])) * Math.sin(r(b[1] - a[1]) / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(q)); }
+  function buildPlan(tpl) {
+    const used = new Set(), stops = [];
+    let from = V.ll;
+    for (const [cat, re, stay] of tpl.steps) {
+      const c = V.categories[cat]; if (!c) continue;
+      const cands = c.items.map(id => ({ id, it: item(id) }))
+        .filter(x => x.it && !x.it.hotel && x.it.ll && !used.has(x.id) && re.test(x.it.n + " " + x.it.k) && walkMin(x.it) <= 25);
+      if (!cands.length) continue;
+      const d = x => between(from, x.it.ll);
+      cands.sort((a, b) => d(a) - d(b));
+      /* a paying advertiser that fits just as well (only a little further) goes first, and is labeled Sponsored */
+      const spon = cands.find(x => (V.sponsors || []).some(sp => sp.item === x.id && sp.active !== false) && d(x) <= d(cands[0]) + 0.25);
+      const pick = spon || cands[0];
+      stops.push({ id: pick.id, walk: Math.max(1, Math.round(d(pick) * 24)), stay, sponsored: !!spon });
+      used.add(pick.id); from = pick.it.ll;
+    }
+    return stops;
+  }
+  /* Plans start now if it suits that part of the day, otherwise at a sensible time (8 AM, 12:30 PM, 6:30 PM). */
+  const DAY_START = { morning: 480, afternoon: 750, evening: 1110 }, DAY_END = { morning: 660, afternoon: 1020, evening: 1290 };
+  function planStart() {
+    const parts = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "numeric", hourCycle: "h23", timeZone: TZ }).formatToParts(new Date());
+    const g = k => +((parts.find(x => x.type === k) || {}).value || 0);
+    const now = g("hour") * 60 + g("minute"), day = S.planDay || partOfDay();
+    if (now >= DAY_START[day] - 60 && now <= DAY_END[day]) return { at: Math.ceil((now + 10) / 15) * 15, when: "" };
+    return { at: DAY_START[day], when: now > DAY_END[day] ? "tomorrow" : "" };
+  }
+  function clockAt(mins) {
+    const start = planStart().at + mins;
+    const h = Math.floor(start / 60) % 24, m = start % 60;
+    return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`;
+  }
+  function planUrl(stops) {
+    const ids = stops.map(s => s.id);
+    const addr = it => encodeURIComponent(it.n + " " + String(it.addr || "").replace(/, CA \d{5}$/, ", CA"));
+    const last = item(ids[ids.length - 1]), mid = ids.slice(0, -1).map(id => addr(item(id))).join("%7C");
+    const direct = "https://www.google.com/maps/dir/?api=1&destination=" + addr(last) + (mid ? "&waypoints=" + mid : "") + "&travelmode=walking";
+    return GO("plan", ids.join("."), direct);
+  }
+  function vPlan() {
+    const day = S.planDay || partOfDay(), tpls = PLANS[day], tpl = tpls[S.planI % tpls.length];
+    const stops = buildPlan(tpl);
+    let t = 0;
+    const timeline = stops.map((st, i) => {
+      t += st.walk; const at = clockAt(t); t += st.stay; const it = item(st.id);
+      return `<li class="cpk-stop" style="animation-delay:${150 + i * 120}ms"><span class="cpk-stop-n">${i + 1}</span>
+        <div class="cpk-stop-walk">${svg("walk")}${st.walk} min walk${i === 0 ? " from the hotel" : ""}</div>
+        <button class="cpk-stop-card" data-act="item" data-id="${esc(st.id)}"><span class="cpk-stop-time">${at}</span><span class="cpk-stop-txt"><b>${esc(it.n)}</b><small>${esc(it.k)}${st.sponsored ? ` · <em class="cpk-spon">Sponsored</em>` : ""}</small></span>${svg("chev")}</button></li>`;
+    }).join("");
+    const total = stops.reduce((a, s) => a + s.walk, 0);
+    const days = [["morning", "Morning"], ["afternoon", "Afternoon"], ["evening", "Evening"]].map(([k, l]) => `<button class="cpk-seg-b${k === day ? " on" : ""}" data-act="planday" data-id="${k}">${l}</button>`).join("");
+    const moods = tpls.map((p, i) => `<button class="cpk-chipbtn${i === S.planI % tpls.length ? " on" : ""}" data-act="planmood" data-id="${i}" style="--c:#E6C27A"><i></i>${esc(p.t)}</button>`).join("");
+    return `<section class="cpk-plan">
+      <p class="cpk-eyebrow">Plan my ${day}</p>
+      <h1 class="cpk-display">${esc(tpl.t)}</h1>
+      <p class="cpk-lede">${stops.length} stop${stops.length === 1 ? "" : "s"} · ${total} min of walking in total · leave around ${clockAt(0)}${planStart().when ? " " + planStart().when : ""}</p>
+      <div class="cpk-plan-ctl"><div class="cpk-seg">${days}</div><div class="cpk-chips">${moods}</div></div>
+      ${stops.length ? `<div class="cpk-plan-grid">
+        <ol class="cpk-timeline">${timeline}<li class="cpk-stop end"><span class="cpk-stop-n">${svg("home")}</span><div class="cpk-stop-walk">Back to ${esc(V.short || V.name)} whenever you're ready</div></li></ol>
+        <div class="cpk-plan-side">
+          <div class="cpk-qrcard plan"><div class="cpk-qr">${qr(planUrl(stops), "QR code: this plan's walking route on your phone")}</div>
+            <div><b>Take this plan with you</b><small>Scan to open the whole walking route in Google Maps, stop by stop.</small></div></div>
+          <div class="cpk-mapwrap small">${mapSVG({ only: stops.map(s => s.id), route: stops.map(s => s.id), labels: true })}</div>
+        </div></div>` : `<p class="cpk-lede">Nothing nearby fits this one. Try another idea.</p>`}
+      <button class="cpk-askabout" data-act="planmood" data-id="${(S.planI + 1) % tpls.length}">${svg("spark")}<span>Show me another idea</span>${svg("chev")}</button>
+    </section>`;
+  }
+
   function vItem(id) {
     const it = item(id), f = howFar(it);
     const link = it.ll ? GO("place", id, mapsUrl(it)) : GO("guide", id, guideUrl(id));
@@ -537,6 +705,8 @@
       else if (top.v === "item") html = vItem(top.id);
       else if (top.v === "ask") html = vAsk();
       else if (top.v === "take") html = vTake();
+      else if (top.v === "near") html = vNear();
+      else if (top.v === "plan") html = vPlan();
     }
     view.innerHTML = html;
     view.className = "cpk-view" + (dir ? " in-" + dir : "");
@@ -560,6 +730,8 @@
     if (e.v === "item") return V.items[e.id].n;
     if (e.v === "ask") return "Ask the concierge";
     if (e.v === "take") return "Take this guide";
+    if (e.v === "near") return "Neighborhood";
+    if (e.v === "plan") return "Plan my " + (S.planDay || partOfDay());
     return "Featured";
   }
   function topLeftHTML() {
@@ -573,7 +745,7 @@
     if (LIVE) LIVE.count("hours", String(hourNow()).padStart(2, "0")); /* busiest times, for the dashboard */ showAd(S.ad); rotateAds(); render("fwd"); } /* the ad on screen gets a full turn in front of the guest */
   function reset() {
     clearTimeout(S.idle); hideWarn();
-    S.mode = "attract"; S.stack = []; S.panel = false; S.chat = []; S.busy = false; S.kb = { open: false, mode: "abc", shift: true };
+    S.mode = "attract"; S.stack = []; S.panel = false; S.chat = []; S.busy = false; S.kb = { open: false, mode: "abc", shift: true }; S.mapCat = "all"; S.mapSel = null; S.planDay = null; S.planI = 0;
     S.large = S.contrast = S.reach = false;
     if (window.speechSynthesis) speechSynthesis.cancel();
     if (LIVE) LIVE.flush();
@@ -622,6 +794,12 @@
       case "askabout": { const it = item(b.dataset.id); go({ v: "ask" }); ask(it.hotel ? `Tell me about ${it.n} at the hotel.` : `Tell me about ${it.n}. Is it good, and how do I get there?`); break; }
       case "newchat": if (!S.busy) { S.chat = []; render(); } break;
       case "take": bump("takeHome", "open"); go({ v: "take" }); break;
+      case "near": bump("categories", "map"); S.mapSel = null; go({ v: "near" }); break;
+      case "plan": bump("categories", "plan"); S.planDay = null; S.planI = 0; go({ v: "plan" }); break;
+      case "mapcat": S.mapCat = b.dataset.id; S.mapSel = null; render(); break;
+      case "mappt": S.mapSel = S.mapSel === b.dataset.id ? null : b.dataset.id; render(); break;
+      case "planday": S.planDay = b.dataset.id; S.planI = 0; render(); break;
+      case "planmood": S.planI = +b.dataset.id; render(); break;
       case "panel": S.panel = !S.panel; render(); break;
       case "large": S.large = !S.large; render(); break;
       case "contrast": S.contrast = !S.contrast; render(); break;
