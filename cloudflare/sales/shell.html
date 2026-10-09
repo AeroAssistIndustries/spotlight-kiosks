@@ -18,6 +18,7 @@ img{max-width:100%}[hidden]{display:none!important}
 .gate-brand small{display:block;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal-deep);font-weight:700;margin-top:3px}
 .gate h1{font-size:24px}
 .gate .err{color:var(--red);font-size:13.5px;min-height:1em}
+.gate .linkbtn{background:none;border:0;padding:2px;color:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer;font:inherit}
 </style>
 </head>
 <body>
@@ -31,7 +32,17 @@ img{max-width:100%}[hidden]{display:none!important}
       <label class="f">Password<input id="gPass" type="password" autocomplete="current-password" required></label>
       <p class="err" id="gErr" role="alert"></p>
       <button class="btn primary lg" type="submit">Sign in</button>
-      <p class="small muted">Forgot your password? Ask the owner to reset it.</p>
+      <p class="small"><button type="button" class="linkbtn" id="gForgotBtn">Forgot password?</button></p>
+    </form>
+    <form id="gForgot" class="stack" hidden autocomplete="on">
+      <h1>Forgot your password?</h1>
+      <p class="small muted">Enter your username. The owner gets a request and gives you a temporary password; you pick your own when you sign in.</p>
+      <label class="f">Username<input id="fUser" type="text" autocomplete="username" required autocapitalize="none"></label>
+      <p class="err" id="fErr" role="alert"></p>
+      <button class="btn primary lg" type="submit">Ask for a reset</button>
+      <p class="small muted" id="fDone" hidden>Request sent. The owner will give you a temporary password.</p>
+      <p class="small muted">Are you the owner? Reset any Sales Studio password, including yours, from the <a href="/admin#security">owner dashboard</a> under Password &amp; security.</p>
+      <p class="small"><button type="button" class="linkbtn" id="fBack">Back to sign in</button></p>
     </form>
     <form id="gChange" class="stack" hidden autocomplete="off">
       <h1>Choose your password</h1>
@@ -59,7 +70,7 @@ async function api(path, body, method) {
   if (!r.ok) { const er = new Error(j.error || 'Request failed (' + r.status + ')'); er.status = r.status; er.code = j.code || (r.status === 401 ? 'revoked' : r.status === 403 || r.status === 400 ? 'invalid_argument' : 'unavailable'); throw er; }
   return j;
 }
-const show = id => ['gLoading','gLogin','gChange'].forEach(x => $(x).hidden = x !== id);
+const show = id => ['gLoading','gLogin','gChange','gForgot'].forEach(x => $(x).hidden = x !== id);
 
 /* ---------------- document store ---------------- */
 function makeDb() {
@@ -236,6 +247,9 @@ async function boot() {
   if (me.user.mustChange) { show('gChange'); $('cCur').focus(); return; }
   startApp(me);
 }
+$('gForgotBtn').addEventListener('click', () => { show('gForgot'); $('fDone').hidden = true; $('fUser').value = $('gUser').value; $('fUser').focus(); });
+$('fBack').addEventListener('click', () => { show('gLogin'); $('gUser').focus(); });
+$('gForgot').addEventListener('submit', async e => { e.preventDefault(); $('fErr').textContent = ''; try { await api('forgot', { username: $('fUser').value }); $('fDone').hidden = false; } catch (er) { $('fErr').textContent = er.message; } });
 $('gLogin').addEventListener('submit', async e => { e.preventDefault(); $('gErr').textContent = ''; try { await api('login', { username: $('gUser').value, password: $('gPass').value }); boot(); } catch (er) { $('gErr').textContent = er.message; } });
 $('gChange').addEventListener('submit', async e => { e.preventDefault(); $('cErr').textContent = ''; if ($('cNew').value !== $('cNew2').value) { $('cErr').textContent = 'The new passwords don’t match.'; return; } try { await api('password', { current: $('cCur').value, next: $('cNew').value }); boot(); } catch (er) { $('cErr').textContent = er.message; } });
 boot();
