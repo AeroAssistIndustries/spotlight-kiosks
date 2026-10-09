@@ -1172,3 +1172,282 @@ a.card:hover{border-color:var(--ink)}
 .cc-tip { margin: 22px 0 8px; padding: 16px; border-radius: 14px; background: #0F1C2B; color: #E6EEF4; }
 .cc-tip h2 { font-size: 17px; margin: 0 0 8px; color: #fff; }
 .cc-tip p { margin: 4px 0; }
+
+/* Demo: team library gate (GitHub Pages preview) */
+.ops-app { max-width: 760px; margin: 0 auto; padding: 0 16px; }
+.ops-demo-tag { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .06em; color: #7A3A00; background: #FFF1D6; padding: 4px 10px; border-radius: 999px; margin: 0 0 10px; }
+.ops-h { font-size: 28px; margin: 0 0 8px; color: #0F1C2B; }
+.ops-lede { color: #536170; margin: 0 0 16px; }
+.ops-form { display: grid; gap: 12px; max-width: 420px; padding: 18px; border: 1px solid #D5DCE2; border-radius: 12px; background: #fff; }
+.ops-form label { display: grid; gap: 6px; font-weight: 600; }
+.ops-form input { padding: 10px; border: 1px solid #B9C3CC; border-radius: 6px; font: inherit; }
+.ops-note { color: #B42318; margin: 0; min-height: 1em; }
+.ops-small { font-size: 13px; color: #536170; margin-top: 14px; }
+.ops-table-wrap { overflow-x: auto; }
+.ops-table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+.ops-table th, .ops-table td { border-bottom: 1px solid #D5DCE2; padding: 10px 8px; text-align: left; font-size: 15px; }
+.ops-view { background: none; border: 1px solid #B9C3CC; border-radius: 6px; padding: 6px 10px; cursor: pointer; font: inherit; }
+
+/* Host dashboard and kiosk test: motion. Turned off for people who ask for reduced motion. */
+@keyframes cp-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes cp-pulse { 0% { box-shadow: 0 0 0 0 rgba(34,199,182,.6); } 70% { box-shadow: 0 0 0 10px rgba(34,199,182,0); } 100% { box-shadow: 0 0 0 0 rgba(34,199,182,0); } }
+@keyframes cp-ring { 0% { transform: scale(.6); opacity: .7; } 100% { transform: scale(1.8); opacity: 0; } }
+.ops-table tbody tr { animation: cp-rise .5s ease both; }
+.ops-table tbody tr:nth-child(2) { animation-delay: .08s; }
+.ops-table tbody tr:nth-child(3) { animation-delay: .16s; }
+.cp-dot { display: inline-block; width: .6em; height: .6em; border-radius: 50%; margin-right: .4em; vertical-align: middle; background: #8a96a3; }
+.cp-dot.on { background: #22C7B6; animation: cp-pulse 1.8s infinite; }
+.cp-dot.off { background: #FF6B4A; }
+.ktest { text-align: center; padding: 2rem 0; }
+.ktest-stage { position: relative; width: 220px; height: 220px; margin: 0 auto 1.5rem; display: grid; place-items: center; }
+.ktest-stage i { position: absolute; inset: 0; border-radius: 50%; border: 3px solid #22C7B6; animation: cp-ring 2.4s ease-out infinite; }
+.ktest-stage i:nth-child(2) { animation-delay: .8s; }
+.ktest-stage i:nth-child(3) { animation-delay: 1.6s; }
+.ktest-stage b { font-family: "Bricolage Grotesque", sans-serif; font-size: 2.2rem; color: #0F1C2B; position: relative; }
+.ktest-clock { font-size: 2.6rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.ktest-grid { display: grid; gap: .75rem; max-width: 520px; margin: 1.5rem auto; text-align: left; }
+.ktest-grid div { background: #f3f6f8; border-radius: 10px; padding: .75rem 1rem; }
+.ktest-form { display: grid; gap: .6rem; max-width: 520px; margin: 0 auto; text-align: left; }
+.ktest-form input { width: 100%; padding: .6rem; border: 1px solid #c9d3dc; border-radius: 8px; font: inherit; }
+@media (prefers-reduced-motion: reduce) {
+  .ops-table tbody tr, .cp-dot.on, .ktest-stage i { animation: none; }
+}
+
+/* Kiosk screens: bright, large and touch-friendly. Used by the player (pictures, videos, touch screens, setup). */
+.kshow-wrap { position: fixed; inset: 0; background: #F4F8FA; color: #0F1C2B; z-index: 10000; display: grid; place-items: center; font-family: "Instrument Sans", system-ui, sans-serif; }
+.kshow-stage { position: absolute; inset: 0; }
+.kshow-stage img, .kshow-stage video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #F4F8FA; opacity: 0; transition: opacity .8s ease; }
+.kshow-stage .on { opacity: 1; }
+.kshow-tap { position: absolute; top: 0; bottom: 0; width: 30%; z-index: 2; background: none; border: 0; cursor: pointer; }
+.kshow-tap.prev { left: 0; } .kshow-tap.next { right: 0; }
+.kshow-dots { position: absolute; bottom: 1.4rem; left: 0; right: 0; display: flex; gap: .6rem; justify-content: center; z-index: 3; pointer-events: none; }
+.kshow-dots span { width: 12px; height: 12px; border-radius: 50%; background: rgba(15,28,43,.25); }
+.kshow-dots span.on { background: #22C7B6; width: 30px; border-radius: 999px; }
+.kshow-bar { position: absolute; top: 1rem; right: 1rem; z-index: 4; display: flex; gap: .6rem; }
+.kshow-bar button { background: #fff; color: #0F1C2B; border: 0; border-radius: 999px; padding: .7rem 1.2rem; font: inherit; font-weight: 600; font-size: 1rem; cursor: pointer; box-shadow: 0 6px 18px rgba(15,28,43,.15); }
+.kshow-start { text-align: center; max-width: 620px; padding: 2rem; }
+.kshow-start h1 { font-family: "Bricolage Grotesque", sans-serif; font-size: clamp(2.2rem, 6vw, 3.6rem); margin: 0 0 .6rem; color: #0F1C2B; }
+.kshow-start p { color: #3d4f5f; font-size: 1.25rem; line-height: 1.5; }
+.kshow-start label { display: inline-block; margin-top: 1.5rem; background: #22C7B6; color: #0F1C2B; font-weight: 700; padding: 1.1rem 2.2rem; border-radius: 999px; cursor: pointer; font-size: 1.2rem; box-shadow: 0 10px 24px rgba(34,199,182,.35); }
+.kshow-start input[type=file] { display: none; }
+.kshow-form { display: grid; gap: .8rem; margin-top: 1.4rem; }
+.kshow-form input { padding: 1rem 1.1rem; border-radius: 14px; border: 2px solid #cfdde5; background: #fff; color: #0F1C2B; font: inherit; font-size: 1.2rem; }
+.kshow-form input:focus { outline: none; border-color: #22C7B6; }
+.kshow-form button { font-size: 1.2rem; padding: 1rem; border: 0; border-radius: 14px; background: #22C7B6; color: #0F1C2B; font-weight: 700; cursor: pointer; box-shadow: 0 10px 24px rgba(34,199,182,.35); }
+.kshow-start a.btn { display: inline-block; margin-top: 1.2rem; background: #22C7B6; color: #0F1C2B; padding: 1rem 1.8rem; border-radius: 999px; font-weight: 700; text-decoration: none; }
+
+/* Touch screens (interactive slides from the content folder). */
+.kshow-stage > .kshow-interactive { position: absolute; inset: 0; overflow: auto; background: #F4F8FA; color: #0F1C2B; padding: 5.5rem 1.5rem 5rem; box-sizing: border-box; opacity: 0; pointer-events: none; transition: opacity .8s ease; font-family: "Instrument Sans", system-ui, sans-serif; }
+.kshow-stage > .kshow-interactive.on { opacity: 1; pointer-events: auto; }
+.ki-inner { max-width: 960px; margin: 0 auto; }
+.ki-inner h2 { font-family: "Bricolage Grotesque", sans-serif; font-size: clamp(2.2rem, 5vw, 3.4rem); margin: 0 0 .4rem; color: #0F1C2B; }
+.ki-inner > p { color: #3d4f5f; font-size: 1.3rem; margin: 0 0 1.6rem; }
+.ki-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+.ki-card { background: #fff; color: #0F1C2B; border: 0; border-top: 6px solid #22C7B6; border-radius: 22px; padding: 1.6rem; text-align: left; font: inherit; font-size: 1.35rem; min-height: 10rem; cursor: pointer; box-shadow: 0 12px 30px rgba(15,28,43,.12); transition: transform .15s ease, box-shadow .15s ease; }
+.ki-card:nth-child(even) { border-top-color: #FF6B4A; }
+.ki-card:active { transform: scale(.98); }
+.ki-card strong { display: block; font-size: 1.4rem; }
+.ki-card span { display: block; color: #4a5a6a; font-size: 1.05rem; margin-top: .5rem; }
+.ki-detail { margin-top: 1.6rem; background: #fff; border-radius: 22px; padding: 1.8rem; font-size: 1.3rem; line-height: 1.5; box-shadow: 0 12px 30px rgba(15,28,43,.12); }
+.ki-detail h3 { margin: 0 0 .5rem; color: #0F1C2B; font-size: 1.7rem; }
+.ki-back { margin-top: 1.2rem; background: #22C7B6; border: 0; border-radius: 999px; padding: 1rem 2rem; font: inherit; font-weight: 700; font-size: 1.15rem; color: #0F1C2B; cursor: pointer; box-shadow: 0 10px 22px rgba(34,199,182,.35); }
+@media (max-width: 560px) { .ki-grid { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .kshow-stage img, .kshow-stage video, .kshow-stage > .kshow-interactive { transition: none; } }
+
+/* Kiosk app: the demo screen full-screen on the device. The side panel and venue switch are hidden. */
+.kapp { position: fixed; inset: 0; background: #E9EEF2; z-index: 10000; }
+.kapp .demo-grid.kapp-grid { display: block; position: absolute; inset: 0; margin: 0; max-width: none; }
+.kapp .device { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; margin: 0; padding: 0; border: 0; border-radius: 0; box-shadow: none; background: none; }
+.kapp .device-pole, .kapp .device-base { display: none; }
+.kapp .device-head { position: absolute; inset: 0; padding: 0; background: none; box-shadow: none; }
+.kapp .screen { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto; border-radius: 0; }
+.kapp .venue-switch[hidden], .kapp .console[hidden] { display: none; }
+
+/* Kiosk app: full-screen control and staff password prompt. */
+.kapp-fs { position: fixed; top: .5rem; right: .5rem; z-index: 20000; background: rgba(255,255,255,.85); border: 0; border-radius: 999px; padding: .45rem .9rem; font: inherit; font-size: .85rem; font-weight: 600; color: #0F1C2B; box-shadow: 0 4px 12px rgba(15,28,43,.18); cursor: pointer; }
+.kapp-modal { position: fixed; inset: 0; background: rgba(15,28,43,.6); z-index: 20001; display: grid; place-items: center; }
+.kapp-modal[hidden] { display: none; }
+.kapp-box { background: #fff; color: #0F1C2B; border-radius: 20px; padding: 1.8rem; width: min(420px, 90vw); box-sizing: border-box; font-family: "Instrument Sans", system-ui, sans-serif; }
+.kapp-box h2 { margin: 0 0 .4rem; font-size: 1.5rem; }
+.kapp-box p { margin: 0 0 1rem; color: #4a5a6a; }
+.kapp-box input { width: 100%; box-sizing: border-box; padding: .8rem; font: inherit; font-size: 1.1rem; border: 2px solid #cfdde5; border-radius: 12px; }
+.kapp-msg { color: #c0392b !important; min-height: 1.2rem; margin: .5rem 0 0 !important; font-size: .95rem; }
+.kapp-row { display: flex; gap: .6rem; justify-content: flex-end; margin-top: .8rem; }
+.kapp-btn, .kapp-btn-ghost { border: 0; border-radius: 999px; padding: .7rem 1.2rem; font: inherit; font-weight: 700; cursor: pointer; }
+.kapp-btn { background: #22C7B6; color: #0F1C2B; }
+.kapp-btn-ghost { background: #eef3f6; color: #0F1C2B; }
+
+/* Kiosk accessibility: high contrast, the options panel, and visible keyboard focus. */
+.k-nav { position: relative; }
+.k-access { position: absolute; bottom: 100%; right: 0; display: grid; gap: .5rem; padding: .8rem; background: #fff; border-radius: 16px; box-shadow: 0 12px 30px rgba(15,28,43,.25); margin-bottom: .6rem; z-index: 5; }
+.k-access button { min-height: 56px; padding: .6rem 1rem; font: inherit; font-size: 1.05rem; font-weight: 600; border: 2px solid #0F1C2B; border-radius: 12px; background: #fff; color: #0F1C2B; cursor: pointer; text-align: left; }
+.k-access button[aria-pressed="true"] { background: #0F1C2B; color: #fff; }
+.k-hc, .k-hc .k-view, .k-hc .k-nav { background: #fff !important; color: #000 !important; }
+.k-hc * { border-color: #000 !important; text-shadow: none !important; }
+.k-hc .k-tile, .k-hc .k-item, .k-hc .k-card, .k-hc .k-tile.wide { background: #fff !important; background-image: none !important; color: #000 !important; border: 3px solid #000 !important; box-shadow: none !important; }
+.k-hc .k-tile::before, .k-hc .k-tile::after, .k-hc .k-tile.wide::before, .k-hc .k-tile.wide::after { display: none !important; }
+.k-hc .k-tile *, .k-hc .k-tile svg, .k-hc .k-tile span, .k-hc .k-tile small { color: #000 !important; stroke: #000 !important; fill: none !important; text-shadow: none !important; }
+button:focus-visible, [tabindex]:focus-visible { outline: 3px solid #0F1C2B !important; outline-offset: 2px; }
+.kapp-a11y { position: fixed; top: .5rem; left: .5rem; z-index: 20000; background: #0F1C2B; color: #fff; border: 0; border-radius: 999px; padding: .45rem .9rem; font: inherit; font-size: .85rem; font-weight: 600; box-shadow: 0 4px 12px rgba(15,28,43,.25); cursor: pointer; }
+
+/* ===== Premium kiosk look (kiosk-app only). Palette and type match the website. ===== */
+/* Background photo: replace kiosk-lobby.jpg with a North Hollywood photo by setting --venue-bg. */
+.kapp{--serif:"Fraunces",Georgia,serif,"Helvetica Neue",Arial,sans-serif;--venue-bg:url("kiosk-lobby.jpg");background:#F4F8FA;color:#0F1C2B}
+.kapp::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(244,248,250,.94) 0%,rgba(244,248,250,.86) 45%,rgba(244,248,250,.97) 100%),var(--venue-bg) center/cover no-repeat;z-index:0;pointer-events:none}
+.kapp .screen{background:transparent;z-index:1}
+.kapp .k{--k-bg:transparent;--k-card:#ffffff;--k-fg:#0F1C2B;--k-sub:#5b6b7b;--k-accent:#0F1C2B;font-family:"Inter",system-ui,sans-serif;background:transparent}
+.kapp .k-status{padding-top:4.6cqw;color:#0F1C2B;font-family:"Fraunces",Georgia,serif;font-weight:700;letter-spacing:.14em}
+.kapp .k-welcome{font-family:"Fraunces",Georgia,serif;font-weight:800;letter-spacing:-.035em;font-size:12cqw;line-height:.95;color:#0F1C2B}
+.kapp .k-venue{color:#5b6b7b;font-size:3.4cqw;letter-spacing:.02em}
+.kapp .k-tiles{gap:2.4cqw}
+.kapp .k-tile{background:#fff!important;color:#0F1C2B;border:1px solid rgba(15,28,43,.07);border-radius:2.6cqw;box-shadow:0 1px 2px rgba(15,28,43,.05),0 12px 30px rgba(15,28,43,.09);transition:transform .15s,box-shadow .15s}
+.kapp .k-tile::before{display:none}
+.kapp .k-tile:active{transform:scale(.98)}
+.kapp .k-tile svg{stroke:#22C7B6;width:7.4cqw;height:7.4cqw;margin-bottom:1.6cqw}
+.kapp .k-tile span{color:#0F1C2B;text-shadow:none;font:700 3.3cqw/1.15 "Fraunces",Georgia,serif;letter-spacing:-.01em}
+.kapp .k-tile.wide{background:radial-gradient(ellipse 70% 120% at 100% 0%,rgba(34,199,182,.35),transparent 60%),#0F1C2B!important;color:#fff;border-color:transparent}
+.kapp .k-tile.wide span{color:#fff;font:800 6cqw/1.05 "Fraunces",Georgia,serif}
+.kapp .k-tile.wide small{color:#b8c7d4;font-size:3cqw}
+.kapp .k-ads{margin:2cqw 4cqw 2cqw;height:auto;min-height:40cqw;border-radius:4cqw;overflow:hidden;background:#0F1C2B;box-shadow:0 24px 60px rgba(15,28,43,.25)}
+.kapp .ad-open{background:radial-gradient(ellipse 60% 90% at 0% 0%,rgba(34,199,182,.28),transparent 70%),#0F1C2B!important;padding:4.4cqw 4.4cqw 9cqw!important}
+.kapp .ad-frame{border:0;border-radius:0;padding:0}
+.kapp .ad-big{font:800 7.4cqw/1 "Fraunces",Georgia,serif;letter-spacing:-.03em;color:#fff}
+.kapp .ad-big::before{content:"Sponsored  ";display:block;font:700 2.6cqw/1 "Inter",sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#22C7B6;margin-bottom:2cqw}
+.kapp .ad-sub{color:#c9d6e2;font-size:3.2cqw}
+.kapp .ad-cta{background:#22C7B6;color:#0F1C2B;border-radius:3cqw;padding:2.6cqw 3.8cqw}
+.kapp .ad-ico{stroke:#22C7B6}
+.kapp .k-nav{background:rgba(255,255,255,.92);border-top:1px solid rgba(15,28,43,.08);backdrop-filter:blur(8px)}
+.kapp .k-nav button{color:#0F1C2B;font-weight:600}
+.kapp .k-nav svg{stroke:#0F1C2B}
+.kapp .k-btn,.kapp .k-cta{background:#0F1C2B!important;color:#fff!important;border-radius:999px!important;box-shadow:0 10px 24px rgba(15,28,43,.2)}
+.kapp .k-attract{background:transparent}
+.kapp .k-attract .a-welcome{font:800 15cqw/.95 "Fraunces",Georgia,serif;letter-spacing:-.04em;color:#0F1C2B}
+.kapp .k-attract .a-venue{color:#5b6b7b}
+.kapp .k-attract .a-touch{background:#0F1C2B;color:#fff;box-shadow:0 14px 36px rgba(15,28,43,.25)}
+.kapp .k-attract .ring{border-color:#22C7B6}
+.kapp .k-detail-hero{background:#0F1C2B!important;color:#fff}
+.kapp .k-item,.kapp .k-facts div,.kapp .k-take,.kapp .k-map,.kapp .k-pk-list div{background:#fff;border:1px solid rgba(15,28,43,.06);box-shadow:0 8px 24px rgba(15,28,43,.07)}
+.kapp .k-item .thumb{background:#0F1C2B}
+.kapp .k-head h2{font:800 9cqw/1 "Fraunces",Georgia,serif;letter-spacing:-.03em}
+.kapp .k-head .ico{background:#22C7B6}
+.kapp-a11y,.kapp-fs{top:1.4cqw;font-family:"Inter",sans-serif}
+
+/* ===== Lexen hotel look: photo background, hotel logo, gold-accent luxury buttons ===== */
+.kapp{--venue-bg:url("lexen/exterior.jpg");--gold:#C9A96E;--gold-deep:#8F6F3A}
+.kapp::before{background:linear-gradient(180deg,rgba(244,248,250,.90) 0%,rgba(244,248,250,.80) 40%,rgba(244,248,250,.94) 100%),var(--venue-bg) center/cover no-repeat}
+.kapp .k-status b{display:inline-flex;align-items:center;gap:2.2cqw;font-size:3.2cqw}
+.kapp .k-status b::before{content:"";display:inline-block;width:19cqw;height:6.4cqw;background:#000 url("lexen/logo.jpg") center/contain no-repeat;border-radius:1.2cqw;box-shadow:inset 0 0 0 1px rgba(201,169,110,.55),0 4px 12px rgba(15,28,43,.25)}
+.kapp .k-tile svg{stroke:var(--gold-deep)}
+.kapp .k-tile{border-top:2px solid rgba(201,169,110,.55)}
+.kapp .k-tile:hover,.kapp .k-tile:focus-visible{box-shadow:0 0 0 2px var(--gold),0 16px 36px rgba(15,28,43,.14)}
+.kapp .k-btn,.kapp .k-cta,.kapp .a-touch,.kapp-btn{background:linear-gradient(180deg,#1f3550,#0F1C2B)!important;color:#fff!important;border:1px solid rgba(201,169,110,.65)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 16px 34px rgba(15,28,43,.30)!important;letter-spacing:.04em;transition:transform .15s,box-shadow .15s,background .2s}
+.kapp .k-btn:hover,.kapp .k-cta:hover,.kapp .a-touch:hover,.kapp-btn:hover{box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 0 0 3px rgba(201,169,110,.35),0 16px 34px rgba(15,28,43,.30)!important}
+.kapp .k-btn:active,.kapp .k-cta:active,.kapp .a-touch:active,.kapp .ad-cta:active,.kapp-btn:active{transform:scale(.97)}
+.kapp .ad-cta{background:linear-gradient(180deg,#e0c68f,#C9A96E)!important;color:#0F1C2B!important;border:1px solid rgba(255,255,255,.3);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 14px 30px rgba(0,0,0,.35)}
+.kapp .ad-sub,.kapp .ad-big::before{color:var(--gold)}
+.kapp .ad-big::before{color:#C9A96E;content:"Sponsored"}
+.kapp .k-nav button{transition:color .15s,background .15s;border-radius:1.6cqw}
+.kapp .k-nav button:hover{background:rgba(201,169,110,.12)}
+.kapp .k-nav svg{stroke:var(--gold-deep)}
+.kapp .k-dots button[aria-selected=true]{background:var(--gold)!important}
+.kapp .k-attract .ring{border-color:var(--gold)}
+.kapp-fs,.kapp-a11y{background:linear-gradient(180deg,#1f3550,#0F1C2B)!important;color:#fff!important;border:1px solid rgba(201,169,110,.65)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 8px 20px rgba(15,28,43,.28)!important;letter-spacing:.04em;padding:.55rem 1.1rem!important}
+.kapp-fs:hover,.kapp-a11y:hover{box-shadow:0 0 0 3px rgba(201,169,110,.35),0 8px 20px rgba(15,28,43,.28)!important}
+.kapp .k-status{flex-wrap:nowrap;white-space:nowrap;gap:3cqw}
+.kapp .k-status b{font-size:2.7cqw;letter-spacing:.14em}
+.kapp .k-status b::before{width:13cqw;height:4.2cqw;border-radius:.9cqw}
+.kapp::before{background:linear-gradient(180deg,rgba(244,248,250,.82) 0%,rgba(244,248,250,.70) 45%,rgba(244,248,250,.88) 100%),var(--venue-bg) center/cover no-repeat}
+.kapp .k-tile.wide{background:radial-gradient(ellipse 70% 120% at 100% 0%,rgba(201,169,110,.35),transparent 60%),#0F1C2B!important}
+.kapp .ad-ico{stroke:var(--gold)}
+.kapp .k-ads{height:44cqw;min-height:0;margin:1.6cqw 4cqw 2.4cqw}
+.kapp .k-tile{aspect-ratio:1.42}
+.kapp .k-tile.wide{aspect-ratio:4.2}
+/* Hotel logo: transparent PNG, no black box */
+.kapp .k-status b{gap:2.6cqw}
+.kapp .k-status b::before{width:19cqw;height:auto;aspect-ratio:1254/1254;max-height:11cqw;background:url("lexen/logo-transparent.png") center/contain no-repeat;border-radius:0;box-shadow:none;margin-right:0}
+.kapp .k-status b{font-family:"Inter",sans-serif;font-weight:700}
+.kapp .k-welcome{font-family:"Fraunces",Georgia,serif;font-weight:600;letter-spacing:-.02em}
+.kapp .k-head h2,.kapp .ad-big,.kapp .k-tile.wide span,.kapp .k-tile span{font-family:"Inter",sans-serif}
+.kapp .k-tile span{font-weight:600;letter-spacing:0}
+.kapp .k-tile.wide span{font:600 6cqw/1.1 "Fraunces",Georgia,serif}
+.kapp .k-head h2{font:600 8.4cqw/1.05 "Fraunces",Georgia,serif;letter-spacing:-.02em}
+.kapp .ad-big{font-weight:700;letter-spacing:-.01em}
+.kapp .k-status{gap:2cqw;padding-left:5cqw;padding-right:5cqw}
+.kapp .k-status b{font-size:2.3cqw;letter-spacing:.12em}
+.kapp .k-status b::before{width:auto;height:8.5cqw;max-height:none;aspect-ratio:auto;background-size:contain;margin-right:1cqw}
+.kapp .k-status span{font-size:2.6cqw;white-space:nowrap}
+.kapp::before{background:linear-gradient(180deg,rgba(244,248,250,.62) 0%,rgba(244,248,250,.48) 45%,rgba(244,248,250,.70) 100%),var(--venue-bg) center/cover no-repeat}
+.kapp .k-status{gap:2cqw;padding-left:5cqw;padding-right:5cqw}
+.kapp .k-status b{font-size:2.3cqw;letter-spacing:.12em}
+.kapp .k-status b::before{width:auto;height:8.5cqw;max-height:none;aspect-ratio:auto;background-size:contain;margin-right:1cqw}
+.kapp .k-status span{font-size:2.6cqw;white-space:nowrap}
+.kapp .k-status b::before{width:15cqw;height:9.5cqw;background-size:contain}
+.kapp::before{background:linear-gradient(180deg,rgba(244,248,250,.50) 0%,rgba(244,248,250,.34) 45%,rgba(244,248,250,.58) 100%),var(--venue-bg) center/cover no-repeat}
+
+/* ===== Lexen kiosk: sliding hotel photos, readable overlay, ADA sizing ===== */
+.kapp{--venue-bg:none}
+.kapp-slides{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.kapp-slides span{position:absolute;inset:0;background:center/cover no-repeat;opacity:0;animation:kslide 24s infinite,kzoom 24s infinite linear}
+@keyframes kslide{0%{opacity:0}4%{opacity:1}30%{opacity:1}38%{opacity:0}100%{opacity:0}}
+@keyframes kzoom{0%{transform:scale(1.02)}100%{transform:scale(1.10)}}
+.kapp::before{background:linear-gradient(180deg,rgba(10,20,32,.78) 0%,rgba(10,20,32,.42) 38%,rgba(10,20,32,.30) 70%,rgba(10,20,32,.62) 100%)!important}
+.kapp .k-status{color:#fff}
+.kapp .k-status b{color:#fff}
+.kapp .k-status span{color:#fff}
+.kapp .k-welcome{color:#fff;text-shadow:0 2px 18px rgba(0,0,0,.35)}
+.kapp .k-venue{color:#e6edf3}
+.kapp .k-attract .a-welcome{color:#fff;text-shadow:0 2px 18px rgba(0,0,0,.35)}
+.kapp .k-attract .a-venue{color:#e6edf3}
+/* ADA sizing: every touch target at least 44 x 44 px */
+.kapp .k-nav button,.kapp .k-btn,.kapp .k-cta,.kapp .a-touch,.kapp .ad-cta,.kapp-fs,.kapp-a11y,.kapp-btn,.kapp-btn-ghost{min-height:44px;min-width:44px}
+.kapp .k-nav button{padding:1.2cqw 3.6cqw}
+.kapp .k-btn,.kapp .k-cta,.kapp .a-touch{padding-top:2.4cqw!important;padding-bottom:2.4cqw!important}
+.kapp-fs,.kapp-a11y{padding:.7rem 1.3rem!important;font-size:1rem!important}
+.kapp .k-dots button{min-width:44px;min-height:44px;background-clip:content-box!important;padding:0!important}
+.kapp .k-tile{min-height:44px}
+.kapp button:focus-visible,.kapp .k-tile:focus-visible{outline:3px solid #C9A96E;outline-offset:3px}
+.kapp .k-tile span{font-size:3.4cqw}
+.kapp .device[data-finish] .device-head{background:none!important;box-shadow:none!important}
+.kapp .device{background:none!important}
+.kapp .k-attract .a-venue,.kapp .k-venue{text-shadow:0 1px 10px rgba(0,0,0,.45);font-weight:600}
+
+/* ===== Kiosk typography: Apple-style system sans (SF Pro on Apple devices, Inter elsewhere) ===== */
+.kapp{--apple:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Inter",system-ui,"Segoe UI",Roboto,Arial,sans-serif}
+.kapp, .kapp .k, .kapp .k *, .kapp button, .kapp-box, .kapp-box *{font-family:var(--apple)!important}
+.kapp .k-welcome,.kapp .k-attract .a-welcome{font-weight:700;letter-spacing:-.035em}
+.kapp .k-head h2,.kapp .k-detail-hero h2,.kapp .ki-inner h2{font-weight:700;letter-spacing:-.03em}
+.kapp .k-tile span{font-weight:600;letter-spacing:-.01em}
+.kapp .k-tile.wide span{font-weight:700;letter-spacing:-.025em}
+.kapp .ad-big{font-weight:700;letter-spacing:-.025em}
+.kapp .k-status b{font-weight:600;letter-spacing:.08em}
+.kapp .k-btn,.kapp .k-cta,.kapp .a-touch,.kapp-btn{font-weight:600;letter-spacing:-.005em}
+
+/* ===== Phone guide for a live venue (concierge/?v=lexen) ===== */
+.cg-body .cc-app{max-width:620px;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,sans-serif}
+.cg-head{text-align:center;padding:8px 0 18px}
+.cg-head img{width:min(260px,70%);height:auto;filter:drop-shadow(0 2px 8px rgba(0,0,0,.25));background:#0B1622;border-radius:18px;padding:14px 18px}
+.cg-head p{color:#536170;margin:10px 0 14px}
+.cg-quick,.cg-acts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.cg-acts{justify-content:flex-start;margin-top:10px}
+.cg-btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 18px;border-radius:999px;background:#0F1C2B;color:#fff;font-weight:600;text-decoration:none}
+.cg-btn.ghost{background:#fff;color:#0F1C2B;border:1.5px solid #0F1C2B}
+.cg-nav{position:sticky;top:0;z-index:5;display:flex;gap:8px;overflow-x:auto;padding:10px 2px;background:var(--paper,#fff);scrollbar-width:none}
+.cg-nav a{flex:none;padding:9px 14px;border-radius:999px;background:#EEF3F6;color:#0F1C2B;font-weight:600;text-decoration:none;font-size:15px;min-height:40px;display:inline-flex;align-items:center}
+.cg-sec{padding-top:18px;scroll-margin-top:60px}
+.cg-sec h2{font-size:24px;letter-spacing:-.02em;margin:0 0 4px}
+.cg-intro{color:#536170;margin:0 0 12px}
+.cg-item{background:#fff;border:1px solid #E3E8EE;border-radius:16px;margin-bottom:10px;box-shadow:0 4px 14px rgba(15,28,43,.05);scroll-margin-top:64px}
+.cg-item summary{list-style:none;display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;min-height:56px}
+.cg-item summary::-webkit-details-marker{display:none}
+.cg-item summary span{flex:1;min-width:0;display:flex;flex-direction:column}
+.cg-item summary b{font-size:17px}
+.cg-item summary small{color:#536170;font-size:14px}
+.cg-item summary em{font-style:normal;font-size:13px;font-weight:600;color:#7a5a1e;background:#F7EED9;padding:4px 10px;border-radius:999px;white-space:nowrap}
+.cg-body-in{padding:0 16px 16px;color:#2c3a48}
+.cg-body-in p{margin:0 0 8px}
+.cg-addr{color:#536170;font-size:14px}
+.cg-body-in dl{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.cg-body-in dl div{background:#F4F8FA;border-radius:10px;padding:8px 10px}
+.cg-body-in dt{font-size:12px;color:#536170}
+.cg-body-in dd{margin:0;font-weight:600}
+.cg-foot{color:#536170;font-size:13px;text-align:center;margin:24px 0}

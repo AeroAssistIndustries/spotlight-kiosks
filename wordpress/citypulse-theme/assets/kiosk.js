@@ -154,7 +154,7 @@
   if (!screen) return;
   const ROOT = screen.dataset.root || "./";
   const S = {
-    venue: "hotel", mode: "attract", stack: [], large: false,
+    venue: "hotel", mode: "attract", stack: [], large: false, access: false, contrast: false, still: false,
     stats: { sessions: 0, views: 0, impr: 0, scans: 0 },
     slide: 0, slides: [], idleT: null, visible: true, paused: false,
     svc: { step: 2 }, room: null, sent: {}
@@ -180,6 +180,15 @@
     while (feed.children.length > 30) feed.lastChild.remove();
   }
 
+  /* The kiosk app can show a real venue name (data-hotel on #kapp). The website demo keeps its sample name. */
+  const APP = document.getElementById("kapp");
+  if (APP && APP.dataset.hotel) { VENUES.hotel.name = APP.dataset.hotel; VENUES.hotel.short = APP.dataset.hotelShort || APP.dataset.hotel.toUpperCase(); }
+  /* Optional per-venue content (for example assets/lexen-data.js). Replaces the hotel's categories and tiles. */
+  if (window.CITYPULSE_VENUE_DATA) {
+    const OV = window.CITYPULSE_VENUE_DATA;
+    OV.categories.forEach(c => { CATS[c.id] = cat(c.id, c.label, c.icon, c.intro, c.items); });
+    Object.assign(VENUES.hotel, OV.venue);
+  }
   const V = () => VENUES[S.venue];
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   const catOf = id => CATS[id] || SPECIAL[id];
@@ -272,6 +281,18 @@
     box.addEventListener("mouseleave", () => { S.paused = false; });
   }
 
+  /* Read the visible screen text aloud (browser speech). */
+  function readAloud() {
+    if (!window.speechSynthesis) return;
+    const view = document.getElementById("kview");
+    const text = view ? view.innerText.replace(/\s+/g, " ").trim() : "";
+    window.speechSynthesis.cancel();
+    if (!text) return;
+    const u = new SpeechSynthesisUtterance(text.slice(0, 1500));
+    u.lang = "en-US"; u.rate = 0.95;
+    window.speechSynthesis.speak(u);
+  }
+
   /* ---------- views ---------- */
   function render(dir) {
     const view = document.getElementById("kview"), nav = document.getElementById("knav");
@@ -299,9 +320,17 @@
     view.className = "k-view" + (dir ? " " + dir : "");
     view.innerHTML = body;
     nav.innerHTML = `
-      <button data-act="home" ${top.view === "home" ? "disabled" : ""}>${svg("home")}Home</button>
-      <button data-act="back" ${S.stack.length <= 1 ? "disabled" : ""}>${svg("back")}Back</button>
-      <button data-act="large" aria-pressed="${S.large}">${svg("text")}${S.large ? "Smaller text" : "Larger text"}</button>`;
+      <button data-act="home">${svg("home")}Home</button>
+      <button data-act="back">${svg("back")}Back</button>
+      <button data-act="large" aria-pressed="${S.large}">${svg("text")}${S.large ? "Smaller text" : "Larger text"}</button>
+      <button data-act="access" aria-expanded="${S.access}" aria-controls="kaccess">${svg("mega")}Accessibility</button>
+      ${S.access ? `<div class="k-access" id="kaccess" role="group" aria-label="Accessibility options">
+        <button data-act="contrast" aria-pressed="${S.contrast}">High contrast: ${S.contrast ? "on" : "off"}</button>
+        <button data-act="still" aria-pressed="${S.still}">Stop moving ads: ${S.still ? "on" : "off"}</button>
+        <button data-act="speak">Read this screen aloud</button>
+        <button data-act="stopspeak">Stop reading</button>
+      </div>` : ""}`;
+    const kk = screen.firstElementChild; if (kk) kk.classList.toggle("k-hc", S.contrast);
     stat("views");
     resetIdle();
   }
@@ -419,8 +448,13 @@
     switch (act) {
       case "start": startSession(); break;
       case "home": S.stack = [{ view: "home" }]; render("back"); break;
-      case "back": S.stack.pop(); render("back"); break;
+      case "back": if (S.stack.length > 1) S.stack.pop(); render("back"); break;
       case "large": S.large = !S.large; log(S.large ? "Turned on larger text" : "Turned off larger text"); render(); break;
+      case "access": S.access = !S.access; render(); break;
+      case "contrast": S.contrast = !S.contrast; render(); break;
+      case "still": S.still = !S.still; render(); break;
+      case "speak": readAloud(); break;
+      case "stopspeak": if (window.speechSynthesis) window.speechSynthesis.cancel(); break;
       case "open": { const entry = CATS[id] ? { view: "cat", id } : { view: id }; log(`Opened ${label(entry)}`); go(entry); break; }
       case "item": { const it = I[id]; log(`Viewed ${it.n}`, it.sp ? "sponsor" : null); go({ view: "item", id }); break; }
       case "sponsor": log(`Tapped ad: ${I[id].n}`, "sponsor"); go({ view: "item", id }); break;
@@ -475,7 +509,7 @@
   if ("IntersectionObserver" in window) new IntersectionObserver(es => { S.visible = es[0].isIntersecting; }, { threshold: .2 }).observe(screen);
   const reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
   setInterval(() => {
-    if (reduce || !S.visible || S.paused || document.hidden) return;
+    if (reduce || S.still || !S.visible || S.paused || document.hidden) return;
     if (screen.contains(document.activeElement) && document.activeElement.closest(".k-ads")) return;
     showSlide(S.slide + 1);
   }, SLIDE_MS);
