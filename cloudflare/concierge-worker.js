@@ -24,7 +24,6 @@
 */
 
 import { handle as backend, getContent, venueId } from "./backend.js";
-import { handleSales } from "./sales.js";
 
 const DEFAULTS = {
   VENUE_URL: "https://aeroassistindustries.github.io/spotlight-kiosks/assets/lexen-data.json",
@@ -207,7 +206,10 @@ export default {
     const allowed = cfg(env, "ALLOWED_ORIGINS").split(",").map(s => s.trim()).filter(Boolean);
     const ok = allowed.includes(origin);
     if (url.pathname === "/health") return json(200, { ok: true });
-    if (url.pathname === "/sales" || url.pathname.startsWith("/sales/")) return handleSales(req, env, ctx);
+    /* Sales Studio moved to its own app. Old links and bookmarks go there. */
+    if (url.pathname === "/sales" || url.pathname.startsWith("/sales/"))
+      return req.method === "GET" || req.method === "HEAD" ? Response.redirect("https://sales.citypulsekiosks.com/", 301)
+        : new Response(JSON.stringify({ error: "Sales Studio moved to https://sales.citypulsekiosks.com" }), { status: 410, headers: { "Content-Type": "application/json" } });
     const b = await backend(req, env, ctx, { origin, allowedOrigin: ok, fetchSeed: () => fetchVenueFile(env) });
     if (b) return b;
     if (req.method === "OPTIONS") return ok ? new Response(null, { status: 204, headers: cors(origin) }) : new Response(null, { status: 403 });
