@@ -10,7 +10,7 @@
    Staff (password protected, see admin-page.js):
      /admin and /admin/api/... */
 
-import { ADMIN_HTML, ADMIN_JS } from "./admin-page.js";
+import { ADMIN_HTML, ADMIN_JS, ADMIN_BRAND } from "./admin-page.js";
 
 const SCHEMA = [
   "CREATE TABLE IF NOT EXISTS content (venue TEXT PRIMARY KEY, json TEXT NOT NULL, version INTEGER NOT NULL, updated_at TEXT NOT NULL)",
@@ -374,6 +374,10 @@ async function admin(req, env, ctx, url, fetchSeed, onContentSaved) {
     return new Response(ADMIN_HTML, { headers: { "Content-Type": "text/html; charset=utf-8", ...PAGE_HEADERS } });
   if (path === "/admin/app.js" && req.method === "GET")
     return new Response(ADMIN_JS, { headers: { "Content-Type": "text/javascript; charset=utf-8", ...PAGE_HEADERS } });
+  if (path.startsWith("/admin/brand/") && req.method === "GET") {
+    const svg = ADMIN_BRAND[path.slice(13)];
+    if (svg) return new Response(svg, { headers: { "Content-Type": "image/svg+xml", "Cache-Control": "public, max-age=86400", "X-Content-Type-Options": "nosniff", "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; sandbox" } });
+  }
   if (!path.startsWith("/admin/api/")) return new Response("Not found", { status: 404 });
 
   /* Every staff request must come from the dashboard page itself. */

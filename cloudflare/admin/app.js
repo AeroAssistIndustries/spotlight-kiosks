@@ -7,6 +7,7 @@
   const clone = o => JSON.parse(JSON.stringify(o));
 
   const TABS = [["overview", "Overview"], ["ads", "Ads"], ["places", "Places"], ["answers", "Answers"], ["hotel", "Hotel"], ["kiosks", "Kiosks"], ["history", "History"]];
+  const LOGO = cls => `<span class="logo${cls ? " " + cls : ""}"><img class="on-light" src="/admin/brand/logo.svg" alt="CityPulse Kiosks"><img class="on-dark" src="/admin/brand/logo-light.svg" alt="CityPulse Kiosks"></span>`;
   const ICONS = { fork: "Dining", bell: "Hotel", coffee: "Coffee", spark: "Things to do", bag: "Shopping", car: "Transport", pin: "Pin", star: "Star", walk: "Walking", sun: "Outdoors" };
 
   let D = null, saved = null, base = 0, meta = {};
@@ -44,11 +45,13 @@
   function login(message, info) {
     D = null;
     app.innerHTML = `<div class="login"><form class="login-card" id="login" novalidate>
-      <div class="mark" aria-hidden="true">C</div>
-      <h1>Kiosk dashboard</h1><p>Sign in to manage your CityPulse kiosks.</p>
+      ${LOGO()}
+      <span class="eyebrow">Kiosk dashboard</span>
+      <h1>Welcome back</h1><p>Sign in to manage your CityPulse kiosks: ads, places, answers and results.</p>
       <label class="f"><span>Staff password</span><input type="password" id="pw" autocomplete="current-password" required></label>
       <button class="btn primary" type="submit">Sign in</button>
       ${message ? `<div class="msg${info ? " info" : ""}" role="alert">${esc(message)}</div>` : ""}
+      <p class="login-foot">CityPulse Kiosks · Staff only</p>
     </form></div>`;
     const pw = document.getElementById("pw");
     pw.focus();
@@ -86,12 +89,13 @@
   function frame() {
     app.innerHTML = `
       <header class="top"><div class="top-in">
-        <div class="brand"><div class="mark" aria-hidden="true">C</div><div><b>${esc(D.name)}</b><small>CityPulse kiosk dashboard</small></div></div>
+        <div class="brand">${LOGO()}<span class="sep" aria-hidden="true"></span><div class="venue-name"><b>${esc(D.name)}</b><small>Kiosk dashboard</small></div></div>
         <div class="state" id="state" aria-live="polite"></div>
         <button class="btn ghost small" data-act="logout">Sign out</button>
       </div>
       <nav class="tabs" aria-label="Sections">${TABS.map(([k, l]) => `<button data-tab="${k}">${l}</button>`).join("")}</nav></header>
       <main id="view"></main>
+      <footer class="foot"><img src="/admin/brand/favicon.svg" alt="" aria-hidden="true"><span>CityPulse Kiosks · Kiosk dashboard for ${esc(D.name)}</span></footer>
       <div class="publish-bar" id="pbar" role="region" aria-label="Unpublished changes">
         <span id="pbar-text">You have unpublished changes</span>
         <button class="btn ghost small" data-act="discard">Discard</button>
