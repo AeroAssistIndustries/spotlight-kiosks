@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 112'%3E%3Cpath d='M6 88 H30 L38 66 L48 108 L57 56 L64 88 H78' fill='none' stroke='%2322C7B6' stroke-width='9' stroke-linecap='round' stroke-linejoin='round'/%3E%3Crect x='80' y='14' width='40' height='56' rx='7' fill='%230F1C2B'/%3E%3Crect x='86' y='20' width='28' height='40' rx='3' fill='%2322C7B6'/%3E%3C/svg%3E">
+<!--APP_HEAD-->
+<style>
+html{color-scheme:light}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+img{max-width:100%}[hidden]{display:none!important}
+.gate{min-height:100vh;display:grid;place-items:center;padding:24px 16px;background:var(--bg)}
+.gate-card{width:min(420px,100%);background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:28px;display:grid;gap:14px;box-shadow:0 20px 50px rgba(15,28,43,.12)}
+.gate-brand{display:flex;align-items:center;gap:10px}
+.gate-brand svg{width:42px;height:37px}
+.gate-brand b{display:block;font:800 19px/1 var(--display)}
+.gate-brand small{display:block;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal-deep);font-weight:700;margin-top:3px}
+.gate h1{font-size:24px}
+.gate .err{color:var(--red);font-size:13.5px;min-height:1em}
+</style>
+</head>
+<body>
+<div class="gate" id="cpGate">
+  <div class="gate-card">
+    <div class="gate-brand"><svg viewBox="0 0 128 112" aria-hidden="true"><path d="M6 88 H30 L38 66 L48 108 L57 56 L64 88 H78" fill="none" stroke="#22C7B6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><g fill="#0F1C2B"><rect x="80" y="14" width="40" height="56" rx="7"/><rect x="94" y="68" width="12" height="22" rx="2"/><rect x="78" y="86" width="44" height="9" rx="4.5"/></g><rect x="86" y="20" width="28" height="40" rx="3" fill="#22C7B6"/><path d="M91 48 H97 L100 41 L104 53 L107 48 H110" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><div><b>CityPulse</b><small>Sales Studio</small></div></div>
+    <p id="gLoading" class="muted">Loading…</p>
+    <form id="gLogin" class="stack" hidden autocomplete="on">
+      <h1>Sign in</h1>
+      <label class="f">Username<input id="gUser" type="text" autocomplete="username" required autocapitalize="none"></label>
+      <label class="f">Password<input id="gPass" type="password" autocomplete="current-password" required></label>
+      <p class="err" id="gErr" role="alert"></p>
+      <button class="btn primary lg" type="submit">Sign in</button>
+      <p class="small muted">Forgot your password? Ask your admin to reset it.</p>
+    </form>
+    <form id="gSetup" class="stack" hidden autocomplete="off">
+      <h1>Set up Sales Studio</h1>
+      <p class="small muted">Create the first admin login. To prove you run CityPulse, enter the kiosk staff dashboard password.</p>
+      <label class="f">Kiosk dashboard password<input id="sAdminPw" type="password" required autocomplete="off"></label>
+      <label class="f">Your full name<input id="sName" type="text" required></label>
+      <div class="g2"><label class="f">Username<input id="sUser" type="text" required autocapitalize="none" pattern="[a-zA-Z0-9._-]{3,32}"></label><label class="f">Email<input id="sEmail" type="email"></label></div>
+      <label class="f">Your new password (10+ characters)<input id="sPass" type="password" minlength="10" required autocomplete="new-password"></label>
+      <p class="err" id="sErr" role="alert"></p>
+      <button class="btn primary lg" type="submit">Create admin and sign in</button>
+    </form>
+    <form id="gChange" class="stack" hidden autocomplete="off">
+      <h1>Choose your password</h1>
+      <p class="small muted">You signed in with a temporary password. Pick your own to continue.</p>
+      <label class="f">Temporary password<input id="cCur" type="password" required autocomplete="current-password"></label>
+      <label class="f">New password (10+ characters)<input id="cNew" type="password" minlength="10" required autocomplete="new-password"></label>
+      <label class="f">New password again<input id="cNew2" type="password" minlength="10" required autocomplete="new-password"></label>
+      <p class="err" id="cErr" role="alert"></p>
+      <button class="btn primary lg" type="submit">Save and continue</button>
+    </form>
+  </div>
+</div>
+<div id="cpApp" hidden><!--APP_MARKUP--></div>
+<script>
+/* Sales Studio host: sign-in, then the same runtime the CRM page expects (db, user, sample, downloads), backed by /sales/api. */
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+async function api(path, body, method) {
+  const opts = { method: method || (body !== undefined ? 'POST' : 'GET'), credentials: 'same-origin', headers: {} };
+  if (body !== undefined) { opts.headers['Content-Type'] = 'application/json'; opts.headers['X-CP-Req'] = '1'; opts.body = JSON.stringify(body); }
+  let r; try { r = await fetch('/sales/api/' + path, opts); } catch (e) { const er = new Error('Can’t reach Sales Studio. Check your connection.'); er.code = 'unavailable'; throw er; }
+  let j = {}; try { j = await r.json(); } catch (e) {}
+  if (!r.ok) { const er = new Error(j.error || 'Request failed (' + r.status + ')'); er.status = r.status; er.code = j.code || (r.status === 401 ? 'revoked' : r.status === 403 || r.status === 400 ? 'invalid_argument' : 'unavailable'); throw er; }
+  return j;
+}
+const show = id => ['gLoading','gLogin','gSetup','gChange'].forEach(x => $(x).hidden = x !== id);
+
+/* ---------------- document store ---------------- */
+function makeDb() {
+  const subs = new Set();
+  let seq = 0, feedStarted = null, dead = false;
+  const clone = o => o == null ? o : JSON.parse(JSON.stringify(o));
+  const snapDoc = (id, data) => ({ id, exists: data != null, data: () => data == null ? undefined : clone(data), metadata: { fromCache: false, hasPendingWrites: false } });
+  const segs = p => String(p).split('/');
+  function checkPath(p, wantDoc) { const s = segs(p); if (!p || s.some(x => !/^[A-Za-z0-9_\-.~:@+]{1,200}$/.test(x)) || (s.length % 2 === 0) !== wantDoc) throw new TypeError('Bad ' + (wantDoc ? 'document' : 'collection') + ' path: ' + p); }
+  const cmp = (x, op, v) => { if (x === undefined || x === null) return false; if (typeof v === 'boolean') x = !!x; switch (op) { case '==': return x === v; case '!=': return x !== v; case '<': return x < v; case '<=': return x <= v; case '>': return x > v; case '>=': return x >= v; } return false; };
+  const matches = (data, wheres) => wheres.every(([f, op, v]) => cmp(data[f], op, v));
+  function ordered(sub) {
+    let arr = [...sub.docs.entries()];
+    if (sub.q.order) { const [f, dir] = sub.q.order; arr.sort((a, b) => { const x = a[1][f], y = b[1][f]; const r = x === y ? 0 : (x === undefined || x === null) ? -1 : (y === undefined || y === null) ? 1 : x < y ? -1 : 1; return dir === 'desc' ? -r : r; }); }
+    if (sub.q.limit && arr.length > sub.q.limit) { for (const [id] of arr.slice(sub.q.limit)) sub.docs.delete(id); arr = arr.slice(0, sub.q.limit); }
+    return arr;
+  }
+  function emitQuery(sub, changes) {
+    const arr = ordered(sub);
+    const docs = arr.map(([id, d]) => snapDoc(id, d));
+    const idx = new Map(docs.map((d, i) => [d.id, i]));
+    const ch = changes.map(c => ({ type: c.type, doc: c.type === 'removed' ? snapDoc(c.id, c.prev) : docs[idx.get(c.id)] || snapDoc(c.id, c.prev), oldIndex: -1, newIndex: c.type === 'removed' ? -1 : (idx.get(c.id) ?? -1) })).filter(c => c.doc);
+    try { sub.next({ docs, size: docs.length, empty: !docs.length, docChanges: () => ch, metadata: { fromCache: false, hasPendingWrites: false } }); } catch (e) { console.error(e); }
+  }
+  function apply(c) {
+    for (const sub of subs) {
+      if (sub.kind === 'doc') { if (sub.path === c.path) { sub.data = c.deleted ? null : c.data; try { sub.next(snapDoc(c.id, sub.data)); } catch (e) { console.error(e); } } continue; }
+      if (!sub.ready || sub.q.col !== c.col) continue;
+      const had = sub.docs.has(c.id), prev = sub.docs.get(c.id);
+      const fits = !c.deleted && matches(c.data, sub.q.wheres);
+      if (fits) { sub.docs.set(c.id, c.data); emitQuery(sub, [{ type: had ? 'modified' : 'added', id: c.id }]); }
+      else if (had) { sub.docs.delete(c.id); emitQuery(sub, [{ type: 'removed', id: c.id, prev }]); }
+    }
+  }
+  function startFeed() {
+    if (feedStarted) return feedStarted;
+    feedStarted = (async () => {
+      seq = (await api('db/seq')).seq;
+      (async function loop() {
+        let fails = 0;
+        while (!dead) {
+          try {
+            const r = await api('db/changes?since=' + seq + '&wait=' + (document.hidden ? '1' : '1'));
+            for (const c of r.changes) apply(c);
+            seq = r.seq; fails = 0;
+            if (!r.more) await sleep(document.hidden ? 6000 : 250);
+          } catch (e) {
+            if (e.status === 401) { dead = true; for (const s of subs) s.err && s.err({ code: 'revoked', message: 'Signed out' }); window.CP_HOST && window.CP_HOST._signedOut(); return; }
+            fails++; await sleep(Math.min(30000, 2000 * fails));
+          }
+        }
+      })();
+    })();
+    return feedStarted;
+  }
+  function query(q) {
+    const b = {
+      where(f, op, v) { return query(Object.assign({}, q, { wheres: q.wheres.concat([[f, op, v]]) })); },
+      orderBy(f, dir) { return query(Object.assign({}, q, { order: [f, dir || 'asc'] })); },
+      limit(n) { return query(Object.assign({}, q, { limit: n })); },
+      async get() { const r = await api('db/query', q); const docs = r.docs.map(d => snapDoc(d.id, d.data)); return { docs, size: docs.length, empty: !docs.length, docChanges: () => docs.map((d, i) => ({ type: 'added', doc: d, oldIndex: -1, newIndex: i })), metadata: { fromCache: false, hasPendingWrites: false } }; },
+      onSnapshot(next, err) {
+        const sub = { kind: 'query', q, docs: new Map(), next, err, ready: false };
+        subs.add(sub);
+        (async () => { try { await startFeed(); const r = await api('db/query', q); if (!subs.has(sub)) return; for (const d of r.docs) sub.docs.set(d.id, d.data); sub.ready = true; emitQuery(sub, r.docs.map(d => ({ type: 'added', id: d.id }))); } catch (e) { err && err({ code: e.code || 'unavailable', message: e.message }); } })();
+        return () => subs.delete(sub);
+      },
+      doc(id) { return docRef(q.col + '/' + (id || (Date.now().toString(36) + Math.random().toString(36).slice(2, 10)))); },
+      async add(data) { const r = b.doc(); await r.set(data); return r; },
+      path: q.col
+    };
+    return b;
+  }
+  function knownCopy(path) { for (const s of subs) { if (s.kind === 'doc' && s.path === path && s.data) return s.data; if (s.kind === 'query' && path.startsWith(s.q.col + '/') && segs(path).length === segs(s.q.col).length + 1) { const d = s.docs.get(segs(path).pop()); if (d) return d; } } return null; }
+  function docRef(path) {
+    checkPath(path, true);
+    const id = segs(path).pop(), col = segs(path).slice(0, -1).join('/');
+    const write = async (op, data) => {
+      await api('db/write', { op, path, data });
+      if (op === 'delete') apply({ path, col, id, deleted: true, data: null });
+      else if (op === 'set') apply({ path, col, id, deleted: false, data: clone(data) });
+      else { const cur = knownCopy(path); if (cur) { const merged = Object.assign({}, cur); for (const [k, v] of Object.entries(data)) merged[k] = (v && typeof v === 'object' && !Array.isArray(v) && merged[k] && typeof merged[k] === 'object' && !Array.isArray(merged[k])) ? Object.assign({}, merged[k], v) : v; apply({ path, col, id, deleted: false, data: merged }); } }
+    };
+    return {
+      id, path,
+      async get() { const r = await api('db/get', { path }); return snapDoc(id, r.exists ? r.data : null); },
+      set: data => write('set', data), update: data => write('update', data), delete: () => write('delete'),
+      async acquire(o) { const r = await api('db/acquire', { path, ttlMs: (o && o.ttlMs) || 30000 }); return { acquired: !!r.acquired }; },
+      onSnapshot(next, err) { const sub = { kind: 'doc', path, next, err, data: null }; subs.add(sub); (async () => { try { await startFeed(); const r = await api('db/get', { path }); if (!subs.has(sub)) return; sub.data = r.exists ? r.data : null; next(snapDoc(id, sub.data)); } catch (e) { err && err({ code: e.code || 'unavailable' }); } })(); return () => subs.delete(sub); },
+      collection(sub) { return query({ col: path + '/' + sub, wheres: [] }); }
+    };
+  }
+  return { doc: docRef, collection: c => { checkPath(c, false); return query({ col: c, wheres: [] }); } };
+}
+
+/* ---------------- browser phone (Twilio) ---------------- */
+function makeVoice(status) {
+  let device = null, current = null, incoming = null, onIncoming = null, loading = null;
+  async function init() {
+    if (!status.voice) return null;
+    if (loading) return loading;
+    loading = (async () => {
+      if (!window.Twilio || !window.Twilio.Device) await new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/@twilio/voice-sdk@2.18.5/dist/twilio.min.js'; s.onload = res; s.onerror = () => rej(new Error('The calling library didn’t load.')); document.head.appendChild(s); });
+      const { token } = await api('voice/token');
+      device = new window.Twilio.Device(token, { closeProtection: true, codecPreferences: ['opus', 'pcmu'] });
+      device.on('tokenWillExpire', async () => { try { device.updateToken((await api('voice/token')).token); } catch (e) {} });
+      device.on('incoming', call => { incoming = call; call.on('cancel', () => { incoming = null; const b = document.getElementById('incomingBar'); if (b) b.hidden = true; }); onIncoming && onIncoming({ from: call.parameters.From || '' }); });
+      device.on('error', e => console.warn('phone', e && e.message));
+      await device.register();
+      return device;
+    })().catch(e => { loading = null; throw e; });
+    return loading;
+  }
+  function wire(call, h) {
+    current = call;
+    call.on('accept', c => { h.onAccept && h.onAccept((c && c.parameters && c.parameters.CallSid) || (call.parameters && call.parameters.CallSid) || ''); });
+    const done = () => { if (current === call) current = null; h.onEnd && h.onEnd(); };
+    call.on('disconnect', done); call.on('cancel', done); call.on('reject', done);
+    call.on('error', e => { h.onError ? h.onError('Call error: ' + ((e && e.message) || 'unknown')) : done(); });
+  }
+  return {
+    get enabled() { return !!status.voice; },
+    init,
+    async call(number, h) { try { const d = await init(); const c = await d.connect({ params: { To: number } }); wire(c, h); } catch (e) { h.onError && h.onError(e.message || 'The call didn’t go through. Allow the microphone and try again.'); } },
+    hangup() { if (current) current.disconnect(); else if (device) device.disconnectAll(); current = null; },
+    mute(on) { if (current) current.mute(!!on); },
+    active() { return !!current; },
+    onIncoming(fn) { onIncoming = fn; if (status.voice) init().catch(() => {}); },
+    accept(h) { if (!incoming) return; const c = incoming; incoming = null; wire(c, h); c.accept(); },
+    reject() { if (incoming) { incoming.reject(); incoming = null; } }
+  };
+}
+
+/* ---------------- start ---------------- */
+async function startApp(me) {
+  const userCap = {
+    async id() { return me.user.id; },
+    async me() { return { id: me.user.id, name: me.user.name, avatarUrl: '', color: '', email: me.user.email || null, isOwner: me.user.owner, canEdit: me.user.role === 'admin' }; },
+    async isOwner() { return me.user.owner; }, async canEdit() { return me.user.role === 'admin'; }, async can() { return true; },
+    async name() { return me.user.name; }, async avatarUrl() { return null; }, async search() { return []; },
+    async profiles(ids) { const list = [].concat(ids).filter(Boolean); if (!list.length) return {}; const r = await api('profiles', { ids: list }); const out = {}; for (const [id, p] of Object.entries(r.profiles || {})) out[id] = { id, name: p.name, avatarUrl: '', color: '', email: null, isMe: id === me.user.id, guest: false }; return out; }
+  };
+  const sample = async (input, opts) => {
+    const prompt = typeof input === 'string' ? input : (input || []).map(m => m.content).join('\n\n');
+    const r = await api('ai', { prompt }).catch(e => { throw { code: e.status === 502 ? 'unavailable' : (e.code || 'unavailable'), message: e.message }; });
+    if (opts && opts.onText) { try { opts.onText({ text: r.text, delta: r.text }); } catch (e) {} }
+    return { text: r.text, truncated: false };
+  };
+  const downloads = { async save({ filename, data }) { const blob = data instanceof Blob ? data : new Blob([data], { type: /\.csv$/i.test(filename) ? 'text/csv' : 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000); return { status: 'saved' }; } };
+  const caps = { db: makeDb(), user: userCap, sample: me.status.ai ? sample : null, downloads };
+  window.claude = { use: async name => caps[name] ?? null };
+  window.CP_HOST = {
+    me: me.user, status: me.status, google: me.google,
+    signOut: async () => { try { await api('logout', {}); } catch (e) {} location.reload(); },
+    _signedOut: () => { alertBox('You were signed out. Sign in again.'); setTimeout(() => location.reload(), 1500); },
+    changePassword: (current, next) => api('password', { current, next }),
+    users: { list: () => api('users'), create: o => api('users', o), update: (id, o) => api('users/' + id, o) },
+    backup: { export: () => api('backup'), import: obj => api('restore', obj) },
+    email: { send: o => api('email/send', o), async connect() { const r = await api('google/start', {}); location.href = r.url; }, async disconnect() { await api('google/disconnect', {}); me.google.connected = false; me.google.email = ''; } },
+    sms: { send: o => api('sms/send', o) },
+    voice: makeVoice(me.status)
+  };
+  document.title = 'CityPulse Sales Studio';
+  $('cpGate').hidden = true; $('cpApp').hidden = false;
+  const code = document.getElementById('cpAppCode').textContent;
+  const s = document.createElement('script'); s.textContent = code; document.body.appendChild(s);
+}
+function alertBox(msg) { const t = document.getElementById('toast'); if (t) { t.textContent = msg; t.hidden = false; } }
+
+async function boot() {
+  let me;
+  try { me = await api('me'); } catch (e) { $('gLoading').textContent = e.message; return; }
+  if (!me.signedIn) { show(me.needsSetup ? 'gSetup' : 'gLogin'); (me.needsSetup ? $('sAdminPw') : $('gUser')).focus(); return; }
+  if (me.user.mustChange) { show('gChange'); $('cCur').focus(); return; }
+  startApp(me);
+}
+$('gLogin').addEventListener('submit', async e => { e.preventDefault(); $('gErr').textContent = ''; try { await api('login', { username: $('gUser').value, password: $('gPass').value }); boot(); } catch (er) { $('gErr').textContent = er.message; } });
+$('gSetup').addEventListener('submit', async e => { e.preventDefault(); $('sErr').textContent = ''; try { await api('setup', { adminPassword: $('sAdminPw').value, name: $('sName').value, username: $('sUser').value.toLowerCase(), email: $('sEmail').value, password: $('sPass').value }); boot(); } catch (er) { $('sErr').textContent = er.message; } });
+$('gChange').addEventListener('submit', async e => { e.preventDefault(); $('cErr').textContent = ''; if ($('cNew').value !== $('cNew2').value) { $('cErr').textContent = 'The new passwords don’t match.'; return; } try { await api('password', { current: $('cCur').value, next: $('cNew').value }); boot(); } catch (er) { $('cErr').textContent = er.message; } });
+boot();
+})();
+</script>
+<script type="text/plain" id="cpAppCode"><!--APP_SCRIPT--></script>
+</body>
+</html>
