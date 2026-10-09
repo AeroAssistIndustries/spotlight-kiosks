@@ -322,6 +322,9 @@
         <button class="lt lt-take" style="grid-area:take" data-act="take"><span class="lt-qr">${qr(GO("guide", "", GUIDE), "QR code: open this guide on your phone")}</span><span class="lt-label">Take it with you</span></button>
       </div></section>`;
   }
+  /* Dock buttons flash gold the moment they are pressed. */
+  root.addEventListener("pointerdown", e => { const d = e.target.closest && e.target.closest(".cpk-dbtn"); if (d && !d.disabled) d.classList.add("press"); }, true);
+  ["pointerup", "pointercancel", "pointerleave"].forEach(ev => root.addEventListener(ev, () => root.querySelectorAll(".cpk-dbtn.press").forEach(x => setTimeout(() => x.classList.remove("press"), 160)), true));
   /* Press feedback like Windows Phone: the tile tilts toward where it was touched. */
   root.addEventListener("pointerdown", e => {
     const el = e.target.closest && e.target.closest("button.lt");
@@ -710,10 +713,12 @@
   }
   function dockHTML() {
     if (S.mode === "attract") return "";
-    return `<button data-act="home">${svg("home")}<span>Home</span></button>
-      <button data-act="back">${svg("back")}<span>Back</span></button>
-      <button data-act="ask" class="cpk-dock-ask">${svg("chat")}<span>Ask</span></button>
-      <button data-act="panel" aria-expanded="${S.panel}" aria-controls="cpk-sheet">${svg("access")}<span>Accessibility</span></button>`;
+    /* the button for the screen you are on is lit (gold); the others are dark metal */
+    const top = S.stack[S.stack.length - 1] || {}, on = S.panel ? "panel" : top.v === "home" ? "home" : top.v === "ask" ? "ask" : "";
+    const b = (act, ico, lbl, extra) => `<button data-act="${act}" class="cpk-dbtn${on === act ? " on" : ""}${S.lastOn !== on && on === act ? " lit" : ""}"${on === act ? ' aria-current="page"' : ""}${extra || ""}><i class="sheen" aria-hidden="true"></i>${svg(ico)}<span>${lbl}</span></button>`;
+    const html = b("home", "home", "Home") + b("back", "back", "Back", S.stack.length < 2 ? " disabled" : "") + b("ask", "chat", "Ask") + b("panel", "access", "Accessibility", ` aria-expanded="${S.panel}" aria-controls="cpk-sheet"`);
+    S.lastOn = on;
+    return html;
   }
   function sheetHTML() {
     const t = (act, ico, lbl, on) => `<button data-act="${act}" aria-pressed="${!!on}">${svg(ico)}<span>${lbl}</span><i>${on ? "On" : "Off"}</i></button>`;

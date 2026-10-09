@@ -21,7 +21,7 @@
 
 /* Background: venue photos, slow crossfade and zoom, with a deep shade for legibility */
 .cpk-bg, .cpk-shade { position: absolute; inset: 0; pointer-events: none; }
-.cpk-bg span { position: absolute; inset: -2%; background: center/cover no-repeat; opacity: 0; animation: cpkFade 27s infinite, cpkZoom 27s infinite linear; }
+.cpk-bg span { position: absolute; inset: 0; background: center/cover no-repeat; opacity: 0; animation: cpkFade 27s infinite, cpkZoom 27s infinite linear; }
 @keyframes cpkFade { 0% { opacity: 0 } 5% { opacity: 1 } 33% { opacity: 1 } 39% { opacity: 0 } 100% { opacity: 0 } }
 @keyframes cpkZoom { 0% { transform: scale(1) } 100% { transform: scale(1.08) } }
 .cpk-shade { background: linear-gradient(180deg, rgba(8,16,26,.72) 0%, rgba(8,16,26,.78) 30%, rgba(8,16,26,.86) 70%, rgba(8,16,26,.94) 100%); transition: background .6s; }
@@ -653,3 +653,40 @@ button.lt:active { transform: perspective(700px) rotateX(var(--rx, 0deg)) rotate
 .lt-wd svg { width: 1.45em; height: 1.45em; color: var(--gold-2); }
 .lt-wd span { font-size: 1.15em; font-weight: 500; } .lt-wd em { font-style: normal; color: rgba(255,255,255,.6); }
 .lt-wd.today b { color: var(--teal); }
+
+/* =====================================================================
+   v16 · Bigger hotel logo; dock buttons in the AeroAssist style:
+   cut corners, brushed-gold gradient for the current screen, dark metal for the rest
+   ===================================================================== */
+.cpk-logo { height: 7.4em !important; }
+.cpk-top { min-height: 8.4em; padding-top: calc(var(--pad) * .55); padding-bottom: calc(var(--pad) * .3); }
+@media (max-aspect-ratio: 1/1) { .cpk-logo { height: 7.8em !important; } }
+
+.cpk-dock { padding: .5em; gap: .5em; background: linear-gradient(180deg, rgba(14,24,36,.88), rgba(8,14,22,.92)) !important; border: 1px solid rgba(166,246,239,.16) !important; border-radius: 0 !important;
+  clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px); }
+.cpk-dock .cpk-dbtn { position: relative; overflow: hidden; border-radius: 0 !important; min-height: 4.4em;
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  background: linear-gradient(160deg, #2A3A4E 0%, #172332 45%, #0E1823 100%) !important; color: rgba(231,240,246,.9) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.14), inset 0 0 0 1px rgba(166,246,239,.18) !important;
+  text-transform: uppercase; letter-spacing: .1em; font-size: .78em !important; font-weight: 700 !important;
+  transition: background .25s, color .2s, box-shadow .25s, transform .12s !important; }
+.cpk-dock .cpk-dbtn svg { width: 1.9em; height: 1.9em; stroke-width: 1.6; color: #A6F6EF; transition: color .2s; }
+/* the current screen: brushed gold, like AeroAssist's primary button */
+.cpk-dock .cpk-dbtn.on, .cpk-dock .cpk-dbtn.press {
+  background: linear-gradient(100deg, #7E5E22 0%, #D9B866 14%, #FFF2CC 27%, #C99A45 44%, #F3DC9F 62%, #9A7432 82%, #E8C97E 100%) !important;
+  color: #120C02 !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 12px 30px -14px rgba(226,190,114,.8) !important; }
+.cpk-dock .cpk-dbtn.on svg, .cpk-dock .cpk-dbtn.press svg { color: #120C02; }
+.cpk-dock .cpk-dbtn.press { transform: translateY(1px) scale(.985) !important; filter: brightness(1.08); }
+.cpk-dock .cpk-dbtn:disabled { opacity: .45; }
+/* a light sweeps across a button when it becomes the current one */
+.cpk-dbtn .sheen { position: absolute; top: 0; left: -120%; width: 60%; height: 100%; pointer-events: none; transform: skewX(-18deg);
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.55), transparent); }
+.cpk-dbtn.lit .sheen, .cpk-dbtn.press .sheen { animation: cpkSheenSweep .7s var(--ease) both; }
+@keyframes cpkSheenSweep { from { left: -120% } to { left: 140% } }
+.cpk.is-still .cpk-dbtn .sheen { animation: none !important; }
+.cpk.is-contrast .cpk-dock .cpk-dbtn { background: #000 !important; color: #fff !important; box-shadow: inset 0 0 0 2px #fff !important; }
+.cpk.is-contrast .cpk-dock .cpk-dbtn.on { background: #FFD966 !important; color: #000 !important; }
+/* v16: root can never scroll (focus/scrollIntoView used to nudge it, exposing a band under the dock) */
+.cpk { overflow: clip; }
+.cpk-bg { overflow: hidden; }
+.cpk-clock b { white-space: nowrap; }
