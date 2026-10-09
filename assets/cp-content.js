@@ -8,7 +8,7 @@
   var EP = ((V.ai && V.ai.endpoint) || "").replace(/\/$/, "");
   var AI = V.ai, KEY = "cp-content-" + V.id, QKEY = "cp-countq-" + V.id;
   var isKiosk = !!document.getElementById("cpk");
-  var APP = "13"; /* kiosk software version, shown in the dashboard */
+  var APP = "14"; /* kiosk software version, shown in the dashboard */
   var BOOT = Date.now(); /* when this page started: a "Refresh now" from the dashboard after this reloads it */
   var store = {
     get: function (k) { try { return JSON.parse(localStorage.getItem(k) || "null"); } catch (e) { return null; } },

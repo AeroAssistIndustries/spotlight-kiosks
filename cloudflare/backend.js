@@ -380,7 +380,7 @@ export async function handle(req, env, ctx, { origin, allowedOrigin, fetchSeed, 
     const id = decodeURIComponent(rawId || "");
     const fallback = guideBase(env) + "?v=" + encodeURIComponent(ID_RE.test(v || "") ? v : venueId(env));
     const go = to => new Response(null, { status: 302, headers: { Location: to, "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" } });
-    if (!ID_RE.test(v || "") || !["ad", "place", "guide"].includes(kind)) return go(fallback);
+    if (!ID_RE.test(v || "") || !["ad", "place", "guide", "plan"].includes(kind)) return go(fallback);
     let c = null;
     try { c = hasDB(env) ? await getContent(env, v, fetchSeed) : { data: await fetchSeed() }; } catch (e) { /* database busy: still send the guest somewhere useful */ }
     if (c && (!c.data || c.data.id !== v)) c = null;
@@ -388,6 +388,14 @@ export async function handle(req, env, ctx, { origin, allowedOrigin, fetchSeed, 
     let to = null;
     if (kind === "ad") { const s = (c.data.sponsors || []).find(x => x.id === id); if (s) to = s.url; }
     else if (kind === "place") { const it = c.data.items[id]; if (it && it.ll) to = mapsUrl(c.data, it); }
+    else if (kind === "plan") {
+      /* a walking plan from the kiosk: open all its stops as one Google Maps route */
+      const its = id.split(".").slice(0, 5).map(x => c.data.items[x]).filter(it => it && it.ll);
+      if (its.length) {
+        const q = it => encodeURIComponent(it.n + " " + String(it.addr || "").replace(/, CA \d{5}$/, ", CA"));
+        to = "https://www.google.com/maps/dir/?api=1&destination=" + q(its[its.length - 1]) + (its.length > 1 ? "&waypoints=" + its.slice(0, -1).map(q).join("%7C") : "") + "&travelmode=walking";
+      }
+    }
     else to = fallback + (id && c.data.items[id] ? "#" + encodeURIComponent(id) : "");
     if (!to) return go(fallback);
     const kiosk = KIOSK_RE.test(url.searchParams.get("k") || "") ? url.searchParams.get("k") : "unknown";
