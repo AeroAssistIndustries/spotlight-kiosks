@@ -106,7 +106,7 @@
   }
 
   /* ---------- state ---------- */
-  const S = { mode: "attract", stack: [], panel: false, large: false, contrast: false, still: false, reach: false, ad: 0, idle: null, chat: [], busy: false };
+  const S = { mode: "attract", stack: [], panel: false, large: false, contrast: false, still: false, reach: false, ad: 0, idle: null, chat: [], busy: false, seen: new Set() };
 
   /* ---------- frame ---------- */
   root.innerHTML = `
@@ -194,7 +194,9 @@
   /* ---------- ads ----------
      Featured local businesses rotate on their own for equal exposure. Nothing here can be tapped:
      each ad shows the business name, logo, website and a QR code that opens the site on the guest's phone. */
-  const SPONS = (V.sponsors || []).filter(x => x && x.name && x.active !== false);
+  /* Shown only while switched on and within the campaign dates set in the dashboard (venue's local date). */
+  const TODAY = dayKey();
+  const SPONS = (V.sponsors || []).filter(x => x && x.name && x.active !== false && (!x.start || TODAY >= x.start) && (!x.end || TODAY <= x.end));
   const SLIDES = SPONS.length ? SPONS : [{ name: "Your business here", kind: "Advertise on this screen", tagline: "Reach every guest at " + V.name + ". From $399 a year.", website: "citypulsekiosks.com", url: PRICING, house: true }];
   const initials = n => n.replace(/^The /, "").split(/[\s.&]+/).filter(Boolean).slice(0, 2).map(w => w[0]).join("").toUpperCase();
   function adHTML(sp, i) {
@@ -223,10 +225,21 @@
     const bar = root.querySelector("#cpk-ad-bar");
     if (bar) { bar.style.transition = "none"; bar.style.transform = "scaleX(0)"; void bar.offsetWidth; bar.style.transition = `transform ${AD_MS}ms linear`; bar.style.transform = S.still ? "scaleX(0)" : "scaleX(1)"; }
     bump("adShown", SLIDES[S.ad].name, SLIDES[S.ad].house ? null : SLIDES[S.ad].id || SLIDES[S.ad].name);
+    if (S.mode !== "attract") seenByGuest();
+  }
+  /* Ads seen while a guest is using the kiosk (not just playing to an empty lobby), and how many guests saw each one. */
+  function seenByGuest() {
+    const sp = SLIDES[S.ad];
+    if (!sp || sp.house) return;
+    const key = sp.id || sp.name;
+    bump("adEngaged", sp.name, key);
+    if (!S.seen.has(key)) { S.seen.add(key); bump("adReach", sp.name, key); }
   }
   showAd(0);
   /* Rotates on its own, including on the welcome screen. "Stop moving images" in Accessibility pauses it (required for moving content). */
-  setInterval(() => { if (!S.still && !document.hidden && SLIDES.length > 1) showAd(S.ad + 1); }, AD_MS);
+  let adTimer = null;
+  function rotateAds() { clearInterval(adTimer); adTimer = setInterval(() => { if (!S.still && !document.hidden && SLIDES.length > 1) showAd(S.ad + 1); }, AD_MS); }
+  rotateAds();
 
   /* ---------- views ---------- */
   const greet = () => { const h = hourNow(); return h < 5 ? "Good evening" : h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"; };
@@ -461,7 +474,8 @@
   /* Soft fade at the bottom when there is more to scroll. */
   function scrollHint() { const more = view.scrollHeight - view.clientHeight - view.scrollTop > 16; view.classList.toggle("has-more", more); }
   view.addEventListener("scroll", scrollHint, { passive: true });
-  function start() { S.mode = "session"; S.stack = [{ v: "home" }]; bump("sessions", "count"); render("fwd"); }
+  function start() { S.mode = "session"; S.stack = [{ v: "home" }]; S.seen = new Set(); bump("sessions", "count");
+    if (LIVE) LIVE.count("hours", String(hourNow()).padStart(2, "0")); /* busiest times, for the dashboard */ showAd(S.ad); rotateAds(); render("fwd"); } /* the ad on screen gets a full turn in front of the guest */
   function reset() {
     clearTimeout(S.idle); hideWarn();
     S.mode = "attract"; S.stack = []; S.panel = false; S.chat = []; S.busy = false;

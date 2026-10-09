@@ -7,6 +7,7 @@
   const clone = o => JSON.parse(JSON.stringify(o));
 
   const TABS = [["overview", "Overview"], ["ads", "Ads"], ["places", "Places"], ["answers", "Answers"], ["hotel", "Hotel"], ["kiosks", "Kiosks"], ["history", "History"]];
+  const LOGO = cls => `<span class="logo${cls ? " " + cls : ""}"><img class="on-light" src="/admin/brand/logo.svg" alt="CityPulse Kiosks"><img class="on-dark" src="/admin/brand/logo-light.svg" alt="CityPulse Kiosks"></span>`;
   const ICONS = { fork: "Dining", bell: "Hotel", coffee: "Coffee", spark: "Things to do", bag: "Shopping", car: "Transport", pin: "Pin", star: "Star", walk: "Walking", sun: "Outdoors" };
 
   let D = null, saved = null, base = 0, meta = {};
@@ -44,11 +45,13 @@
   function login(message, info) {
     D = null;
     app.innerHTML = `<div class="login"><form class="login-card" id="login" novalidate>
-      <div class="mark" aria-hidden="true">C</div>
-      <h1>Kiosk dashboard</h1><p>Sign in to manage your CityPulse kiosks.</p>
+      ${LOGO()}
+      <span class="eyebrow">Kiosk dashboard</span>
+      <h1>Welcome back</h1><p>Sign in to manage your CityPulse kiosks: ads, places, answers and results.</p>
       <label class="f"><span>Staff password</span><input type="password" id="pw" autocomplete="current-password" required></label>
       <button class="btn primary" type="submit">Sign in</button>
       ${message ? `<div class="msg${info ? " info" : ""}" role="alert">${esc(message)}</div>` : ""}
+      <p class="login-foot">CityPulse Kiosks · Staff only</p>
     </form></div>`;
     const pw = document.getElementById("pw");
     pw.focus();
@@ -86,12 +89,13 @@
   function frame() {
     app.innerHTML = `
       <header class="top"><div class="top-in">
-        <div class="brand"><div class="mark" aria-hidden="true">C</div><div><b>${esc(D.name)}</b><small>CityPulse kiosk dashboard</small></div></div>
+        <div class="brand">${LOGO()}<span class="sep" aria-hidden="true"></span><div class="venue-name"><b>${esc(D.name)}</b><small>Kiosk dashboard</small></div></div>
         <div class="state" id="state" aria-live="polite"></div>
         <button class="btn ghost small" data-act="logout">Sign out</button>
       </div>
       <nav class="tabs" aria-label="Sections">${TABS.map(([k, l]) => `<button data-tab="${k}">${l}</button>`).join("")}</nav></header>
       <main id="view"></main>
+      <footer class="foot"><img src="/admin/brand/favicon.svg" alt="" aria-hidden="true"><span>CityPulse Kiosks · Kiosk dashboard for ${esc(D.name)}</span></footer>
       <div class="publish-bar" id="pbar" role="region" aria-label="Unpublished changes">
         <span id="pbar-text">You have unpublished changes</span>
         <button class="btn ghost small" data-act="discard">Discard</button>
@@ -109,7 +113,8 @@
     if (!view) return;
     document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-current", b.dataset.tab === tab ? "page" : "false"));
     const y = window.scrollY;
-    view.innerHTML = ({ overview: vOverview, ads: vAds, places: vPlaces, answers: vAnswers, hotel: vHotel, kiosks: vKiosks, history: vHistory })[tab]();
+    document.body.classList.toggle("is-report", tab === "report");
+    view.innerHTML = ({ overview: vOverview, ads: vAds, places: vPlaces, answers: vAnswers, hotel: vHotel, kiosks: vKiosks, history: vHistory, report: vReport })[tab]();
     window.scrollTo(0, y);
   }
 
@@ -162,11 +167,13 @@
     const c = el.closest("label") && el.closest("label").querySelector("[data-count]");
     if (c && el.maxLength > 0) c.textContent = `${el.value.length} / ${el.maxLength}`;
     if (el.dataset.title) { const t = document.getElementById(el.dataset.title); if (t) t.textContent = el.value || "Untitled"; }
+    const m = el.dataset.bind.match(/^sponsors\.(\d+)\./);
+    if (m) { const pv = document.getElementById("ad-prev-" + m[1]); if (pv) pv.innerHTML = adPreview(D.sponsors[+m[1]]); }
     markDirty();
   }
   function onChange(e) {
     const el = e.target;
-    if (el.dataset.bind && (el.type === "checkbox" || el.tagName === "SELECT")) { setPath(D, el.dataset.bind, readVal(el)); markDirty(); if (el.dataset.rerender) render(); }
+    if (el.dataset.bind && (el.type === "checkbox" || el.tagName === "SELECT" || el.type === "date")) { setPath(D, el.dataset.bind, readVal(el)); markDirty(); if (el.dataset.rerender || /^sponsors\.\d+\.(active|start|end|item)$/.test(el.dataset.bind)) render(); }
     if (el.dataset.cat) { toggleCat(el.dataset.item, el.dataset.cat, el.checked); markDirty(); }
     if (el.id === "range-kiosk") { kioskFilter = el.value; loadStats(); }
     if (el.dataset.addchip) { const v = el.value; if (v) { const arr = getPath(D, el.dataset.addchip) || []; if (!arr.includes(v)) arr.push(v); setPath(D, el.dataset.addchip, arr); markDirty(); render(); } }
@@ -189,23 +196,38 @@
   }
   const armed = (act, label, extra) => `<button class="btn small danger" data-act="${act}" data-armed-label="Click again to confirm"${extra || ""}>${label}</button>`;
 
+  /* ---------- dates ---------- */
+  const today = () => new Intl.DateTimeFormat("en-CA", { timeZone: (D && D.tz) || "America/Los_Angeles" }).format(new Date());
+  const dayDiff = (a, b) => Math.round((Date.parse(b + "T12:00:00Z") - Date.parse(a + "T12:00:00Z")) / 86400000);
+  const niceDay = d => new Date(d + "T12:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+  function adStatus(s) {
+    const t = today();
+    if (s.active === false) return ["off", "Hidden"];
+    if (s.start && t < s.start) return ["warn", "Starts " + niceDay(s.start)];
+    if (s.end && t > s.end) return ["off", "Ended " + niceDay(s.end)];
+    if (s.end) { const d = dayDiff(t, s.end); return d <= 7 ? ["warn", d === 0 ? "Ends today" : `Ends in ${d} day${d > 1 ? "s" : ""}`] : ["ok", "Running until " + niceDay(s.end)]; }
+    return ["ok", "Running"];
+  }
+  const kioskOffline = k => Date.now() - Date.parse(k.last_seen) > 15 * 60000;
+
   /* ---------- overview ---------- */
   async function loadStats() {
     statsErr = "";
     try { stats = await api(`stats?days=${range}${kioskFilter ? "&kiosk=" + encodeURIComponent(kioskFilter) : ""}`); }
     catch (e) { if (e.message === "signed out") return; statsErr = e.message; }
-    if (tab === "overview" || tab === "kiosks") render();
+    if (tab === "overview" || tab === "kiosks" || tab === "report") render();
   }
   function sumType(type) { return (stats ? stats.byKey : []).filter(r => r.type === type).reduce((a, r) => a + r.n, 0); }
   function keysOf(type) { return (stats ? stats.byKey : []).filter(r => r.type === type); }
   function nameOf(id) { const it = D.items[id]; return it ? it.n : id; }
   function adRows() {
-    const views = {}, scans = {};
-    keysOf("adShown").forEach(r => { views[r.key] = (views[r.key] || 0) + r.n; });
+    const tally = type => { const o = {}; keysOf(type).forEach(r => { o[r.key] = (o[r.key] || 0) + r.n; }); return o; };
+    const views = tally("adShown"), engaged = tally("adEngaged"), reach = tally("adReach"), scans = {};
     keysOf("qr").forEach(r => { if (r.key.startsWith("ad:")) scans[r.key.slice(3)] = (scans[r.key.slice(3)] || 0) + r.n; });
-    const rows = D.sponsors.map(s => ({ id: s.id, name: s.name, active: s.active !== false, views: (views[s.id] || 0) + (views[s.name] || 0), scans: scans[s.id] || 0 }));
+    const row = (id, name, active) => ({ id, name, active, views: views[id] || 0, engaged: engaged[id] || 0, reach: reach[id] || 0, scans: scans[id] || 0 });
+    const rows = D.sponsors.map(s => { const r = row(s.id, s.name, s.active !== false); if (s.name !== s.id) { r.views += views[s.name] || 0; } return r; });
     const known = new Set(D.sponsors.flatMap(s => [s.id, s.name]));
-    Object.keys(views).filter(k => !known.has(k)).forEach(k => rows.push({ id: k, name: k + " (removed)", active: false, views: views[k], scans: scans[k] || 0 }));
+    Object.keys(views).filter(k => !known.has(k)).forEach(k => rows.push(row(k, k + " (removed)", false)));
     return rows;
   }
   function topList(rows, label, nameFn) {
@@ -241,25 +263,29 @@
       ${kiosks.length > 1 ? `<select id="range-kiosk" aria-label="Kiosk" style="width:auto"><option value="">All kiosks</option>${kiosks.map(k => `<option value="${esc(k.kiosk)}"${k.kiosk === kioskFilter ? " selected" : ""}>${esc(k.kiosk)}</option>`).join("")}</select>` : ""}</div>`;
     if (statsErr) return head + `<div class="card"><div class="msg" role="alert">${esc(statsErr)}</div></div>`;
     if (!stats) return head + `<div class="card loading">Loading numbers…</div>`;
-    const ads = adRows(), adViews = ads.reduce((a, r) => a + r.views, 0), scans = sumType("qr");
+    const ads = adRows(), adViews = ads.reduce((a, r) => a + r.views, 0), adEngaged = ads.reduce((a, r) => a + r.engaged, 0), scans = sumType("qr");
     const placeScans = keysOf("qr").filter(r => r.key.startsWith("place:")).map(r => ({ key: r.key.slice(6), n: r.n }));
     const card = (label, n, sub) => `<div class="card stat"><span>${label}</span><b>${fmt(n)}</b>${sub ? `<small>${sub}</small>` : ""}</div>`;
-    const maxV = Math.max(1, ...ads.map(r => r.views));
-    return head + `
+    const maxV = Math.max(1, ...ads.map(r => r.engaged));
+    const alerts = [];
+    (stats.kiosks || []).filter(kioskOffline).forEach(k => alerts.push(`<b>${esc(k.kiosk)}</b> hasn't checked in since ${esc(ago(k.last_seen))}. Check that the screen is on and connected to Wi-Fi.`));
+    D.sponsors.forEach(s => { const [cls, label] = adStatus(s); if (cls === "warn" && /^Ends/.test(label)) alerts.push(`<b>${esc(s.name)}</b>: ad ${esc(label.toLowerCase())}. Time to talk renewal.`); });
+    return head + (alerts.length ? `<div class="alerts" role="status">${alerts.map(a => `<p>${a}</p>`).join("")}</div>` : "") + `
       <div class="grid g5">
         ${card("Guest sessions", sumType("sessions"), "Someone tapped Start")}
         ${card("Places viewed", sumType("places"))}
         ${card("Questions asked", sumType("questions"))}
-        ${card("Ad views", adViews, "Each time an ad was on screen")}
+        ${card("Ad views with a guest", adEngaged, `${fmt(adViews)} in total, including an empty lobby`)}
         ${card("QR scans", scans, "Phones that opened a link")}
       </div>
       <div class="card"><div class="card-head"><div><h2>Activity</h2></div><div class="legend"><span><i style="background:var(--blue)"></i>Guest sessions</span><span><i style="background:var(--gold)"></i>QR scans</span></div></div>${chart()}</div>
-      <div class="card"><div class="card-head"><div><h2>Advertisers</h2><p>Proof of exposure for each business. Views count each time the ad was shown; scans count phones that opened the business's link from its QR code.</p></div>
+      <div class="card"><div class="card-head"><div><h2>Advertisers</h2><p>Proof of exposure for each business. <b>Total views</b> count every time the ad came on screen, even with nobody there. <b>With a guest</b> counts only times someone was using the kiosk while it showed. <b>Guests reached</b> counts each guest session once. <b>QR scans</b> are phones that opened the business's link.</p></div>
         <button class="btn small" data-act="csv">Download report (CSV)</button></div>
-        ${ads.length ? `<div class="table-wrap"><table><thead><tr><th>Business</th><th class="num">Ad views</th><th style="width:22%"></th><th class="num">QR scans</th><th class="num">Scans per 1,000 views</th></tr></thead><tbody>
-          ${ads.map(r => `<tr><td>${esc(r.name)}${r.active ? "" : ` <span class="pill off">Not showing</span>`}</td><td class="num">${fmt(r.views)}</td><td><div class="bar"><i style="width:${Math.round(r.views / maxV * 100)}%"></i></div></td><td class="num">${fmt(r.scans)}</td><td class="num">${r.views ? (r.scans / r.views * 1000).toFixed(1) : "–"}</td></tr>`).join("")}
+        ${ads.length ? `<div class="table-wrap"><table><thead><tr><th>Business</th><th class="num">Total views</th><th class="num">With a guest</th><th style="width:16%"></th><th class="num">Guests reached</th><th class="num">QR scans</th><th class="num">Scans per 100 guests</th><th></th></tr></thead><tbody>
+          ${ads.map(r => `<tr><td><button class="link" data-act="report" data-id="${esc(r.id)}" title="Open the advertiser report">${esc(r.name)}</button>${r.active ? "" : ` <span class="pill off">Not showing</span>`}</td><td class="num muted">${fmt(r.views)}</td><td class="num"><b>${fmt(r.engaged)}</b></td><td><div class="bar"><i style="width:${Math.round(r.engaged / maxV * 100)}%"></i></div></td><td class="num">${fmt(r.reach)}</td><td class="num">${fmt(r.scans)}</td><td class="num">${r.reach ? (r.scans / r.reach * 100).toFixed(1) : "–"}</td><td class="num"><button class="btn small" data-act="report" data-id="${esc(r.id)}">Report</button></td></tr>`).join("")}
         </tbody></table></div>` : `<div class="empty">No ads yet. Add one in the Ads tab.</div>`}
       </div>
+      <div class="card"><div class="card-head"><div><h2>Busiest times</h2><p>When guests start using the kiosk, by hour of the day (hotel time). Useful when pitching advertisers.</p></div></div>${hoursChart()}</div>
       <div class="grid g2">
         <div class="card"><h3>Most viewed places</h3>${topList(keysOf("places"), "place views", nameOf)}</div>
         <div class="card"><h3>Directions scanned</h3>${topList(placeScans, "scans", nameOf)}</div>
@@ -267,8 +293,83 @@
         <div class="card"><h3>Top questions</h3>${topList(keysOf("questions"), "questions")}<p class="muted" style="font-size:13px;margin-top:10px">Free-typed questions are counted without their text, so guests' words stay private.</p></div>
       </div>`;
   }
+  function hoursChart() {
+    const h = Array(24).fill(0);
+    keysOf("hours").forEach(r => { const i = +r.key; if (i >= 0 && i < 24) h[i] += r.n; });
+    const total = h.reduce((a, b) => a + b, 0);
+    if (!total) return `<div class="empty">No guest sessions in this period yet.</div>`;
+    const max = Math.max(...h), W = 720, H = 120, bw = W / 24;
+    const lab = i => i === 0 ? "12a" : i < 12 ? i + "a" : i === 12 ? "12p" : (i - 12) + "p";
+    const peak = h.indexOf(max);
+    return `<p style="margin:-4px 0 10px;font-size:15px">Busiest hour: <b>${lab(peak)}–${lab((peak + 1) % 24)}</b></p>
+      <svg class="chart" viewBox="0 0 ${W} ${H + 20}" role="img" aria-label="Guest sessions by hour of day">
+      ${h.map((n, i) => { const hh = n / max * (H - 6); return `<rect x="${i * bw + 3}" y="${H - hh}" width="${bw - 6}" height="${Math.max(hh, n ? 2 : 0)}" rx="2" fill="${i === peak ? "var(--blue)" : "color-mix(in srgb, var(--blue) 45%, transparent)"}"><title>${lab(i)}: ${n} sessions</title></rect>${i % 3 === 0 ? `<text x="${i * bw + bw / 2}" y="${H + 15}" text-anchor="middle">${lab(i)}</text>` : ""}`; }).join("")}
+      <line x1="0" x2="${W}" y1="${H}" y2="${H}" stroke="currentColor" stroke-opacity=".12"/></svg>`;
+  }
+
+  /* ---------- advertiser report (print or save as PDF) ---------- */
+  let reportId = null;
+  function vReport() {
+    const s = D.sponsors.find(x => x.id === reportId);
+    if (!stats) return `<div class="card loading">Loading numbers…</div>`;
+    const r = adRows().find(x => x.id === reportId);
+    if (!s || !r) return `<div class="card empty">This ad no longer exists.</div>`;
+    const days = [], end = new Date(stats.to + "T12:00:00Z");
+    for (let i = stats.days - 1; i >= 0; i--) days.push(new Date(end.getTime() - i * 86400000).toISOString().slice(0, 10));
+    const per = (type, key) => d => (stats.adDays || []).filter(x => x.day === d && x.type === type && (x.key === key || (type === "adShown" && x.key === s.name))).reduce((a, x) => a + x.n, 0);
+    const eng = days.map(per("adEngaged", s.id)), qrs = days.map(per("qr", "ad:" + s.id)), tot = days.map(per("adShown", s.id)), rch = days.map(per("adReach", s.id));
+    const max = Math.max(4, ...eng), W = 720, H = 150, n = days.length, bw = W / n, every = Math.ceil(n / 8);
+    const lab = d => new Date(d + "T12:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+    const kpi = (label, val, sub) => `<div class="kpi"><span>${label}</span><b>${val}</b>${sub ? `<small>${sub}</small>` : ""}</div>`;
+    const seg = [[7, "7 days"], [30, "30 days"], [90, "90 days"]].map(([d, l]) => `<button data-act="range" data-days="${d}" aria-pressed="${range === d}">${l}</button>`).join("");
+    const kiosksN = (stats.kiosks || []).length;
+    return `<div class="no-print report-bar"><button class="btn small" data-act="back-overview">← Back to overview</button><div class="seg" role="group" aria-label="Period">${seg}</div><button class="btn primary small" data-act="print">Print or save as PDF</button></div>
+    <article class="report">
+      <header class="report-head">${LOGO("report-logo")}<div class="report-title"><span>Advertising report</span><b>${esc(niceDay(stats.from))} – ${esc(niceDay(stats.to))}</b></div></header>
+      <div class="report-biz">${s.logo ? `<div class="logo-box"><img src="${esc(imgUrl(s.logo))}" alt="${esc(s.name)} logo"></div>` : ""}
+        <div><h1>${esc(s.name)}</h1><p>${esc(s.kind || "")}${s.kind ? " · " : ""}Featured on the CityPulse concierge kiosk at ${esc(D.name)}, ${esc(D.address)}</p></div></div>
+      <div class="kpis">
+        ${kpi("Guests reached", fmt(r.reach), "Guest sessions that saw the ad")}
+        ${kpi("Views with a guest", fmt(r.engaged), "Ad on screen while a guest used the kiosk")}
+        ${kpi("Total views", fmt(r.views), `Every time the ad came on screen${kiosksN > 1 ? `, on ${kiosksN} kiosks` : ""}`)}
+        ${kpi("QR scans", fmt(r.scans), r.reach ? `${(r.scans / r.reach * 100).toFixed(1)} per 100 guests reached` : "Phones that opened your link")}
+      </div>
+      <section><h2>Day by day</h2><div class="legend"><span><i style="background:var(--blue)"></i>Views with a guest</span><span><i style="background:var(--gold)"></i>QR scans</span></div>
+      <svg class="chart" viewBox="0 0 ${W} ${H + 20}" role="img" aria-label="Views with a guest and QR scans per day">
+        ${days.map((d, i) => { const w = Math.max(2, bw * 0.34), he = eng[i] / max * (H - 8), hq = qrs[i] / max * (H - 8);
+          return `<rect x="${i * bw + bw / 2 - w - 1}" y="${H - he}" width="${w}" height="${he}" rx="2" fill="var(--blue)"><title>${lab(d)}: ${eng[i]} views with a guest</title></rect><rect x="${i * bw + bw / 2 + 1}" y="${H - hq}" width="${w}" height="${hq}" rx="2" fill="var(--gold)"><title>${lab(d)}: ${qrs[i]} QR scans</title></rect>${i % every === 0 ? `<text x="${i * bw + bw / 2}" y="${H + 15}" text-anchor="middle">${lab(d)}</text>` : ""}`; }).join("")}
+        <line x1="0" x2="${W}" y1="${H}" y2="${H}" stroke="currentColor" stroke-opacity=".12"/></svg></section>
+      <section><h2>Your ad</h2><div class="preview-wrap">${adPreview(s)}</div></section>
+      ${n <= 31 ? `<section><h2>Daily figures</h2><div class="table-wrap"><table><thead><tr><th>Date</th><th class="num">Guests reached</th><th class="num">Views with a guest</th><th class="num">Total views</th><th class="num">QR scans</th></tr></thead><tbody>
+        ${days.map((d, i) => `<tr><td>${lab(d)}</td><td class="num">${fmt(rch[i])}</td><td class="num">${fmt(eng[i])}</td><td class="num">${fmt(tot[i])}</td><td class="num">${fmt(qrs[i])}</td></tr>`).join("")}</tbody></table></div></section>` : ""}
+      <footer class="report-foot"><p><b>How we count.</b> Ads rotate every 8 seconds. A view with a guest is counted when the ad is on screen while someone is using the kiosk; each guest session counts once toward guests reached. QR scans are counted when a phone opens the ad's QR code. No personal information is collected.</p><p>Prepared by CityPulse Kiosks · citypulsekiosks.com</p></footer>
+    </article>`;
+  }
+
+  /* ---------- how an ad looks on the kiosk ---------- */
+  function qrSvg(text) {
+    if (typeof qrcode !== "function" || !text) return "";
+    const q = qrcode(0, "M"); q.addData(text); q.make();
+    const N = q.getModuleCount(); let d = "";
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (q.isDark(y, x)) d += `M${x} ${y}h1v1h-1z`;
+    return `<svg viewBox="-2 -2 ${N + 4} ${N + 4}" shape-rendering="crispEdges" aria-hidden="true"><rect x="-2" y="-2" width="${N + 4}" height="${N + 4}" fill="#fff"/><path fill="#0F1C2B" d="${d}"/></svg>`;
+  }
+  function adPreview(s) {
+    const it = s.item && D.items[s.item], walk = it ? far(it) : "";
+    let url = ""; try { url = new URL(s.url).protocol === "https:" ? s.url : ""; } catch (e) { /* not a link yet */ }
+    return `<div class="kad" aria-label="Preview of the ad on the kiosk">
+      <div class="kad-logo">${s.logo ? `<img src="${esc(imgUrl(s.logo))}" alt="">` : `<span>${esc(initials(s.name || "?"))}</span>`}</div>
+      <span class="kad-tag">Sponsored</span>
+      <b class="kad-name">${esc(s.name || "Business name")}</b>
+      <span class="kad-kind">${esc(s.kind || "")}${s.kind && walk ? " · " : ""}${esc(walk)}</span>
+      ${s.tagline ? `<span class="kad-line">${esc(s.tagline)}</span>` : ""}
+      <span class="kad-web">${esc(s.website || "")}</span>
+      <div class="kad-qr">${url ? qrSvg(url) : `<span>QR code appears when the link is set</span>`}</div><small class="kad-scan">Scan to visit</small>
+    </div>`;
+  }
+
   function csv() {
-    const rows = [["Business", "Ad views", "QR scans", "Scans per 1000 views", "From", "To"]].concat(adRows().map(r => [r.name, r.views, r.scans, r.views ? (r.scans / r.views * 1000).toFixed(1) : "", stats.from, stats.to]));
+    const rows = [["Business", "Total ad views", "Views with a guest using the kiosk", "Guests reached", "QR scans", "Scans per 100 guests reached", "From", "To"]].concat(adRows().map(r => [r.name, r.views, r.engaged, r.reach, r.scans, r.reach ? (r.scans / r.reach * 100).toFixed(1) : "", stats.from, stats.to]));
     const text = rows.map(r => r.map(c => /[",\n]/.test(String(c)) ? `"${String(c).replace(/"/g, '""')}"` : c).join(",")).join("\r\n");
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([text], { type: "text/csv" }));
@@ -291,9 +392,10 @@
             <label class="btn small">${s.logo ? "Replace logo" : "Upload logo"}<input type="file" class="sr" accept="image/png,image/jpeg,image/webp" data-upload="${p}.logo" data-kind="logo"></label>
             ${s.logo ? `<button class="btn small ghost" data-act="clear" data-path="${p}.logo">Remove logo</button>` : ""}
             <small class="muted" style="font-size:13px">PNG with a clear background works best.</small>
+            <div class="preview-wrap small" id="ad-prev-${i}">${adPreview(s)}</div>
           </div>
           <div>
-            <div class="ad-top"><h3 id="ad-t-${i}">${esc(s.name || "New ad")}</h3>
+            <div class="ad-top"><h3 id="ad-t-${i}">${esc(s.name || "New ad")}</h3><span class="pill ${adStatus(s)[0]}"><i></i>${esc(adStatus(s)[1])}</span>
               <label class="switch"><input type="checkbox" data-bind="${p}.active" ${s.active !== false ? "checked" : ""} aria-label="Show on kiosks">Show on kiosks</label></div>
             <div class="fields">
               ${field("Business name", p + ".name", { max: 60, title: "ad-t-" + i, req: true })}
@@ -302,8 +404,10 @@
               ${field("Website shown", p + ".website", { max: 60, placeholder: "example.com" })}
               ${field("QR code opens", p + ".url", { type: "url", placeholder: "https://", help: "Must start with https://. Guests scan the code to open this page on their own phone." })}
               ${field("Linked place", p + ".item", { options: placeOpts, help: "Shows the walking time on the ad." })}
+              <div class="dates">${field("Campaign starts", p + ".start", { type: "date", help: "Optional. Leave empty to start now." })}${field("Campaign ends", p + ".end", { type: "date", help: "Optional. The ad comes off the kiosks after this day." })}</div>
             </div>
             <div class="item-actions">
+              ${s.id ? `<button class="btn small" data-act="report" data-id="${esc(s.id)}">Advertiser report</button>` : ""}
               <span class="grow"></span>
               <button class="icon-btn" data-act="move" data-list="sponsors" data-i="${i}" data-d="-1" aria-label="Move up" ${i === 0 ? "disabled" : ""}>↑</button>
               <button class="icon-btn" data-act="move" data-list="sponsors" data-i="${i}" data-d="1" aria-label="Move down" ${i === D.sponsors.length - 1 ? "disabled" : ""}>↓</button>
@@ -337,7 +441,8 @@
         ${field(it.hotel ? "Short line" : "Type", p + ".k", { max: 80, placeholder: it.hotel ? "Open 24 hours" : "Diner" })}
         ${it.hotel ? "" : `
           ${field("Address", p + ".addr", { max: 160, full: true, placeholder: "Street, city, state ZIP" })}
-          ${field("Latitude", p + ".ll.0", { kind: "num", mode: "decimal", help: "In Google Maps, right-click the place and click the numbers at the top to copy them." })}
+          <div class="full maps-row"><label class="f" for="maps-${esc(id)}"><span>Google Maps link</span><input type="url" id="maps-${esc(id)}" placeholder="Paste the place's Share link from Google Maps"></label><button class="btn small" data-act="maps" data-id="${esc(id)}">Find location</button></div>
+          ${field("Latitude", p + ".ll.0", { kind: "num", mode: "decimal", help: "Filled in from the link, or in Google Maps right-click the place and copy the numbers." })}
           ${field("Longitude", p + ".ll.1", { kind: "num", mode: "decimal" })}
           ${field("Price", p + ".price", { options: [["", "Not shown"], ["$", "$"], ["$$", "$$"], ["$$$", "$$$"], ["$$$$", "$$$$"]] })}`}
         ${field("Description", p + ".d", { max: 400, area: true, full: true, help: "Shown on the kiosk and used by the AI concierge. Don't include opening hours; they change." })}
@@ -466,10 +571,11 @@
     const list = stats ? stats.kiosks : null;
     return `<div class="head"><div><h1>Kiosks</h1><p>Every screen running your kiosk. Kiosks check in every 5 minutes and pick up published changes the next time they're on the welcome screen.</p></div>
       <button class="btn small" data-act="refresh">Refresh</button></div>
-      <div class="card">${!list ? `<div class="loading">Loading…</div>` : list.length ? `<div class="table-wrap"><table><thead><tr><th>Kiosk</th><th>Status</th><th>Last check-in</th><th>Content</th><th>Device</th></tr></thead><tbody>
-        ${list.map(k => { const on = Date.now() - Date.parse(k.last_seen) < 12 * 60000; const cur = k.version === base;
-          return `<tr><td><b>${esc(k.kiosk)}</b></td><td>${on ? `<span class="pill ok"><i></i>Online</span>` : `<span class="pill warn"><i></i>Not checked in</span>`}</td>
-          <td>${esc(ago(k.last_seen))}</td><td>${cur ? `<span class="pill ok">Up to date</span>` : `<span class="pill">Version ${esc(k.version || "–")}, updating</span>`}</td><td class="muted">${esc(device(k.ua))}</td></tr>`; }).join("")}
+      <div class="card">${!list ? `<div class="loading">Loading…</div>` : list.length ? `<div class="table-wrap"><table><thead><tr><th>Kiosk</th><th>Status</th><th>Last check-in</th><th>Content</th><th>Screen</th><th>Device</th></tr></thead><tbody>
+        ${list.map(k => { const off = kioskOffline(k), cur = k.version === base;
+          return `<tr><td><b>${esc(k.kiosk)}</b></td><td>${!off ? `<span class="pill ok"><i></i>Online</span>` : `<span class="pill bad"><i></i>Offline</span>`}</td>
+          <td>${esc(ago(k.last_seen))}</td><td>${cur ? `<span class="pill ok">Up to date</span>` : `<span class="pill">Version ${esc(k.version || "–")}, updating</span>`}</td>
+          <td class="muted">${k.screen ? esc(k.screen.replace("x", " × ")) : "–"}${k.app ? `<br><small>Kiosk software ${esc(k.app)}</small>` : ""}</td><td class="muted">${esc(device(k.ua))}</td></tr>`; }).join("")}
       </tbody></table></div>` : `<div class="empty">No kiosk has checked in yet.</div>`}</div>
       <div class="card"><h3>Naming a kiosk</h3><p>Each kiosk gets a code name the first time it starts. To give one a clear name, open the kiosk page once on that screen with <b>?kiosk=</b> and a name at the end of the address, for example <b>…/kiosk-app/?kiosk=lobby</b>. Use letters, numbers and dashes.</p></div>`;
   }
@@ -534,6 +640,10 @@
       case "range": range = +d.days; stats = null; render(); return loadStats();
       case "refresh": stats = null; render(); return loadStats();
       case "csv": return csv();
+      case "report": reportId = d.id; tab = "report"; history.replaceState(null, "", "#overview"); window.scrollTo(0, 0); if (!stats || stats.days < 7) { range = 30; stats = null; loadStats(); } render(); return;
+      case "back-overview": tab = "overview"; render(); return;
+      case "print": return window.print();
+      case "maps": return findOnMaps(d.id);
       case "open": open = open === d.key ? null : d.key; render(); return;
       case "move": { const list = getPath(D, d.list), j = i + +d.d; if (j < 0 || j >= list.length) return; [list[i], list[j]] = [list[j], list[i]]; break; }
       case "clear": setPath(D, d.path, undefined); break;
@@ -565,6 +675,28 @@
       default: return;
     }
     markDirty(); render();
+  }
+
+  function coordsFrom(href) {
+    let t = href; try { t = decodeURIComponent(href); } catch (e) { /* keep as is */ }
+    for (const re of [/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/, /@(-?\d+\.\d+),(-?\d+\.\d+)/, /[?&](?:q|query|ll|destination|center)=(-?\d+\.\d+),\s*(-?\d+\.\d+)/, /^\s*(-?\d+\.\d+),\s*(-?\d+\.\d+)\s*$/]) {
+      const m = t.match(re); if (m && Math.abs(+m[1]) <= 90 && Math.abs(+m[2]) <= 180) return [+m[1], +m[2]];
+    }
+    return null;
+  }
+  async function findOnMaps(id) {
+    const inp = document.getElementById("maps-" + id), v = inp ? inp.value.trim() : "";
+    if (!v) { toast("Paste a Google Maps link first.", true); return; }
+    let ll = coordsFrom(v), name = "";
+    if (!ll) {
+      try { const r = await api("resolve-map?url=" + encodeURIComponent(v)); ll = r.ll; name = r.name; }
+      catch (e) { if (e.message !== "signed out") toast(e.message, true); return; }
+    }
+    const it = D.items[id];
+    it.ll = [Math.round(ll[0] * 1e7) / 1e7, Math.round(ll[1] * 1e7) / 1e7];
+    if (name && (!it.n || /^New place$/.test(it.n))) it.n = name;
+    markDirty(); render();
+    toast(`Location set: ${far(it) || "found"} from the hotel.`);
   }
 
   function cleaned() {
