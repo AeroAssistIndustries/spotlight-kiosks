@@ -249,7 +249,7 @@
   rotateAds();
 
   /* ---------- views ---------- */
-  const greet = () => { const h = hourNow(); return h < 5 ? "Good evening" : h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"; };
+  const greet = () => { const h = hourNow(); return h < 4 ? "Late night in NoHo" : h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"; };
   const item = id => V.items[id];
   const ICON = {};
   Object.values(V.categories).forEach(c => c.items.forEach(i => { if (!ICON[i]) ICON[i] = c.icon; }));
