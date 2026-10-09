@@ -690,3 +690,19 @@ button.lt:active { transform: perspective(700px) rotateX(var(--rx, 0deg)) rotate
 .cpk { overflow: clip; }
 .cpk-bg { overflow: hidden; }
 .cpk-clock b { white-space: nowrap; }
+
+/* v17 polish (QA pass) */
+/* Larger text: the home tiles are already big, so they keep their size; the rest of the screen gets larger. */
+.cpk.is-large .cpk-home.metro { font-size: .82em; }
+@media (min-aspect-ratio: 1/1) { .cpk.is-large .cpk-home.metro { font-size: .76em; } }
+/* Ads keep the standard size in Larger text so their text never runs under the dots. */
+.cpk.is-large .cpk-ads { font-size: clamp(15px, 2.05vmin, 30px); }
+@media (min-aspect-ratio: 1/1) { .cpk.is-large .cpk-ads { font-size: clamp(14px, 1.85vmin, 28px); } }
+/* Lower the screen: the tile grid gets less height, so it scales down to fit instead of clipping. */
+.cpk.is-reach .cpk-home.metro { font-size: .68em; }
+@media (min-aspect-ratio: 1/1) { .cpk.is-reach .cpk-home.metro { font-size: .74em; } }
+/* Ad text never collides with the slide dots */
+.cpk-ad-x { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+/* Neighborhood tile: keep the label readable over the moving lights */
+.lt-map::after { content: ""; position: absolute; inset: auto 0 0 0; height: 46%; background: linear-gradient(0deg, rgba(8,15,24,.92), rgba(8,15,24,0)); pointer-events: none; }
+.lt-map .lt-label { z-index: 1; text-shadow: 0 1px 8px rgba(0,0,0,.7); }
