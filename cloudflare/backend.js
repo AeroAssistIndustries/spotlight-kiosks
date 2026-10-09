@@ -11,6 +11,7 @@
      /admin and /admin/api/... */
 
 import { ADMIN_HTML, ADMIN_JS, ADMIN_BRAND, ADMIN_FILES } from "./admin-page.js";
+import { salesUsers, salesResetPassword } from "./sales.js";
 
 const SCHEMA = [
   "CREATE TABLE IF NOT EXISTS content (venue TEXT PRIMARY KEY, json TEXT NOT NULL, version INTEGER NOT NULL, updated_at TEXT NOT NULL)",
@@ -570,6 +571,18 @@ async function admin(req, env, ctx, url, fetchSeed, onContentSaved) {
     a.codes_at = new Date().toISOString();
     await putAuth(env, a);
     return send(200, { codes });
+  }
+
+  /* Sales Studio logins: list people and give anyone (the Sales Studio owner too) a temporary password */
+  if (api === "sales-users" && req.method === "GET") return send(200, { users: await salesUsers(env) });
+  if (api === "sales-reset" && req.method === "POST") {
+    const ip = req.headers.get("CF-Connecting-IP") || "local";
+    if (tooManyTries(ip)) return send(429, { error: "Too many tries. Wait 15 minutes and try again." });
+    let body; try { body = await req.json(); } catch (e) { body = {}; }
+    const a = await getAuth(env);
+    if (!(await passwordOk(env, a, String((body && body.current) || "").slice(0, 200)))) { (tries.get(ip) || []).push(Date.now()); return send(400, { error: "Your dashboard password is not right." }); }
+    const r = await salesResetPassword(env, body.id);
+    return r ? send(200, r) : send(404, { error: "That person is no longer in Sales Studio." });
   }
 
   /* Owner files: guides and the launch checklist (signed-in only) */

@@ -294,6 +294,17 @@ export async function handleSales(req, env, ctx) {
     return jsonRes(200, { ok: true }, { "Set-Cookie": await sessionCookie(env, row.id) });
   }
   if (api === "logout") return jsonRes(200, { ok: true }, { "Set-Cookie": `${COOKIE}=; Path=/sales; HttpOnly; Secure; SameSite=Lax; Max-Age=0` });
+  /* Forgot password: records a reset request the owner sees in the owner dashboard (Password & security).
+     The answer is the same whether or not the username exists. */
+  if (api === "forgot" && req.method === "POST") {
+    if (tooManyTries(ip, true)) return jsonRes(429, { error: "Too many tries. Wait 15 minutes and try again." });
+    const name = String(body.username || "").trim().toLowerCase();
+    if (USER_RE.test(name)) {
+      const row = await env.DB.prepare("SELECT id, active FROM crm_users WHERE username = ?").bind(name).first();
+      if (row && row.active) await env.DB.prepare("INSERT INTO crm_meta (k, v) VALUES (?, ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v").bind("reset:" + row.id, nowIso()).run();
+    }
+    return jsonRes(200, { ok: true });
+  }
 
   /* ----- signed-in routes ----- */
   const u = await currentUser(req, env);
@@ -569,6 +580,26 @@ async function googleCallback(req, env, url) {
   try { email = JSON.parse(dec.decode(fromB64(String(j.id_token || "").split(".")[1] || ""))).email || ""; } catch (e) {}
   await env.DB.prepare("INSERT OR REPLACE INTO crm_google (user_id, email, token, updated_at) VALUES (?, ?, ?, ?)").bind(u.id, email, await seal(env, j.refresh_token), nowIso()).run();
   return back("");
+}
+
+/* ---------- used by the owner dashboard (/admin, signed in there) ---------- */
+export async function salesUsers(env) {
+  await ensure(env); await loadSecret(env); await seedOwner(env);
+  const users = (await env.DB.prepare("SELECT id, username, name, role, active, owner, must_change, last_login FROM crm_users ORDER BY owner DESC, name").all()).results || [];
+  const reqs = (await env.DB.prepare("SELECT k, v FROM crm_meta WHERE k LIKE 'reset:%'").all()).results || [];
+  const asked = Object.fromEntries(reqs.map(r => [r.k.slice(6), r.v]));
+  return users.map(u => ({ id: u.id, username: u.username, name: u.name, role: u.role, active: !!u.active, owner: !!u.owner, mustChange: !!u.must_change, lastLogin: u.last_login || "", resetAsked: asked[u.id] || "" }));
+}
+export async function salesResetPassword(env, id) {
+  await ensure(env);
+  const row = await env.DB.prepare("SELECT id, username, name FROM crm_users WHERE id = ?").bind(String(id || "")).first();
+  if (!row) return null;
+  const abc = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789", r = crypto.getRandomValues(new Uint8Array(14));
+  const temp = [...r].map(x => abc[x % abc.length]).join("").replace(/^(.{5})(.{5})(.{4})$/, "$1-$2-$3");
+  await env.DB.prepare("UPDATE crm_users SET pass = ?, must_change = 1, active = 1 WHERE id = ?").bind(await hashPassword(temp), row.id).run();
+  await env.DB.prepare("DELETE FROM crm_meta WHERE k = ?").bind("reset:" + row.id).run();
+  userCache.delete(row.id);
+  return { username: row.username, name: row.name, temp };
 }
 
 export const _test = { normPhone, mime, voiceToken, canWrite, canRead, hashPassword, checkPassword };

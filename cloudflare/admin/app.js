@@ -43,7 +43,7 @@
 
   let D = null, saved = null, base = 0, meta = {};
   let tab = (location.hash.slice(1) || "overview");
-  if (!TABS.some(t => t[0] === tab)) tab = "overview";
+  if (!TABS.some(t => t[0] === tab) && tab !== "security") tab = "overview";
   let open = null, placeQuery = "";
   let range = 7, kioskFilter = "", stats = null, statsErr = "";
   let busy = false;
@@ -423,6 +423,8 @@
     D.sponsors.filter(s => s.id && s.active !== false && !(deals[s.id] && deals[s.id].price != null)).slice(0, 2).forEach(s => acts.push({ tone: "info", text: `Add the monthly price for <b>${esc(s.name)}</b> to track revenue.`, btn: "Add deal", act: `data-act="goto-deal" data-id="${esc(s.id)}"` }));
     D.sponsors.filter(s => !s.logo).slice(0, 1).forEach(s => acts.push({ tone: "info", text: `<b>${esc(s.name || "An ad")}</b> has no logo yet.`, btn: "Upload", act: 'data-tab="ads"' }));
     if (sec && !(sec.codes && sec.codes.left)) acts.push({ tone: "warn", text: `<b>No recovery codes yet.</b> Create them so you can reset the password yourself if it's forgotten.`, btn: "Set up", act: 'data-tab="security"' });
+    const sa = salesAsked();
+    if (sa) acts.push({ tone: "bad", text: `<b>${sa} Sales Studio reset request${sa > 1 ? "s" : ""}.</b> Someone forgot their password.`, btn: "Reset", act: 'data-tab="security"' });
     const lt = tasksOpen();
     if (lt) acts.push({ tone: "warn", text: `<b>${lt} launch task${lt > 1 ? "s" : ""}</b> still open for North Hollywood.`, btn: "Checklist", act: 'data-act="file-open" data-id="launch"' });
     const todos = notes.filter(n => n.todo && !n.done).length;
@@ -931,6 +933,10 @@
       case "add-faq-go": go("answers"); clickAct("add-faq"); return;
       case "note-filter": noteFilter = d.f; render(); return;
       case "file-open": return openFile(d.id);
+      case "sales-reset-ask": salesAsk = d.id; salesTemp = null; render(); setTimeout(() => { const i = document.getElementById("sr-cur"); if (i) i.focus(); }, 30); return;
+      case "sales-reset-cancel": salesAsk = null; render(); return;
+      case "sales-temp-done": salesTemp = null; render(); return;
+      case "sales-temp-copy": try { await navigator.clipboard.writeText(salesTemp ? salesTemp.temp : ""); toast("Temporary password copied."); } catch (e) { toast("Select the password and copy it.", true); } return;
       case "codes-done": freshCodes = null; render(); toast("Recovery codes saved. Keep them somewhere safe."); return;
       case "codes-copy": { const t = (freshCodes || []).join("\n"); try { await navigator.clipboard.writeText(t); toast("Codes copied."); } catch (e) { toast("Select the codes and copy them.", true); } return; }
       case "file-back": fileId = null; render(); window.scrollTo(0, 0); return;
@@ -1008,8 +1014,28 @@
 
   /* ---------- notes & to-dos (shared by everyone who signs in) ---------- */
   /* ---------- password & security ---------- */
-  let sec = null, freshCodes = null;
-  async function loadSecurity() { try { sec = await api("security"); } catch (e) { sec = sec || null; } if (tab === "security" || tab === "overview") render(); updateBadges(); }
+  let sec = null, freshCodes = null, salesList = null, salesAsk = null, salesTemp = null;
+  async function loadSecurity() {
+    try { sec = await api("security"); } catch (e) { sec = sec || null; }
+    try { salesList = (await api("sales-users")).users || []; } catch (e) { salesList = salesList || []; }
+    if (tab === "security" || tab === "overview") render(); updateBadges();
+  }
+  const salesAsked = () => (salesList || []).filter(u => u.resetAsked).length;
+  function salesCard() {
+    if (!salesList) return "";
+    const when = d => d ? new Date(d).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "Never";
+    const row = u => {
+      const pills = [u.owner ? `<span class="pill ok"><i></i>Owner</span>` : "", !u.active ? `<span class="pill off"><i></i>Off</span>` : "", u.resetAsked ? `<span class="pill warn"><i></i>Asked for a reset ${esc(when(u.resetAsked))}</span>` : "", u.mustChange ? `<span class="pill"><i></i>Picks a new password at sign-in</span>` : ""].join(" ");
+      const ask = salesAsk === u.id ? `<form class="sales-reset" data-form="sales-reset" data-id="${esc(u.id)}"><label class="f"><span>Your dashboard password, to confirm</span><input type="password" id="sr-cur" autocomplete="current-password" required></label><button class="btn primary small" type="submit">Make temporary password</button><button class="btn small" type="button" data-act="sales-reset-cancel">Cancel</button></form>` : "";
+      const temp = salesTemp && salesTemp.id === u.id ? `<div class="temp-pw"><p>Give this to <b>${esc(salesTemp.name)}</b>. They sign in with username <b>${esc(salesTemp.username)}</b> and this temporary password, then pick their own.</p><code>${esc(salesTemp.temp)}</code><div class="item-actions"><button class="btn small" data-act="sales-temp-copy">Copy</button><span class="grow"></span><button class="btn small" data-act="sales-temp-done">Done</button></div></div>` : "";
+      return `<tr><td><b>${esc(u.name)}</b><br><small class="muted">${esc(u.username)}</small></td><td>${esc(u.role)}</td><td>${pills || '<span class="pill ok"><i></i>Active</span>'}</td><td>${esc(when(u.lastLogin))}</td><td class="num">${salesAsk === u.id || (salesTemp && salesTemp.id === u.id) ? "" : `<button class="btn small" data-act="sales-reset-ask" data-id="${esc(u.id)}">Reset password</button>`}</td></tr>${ask || temp ? `<tr class="sub-row"><td colspan="5">${ask}${temp}</td></tr>` : ""}`;
+    };
+    return `<div class="card">
+      <div class="card-head"><h2>${icon("users")} Sales Studio logins</h2>${salesAsked() ? `<span class="pill warn"><i></i>${salesAsked()} reset request${salesAsked() > 1 ? "s" : ""}</span>` : ""}<a class="btn small" href="/sales" target="_blank" rel="noopener">Open Sales Studio</a></div>
+      <p>Give anyone a temporary password, including the Sales Studio owner login. People who click Forgot password? in Sales Studio show up here.</p>
+      <div class="table-wrap"><table><thead><tr><th>Person</th><th>Level</th><th>Status</th><th>Last sign-in</th><th class="num"></th></tr></thead><tbody>${salesList.map(row).join("") || `<tr><td colspan="5" class="empty">No one yet.</td></tr>`}</tbody></table></div>
+    </div>`;
+  }
   function vSecurity() {
     if (!sec) { loadSecurity(); return `<div class="head"><div><h1>Password &amp; security</h1><p>Loading…</p></div></div>`; }
     const c = sec.codes || {}, when = d => d ? new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "";
@@ -1036,6 +1062,7 @@
         </div>
         ${codesCard}
       </div>
+      ${salesCard()}
       <div class="card">
         <div class="card-head"><h2>If everything is lost</h2></div>
         <p>The account owner can always reset the password in Cloudflare: Workers &amp; Pages → spotlight-kiosks → Settings → Variables and Secrets → ADMIN_PASSWORD → Rotate → Deploy. That password then signs in, and the dashboard password and all recovery codes are cleared. It also turns off advertisers' live report links, so send them new ones.</p>
@@ -1044,6 +1071,12 @@
   }
   async function onSecuritySubmit(form) {
     const btn = form.querySelector("button[type=submit]");
+    if (form.dataset.form === "sales-reset") {
+      btn.disabled = true;
+      try { const r = await api("sales-reset", { json: { id: form.dataset.id, current: form.querySelector("#sr-cur").value } }); salesTemp = { id: form.dataset.id, ...r }; salesAsk = null; await loadSecurity(); }
+      catch (e) { if (e.message !== "signed out") toast(e.message, true); btn.disabled = false; }
+      return;
+    }
     if (form.dataset.form === "password") {
       const cur = form.querySelector("#pw-cur").value, a = form.querySelector("#pw-new").value, b = form.querySelector("#pw-new2").value;
       if (a.length < 10) return toast("Use at least 10 characters for the new password.", true);
@@ -1153,7 +1186,7 @@
     const f = e.target.closest && e.target.closest("[data-form]");
     if (!f) return;
     e.preventDefault();
-    if (f.dataset.form === "password" || f.dataset.form === "codes") return onSecuritySubmit(f);
+    if (f.dataset.form === "password" || f.dataset.form === "codes" || f.dataset.form === "sales-reset") return onSecuritySubmit(f);
     if (f.dataset.form === "quick-note") { const t = document.getElementById("qn-text"), re = /^(todo|to-do|\[\s?\])\s*:?\s*/i; addNote(t.value.replace(re, ""), { todo: re.test(t.value) }); }
     if (f.dataset.form === "new-note") { const c = f.querySelector('input[name="nn-color"]:checked'); addNote(document.getElementById("nn-text").value, { todo: document.getElementById("nn-todo").checked, color: c ? c.value : "yellow" }); }
   });
@@ -1189,7 +1222,7 @@
     notes.slice(0, 50).forEach(n => it.push({ g: "Notes", t: n.text.split("\n")[0].slice(0, 80), ic: "notes", run: () => go("notes") }));
     return it;
   }
-  function go(k) { if (tab === "security" && k !== "security") freshCodes = null; tab = k; open = null; if (k === "files") fileId = null; history.replaceState(null, "", "#" + k); render(); window.scrollTo(0, 0); if (k === "overview" || k === "kiosks") loadStats(); }
+  function go(k) { if (tab === "security" && k !== "security") { freshCodes = null; salesTemp = null; salesAsk = null; } tab = k; open = null; if (k === "files") fileId = null; history.replaceState(null, "", "#" + k); render(); window.scrollTo(0, 0); if (k === "overview" || k === "kiosks") loadStats(); }
   function clickAct(act, data) { const b = document.createElement("button"); b.dataset.act = act; Object.assign(b.dataset, data || {}); b.hidden = true; app.appendChild(b); b.click(); b.remove(); }
   function openPalette() {
     if (!D) return;
