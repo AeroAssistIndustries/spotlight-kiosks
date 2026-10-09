@@ -16,7 +16,7 @@
       
     </div>
   </div>
-  <div class="wrap footer-base"><span>© <?php echo esc_html( gmdate( 'Y' ) ); ?> CityPulse Kiosks. All rights reserved.</span><nav aria-label="Legal"><a href="<?php echo esc_url( home_url( '/' ) ); ?>privacy/">Privacy Policy</a><a href="<?php echo esc_url( home_url( '/' ) ); ?>terms/">Terms &amp; Conditions</a><a href="https://spotlight-kiosks.sarvesh-bb0.workers.dev/sales" rel="nofollow">Team login</a><a href="https://spotlight-kiosks.sarvesh-bb0.workers.dev/admin" rel="nofollow">Owner login</a></nav></div>
+  <div class="wrap footer-base"><span>© <?php echo esc_html( gmdate( 'Y' ) ); ?> CityPulse Kiosks. All rights reserved.</span><nav aria-label="Legal"><a href="<?php echo esc_url( home_url( '/' ) ); ?>privacy/">Privacy Policy</a><a href="<?php echo esc_url( home_url( '/' ) ); ?>terms/">Terms &amp; Conditions</a><a href="https://sales.citypulsekiosks.com" rel="nofollow">Team login</a><a href="https://spotlight-kiosks.sarvesh-bb0.workers.dev/admin" rel="nofollow">Owner login</a></nav></div>
 </footer>
 <?php wp_footer(); ?>
 </body>
