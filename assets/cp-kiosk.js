@@ -194,7 +194,9 @@
   /* ---------- ads ----------
      Featured local businesses rotate on their own for equal exposure. Nothing here can be tapped:
      each ad shows the business name, logo, website and a QR code that opens the site on the guest's phone. */
-  const SPONS = (V.sponsors || []).filter(x => x && x.name && x.active !== false);
+  /* Shown only while switched on and within the campaign dates set in the dashboard (venue's local date). */
+  const TODAY = dayKey();
+  const SPONS = (V.sponsors || []).filter(x => x && x.name && x.active !== false && (!x.start || TODAY >= x.start) && (!x.end || TODAY <= x.end));
   const SLIDES = SPONS.length ? SPONS : [{ name: "Your business here", kind: "Advertise on this screen", tagline: "Reach every guest at " + V.name + ". From $399 a year.", website: "citypulsekiosks.com", url: PRICING, house: true }];
   const initials = n => n.replace(/^The /, "").split(/[\s.&]+/).filter(Boolean).slice(0, 2).map(w => w[0]).join("").toUpperCase();
   function adHTML(sp, i) {
@@ -472,7 +474,8 @@
   /* Soft fade at the bottom when there is more to scroll. */
   function scrollHint() { const more = view.scrollHeight - view.clientHeight - view.scrollTop > 16; view.classList.toggle("has-more", more); }
   view.addEventListener("scroll", scrollHint, { passive: true });
-  function start() { S.mode = "session"; S.stack = [{ v: "home" }]; S.seen = new Set(); bump("sessions", "count"); showAd(S.ad); rotateAds(); render("fwd"); } /* the ad on screen gets a full turn in front of the guest */
+  function start() { S.mode = "session"; S.stack = [{ v: "home" }]; S.seen = new Set(); bump("sessions", "count");
+    if (LIVE) LIVE.count("hours", String(hourNow()).padStart(2, "0")); /* busiest times, for the dashboard */ showAd(S.ad); rotateAds(); render("fwd"); } /* the ad on screen gets a full turn in front of the guest */
   function reset() {
     clearTimeout(S.idle); hideWarn();
     S.mode = "attract"; S.stack = []; S.panel = false; S.chat = []; S.busy = false;

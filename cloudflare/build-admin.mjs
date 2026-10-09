@@ -3,7 +3,8 @@
 import { readFileSync, writeFileSync } from "node:fs";
 const dir = new URL(".", import.meta.url);
 const html = readFileSync(new URL("admin/index.html", dir), "utf8");
-const js = readFileSync(new URL("admin/app.js", dir), "utf8");
+/* the QR code maker (MIT licence) comes first, so ad previews can show real QR codes */
+const js = readFileSync(new URL("../assets/vendor/qrcode-generator.js", dir), "utf8") + "\n;\n" + readFileSync(new URL("admin/app.js", dir), "utf8");
 /* CityPulse logos, taken from the website's own files so they always match */
 const brand = Object.fromEntries(["logo.svg", "logo-light.svg", "logo-mark.svg", "favicon.svg"].map(f => [f, readFileSync(new URL("../assets/" + f, dir), "utf8")]));
 writeFileSync(new URL("admin-page.js", dir),

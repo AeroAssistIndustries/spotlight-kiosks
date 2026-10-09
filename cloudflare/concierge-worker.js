@@ -135,7 +135,8 @@ function systemPrompt(v, wx) {
     places.push(`- [${id}] ${it.n}: ${it.k}${it.price ? ", " + it.price : ""}. ${it.addr}. ${dist}. ${it.d}${facts ? " " + facts + "." : ""}`);
   }
   const faq = (v.faq || []).map(f => `Q: ${f.q} A: ${f.a}`).join("\n");
-  const featured = (v.sponsors || []).filter(s => s.active !== false).map(s => s.name).join(", ");
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: tz }).format(new Date());
+  const featured = (v.sponsors || []).filter(s => s.active !== false && (!s.start || today >= s.start) && (!s.end || today <= s.end)).map(s => s.name).join(", ");
   return `You are the concierge on the touch-screen kiosk in the lobby of ${v.name}, ${v.address}. Guests are standing at the kiosk, often in a hurry.
 
 Right now it is ${now} (Pacific time). Weather forecast for North Hollywood (US National Weather Service): ${wx}.

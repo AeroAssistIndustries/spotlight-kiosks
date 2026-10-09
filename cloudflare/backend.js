@@ -19,7 +19,7 @@ const SCHEMA = [
   "CREATE TABLE IF NOT EXISTS events (day TEXT NOT NULL, venue TEXT NOT NULL, kiosk TEXT NOT NULL, type TEXT NOT NULL, key TEXT NOT NULL, n INTEGER NOT NULL, PRIMARY KEY (day, venue, kiosk, type, key))",
   "CREATE TABLE IF NOT EXISTS kiosks (venue TEXT NOT NULL, kiosk TEXT NOT NULL, first_seen TEXT, last_seen TEXT NOT NULL, version INTEGER, ua TEXT, PRIMARY KEY (venue, kiosk))"
 ];
-const EVENT_TYPES = ["sessions", "categories", "places", "questions", "takeHome", "adShown", "adEngaged", "adReach", "qr"];
+const EVENT_TYPES = ["sessions", "hours", "categories", "places", "questions", "takeHome", "adShown", "adEngaged", "adReach", "qr"];
 const ICONS = ["fork", "bell", "coffee", "spark", "bag", "car", "home", "pin", "star", "walk", "phone", "chat", "sun"];
 const MAX_MEDIA = 1024 * 1024, MAX_CONTENT = 300 * 1024, HISTORY_KEEP = 40;
 const ID_RE = /^[a-z0-9][a-z0-9-]{0,40}$/, KIOSK_RE = /^[A-Za-z0-9][A-Za-z0-9-]{0,31}$/, DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -30,8 +30,12 @@ const hasDB = env => !!(env && env.DB && typeof env.DB.prepare === "function");
 export const dayKey = (tz, d) => new Intl.DateTimeFormat("en-CA", { timeZone: tz || "America/Los_Angeles" }).format(d || new Date());
 
 let schemaReady = null;
+/* Columns added after the first release; adding one that already exists fails harmlessly. */
+const UPGRADES = ["ALTER TABLE kiosks ADD COLUMN screen TEXT", "ALTER TABLE kiosks ADD COLUMN app TEXT"];
 function ensure(env) {
-  if (!schemaReady) schemaReady = env.DB.batch(SCHEMA.map(s => env.DB.prepare(s))).catch(e => { schemaReady = null; throw e; });
+  if (!schemaReady) schemaReady = env.DB.batch(SCHEMA.map(s => env.DB.prepare(s)))
+    .then(() => Promise.all(UPGRADES.map(u => env.DB.prepare(u).run().catch(() => null))))
+    .catch(e => { schemaReady = null; throw e; });
   return schemaReady;
 }
 
@@ -90,6 +94,12 @@ function https(v, label, required) {
   let u; try { u = new URL(s); } catch (e) { bad(`${label} is not a web address. It should start with https://`); }
   if (u.protocol !== "https:" || !u.hostname.includes(".") || u.username || u.password) bad(`${label} must be a full https:// web address.`);
   return u.href;
+}
+function date(v, label) {
+  const s = str(v, 10, label);
+  if (!s) return undefined;
+  if (!DAY_RE.test(s) || isNaN(Date.parse(s + "T12:00:00Z"))) bad(`${label} is not a valid date.`);
+  return s;
 }
 function ll(v, label, required) {
   if ((v == null || v === "" || (Array.isArray(v) && v.every(x => x === "" || x == null))) && !required) return null;
@@ -183,8 +193,12 @@ export function validateContent(input, prev) {
       item: s.item && out.items[s.item] ? s.item : undefined,
       logo: img(s.logo, `${label}: logo`) || undefined,
       sponsored: true,
-      active: s.active !== false
+      active: s.active !== false,
+      start: date(s.start, `${label}: start date`),
+      end: date(s.end, `${label}: end date`)
     });
+    const last = out.sponsors[out.sponsors.length - 1];
+    if (last.start && last.end && last.end < last.start) bad(`${label}: the end date is before the start date.`);
   }
 
   /* concierge answers */
@@ -291,8 +305,10 @@ export async function handle(req, env, ctx, { origin, allowedOrigin, fetchSeed, 
     const kiosk = url.searchParams.get("k") || "";
     if (KIOSK_RE.test(kiosk)) {
       const t = nowIso(), ua = (req.headers.get("User-Agent") || "").slice(0, 160);
-      ctx.waitUntil(env.DB.prepare("INSERT INTO kiosks (venue, kiosk, first_seen, last_seen, version, ua) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT (venue, kiosk) DO UPDATE SET last_seen = excluded.last_seen, version = excluded.version, ua = excluded.ua")
-        .bind(venue, kiosk, t, t, +url.searchParams.get("have") || 0, ua).run().catch(() => {}));
+      const screen = /^\d{2,5}x\d{2,5}$/.test(url.searchParams.get("s") || "") ? url.searchParams.get("s") : null;
+      const app = /^[\w.-]{1,16}$/.test(url.searchParams.get("app") || "") ? url.searchParams.get("app") : null;
+      ctx.waitUntil(env.DB.prepare("INSERT INTO kiosks (venue, kiosk, first_seen, last_seen, version, ua, screen, app) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (venue, kiosk) DO UPDATE SET last_seen = excluded.last_seen, version = excluded.version, ua = excluded.ua, screen = excluded.screen, app = excluded.app")
+        .bind(venue, kiosk, t, t, +url.searchParams.get("have") || 0, ua, screen, app).run().catch(() => {}));
     }
     if (+url.searchParams.get("have") === c.version) return send(200, { version: c.version, same: true }, origin);
     return send(200, { version: c.version, data: c.data }, origin);
@@ -450,6 +466,23 @@ async function admin(req, env, ctx, url, fetchSeed, onContentSaved) {
     return send(200, { ref: "media:" + id, url: url.origin + "/media/" + id });
   }
 
+  /* Google Maps short links (maps.app.goo.gl/...) hide the coordinates; follow the redirect to find them. */
+  if (api === "resolve-map" && req.method === "GET") {
+    let u; try { u = new URL(url.searchParams.get("url") || ""); } catch (e) { return send(400, { error: "That is not a link." }); }
+    const okHost = /^(maps\.app\.goo\.gl|goo\.gl|maps\.google\.com|www\.google\.com|google\.com)$/.test(u.hostname);
+    if (u.protocol !== "https:" || !okHost) return send(400, { error: "Paste a Google Maps link." });
+    let href = u.href;
+    for (let i = 0; i < 4 && /goo\.gl$/.test(new URL(href).hostname); i++) {
+      const r = await withTimeoutFetch(href);
+      const loc = r && r.headers.get("Location");
+      if (!loc) break;
+      href = new URL(loc, href).href;
+    }
+    const ll = coordsFrom(href);
+    if (!ll) return send(422, { error: "Couldn't find the location in that link. In Google Maps, right-click the place and copy the numbers instead." });
+    return send(200, { ll, name: placeName(href) });
+  }
+
   if (api === "stats" && req.method === "GET") {
     const c = await getContent(env, venue, fetchSeed);
     const tz = (c && c.data.tz) || "America/Los_Angeles";
@@ -458,15 +491,34 @@ async function admin(req, env, ctx, url, fetchSeed, onContentSaved) {
     const kiosk = url.searchParams.get("kiosk") || "";
     const where = "venue = ? AND day >= ?" + (KIOSK_RE.test(kiosk) ? " AND kiosk = ?" : "");
     const args = KIOSK_RE.test(kiosk) ? [venue, from, kiosk] : [venue, from];
-    const [byKey, byDay, kiosks] = await env.DB.batch([
+    const [byKey, byDay, adDays, kiosks] = await env.DB.batch([
       env.DB.prepare(`SELECT type, key, SUM(n) AS n FROM events WHERE ${where} GROUP BY type, key ORDER BY n DESC`).bind(...args),
       env.DB.prepare(`SELECT day, type, SUM(n) AS n FROM events WHERE ${where} GROUP BY day, type ORDER BY day`).bind(...args),
-      env.DB.prepare("SELECT kiosk, first_seen, last_seen, version, ua FROM kiosks WHERE venue = ? ORDER BY last_seen DESC").bind(venue)
+      env.DB.prepare(`SELECT day, type, key, SUM(n) AS n FROM events WHERE ${where} AND (type IN ('adShown', 'adEngaged', 'adReach') OR (type = 'qr' AND key LIKE 'ad:%')) GROUP BY day, type, key ORDER BY day`).bind(...args),
+      env.DB.prepare("SELECT kiosk, first_seen, last_seen, version, ua, screen, app FROM kiosks WHERE venue = ? ORDER BY last_seen DESC").bind(venue)
     ]);
-    return send(200, { from, to, days, tz, now: nowIso(), version: c ? c.version : 0, byKey: byKey.results || [], byDay: byDay.results || [], kiosks: kiosks.results || [] });
+    return send(200, { from, to, days, tz, now: nowIso(), version: c ? c.version : 0, byKey: byKey.results || [], byDay: byDay.results || [], adDays: adDays.results || [], kiosks: kiosks.results || [] });
   }
 
   return send(404, { error: "Not found." });
+}
+
+async function withTimeoutFetch(href) {
+  try { return await Promise.race([fetch(href, { redirect: "manual" }), new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 5000))]); }
+  catch (e) { return null; }
+}
+export function coordsFrom(href) {
+  const s = decodeURIComponent(href);
+  const pats = [/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/, /@(-?\d+\.\d+),(-?\d+\.\d+)/, /[?&](?:q|query|ll|destination|center)=(-?\d+\.\d+),\s*(-?\d+\.\d+)/];
+  for (const re of pats) {
+    const m = s.match(re);
+    if (m) { const a = +m[1], b = +m[2]; if (Math.abs(a) <= 90 && Math.abs(b) <= 180) return [a, b]; }
+  }
+  return null;
+}
+function placeName(href) {
+  const m = decodeURIComponent(href).match(/\/place\/([^/@?]+)/);
+  return m ? m[1].replace(/\+/g, " ").slice(0, 80) : "";
 }
 
 async function save(env, venue, base, data, note, onContentSaved) {

@@ -10,7 +10,7 @@ const CORE = [
   "../assets/cp-kiosk.js?v=11",
   "../assets/kiosk-app.js?v=10",
   "../assets/lexen-data.js?v=10",
-  "../assets/cp-content.js?v=10",
+  "../assets/cp-content.js?v=11",
   "../assets/vendor/qrcode-generator.js",
   "../assets/favicon.png",
   "../assets/lexen/logo-transparent.png",
