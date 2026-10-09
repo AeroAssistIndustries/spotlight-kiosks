@@ -26,6 +26,12 @@ Cloudflare builds and deploys the worker from GitHub on every push to `main` (ro
 Once the dashboard is live, edit content there rather than in `assets/lexen-data.js`; the file is only the starting
 copy and the fallback.
 
+## Advertiser report links
+
+In the dashboard, **Copy live link** (on an advertiser's report or deal) gives a private link such as
+`/r/lexen/granville/<token>` that shows that business its own numbers, with no sign-in. The token is signed with the
+staff password, so changing `ADMIN_PASSWORD` turns every existing link off.
+
 ## What is counted
 
 Per kiosk and per day: guest sessions, sections and places opened, questions (approved-answer titles only; free-typed

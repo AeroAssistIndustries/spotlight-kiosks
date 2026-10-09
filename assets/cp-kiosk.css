@@ -390,3 +390,12 @@ body.kiosk-body { margin: 0; overflow: hidden; background: #0B1622; overscroll-b
 
 /* extra white margin around QR codes (inside the white card) for faster scanning */
 .cpk-qr, .cpk-take-qr { padding: .3em; box-sizing: border-box; }
+
+/* ---------- announcements from the dashboard ---------- */
+.cpk-notice { display: flex; align-items: flex-start; gap: .8em; padding: .85em 1.2em; margin: 0 0 1em; border-radius: 1.1em; text-align: left;
+  background: linear-gradient(180deg, rgba(217,183,110,.28), rgba(217,183,110,.16)); border: 1px solid rgba(217,183,110,.6); color: #fff;
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+.cpk-notice svg { width: 1.5em; height: 1.5em; color: var(--gold-2); flex: none; margin-top: .05em; }
+.cpk-notice-p { display: block; font-size: 1.1em; font-weight: 600; line-height: 1.35; }
+.cpk-notice-p + .cpk-notice-p { margin-top: .35em; }
+.cpk-attract .cpk-notice { max-width: 92%; margin: 0 0 1.6em; }

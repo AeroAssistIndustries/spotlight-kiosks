@@ -249,6 +249,9 @@
   Object.values(V.categories).forEach(c => c.items.forEach(i => { if (!ICON[i]) ICON[i] = c.icon; }));
   const iconOf = id => ICON[id] || "pin";
 
+  /* Announcements staff post in the dashboard (switched on and within their dates). */
+  const NOTICES = (V.notices || []).filter(n => n && n.text && n.active !== false && (!n.start || TODAY >= n.start) && (!n.end || TODAY <= n.end));
+  const noticeHTML = () => NOTICES.length ? `<span class="cpk-notice" role="status">${svg("mega")}<span>${NOTICES.slice(0, 2).map(n => `<span class="cpk-notice-p">${esc(n.text)}</span>`).join("")}</span></span>` : "";
   /* Welcome screen: invites guests in with real questions people ask, and shortcuts straight to the popular sections. */
   const TRY = V.faq.map(f => f.q).slice(0, 10);
   function vAttract() {
@@ -257,6 +260,7 @@
       <span class="cpk-a-kicker">Welcome to</span>
       <span class="cpk-a-name">${esc(V.name)}</span>
       <span class="cpk-a-sub">Your guide to the hotel and North Hollywood</span>
+      ${noticeHTML()}
       ${TRY.length ? `<span class="cpk-a-try">${svg("chat")}<span>Ask me: <b id="cpk-try">“${esc(TRY[S.tryI % TRY.length])}”</b></span></span>` : ""}
       <span class="cpk-a-touch"><span class="cpk-ring"></span>Touch anywhere to begin</span></button>
       <div class="cpk-quicks">${quick}<button class="cpk-quick ask" data-act="quick" data-id="ask">${svg("chat")}<span>Ask the concierge</span></button></div></div>`;
@@ -279,6 +283,7 @@
     return `<section class="cpk-home">
       <h1 class="cpk-h1">${greet()}.</h1>
       <p class="cpk-lede">How can we help you today?</p>
+      ${noticeHTML()}
       <button class="cpk-askbar" data-act="ask">${svg("search")}<span>Ask the concierge</span><em>Wi-Fi, check-out, food, Universal…</em></button>
       <div id="cpk-weekslot">${weekHTML()}</div>
       <div class="cpk-tiles">${V.tiles.map(tileHTML).join("")}</div>

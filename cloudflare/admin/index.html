@@ -256,6 +256,28 @@ button.link:hover { color: var(--blue); text-decoration: underline; }
 .report-foot { margin-top: 30px; padding-top: 16px; border-top: 1px solid var(--soft); color: var(--mute); font-size: 13px; display: grid; gap: 6px; }
 body.is-report .tabs, body.is-report .publish-bar { display: none; }
 
+/* revenue, deals, announcements, share dialog */
+.revenue { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 18px; }
+.revenue > div { flex: 1 1 240px; border-radius: var(--r); padding: 18px 22px; color: #fff; background: linear-gradient(135deg, #0F1C2B, #0B4F4A); box-shadow: var(--shadow); }
+.revenue > div + div { background: linear-gradient(135deg, #2a3442, #3b4656); }
+.revenue span { font-size: 13px; opacity: .8; }
+.revenue b { display: block; font-size: 34px; letter-spacing: -.03em; margin: 2px 0; }
+.revenue small { opacity: .8; font-size: 13px; }
+.deal { margin-top: 16px; border: 1px dashed var(--line); border-radius: 14px; padding: 4px 14px 10px; background: color-mix(in srgb, var(--soft) 40%, transparent); }
+.deal.open { border-style: solid; }
+.deal-head { width: 100%; border: 0; background: none; padding: 10px 0 4px; display: flex; justify-content: space-between; align-items: center; gap: 12px; cursor: pointer; text-align: left; min-height: 44px; flex-wrap: wrap; }
+.deal-head span { font-weight: 600; }
+.deal-head em { font-style: normal; font-weight: 400; color: var(--mute); font-size: 13px; margin-left: 6px; }
+.deal-head small { color: var(--mute); font-size: 14px; }
+.notice-prev { margin-top: 14px; }
+.knotice { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 14px; color: #fff; background: linear-gradient(180deg, #2b3a4a, #18242f); border: 1px solid rgba(217,183,110,.6); max-width: 560px; }
+.knotice b { font-weight: 600; }
+.nowrap { white-space: nowrap; }
+.share { position: fixed; inset: 0; background: rgba(0,0,0,.35); display: grid; place-items: center; z-index: 50; padding: 16px; }
+.share[hidden] { display: none; }
+.share-box { background: var(--card); border-radius: 20px; padding: 24px; width: min(560px, 100%); box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+.share-box p { color: var(--mute); margin: 6px 0 14px; font-size: 15px; }
+
 @media print {
   @page { margin: 14mm; }
   :root { --bg: #fff; --card: #fff; --ink: #1d1d1f; --mute: #555; --soft: #e5e5ea; --line: #d2d2d7; --blue: #0B7F74; --gold: #0F1C2B; color-scheme: light; }

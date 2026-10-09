@@ -8,7 +8,8 @@
   var EP = ((V.ai && V.ai.endpoint) || "").replace(/\/$/, "");
   var AI = V.ai, KEY = "cp-content-" + V.id, QKEY = "cp-countq-" + V.id;
   var isKiosk = !!document.getElementById("cpk");
-  var APP = "12"; /* kiosk software version, shown in the dashboard */
+  var APP = "13"; /* kiosk software version, shown in the dashboard */
+  var BOOT = Date.now(); /* when this page started: a "Refresh now" from the dashboard after this reloads it */
   var store = {
     get: function (k) { try { return JSON.parse(localStorage.getItem(k) || "null"); } catch (e) { return null; } },
     set: function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
@@ -80,8 +81,9 @@
   var pending = false;
   function check() {
     if (!EP || navigator.onLine === false) return;
-    var u = EP + "/content?venue=" + encodeURIComponent(V.id) + "&have=" + version + (kiosk ? "&k=" + encodeURIComponent(kiosk) + "&s=" + Math.round(screen.width) + "x" + Math.round(screen.height) + "&app=" + APP : "");
+    var u = EP + "/content?venue=" + encodeURIComponent(V.id) + "&have=" + version + (kiosk ? "&k=" + encodeURIComponent(kiosk) + "&s=" + Math.round(screen.width) + "x" + Math.round(screen.height) + "&app=" + APP + "&boot=" + BOOT : "");
     fetch(u, { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (j && j.reload) pending = true;
       if (!j || j.same || !j.data || j.data.id !== V.id || !j.data.items) return;
       if (j.version === version) return;
       store.set(KEY, { version: j.version, data: j.data, at: Date.now() });
@@ -105,7 +107,7 @@
   if (EP) {
     setTimeout(check, isKiosk ? 4000 : 300);
     if (isKiosk) {
-      setInterval(check, 5 * 60000);
+      setInterval(check, 2 * 60000);
       setInterval(flush, 60000);
       setInterval(maybeReload, 15000);
       window.addEventListener("online", function () { check(); flush(); });
