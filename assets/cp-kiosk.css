@@ -319,3 +319,74 @@ body.kiosk-body { margin: 0; overflow: hidden; background: #0B1622; overscroll-b
 @media (min-aspect-ratio: 1/1) { .cpk-ad-logo.img { width: 13em; height: 8em; } }
 .cpk-ad-logo.img { display: flex; align-items: center; justify-content: center; }
 .cpk-ad-logo.img img { width: auto; height: auto; max-width: 100%; max-height: 100%; min-height: 0; display: block; }
+
+/* ---------- Home fits on one screen (no scrolling), whatever the screen size ---------- */
+.cpk-home { display: flex; flex-direction: column; min-height: 100%; }
+.cpk-home .cpk-tiles { flex: 1 1 auto; grid-auto-rows: minmax(6.2em, 1fr); min-height: 0; }
+.cpk-home .cpk-tile { min-height: 0; }
+.cpk-home .cpk-take { flex: none; margin-top: auto; padding: .8em 1em; }
+.cpk-home .cpk-take-qr { width: 5.6em; height: 5.6em; }
+/* compact forecast strip on the home screen: day, icon and temperatures on one line */
+.cpk-home .cpk-week { margin: -.4em 0 1em; padding: .4em; gap: .3em; }
+.cpk-home .cpk-day { flex-direction: row; justify-content: center; gap: .4em; padding: .55em .3em; flex-wrap: nowrap; white-space: nowrap; overflow: hidden; }
+.cpk-home .cpk-day svg { width: 1.5em; height: 1.5em; margin: 0; }
+.cpk-home .cpk-day small { display: none; }
+.cpk-home .cpk-day .cpk-lo { font-size: .85em; }
+@media (min-aspect-ratio: 1/1) {
+  .cpk-home .cpk-h1 { font-size: 2.5em; margin-top: 0; }
+  .cpk-home .cpk-lede { margin-bottom: .8em; }
+  .cpk-home .cpk-askbar { margin-bottom: 1em; min-height: 3.2em; padding: .8em 1.2em; }
+  .cpk-home .cpk-tile { padding: 1em 1.1em; }
+  .cpk-home .cpk-tile-ico { width: 2.3em; height: 2.3em; }
+  .cpk-home .cpk-tiles { margin-bottom: 1em; }
+  .cpk-home .cpk-take-qr { width: 4.6em; height: 4.6em; }
+  .cpk-home .cpk-take-txt b { font-size: 1.15em; }
+  .cpk-home .cpk-week { font-size: .9em; }
+  .cpk-home .cpk-day b { font-size: .85em; }
+}
+
+/* ---------- built-in touch keyboard ---------- */
+.cpk-kb { display: none; margin: -.4em 0 1.1em; padding: .55em; border-radius: var(--r); background: rgba(10,18,28,.78); border: 1px solid var(--line);
+  -webkit-backdrop-filter: blur(22px) saturate(150%); backdrop-filter: blur(22px) saturate(150%); box-shadow: 0 18px 50px rgba(0,0,0,.35); }
+.cpk-kb.open { display: block; animation: cpkIn .25s cubic-bezier(.2,.8,.2,1); }
+.cpk-kb-row { display: flex; gap: .4em; margin-bottom: .4em; justify-content: center; }
+.cpk-key { flex: 1 1 0; min-width: 0; min-height: 3.1em; border-radius: .75em; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.12); color: #fff;
+  font: inherit; font-size: 1.25em; font-weight: 550; display: grid; place-items: center; touch-action: manipulation; transition: transform .08s, background .08s; }
+.cpk-key.fn { flex: 1.4 1 0; font-size: 1em; background: rgba(255,255,255,.06); color: var(--sub); }
+.cpk-key.fn.on { background: rgba(217,183,110,.22); color: var(--gold-2); }
+.cpk-key.space { flex: 5 1 0; font-size: 1em; color: var(--sub); }
+.cpk-key.go { flex: 1.8 1 0; font-size: 1.05em; font-weight: 700; color: var(--ink); background: linear-gradient(180deg, #F3DFAE, var(--gold)); border-color: transparent; }
+.cpk-key.down { transform: scale(.94); background: rgba(255,255,255,.3); }
+.cpk-kb-hide { display: flex; align-items: center; gap: .4em; margin: .1em auto 0; padding: .35em .9em; border-radius: 999px; color: var(--sub); font-size: .9em; min-height: 2.75em; }
+.cpk-kb-hide svg { width: 1.1em; height: 1.1em; }
+.cpk-sugg { display: flex; flex-wrap: wrap; gap: .5em; margin: -.5em 0 .9em; }
+.cpk-sugg:empty { display: none; }
+.cpk-q.small { padding: .6em 1em; font-size: .95em; border-color: rgba(217,183,110,.45); }
+.cpk.is-contrast .cpk-key { background: #000; border: 2px solid #fff; }
+
+/* ---------- welcome screen: "Ask me" prompt and shortcuts ---------- */
+.cpk-attract-wrap { min-height: 100%; display: flex; flex-direction: column; }
+.cpk-attract-wrap .cpk-attract { flex: 1 1 auto; min-height: 0; }
+.cpk-a-sub { margin-bottom: 1.4em; }
+.cpk-a-try { display: inline-flex; align-items: center; gap: .6em; margin-bottom: 1.8em; padding: .7em 1.3em; border-radius: 999px; font-size: 1.15em;
+  background: rgba(10,18,28,.55); border: 1px solid rgba(255,255,255,.18); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); max-width: 92%; }
+.cpk-a-try svg { width: 1.3em; height: 1.3em; color: var(--gold-2); flex: none; }
+.cpk-a-try b { font-weight: 600; display: inline-block; transition: opacity .35s, transform .35s; }
+.cpk-a-try b.out { opacity: 0; transform: translateY(.3em); }
+.cpk-quicks { display: flex; gap: .8em; justify-content: center; flex-wrap: wrap; padding-bottom: 1.2em; }
+.cpk-quick { display: inline-flex !important; align-items: center; gap: .6em; padding: .85em 1.4em; min-height: 3.4em; border-radius: 999px; font: inherit; font-size: 1.05em; font-weight: 600; color: #fff;
+  background: rgba(10,18,28,.6); border: 1px solid rgba(255,255,255,.22); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+.cpk-quick svg { width: 1.3em; height: 1.3em; color: var(--gold-2); }
+.cpk-quick.ask { border-color: rgba(217,183,110,.6); }
+.cpk-quick:active { transform: scale(.97); }
+.cpk.is-still .cpk-a-try b { transition: none; }
+
+/* ---------- place page: ask about it, and more like it ---------- */
+.cpk-askabout { width: 100%; display: flex !important; align-items: center; gap: .8em; margin-top: 1em; padding: 1em 1.2em; border-radius: var(--r);
+  background: linear-gradient(180deg, rgba(217,183,110,.2), rgba(217,183,110,.1)); border: 1px solid rgba(217,183,110,.5); color: #fff; font: inherit; min-height: 3.6em; }
+.cpk-askabout svg { width: 1.4em; height: 1.4em; color: var(--gold-2); flex: none; }
+.cpk-askabout span { font-size: 1.15em; font-weight: 600; text-align: left; flex: 1; }
+.cpk-askabout:active { transform: scale(.985); }
+
+/* extra white margin around QR codes (inside the white card) for faster scanning */
+.cpk-qr, .cpk-take-qr { padding: .3em; box-sizing: border-box; }
