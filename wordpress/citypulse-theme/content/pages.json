@@ -20,6 +20,56 @@
   "front": false
  },
  {
+  "path": "operations",
+  "slug": "operations",
+  "parent": "",
+  "title": "Team library (demo)",
+  "description": "Demo of the CityPulse team library. Enter the access code to preview file names.",
+  "content": "<!-- wp:html -->\n<section class=\"section\"><div class=\"wrap\"><div class=\"ops-app\" id=\"ops-app\"><p>Loading…</p><noscript><p>Turn on JavaScript to open this page.</p></noscript></div></div></section>\n<!-- /wp:html -->",
+  "active": "operations/",
+  "front": false
+ },
+ {
+  "path": "host",
+  "slug": "host",
+  "parent": "",
+  "title": "Host dashboard (demo)",
+  "description": "Demo of the host dashboard: kiosk status and visit counts. Sample data only.",
+  "content": "<!-- wp:html -->\n<section class=\"section\"><div class=\"wrap\"><div class=\"ops-app\" id=\"host-app\"><p>Loading…</p><noscript><p>Turn on JavaScript to open this page.</p></noscript></div></div></section>\n<!-- /wp:html -->",
+  "active": "host/",
+  "front": false
+ },
+ {
+  "path": "kiosk-test",
+  "slug": "kiosk-test",
+  "parent": "",
+  "title": "Kiosk test",
+  "description": "Test page for a CityPulse kiosk: connection check and a test check-in to the website.",
+  "content": "<!-- wp:html -->\n<section class=\"section\"><div class=\"wrap\"><div class=\"ktest\" id=\"ktest-app\"><p>Loading…</p><noscript><p>Turn on JavaScript to run this test.</p></noscript></div></div></section>\n<!-- /wp:html -->",
+  "active": "kiosk-test/",
+  "front": false
+ },
+ {
+  "path": "kiosk-show",
+  "slug": "kiosk-show",
+  "parent": "",
+  "title": "Kiosk slideshow",
+  "description": "Full-screen slideshow for a CityPulse kiosk. Plays pictures and videos from a USB stick.",
+  "content": "<!-- wp:html -->\n<section class=\"section\"><div class=\"show-app\" id=\"show-app\" data-github=\"https://api.github.com/repos/AeroAssistIndustries/spotlight-kiosks/contents/content?ref=main\"><noscript><p>Turn on JavaScript to run the slideshow.</p></noscript></div></section>\n<!-- /wp:html -->",
+  "active": "kiosk-show/",
+  "front": false
+ },
+ {
+  "path": "kiosk-app",
+  "slug": "kiosk-app",
+  "parent": "",
+  "title": "Kiosk screen",
+  "description": "The CityPulse concierge kiosk screen, for a live kiosk.",
+  "content": "<!-- wp:html -->\n<link rel=\"stylesheet\" href=\"{{CP_ASSETS}}cp-kiosk.css?v=17\"><div class=\"cpk\" id=\"cpk\" data-root=\"{{CP_HOME}}\" lang=\"en\"></div><button class=\"kapp-fs\" id=\"kapp-fs\" type=\"button\" aria-label=\"Full screen\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5\"/></svg></button><div class=\"kapp-modal\" id=\"kapp-modal\" hidden role=\"dialog\" aria-modal=\"true\" aria-labelledby=\"kapp-modal-t\"><div class=\"kapp-box\"><form id=\"kapp-form\" autocomplete=\"off\"><h2 id=\"kapp-modal-t\">Staff menu</h2><p>Enter the staff password.</p><input type=\"password\" id=\"kapp-pass\" aria-label=\"Staff password\" required><p class=\"kapp-msg\" id=\"kapp-msg\" role=\"status\"></p><div class=\"kapp-row\"><button type=\"button\" class=\"kapp-btn-ghost\" data-close>Cancel</button><button type=\"submit\" class=\"kapp-btn\">Continue</button></div></form><div id=\"kapp-stats\" hidden></div></div></div>\n<!-- /wp:html -->",
+  "active": "kiosk-app/",
+  "front": false
+ },
+ {
   "path": "concierge",
   "slug": "concierge",
   "parent": "",
