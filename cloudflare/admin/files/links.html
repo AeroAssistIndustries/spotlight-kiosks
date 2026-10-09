@@ -1,0 +1,25 @@
+<p class="lead">Everything runs on accounts CityPulse owns. No passwords are written here.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>What</th><th>Address</th><th>Managed in</th></tr></thead>
+<tbody>
+<tr><td>Owner dashboard</td><td><a href="/admin">spotlight-kiosks.sarvesh-bb0.workers.dev/admin</a></td><td>Staff password, Cloudflare secret ADMIN_PASSWORD</td></tr>
+<tr><td>Sales Studio</td><td><a href="/sales" target="_blank" rel="noopener">spotlight-kiosks.sarvesh-bb0.workers.dev/sales</a></td><td>Owner login; the owner issues every rep login</td></tr>
+<tr><td>Kiosk screen</td><td><a href="https://aeroassistindustries.github.io/spotlight-kiosks/kiosk-app/" target="_blank" rel="noopener">aeroassistindustries.github.io/spotlight-kiosks/kiosk-app/</a></td><td>No sign-in; add ?kiosk=name once on a new screen</td></tr>
+<tr><td>Website</td><td><a href="https://aeroassistindustries.github.io/spotlight-kiosks/" target="_blank" rel="noopener">aeroassistindustries.github.io/spotlight-kiosks</a></td><td>GitHub, AeroAssistIndustries</td></tr>
+<tr><td>Pricing and checkout</td><td><a href="https://aeroassistindustries.github.io/spotlight-kiosks/pricing/" target="_blank" rel="noopener">&hellip;/pricing/</a></td><td>Orders email sarvesh.joshiaz@gmail.com</td></tr>
+<tr><td>Server, database, AI</td><td>Cloudflare &rarr; Workers &amp; Pages &rarr; spotlight-kiosks</td><td>Cloudflare account</td></tr>
+<tr><td>Code</td><td><a href="https://github.com/AeroAssistIndustries/spotlight-kiosks" target="_blank" rel="noopener">github.com/AeroAssistIndustries/spotlight-kiosks</a></td><td>GitHub</td></tr>
+<tr><td>Payment and order-email settings</td><td>assets/config.js in the code</td><td>GitHub</td></tr>
+</tbody></table></div>
+
+<h2>Keys stored on the server</h2>
+<p>Set in Cloudflare &rarr; spotlight-kiosks &rarr; Settings &rarr; Variables and Secrets. Names only.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Key</th><th>Used for</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>ADMIN_PASSWORD</td><td>Dashboard sign-in and advertiser report links</td><td><span class="pill ok"><i></i>Set</span></td></tr>
+<tr><td>SALES_SECRET</td><td>Sales Studio sign-ins</td><td><span class="pill off"><i></i>Optional</span></td></tr>
+<tr><td>TWILIO_* (5 keys)</td><td>Calls and texts from Sales Studio</td><td><span class="pill off"><i></i>When needed</span></td></tr>
+<tr><td>GOOGLE_CLIENT_ID / SECRET</td><td>Sending email from Gmail in Sales Studio</td><td><span class="pill off"><i></i>When needed</span></td></tr>
+<tr><td>ANTHROPIC_API_KEY</td><td>A stronger AI concierge (Claude) in place of the free model</td><td><span class="pill off"><i></i>Optional</span></td></tr>
+</tbody></table></div>
