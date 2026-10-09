@@ -9,6 +9,8 @@
   const TABS = [["overview", "Overview"], ["ads", "Ads"], ["places", "Places"], ["answers", "Answers"], ["notices", "Announcements"], ["notes", "Notes"], ["files", "Files"], ["hotel", "Hotel"], ["kiosks", "Kiosks"], ["history", "History"]];
   /* line icons (24px grid) */
   const IC = {
+    lock: '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+    key: '<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M15 8l2 2"/>',
     files: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 10h18"/>',
     print: '<path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/>',
     overview: '<rect x="3" y="3" width="8" height="10" rx="2"/><rect x="13" y="3" width="8" height="6" rx="2"/><rect x="13" y="11" width="8" height="10" rx="2"/><rect x="3" y="15" width="8" height="6" rx="2"/>',
@@ -81,8 +83,10 @@
       <label class="f"><span>Staff password</span><input type="password" id="pw" autocomplete="current-password" required></label>
       <button class="btn primary" type="submit">Sign in</button>
       ${message ? `<div class="msg${info ? " info" : ""}" role="alert">${esc(message)}</div>` : ""}
+      <p class="login-alt"><button type="button" class="linkish" id="forgot">Forgot password?</button></p>
       <p class="login-foot">CityPulse Kiosks · Staff only</p>
     </form></div>`;
+    document.getElementById("forgot").addEventListener("click", () => recover());
     const pw = document.getElementById("pw");
     pw.focus();
     document.getElementById("login").addEventListener("submit", async e => {
@@ -90,6 +94,36 @@
       const b = e.target.querySelector("button"); b.disabled = true; b.textContent = "Signing in…";
       try { await api("login", { json: { password: pw.value } }); await load(); }
       catch (err) { login(err.message); }
+    });
+  }
+
+  /* Forgot password: one of the printed recovery codes sets a new password */
+  function recover(message) {
+    D = null;
+    app.innerHTML = `<div class="login"><form class="login-card" id="recover" novalidate>
+      ${LOGO()}
+      <span class="eyebrow">Reset password</span>
+      <h1>Forgot your password?</h1>
+      <p>Enter one of your recovery codes and choose a new password. Each code works once.</p>
+      <label class="f"><span>Recovery code</span><input type="text" id="rc-code" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX" required></label>
+      <label class="f"><span>New password</span><input type="password" id="rc-new" autocomplete="new-password" minlength="10" required></label>
+      <label class="f"><span>Type it again</span><input type="password" id="rc-new2" autocomplete="new-password" minlength="10" required></label>
+      <button class="btn primary" type="submit">Reset and sign in</button>
+      ${message ? `<div class="msg" role="alert">${esc(message)}</div>` : ""}
+      <details class="login-help"><summary>No recovery codes?</summary><p>The account owner can reset it in Cloudflare: Workers &amp; Pages, spotlight-kiosks, Settings, Variables and Secrets. Edit ADMIN_PASSWORD, choose Rotate, type a new password and Deploy. That new password then signs in, and old recovery codes stop working.</p></details>
+      <p class="login-alt"><button type="button" class="linkish" id="back-login">Back to sign in</button></p>
+    </form></div>`;
+    document.getElementById("rc-code").focus();
+    document.getElementById("back-login").addEventListener("click", () => login());
+    document.getElementById("recover").addEventListener("submit", async e => {
+      e.preventDefault();
+      const code = document.getElementById("rc-code").value.trim(), a = document.getElementById("rc-new").value, b2 = document.getElementById("rc-new2").value;
+      if (!code) return recover("Enter one of your recovery codes.");
+      if (a.length < 10) return recover("Use at least 10 characters for the new password.");
+      if (a !== b2) return recover("The two new passwords don't match.");
+      const b = e.target.querySelector("button[type=submit]"); b.disabled = true; b.textContent = "Resetting…";
+      try { const r = await api("recover", { json: { code, next: a } }); await load(); toast(`Password changed. ${r.left} recovery code${r.left === 1 ? "" : "s"} left.`); }
+      catch (err) { recover(err.message); }
     });
   }
 
@@ -126,6 +160,7 @@
         <nav class="side-nav" aria-label="Sections">${TABS.map(([k, l]) => `<button data-tab="${k}">${icon(k)}<span>${l}</span><em class="badge" id="badge-${k}"></em></button>`).join("")}</nav>
         <div class="side-foot">
           <button class="side-search" data-act="palette">${icon("search")}<span>Search or jump to…</span><kbd>${/Mac/.test(navigator.platform) ? "⌘" : "Ctrl"} K</kbd></button>
+          <button class="side-out" data-tab="security">${icon("lock")}<span>Password &amp; security</span></button>
           <button class="side-out" data-act="logout">${icon("logout")}<span>Sign out</span></button>
         </div>
       </aside>
@@ -154,6 +189,7 @@
     tick();
     loadNotes();
     loadFiles();
+    loadSecurity();
   }
 
   /* ---------- live clock (the hotel's own time) ---------- */
@@ -183,12 +219,12 @@
     const view = document.getElementById("view");
     if (!view) return;
     document.querySelectorAll(".side-nav button").forEach(b => b.setAttribute("aria-current", b.dataset.tab === tab ? "page" : "false"));
-    const ct = document.getElementById("crumb-t"); if (ct) ct.textContent = tab === "report" ? "Advertiser report" : (TABS.find(t => t[0] === tab) || [, ""])[1];
+    const ct = document.getElementById("crumb-t"); if (ct) ct.textContent = tab === "security" ? "Password & security" : tab === "report" ? "Advertiser report" : (TABS.find(t => t[0] === tab) || [, ""])[1];
     document.body.classList.remove("menu-open");
     updateBadges();
     const y = window.scrollY;
     document.body.classList.toggle("is-report", tab === "report");
-    view.innerHTML = ({ overview: vOverview, ads: vAds, places: vPlaces, answers: vAnswers, hotel: vHotel, notices: vNotices, notes: vNotes, files: vFiles, kiosks: vKiosks, history: vHistory, report: vReport })[tab]();
+    view.innerHTML = ({ overview: vOverview, ads: vAds, places: vPlaces, answers: vAnswers, hotel: vHotel, notices: vNotices, notes: vNotes, files: vFiles, security: vSecurity, kiosks: vKiosks, history: vHistory, report: vReport })[tab]();
     labelTables(view);
     if (tab === "files") wireTasks(view);
     window.scrollTo(0, y);
@@ -224,7 +260,7 @@
     }
   }
   window.addEventListener("beforeunload", e => { if (D && isDirty()) { e.preventDefault(); e.returnValue = ""; } });
-  window.addEventListener("hashchange", () => { const t = location.hash.slice(1); if (TABS.some(x => x[0] === t) && t !== tab) { tab = t; open = null; render(); if (tab === "overview" || tab === "kiosks") loadStats(); } });
+  window.addEventListener("hashchange", () => { const t = location.hash.slice(1); if ((TABS.some(x => x[0] === t) || t === "security") && t !== tab) { tab = t; open = null; render(); if (tab === "overview" || tab === "kiosks") loadStats(); } });
 
   /* ---------- binding form fields to the draft ---------- */
   function getPath(o, path) { return path.split(".").reduce((a, k) => a == null ? a : a[k], o); }
@@ -386,6 +422,7 @@
     D.sponsors.forEach(s => { const [cls, label] = adStatus(s); if (cls === "warn" && /^Ends/.test(label)) acts.push({ tone: "warn", text: `<b>${esc(s.name)}</b> ad ${esc(label.toLowerCase())}. Time to talk renewal.`, btn: "Open ad", act: 'data-tab="ads"' }); });
     D.sponsors.filter(s => s.id && s.active !== false && !(deals[s.id] && deals[s.id].price != null)).slice(0, 2).forEach(s => acts.push({ tone: "info", text: `Add the monthly price for <b>${esc(s.name)}</b> to track revenue.`, btn: "Add deal", act: `data-act="goto-deal" data-id="${esc(s.id)}"` }));
     D.sponsors.filter(s => !s.logo).slice(0, 1).forEach(s => acts.push({ tone: "info", text: `<b>${esc(s.name || "An ad")}</b> has no logo yet.`, btn: "Upload", act: 'data-tab="ads"' }));
+    if (sec && !(sec.codes && sec.codes.left)) acts.push({ tone: "warn", text: `<b>No recovery codes yet.</b> Create them so you can reset the password yourself if it's forgotten.`, btn: "Set up", act: 'data-tab="security"' });
     const lt = tasksOpen();
     if (lt) acts.push({ tone: "warn", text: `<b>${lt} launch task${lt > 1 ? "s" : ""}</b> still open for North Hollywood.`, btn: "Checklist", act: 'data-act="file-open" data-id="launch"' });
     const todos = notes.filter(n => n.todo && !n.done).length;
@@ -894,6 +931,8 @@
       case "add-faq-go": go("answers"); clickAct("add-faq"); return;
       case "note-filter": noteFilter = d.f; render(); return;
       case "file-open": return openFile(d.id);
+      case "codes-done": freshCodes = null; render(); toast("Recovery codes saved. Keep them somewhere safe."); return;
+      case "codes-copy": { const t = (freshCodes || []).join("\n"); try { await navigator.clipboard.writeText(t); toast("Codes copied."); } catch (e) { toast("Select the codes and copy them.", true); } return; }
       case "file-back": fileId = null; render(); window.scrollTo(0, 0); return;
       case "file-print": return window.print();
       case "note-done": case "note-pin": case "note-todo": case "note-color": {
@@ -968,6 +1007,58 @@
   }
 
   /* ---------- notes & to-dos (shared by everyone who signs in) ---------- */
+  /* ---------- password & security ---------- */
+  let sec = null, freshCodes = null;
+  async function loadSecurity() { try { sec = await api("security"); } catch (e) { sec = sec || null; } if (tab === "security" || tab === "overview") render(); updateBadges(); }
+  function vSecurity() {
+    if (!sec) { loadSecurity(); return `<div class="head"><div><h1>Password &amp; security</h1><p>Loading…</p></div></div>`; }
+    const c = sec.codes || {}, when = d => d ? new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "";
+    const codesCard = freshCodes ? `<div class="card codes-card">
+        <div class="card-head"><h2>${icon("key")} Your new recovery codes</h2></div>
+        <p class="warn-line">Save these now: print them or keep them in your password manager. They won't be shown again. Each one resets the password once.</p>
+        <ol class="codes">${freshCodes.map(x => `<li><code>${esc(x)}</code></li>`).join("")}</ol>
+        <div class="item-actions"><button class="btn small" data-act="codes-copy">Copy all</button><button class="btn small" data-act="print">Print</button><span class="grow"></span><button class="btn small primary" data-act="codes-done">I've saved them</button></div>
+      </div>` : `<div class="card">
+        <div class="card-head"><h2>${icon("key")} Recovery codes</h2>${c.total ? `<span class="pill ${c.left > 2 ? "ok" : "warn"}"><i></i>${c.left} of ${c.total} left</span>` : `<span class="pill warn"><i></i>Not set up</span>`}</div>
+        <p>If you forget the password, a recovery code lets you set a new one from the sign-in screen. ${c.total ? `Created ${esc(when(c.created_at))}. Making new codes cancels the old ones.` : "Create a set now and keep it somewhere safe."}</p>
+        <form class="sec-form" data-form="codes"><label class="f"><span>Current password</span><input type="password" id="cd-cur" autocomplete="current-password" required></label><button class="btn ${c.total ? "" : "primary"}" type="submit">${c.total ? "Make new codes" : "Create recovery codes"}</button></form>
+      </div>`;
+    return `<div class="head"><div><h1>Password &amp; security</h1><p>One staff password signs in to this dashboard. Change it here any time; everyone else is signed out when it changes.</p></div></div>
+      <div class="grid g2">
+        <div class="card">
+          <div class="card-head"><h2>${icon("lock")} Change password</h2>${sec.changed_at ? `<span class="pill"><i></i>Changed ${esc(when(sec.changed_at))}</span>` : ""}</div>
+          <form class="sec-form" data-form="password">
+            <label class="f"><span>Current password</span><input type="password" id="pw-cur" autocomplete="current-password" required></label>
+            <label class="f"><span>New password <em>at least 10 characters</em></span><input type="password" id="pw-new" autocomplete="new-password" minlength="10" required></label>
+            <label class="f"><span>Type it again</span><input type="password" id="pw-new2" autocomplete="new-password" minlength="10" required></label>
+            <button class="btn primary" type="submit">Change password</button>
+          </form>
+        </div>
+        ${codesCard}
+      </div>
+      <div class="card">
+        <div class="card-head"><h2>If everything is lost</h2></div>
+        <p>The account owner can always reset the password in Cloudflare: Workers &amp; Pages → spotlight-kiosks → Settings → Variables and Secrets → ADMIN_PASSWORD → Rotate → Deploy. That password then signs in, and the dashboard password and all recovery codes are cleared. It also turns off advertisers' live report links, so send them new ones.</p>
+        <p class="small">Changing the password here does not affect advertisers' report links.</p>
+      </div>`;
+  }
+  async function onSecuritySubmit(form) {
+    const btn = form.querySelector("button[type=submit]");
+    if (form.dataset.form === "password") {
+      const cur = form.querySelector("#pw-cur").value, a = form.querySelector("#pw-new").value, b = form.querySelector("#pw-new2").value;
+      if (a.length < 10) return toast("Use at least 10 characters for the new password.", true);
+      if (a !== b) return toast("The two new passwords don't match.", true);
+      btn.disabled = true;
+      try { await api("password", { json: { current: cur, next: a } }); form.reset(); await loadSecurity(); toast("Password changed. Everyone else has been signed out."); }
+      catch (e) { if (e.message !== "signed out") toast(e.message, true); } finally { btn.disabled = false; }
+    }
+    if (form.dataset.form === "codes") {
+      btn.disabled = true;
+      try { freshCodes = (await api("recovery-codes", { json: { current: form.querySelector("#cd-cur").value } })).codes; await loadSecurity(); render(); }
+      catch (e) { if (e.message !== "signed out") toast(e.message, true); } finally { btn.disabled = false; }
+    }
+  }
+
   /* ---------- owner files: guides + launch checklist (loaded only after sign-in) ---------- */
   let fileList = null, fileId = null, fileCache = {}, tasks = {}, taskTotal = 0;
   const tasksOpen = () => Math.max(0, taskTotal - Object.values(tasks).filter(Boolean).length);
@@ -1062,6 +1153,7 @@
     const f = e.target.closest && e.target.closest("[data-form]");
     if (!f) return;
     e.preventDefault();
+    if (f.dataset.form === "password" || f.dataset.form === "codes") return onSecuritySubmit(f);
     if (f.dataset.form === "quick-note") { const t = document.getElementById("qn-text"), re = /^(todo|to-do|\[\s?\])\s*:?\s*/i; addNote(t.value.replace(re, ""), { todo: re.test(t.value) }); }
     if (f.dataset.form === "new-note") { const c = f.querySelector('input[name="nn-color"]:checked'); addNote(document.getElementById("nn-text").value, { todo: document.getElementById("nn-todo").checked, color: c ? c.value : "yellow" }); }
   });
@@ -1097,7 +1189,7 @@
     notes.slice(0, 50).forEach(n => it.push({ g: "Notes", t: n.text.split("\n")[0].slice(0, 80), ic: "notes", run: () => go("notes") }));
     return it;
   }
-  function go(k) { tab = k; open = null; if (k === "files") fileId = null; history.replaceState(null, "", "#" + k); render(); window.scrollTo(0, 0); if (k === "overview" || k === "kiosks") loadStats(); }
+  function go(k) { if (tab === "security" && k !== "security") freshCodes = null; tab = k; open = null; if (k === "files") fileId = null; history.replaceState(null, "", "#" + k); render(); window.scrollTo(0, 0); if (k === "overview" || k === "kiosks") loadStats(); }
   function clickAct(act, data) { const b = document.createElement("button"); b.dataset.act = act; Object.assign(b.dataset, data || {}); b.hidden = true; app.appendChild(b); b.click(); b.remove(); }
   function openPalette() {
     if (!D) return;

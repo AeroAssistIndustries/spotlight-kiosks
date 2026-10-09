@@ -759,6 +759,23 @@ td > .rank { position: absolute; left: 10px; top: 50%; transform: translateY(-50
   .task, .flow, .filedoc .callout, .diagram-wrap { background: #fff !important; border-color: #ccc !important; break-inside: avoid; }
   .dg-edge { stroke: #8a6a1f; } .dg-head { fill: #8a6a1f; } .dg-box { stroke: #999; } .dg-core { fill: #eef9f7; stroke: #0b7f74; }
 }
+/* password & security */
+.login-alt { margin-top: 12px; text-align: center; }
+.linkish { background: none; border: 0; padding: 4px; color: var(--teal); font-size: 14px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.linkish:hover { color: var(--gold-2); }
+.login-help { margin-top: 14px; font-size: 13.5px; color: var(--mute); }
+.login-help summary { cursor: pointer; color: var(--ink2); }
+.login-help p { margin-top: 8px; line-height: 1.5; }
+.login-card .f { display: block; margin-top: 12px; }
+.sec-form { display: grid; gap: 12px; margin-top: 8px; }
+.sec-form .btn { justify-self: start; }
+.codes { list-style: none; padding: 0; margin: 14px 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.codes li { padding: 10px 12px; background: #0D1A28; border: 1px solid var(--line); text-align: center; }
+.codes code { font: 600 17px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .08em; color: var(--gold-2); }
+.warn-line { color: var(--amber); font-size: 15px; }
+.codes-card { border-color: rgba(217,183,110,.55) !important; }
+p.small { color: var(--mute); font-size: 13.5px; margin-top: 8px; }
+@media print { .codes li { background: #fff !important; border-color: #999 !important; } .codes code { color: #111 !important; } }
 @media print {
   :root, :root:not([data-theme="light"]) { --bg: #fff; --card: #fff; --ink: #111; --ink2: #333; --mute: #555; --soft: #eee; --line: #ccc; --blue: #0B7F74; --teal: #16B8A8; --gold: #8A6A1F; --gold-2: #8A6A1F; color-scheme: light; }
   html, body { background: #fff !important; color: #111; }
