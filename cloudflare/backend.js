@@ -19,7 +19,9 @@ const SCHEMA = [
   "CREATE TABLE IF NOT EXISTS events (day TEXT NOT NULL, venue TEXT NOT NULL, kiosk TEXT NOT NULL, type TEXT NOT NULL, key TEXT NOT NULL, n INTEGER NOT NULL, PRIMARY KEY (day, venue, kiosk, type, key))",
   "CREATE TABLE IF NOT EXISTS kiosks (venue TEXT NOT NULL, kiosk TEXT NOT NULL, first_seen TEXT, last_seen TEXT NOT NULL, version INTEGER, ua TEXT, PRIMARY KEY (venue, kiosk))",
   /* advertiser deal details: staff only, never sent to kiosks */
-  "CREATE TABLE IF NOT EXISTS deals (venue TEXT NOT NULL, sponsor TEXT NOT NULL, json TEXT NOT NULL, updated_at TEXT NOT NULL, PRIMARY KEY (venue, sponsor))"
+  "CREATE TABLE IF NOT EXISTS deals (venue TEXT NOT NULL, sponsor TEXT NOT NULL, json TEXT NOT NULL, updated_at TEXT NOT NULL, PRIMARY KEY (venue, sponsor))",
+  /* staff notes and to-dos (dashboard only) */
+  "CREATE TABLE IF NOT EXISTS notes (id TEXT PRIMARY KEY, venue TEXT NOT NULL, text TEXT NOT NULL, color TEXT, pinned INTEGER DEFAULT 0, done INTEGER DEFAULT 0, todo INTEGER DEFAULT 0, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)"
 ];
 const EVENT_TYPES = ["sessions", "hours", "categories", "places", "questions", "takeHome", "adShown", "adEngaged", "adReach", "qr"];
 const ICONS = ["fork", "bell", "coffee", "spark", "bag", "car", "home", "pin", "star", "walk", "phone", "chat", "sun"];
@@ -534,6 +536,36 @@ async function admin(req, env, ctx, url, fetchSeed, onContentSaved) {
     return send(200, { ok: true, deal: { ...d, updated_at: t } });
   }
 
+  /* staff notes */
+  if (api === "notes") {
+    const COLORS = ["yellow", "teal", "pink", "blue", "gray"];
+    if (req.method === "GET") {
+      const r = await env.DB.prepare("SELECT id, text, color, pinned, done, todo, created_at, updated_at FROM notes WHERE venue = ? ORDER BY pinned DESC, updated_at DESC LIMIT 300").bind(venue).all();
+      return send(200, { notes: r.results || [] });
+    }
+    let body; try { body = await req.json(); } catch (e) { body = {}; }
+    if (req.method === "DELETE") {
+      if (!/^[a-z0-9]{6,32}$/.test(body.id || "")) return send(400, { error: "Unknown note." });
+      await env.DB.prepare("DELETE FROM notes WHERE venue = ? AND id = ?").bind(venue, body.id).run();
+      return send(200, { ok: true });
+    }
+    let text; try { text = str(body.text, 2000, "Note", true); } catch (e) { if (e instanceof Bad) return send(422, { error: e.message }); throw e; }
+    const color = COLORS.includes(body.color) ? body.color : "yellow", t = nowIso();
+    const flags = [body.pinned ? 1 : 0, body.done ? 1 : 0, body.todo ? 1 : 0];
+    if (req.method === "POST") {
+      const n = await env.DB.prepare("SELECT COUNT(*) AS n FROM notes WHERE venue = ?").bind(venue).first();
+      if (n && n.n >= 300) return send(422, { error: "You have 300 notes. Delete some old ones first." });
+      const id = [...crypto.getRandomValues(new Uint8Array(8))].map(b => b.toString(16).padStart(2, "0")).join("");
+      await env.DB.prepare("INSERT INTO notes (id, venue, text, color, pinned, done, todo, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)").bind(id, venue, text, color, ...flags, t, t).run();
+      return send(200, { note: { id, text, color, pinned: flags[0], done: flags[1], todo: flags[2], created_at: t, updated_at: t } });
+    }
+    if (req.method === "PUT") {
+      if (!/^[a-z0-9]{6,32}$/.test(body.id || "")) return send(400, { error: "Unknown note." });
+      await env.DB.prepare("UPDATE notes SET text = ?, color = ?, pinned = ?, done = ?, todo = ?, updated_at = ? WHERE venue = ? AND id = ?").bind(text, color, ...flags, t, venue, body.id).run();
+      return send(200, { ok: true, updated_at: t });
+    }
+  }
+
   /* private link to an advertiser's own live report */
   if (api === "share" && req.method === "GET") {
     const sp = url.searchParams.get("sponsor") || "";
@@ -549,13 +581,17 @@ async function admin(req, env, ctx, url, fetchSeed, onContentSaved) {
     const kiosk = url.searchParams.get("kiosk") || "";
     const where = "venue = ? AND day >= ?" + (KIOSK_RE.test(kiosk) ? " AND kiosk = ?" : "");
     const args = KIOSK_RE.test(kiosk) ? [venue, from, kiosk] : [venue, from];
-    const [byKey, byDay, adDays, kiosks] = await env.DB.batch([
+    const prevFrom = dayKey(tz, new Date(Date.now() - (2 * days - 1) * 86400000));
+    const prevWhere = "venue = ? AND day >= ? AND day < ?" + (KIOSK_RE.test(kiosk) ? " AND kiosk = ?" : "");
+    const prevArgs = KIOSK_RE.test(kiosk) ? [venue, prevFrom, from, kiosk] : [venue, prevFrom, from];
+    const [byKey, byDay, adDays, kiosks, prev] = await env.DB.batch([
       env.DB.prepare(`SELECT type, key, SUM(n) AS n FROM events WHERE ${where} GROUP BY type, key ORDER BY n DESC`).bind(...args),
       env.DB.prepare(`SELECT day, type, SUM(n) AS n FROM events WHERE ${where} GROUP BY day, type ORDER BY day`).bind(...args),
       env.DB.prepare(`SELECT day, type, key, SUM(n) AS n FROM events WHERE ${where} AND (type IN ('adShown', 'adEngaged', 'adReach') OR (type = 'qr' AND key LIKE 'ad:%')) GROUP BY day, type, key ORDER BY day`).bind(...args),
-      env.DB.prepare("SELECT kiosk, first_seen, last_seen, version, ua, screen, app FROM kiosks WHERE venue = ? ORDER BY last_seen DESC").bind(venue)
+      env.DB.prepare("SELECT kiosk, first_seen, last_seen, version, ua, screen, app FROM kiosks WHERE venue = ? ORDER BY last_seen DESC").bind(venue),
+      env.DB.prepare(`SELECT type, SUM(n) AS n FROM events WHERE ${prevWhere} GROUP BY type`).bind(...prevArgs)
     ]);
-    return send(200, { from, to, days, tz, now: nowIso(), version: c ? c.version : 0, byKey: byKey.results || [], byDay: byDay.results || [], adDays: adDays.results || [], kiosks: kiosks.results || [] });
+    return send(200, { from, to, days, tz, now: nowIso(), version: c ? c.version : 0, byKey: byKey.results || [], byDay: byDay.results || [], adDays: adDays.results || [], kiosks: kiosks.results || [], prev: Object.fromEntries((prev.results || []).map(r => [r.type, r.n])) });
   }
 
   return send(404, { error: "Not found." });
