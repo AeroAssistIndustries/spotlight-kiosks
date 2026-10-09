@@ -106,3 +106,46 @@ For better answers, add a Claude API key; the relay then uses Claude instead of 
 | `ADMIN_PASSWORD` | none (secret; the dashboard stays locked until it is set) |
 | `VENUE_ID` | `lexen` (the venue the dashboard manages) |
 | `GUIDE_URL` | `https://aeroassistindustries.github.io/spotlight-kiosks/concierge/` (where guide QR codes lead) |
+
+## Sales Studio (call-center CRM) at `/sales`
+
+The same worker serves Sales Studio at `https://spotlight-kiosks.sarvesh-bb0.workers.dev/sales`. It stores everything in
+the `citypulse` D1 database in its own `crm_*` tables (created automatically). Files: `sales.js` (server),
+`sales/app.html` (the CRM screens; the same page also runs inside Claude), `sales/shell.html` (sign-in and the
+connection to the server). Run `node cloudflare/build-sales.mjs` after editing either page to regenerate `sales-page.js`.
+
+**Plan.** Use the Workers Paid plan ($5/month minimum) for a working call floor. The free plan's per-request CPU limit
+is too small for password checks and large lead lists.
+
+**First sign-in.** Open `/sales`. The first person creates the owner admin by entering the kiosk dashboard password
+(`ADMIN_PASSWORD`) once. Everyone else gets a login from Team > Add a person and picks their own password at first sign-in.
+
+**Moving data from the Claude version.** Settings > Backup > Restore, then choose the backup file. `__OWNER__` in a
+backup is replaced with the signed-in admin.
+
+### Secrets (Workers & Pages > spotlight-kiosks > Settings > Variables and Secrets, type Secret)
+
+| Name | What it is | Needed for |
+| --- | --- | --- |
+| `SALES_SECRET` | any long random text; signs sign-in cookies (falls back to `ADMIN_PASSWORD`) | recommended |
+| `TWILIO_ACCOUNT_SID` | Account SID (AC…) from the Twilio console | calls and texts |
+| `TWILIO_AUTH_TOKEN` | Auth Token from the Twilio console | calls and texts |
+| `TWILIO_API_KEY` / `TWILIO_API_SECRET` | an API key (SK…) and its secret: Twilio console > Account > API keys | calls and texts |
+| `TWILIO_TWIML_APP_SID` | TwiML App (AP…) with Voice URL `…/sales/voice/outbound` (POST) | browser calling |
+| `TWILIO_CALLER_ID` | the CityPulse Twilio number, +1… | browser calling |
+| `TWILIO_SMS_FROM` or `TWILIO_MESSAGING_SERVICE_SID` | number (+1…) or Messaging Service (MG…) that sends texts | texting |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google Cloud OAuth client (Web application) | Send from Gmail |
+
+**Twilio phone number settings.** A call comes in: Webhook `…/sales/voice/incoming` (POST). A message comes in:
+Webhook `…/sales/sms/incoming` (POST). Incoming calls ring every agent marked Available; if nobody answers in 25
+seconds the caller leaves a voicemail, which becomes a callback task. Texting to US numbers needs A2P 10DLC
+registration in Twilio first.
+
+**Google OAuth client.** In Google Cloud: create a project, enable the Gmail API, set the OAuth consent screen to
+Internal (Google Workspace), create an OAuth client of type Web application, and add the redirect URI
+`https://spotlight-kiosks.sarvesh-bb0.workers.dev/sales/google/callback` (and the same path on any custom domain).
+The app asks only for permission to send mail (`gmail.send`).
+
+**Safety rules enforced on the server.** Do-not-call numbers can't be dialed or texted; STOP replies add the number
+to the list; agents can't change settings, templates, roles or other people's status; calls are recorded only when an
+admin turns recording on, and the other side hears "This call may be recorded" first.
