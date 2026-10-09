@@ -10,7 +10,7 @@
    Staff (password protected, see admin-page.js):
      /admin and /admin/api/... */
 
-import { ADMIN_HTML, ADMIN_JS, ADMIN_BRAND } from "./admin-page.js";
+import { ADMIN_HTML, ADMIN_JS, ADMIN_BRAND, ADMIN_FILES } from "./admin-page.js";
 
 const SCHEMA = [
   "CREATE TABLE IF NOT EXISTS content (venue TEXT PRIMARY KEY, json TEXT NOT NULL, version INTEGER NOT NULL, updated_at TEXT NOT NULL)",
@@ -21,6 +21,7 @@ const SCHEMA = [
   /* advertiser deal details: staff only, never sent to kiosks */
   "CREATE TABLE IF NOT EXISTS deals (venue TEXT NOT NULL, sponsor TEXT NOT NULL, json TEXT NOT NULL, updated_at TEXT NOT NULL, PRIMARY KEY (venue, sponsor))",
   /* staff notes and to-dos (dashboard only) */
+  "CREATE TABLE IF NOT EXISTS tasks (venue TEXT NOT NULL, id TEXT NOT NULL, done INTEGER NOT NULL DEFAULT 0, updated_at TEXT NOT NULL, PRIMARY KEY (venue, id))",
   "CREATE TABLE IF NOT EXISTS notes (id TEXT PRIMARY KEY, venue TEXT NOT NULL, text TEXT NOT NULL, color TEXT, pinned INTEGER DEFAULT 0, done INTEGER DEFAULT 0, todo INTEGER DEFAULT 0, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)"
 ];
 const EVENT_TYPES = ["sessions", "hours", "categories", "places", "questions", "takeHome", "adShown", "adEngaged", "adReach", "qr"];
@@ -454,6 +455,26 @@ async function admin(req, env, ctx, url, fetchSeed, onContentSaved) {
   if (!hasDB(env)) return send(503, { error: "The database is not connected to the worker yet." });
   await ensure(env);
   const venue = venueId(env);
+
+  /* Owner files: guides and the launch checklist (signed-in only) */
+  if (api === "files" && req.method === "GET")
+    return send(200, { files: ADMIN_FILES.map(({ html, ...f }) => f) });
+  if (api.startsWith("files/") && req.method === "GET") {
+    const f = ADMIN_FILES.find(x => x.id === api.slice(6));
+    return f ? send(200, { file: f }) : send(404, { error: "That file is not here." });
+  }
+  if (api === "tasks" && req.method === "GET") {
+    const r = await env.DB.prepare("SELECT id, done, updated_at FROM tasks WHERE venue = ?").bind(venue).all();
+    return send(200, { tasks: r.results || [] });
+  }
+  if (api === "tasks" && req.method === "PUT") {
+    let body; try { body = await req.json(); } catch (e) { body = {}; }
+    const id = String((body && body.id) || "");
+    if (!/^[a-z0-9-]{1,64}$/.test(id)) return send(400, { error: "Unknown task." });
+    const done = body.done ? 1 : 0, now = new Date().toISOString();
+    await env.DB.prepare("INSERT INTO tasks (venue, id, done, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(venue, id) DO UPDATE SET done = excluded.done, updated_at = excluded.updated_at").bind(venue, id, done, now).run();
+    return send(200, { ok: true, id, done, updated_at: now });
+  }
 
   if (api === "content" && req.method === "GET") {
     const c = await getContent(env, venue, fetchSeed);

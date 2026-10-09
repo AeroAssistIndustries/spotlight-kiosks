@@ -1,0 +1,8 @@
+[
+  { "id": "launch", "title": "North Hollywood launch plan", "summary": "Readiness, what to do before the first sale, the 30-day plan and who to pitch first.", "icon": "bolt", "updated": "2026-10-09" },
+  { "id": "selling", "title": "Selling and running an ad", "summary": "From first pitch to ad live on the kiosk to the monthly report, step by step.", "icon": "ads", "updated": "2026-10-09" },
+  { "id": "system", "title": "How CityPulse works", "summary": "A chart of the whole system, what happens step by step, and every outside service.", "icon": "overview", "updated": "2026-10-09" },
+  { "id": "dashboard", "title": "Dashboard guide", "summary": "Signing in, publishing, what each section does and resetting the password.", "icon": "kiosks", "updated": "2026-10-09" },
+  { "id": "qa", "title": "QA report, Oct 9", "summary": "What was tested before launch and the results.", "icon": "check", "updated": "2026-10-09" },
+  { "id": "links", "title": "Links and accounts", "summary": "Every address and the account that manages it. No passwords.", "icon": "link", "updated": "2026-10-09" }
+]

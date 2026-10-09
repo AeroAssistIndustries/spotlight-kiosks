@@ -6,9 +6,11 @@
   const fmt = n => Number(n || 0).toLocaleString("en-US");
   const clone = o => JSON.parse(JSON.stringify(o));
 
-  const TABS = [["overview", "Overview"], ["ads", "Ads"], ["places", "Places"], ["answers", "Answers"], ["notices", "Announcements"], ["notes", "Notes"], ["hotel", "Hotel"], ["kiosks", "Kiosks"], ["history", "History"]];
+  const TABS = [["overview", "Overview"], ["ads", "Ads"], ["places", "Places"], ["answers", "Answers"], ["notices", "Announcements"], ["notes", "Notes"], ["files", "Files"], ["hotel", "Hotel"], ["kiosks", "Kiosks"], ["history", "History"]];
   /* line icons (24px grid) */
   const IC = {
+    files: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 10h18"/>',
+    print: '<path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/>',
     overview: '<rect x="3" y="3" width="8" height="10" rx="2"/><rect x="13" y="3" width="8" height="6" rx="2"/><rect x="13" y="11" width="8" height="10" rx="2"/><rect x="3" y="15" width="8" height="6" rx="2"/>',
     ads: '<path d="M3 11v2a2 2 0 0 0 2 2h1l5 4V5L6 9H5a2 2 0 0 0-2 2z"/><path d="M15 9a4 4 0 0 1 0 6M18 6a8 8 0 0 1 0 12"/>',
     places: '<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
@@ -151,6 +153,7 @@
     markDirty();
     tick();
     loadNotes();
+    loadFiles();
   }
 
   /* ---------- live clock (the hotel's own time) ---------- */
@@ -185,8 +188,9 @@
     updateBadges();
     const y = window.scrollY;
     document.body.classList.toggle("is-report", tab === "report");
-    view.innerHTML = ({ overview: vOverview, ads: vAds, places: vPlaces, answers: vAnswers, hotel: vHotel, notices: vNotices, notes: vNotes, kiosks: vKiosks, history: vHistory, report: vReport })[tab]();
+    view.innerHTML = ({ overview: vOverview, ads: vAds, places: vPlaces, answers: vAnswers, hotel: vHotel, notices: vNotices, notes: vNotes, files: vFiles, kiosks: vKiosks, history: vHistory, report: vReport })[tab]();
     labelTables(view);
+    if (tab === "files") wireTasks(view);
     window.scrollTo(0, y);
     tick();
   }
@@ -256,6 +260,7 @@
   }
   function onChange(e) {
     const el = e.target;
+    if (el.dataset.task) { saveTask(el); return; }
     if (el.dataset.bind && (el.type === "checkbox" || el.tagName === "SELECT" || el.type === "date")) { setPath(D, el.dataset.bind, readVal(el)); markDirty(); if (el.dataset.rerender || /^(sponsors|notices)\.\d+\.(active|start|end|item)$/.test(el.dataset.bind)) render(); }
     if (el.dataset.cat) { toggleCat(el.dataset.item, el.dataset.cat, el.checked); markDirty(); }
     if (el.id === "range-kiosk") { kioskFilter = el.value; loadStats(); }
@@ -381,6 +386,8 @@
     D.sponsors.forEach(s => { const [cls, label] = adStatus(s); if (cls === "warn" && /^Ends/.test(label)) acts.push({ tone: "warn", text: `<b>${esc(s.name)}</b> ad ${esc(label.toLowerCase())}. Time to talk renewal.`, btn: "Open ad", act: 'data-tab="ads"' }); });
     D.sponsors.filter(s => s.id && s.active !== false && !(deals[s.id] && deals[s.id].price != null)).slice(0, 2).forEach(s => acts.push({ tone: "info", text: `Add the monthly price for <b>${esc(s.name)}</b> to track revenue.`, btn: "Add deal", act: `data-act="goto-deal" data-id="${esc(s.id)}"` }));
     D.sponsors.filter(s => !s.logo).slice(0, 1).forEach(s => acts.push({ tone: "info", text: `<b>${esc(s.name || "An ad")}</b> has no logo yet.`, btn: "Upload", act: 'data-tab="ads"' }));
+    const lt = tasksOpen();
+    if (lt) acts.push({ tone: "warn", text: `<b>${lt} launch task${lt > 1 ? "s" : ""}</b> still open for North Hollywood.`, btn: "Checklist", act: 'data-act="file-open" data-id="launch"' });
     const todos = notes.filter(n => n.todo && !n.done).length;
     if (todos) acts.push({ tone: "info", text: `${todos} open to-do${todos > 1 ? "s" : ""} in your notes.`, btn: "View", act: 'data-tab="notes"' });
     if (!(D.notices || []).some(n => n.active !== false)) acts.push({ tone: "idea", text: "Tip: post an announcement, like today's happy hour or a pool closure.", btn: "Post one", act: 'data-act="goto-notice"' });
@@ -886,6 +893,9 @@
       case "add-place-go": go("places"); return;
       case "add-faq-go": go("answers"); clickAct("add-faq"); return;
       case "note-filter": noteFilter = d.f; render(); return;
+      case "file-open": return openFile(d.id);
+      case "file-back": fileId = null; render(); window.scrollTo(0, 0); return;
+      case "file-print": return window.print();
       case "note-done": case "note-pin": case "note-todo": case "note-color": {
         const n = notes.find(x => x.id === d.id); if (!n) return;
         if (d.act === "note-done") n.done = n.done ? 0 : 1;
@@ -958,6 +968,52 @@
   }
 
   /* ---------- notes & to-dos (shared by everyone who signs in) ---------- */
+  /* ---------- owner files: guides + launch checklist (loaded only after sign-in) ---------- */
+  let fileList = null, fileId = null, fileCache = {}, tasks = {}, taskTotal = 0;
+  const tasksOpen = () => Math.max(0, taskTotal - Object.values(tasks).filter(Boolean).length);
+  async function loadFiles() {
+    try {
+      const [l, t] = await Promise.all([api("files"), api("tasks")]);
+      fileList = l.files || []; tasks = {}; (t.tasks || []).forEach(x => { tasks[x.id] = !!x.done; });
+      const launch = await api("files/launch").catch(() => null);
+      if (launch && launch.file) { fileCache.launch = launch.file; taskTotal = (launch.file.html.match(/data-task="/g) || []).length; }
+    } catch (e) { if (!fileList) fileList = []; }
+    updateBadges(); if (tab === "files" || tab === "overview") render();
+  }
+  async function openFile(id) {
+    if (tab !== "files") go("files");
+    fileId = id; render(); window.scrollTo(0, 0);
+    if (!fileCache[id]) {
+      try { fileCache[id] = (await api("files/" + encodeURIComponent(id))).file; } catch (e) { if (e.message !== "signed out") toast(e.message, true); fileId = null; }
+      render();
+    }
+  }
+  function vFiles() {
+    if (!fileList) return `<div class="head"><div><h1>Files</h1><p>Loading…</p></div></div>`;
+    if (fileId) {
+      const f = fileCache[fileId], meta = fileList.find(x => x.id === fileId) || {};
+      const nTask = f ? (f.html.match(/data-task="/g) || []).length : 0;
+      const done = f ? [...f.html.matchAll(/data-task="([a-z0-9-]+)"/g)].filter(m => tasks[m[1]]).length : 0;
+      return `<div class="file-bar"><button class="btn small" data-act="file-back">${icon("up")} All files</button><span class="grow"></span>${nTask ? `<span class="pill${done === nTask ? " ok" : ""}"><i></i>${done} of ${nTask} done</span>` : ""}<button class="btn small" data-act="file-print">${icon("print")} Print or save as PDF</button></div>
+        <article class="card filedoc"><span class="eyebrow">CityPulse Kiosks · updated ${esc(fmtDate(meta.updated))}</span><h1>${esc(meta.title || "")}</h1>${f ? f.html : `<p class="empty">Loading…</p>`}</article>`;
+    }
+    const open = tasksOpen();
+    return `<div class="head"><div><h1>Files</h1><p>Guides for running CityPulse and the North Hollywood launch checklist. Only people signed in to this dashboard can open them.</p></div></div>
+      ${taskTotal ? `<button class="launch-strip" data-act="file-open" data-id="launch"><span>${icon("bolt")}</span><b>${open ? `${open} launch task${open === 1 ? "" : "s"} open` : "Launch checklist complete"}</b><small>${taskTotal - open} of ${taskTotal} done</small><i class="meter"><i style="width:${Math.round((taskTotal - open) / taskTotal * 100)}%"></i></i></button>` : ""}
+      <div class="files">${fileList.map(f => `<button class="file-tile" data-act="file-open" data-id="${esc(f.id)}"><span class="file-ic">${icon(f.icon || "files")}</span><b>${esc(f.title)}</b><small>${esc(f.summary)}</small><em>Updated ${esc(fmtDate(f.updated))}</em></button>`).join("")}</div>`;
+  }
+  const fmtDate = d => { if (!d) return ""; const t = new Date(d + "T12:00:00Z"); return isNaN(t) ? d : t.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }); };
+  /* checklist boxes inside a file: restore saved state after each render, save each tick */
+  function wireTasks(root) {
+    root.querySelectorAll("input[data-task]").forEach(cb => { cb.checked = !!tasks[cb.dataset.task]; cb.closest(".task").classList.toggle("done", cb.checked); });
+  }
+  async function saveTask(cb) {
+    const id = cb.dataset.task, done = cb.checked;
+    tasks[id] = done; cb.closest(".task").classList.toggle("done", done); updateBadges();
+    try { await api("tasks", { method: "PUT", json: { id, done } }); render(); }
+    catch (e) { tasks[id] = !done; cb.checked = !done; cb.closest(".task").classList.toggle("done", !done); updateBadges(); if (e.message !== "signed out") toast(e.message, true); }
+  }
+
   let notes = [], noteFilter = "all", noteQuery = "";
   const NOTE_COLORS = ["yellow", "teal", "pink", "blue", "gray"];
   async function loadNotes() { try { notes = (await api("notes")).notes || []; } catch (e) { notes = []; } if (tab === "overview" || tab === "notes") render(); updateBadges(); }
@@ -1018,6 +1074,7 @@
     set("kiosks", off ? off : "", "bad");
     set("ads", D.sponsors.filter(x => /^Ends/.test(adStatus(x)[1])).length || "", "warn");
     set("notes", notes.filter(n => n.todo && !n.done).length || "");
+    set("files", tasksOpen() || "", "warn");
     set("notices", (D.notices || []).filter(n => adStatus(n)[0] === "ok").length || "", "ok");
   }
 
@@ -1033,13 +1090,14 @@
     it.push({ g: "Actions", t: "Restart all kiosks", ic: "refresh", run: () => clickAct("kiosk-reload", { k: "*" }) });
     it.push({ g: "Actions", t: "Download ad report (CSV)", ic: "down", run: () => { if (stats) csv(); } });
     it.push({ g: "Actions", t: "Sign out", ic: "logout", run: () => clickAct("logout") });
+    (fileList || []).forEach(f => it.push({ g: "Files", t: f.title, sub: f.summary, ic: "files", run: () => openFile(f.id) }));
     D.sponsors.forEach(s => s.id && it.push({ g: "Advertisers", t: s.name, sub: "Open report", ic: "ads", run: () => clickAct("report", { id: s.id }) }));
     Object.entries(D.items).forEach(([id, x]) => it.push({ g: "Places", t: x.n, sub: x.k, ic: "places", run: () => { go("places"); open = "p:" + id; render(); setTimeout(() => { const el = document.querySelector(`[data-key="p:${CSS.escape(id)}"]`); if (el) el.scrollIntoView({ block: "center" }); }, 30); } }));
     D.faq.forEach((f, i) => it.push({ g: "Answers", t: f.q, ic: "answers", run: () => { go("answers"); open = "f:" + i; render(); } }));
     notes.slice(0, 50).forEach(n => it.push({ g: "Notes", t: n.text.split("\n")[0].slice(0, 80), ic: "notes", run: () => go("notes") }));
     return it;
   }
-  function go(k) { tab = k; open = null; history.replaceState(null, "", "#" + k); render(); window.scrollTo(0, 0); if (k === "overview" || k === "kiosks") loadStats(); }
+  function go(k) { tab = k; open = null; if (k === "files") fileId = null; history.replaceState(null, "", "#" + k); render(); window.scrollTo(0, 0); if (k === "overview" || k === "kiosks") loadStats(); }
   function clickAct(act, data) { const b = document.createElement("button"); b.dataset.act = act; Object.assign(b.dataset, data || {}); b.hidden = true; app.appendChild(b); b.click(); b.remove(); }
   function openPalette() {
     if (!D) return;

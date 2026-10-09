@@ -1,0 +1,50 @@
+<p class="lead">Everything a guest, you or an advertiser does passes through one Cloudflare worker, which keeps all content and numbers in one database.</p>
+<div class="diagram-wrap"><svg class="diagram" viewBox="0 0 760 424" role="img" aria-label="One Cloudflare worker connects the kiosk, the dashboard and every sale"><defs><marker id="dg-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="dg-head" d="M0 0L10 5L0 10z"/></marker></defs><text class="dg-title" x="24" y="30">One Cloudflare worker connects the kiosk, the dashboard and every sale</text><path class="dg-edge" d="M104 104V144" marker-end="url(#dg-a)"/><path class="dg-edge" d="M104 200V240" marker-end="url(#dg-a)"/><path class="dg-edge" d="M288 104V144" marker-end="url(#dg-a)"/><path class="dg-edge" d="M288 200V240" marker-end="url(#dg-a)"/><path class="dg-edge" d="M472 104V144" marker-end="url(#dg-a)"/><path class="dg-edge" d="M472 200V240" marker-end="url(#dg-a)"/><path class="dg-edge" d="M656 104V144" marker-end="url(#dg-a)"/><path class="dg-edge" d="M656 200V240" marker-end="url(#dg-a)"/><path class="dg-edge" d="M104 304V344" marker-end="url(#dg-a)"/><path class="dg-edge" d="M288 304V344" marker-end="url(#dg-a)"/><path class="dg-edge" d="M472 304V344" marker-end="url(#dg-a)"/><path class="dg-edge" d="M736 172H748V372H738" marker-end="url(#dg-a)"/><text class="dg-s dg-end" x="742" y="232">pays</text><rect class="dg-person" x="24" y="56" width="160" height="48" rx="3"/><text class="dg-t" x="36" y="76">Hotel guest</text><text class="dg-s" x="36" y="93">taps the lobby kiosk</text><rect class="dg-person" x="208" y="56" width="160" height="48" rx="3"/><text class="dg-t" x="220" y="76">Guest's phone</text><text class="dg-s" x="220" y="93">scans a QR code</text><rect class="dg-person" x="392" y="56" width="160" height="48" rx="3"/><text class="dg-t" x="404" y="76">You and staff</text><text class="dg-s" x="404" y="93">edit and publish</text><rect class="dg-person" x="576" y="56" width="160" height="48" rx="3"/><text class="dg-t" x="588" y="76">Advertiser</text><text class="dg-s" x="588" y="93">orders and pays</text><rect class="dg-box" x="24" y="144" width="160" height="56" rx="3"/><text class="dg-t" x="36" y="166">Kiosk screen</text><text class="dg-s" x="36" y="184">GitHub Pages</text><rect class="dg-box" x="208" y="144" width="160" height="56" rx="3"/><text class="dg-t" x="220" y="166">QR link</text><text class="dg-s" x="220" y="184">counted, then forwarded</text><rect class="dg-box" x="392" y="144" width="160" height="56" rx="3"/><text class="dg-t" x="404" y="166">Owner dashboard</text><text class="dg-s" x="404" y="184">Cloudflare, /admin</text><rect class="dg-box" x="576" y="144" width="160" height="56" rx="3"/><text class="dg-t" x="588" y="166">Website checkout</text><text class="dg-s" x="588" y="184">order and e-signature</text><rect class="dg-core" x="24" y="240" width="528" height="64" rx="3"/><text class="dg-t" x="36" y="264">Cloudflare worker: spotlight-kiosks</text><text class="dg-s dg-ink" x="36" y="282">Sends kiosks their content, counts every view and scan, answers</text><text class="dg-s dg-ink" x="36" y="297">guest questions, runs this dashboard and advertisers' live reports</text><rect class="dg-box" x="576" y="240" width="160" height="64" rx="3"/><text class="dg-t" x="588" y="264">FormSubmit</text><text class="dg-s" x="588" y="282">emails each order</text><text class="dg-s" x="588" y="297">to your Gmail</text><rect class="dg-box" x="24" y="344" width="160" height="56" rx="3"/><text class="dg-t" x="36" y="366">D1 database</text><text class="dg-s" x="36" y="384">content, counts, deals</text><rect class="dg-box" x="208" y="344" width="160" height="56" rx="3"/><text class="dg-t" x="220" y="366">Workers AI</text><text class="dg-s" x="220" y="384">concierge answers</text><rect class="dg-box" x="392" y="344" width="160" height="56" rx="3"/><text class="dg-t" x="404" y="366">Google Maps</text><text class="dg-s" x="404" y="384">and advertiser sites</text><rect class="dg-warn" x="576" y="344" width="160" height="56" rx="3"/><text class="dg-t" x="588" y="366">Stripe</text><text class="dg-s" x="588" y="384">links not set up yet</text></svg></div>
+<p class="fnote">The kiosk also pulls weather straight from weather.gov. Code lives on GitHub; every change rebuilds the kiosk screen, the website and the worker automatically.</p>
+
+<h2>What happens, step by step</h2>
+<div class="flows">
+<div class="flow"><h3>A guest uses the kiosk</h3><ol>
+<li>The lobby screen opens the kiosk page from GitHub Pages.</li>
+<li>It loads the latest content from the worker and keeps a copy, so it still works if the internet drops.</li>
+<li>Weather comes from weather.gov; questions go to the worker, which asks Workers AI.</li>
+<li>Once a minute the kiosk sends its counts to the worker, which saves them in the database.</li>
+</ol></div>
+<div class="flow"><h3>A guest scans a QR code</h3><ol>
+<li>The phone opens a short CityPulse link on the worker.</li>
+<li>The worker counts the scan for that business or place.</li>
+<li>It forwards the phone to Google Maps, the advertiser's website or the phone guide.</li>
+</ol></div>
+<div class="flow"><h3>You change something</h3><ol>
+<li>Edit hotel info, places, answers or ads here.</li>
+<li>Publish. The worker saves a new version, so any version can be restored.</li>
+<li>Every kiosk checks in every 2 minutes and switches when nobody is using it.</li>
+</ol></div>
+<div class="flow"><h3>An advertiser orders</h3><ol>
+<li>They complete the website checkout and sign the Advertiser Agreement.</li>
+<li>FormSubmit emails the order and their files to Gmail; Stripe takes payment once connected.</li>
+<li>You add the ad here, publish, and send them their live report link.</li>
+</ol></div>
+</div>
+
+<h2>Outside services</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Service</th><th>What it does for CityPulse</th><th>Status</th><th>Cost</th></tr></thead>
+<tbody>
+<tr><td>Cloudflare Workers</td><td>Runs the worker: kiosk content, counts, QR links, AI answers, this dashboard, reports, Sales Studio</td><td><span class="pill ok"><i></i>Live</span></td><td>Free plan</td></tr>
+<tr><td>Cloudflare D1</td><td>The database: content, versions, counts, kiosks, deals, notes, tasks</td><td><span class="pill ok"><i></i>Live</span></td><td>Free plan</td></tr>
+<tr><td>Workers AI (Gemma 4)</td><td>Writes the concierge's answers from the hotel's approved facts</td><td><span class="pill ok"><i></i>Live</span></td><td>Free daily allowance</td></tr>
+<tr><td>GitHub and GitHub Pages</td><td>Stores the code; hosts the kiosk screen, phone guide and website</td><td><span class="pill ok"><i></i>Live</span></td><td>Free</td></tr>
+<tr><td>Weather.gov</td><td>Current weather and 7-day forecast on the kiosk</td><td><span class="pill ok"><i></i>Live</span></td><td>Free, no account</td></tr>
+<tr><td>Google Maps</td><td>Walking directions and evening routes opened by QR codes</td><td><span class="pill ok"><i></i>Live</span></td><td>Free, links only</td></tr>
+<tr><td>FormSubmit</td><td>Emails website orders and inquiries to Gmail</td><td><span class="pill ok"><i></i>Live</span></td><td>Free</td></tr>
+<tr><td>Gmail</td><td>Receives orders and leads today</td><td><span class="pill ok"><i></i>Live</span></td><td>Free</td></tr>
+<tr><td>Google Fonts</td><td>Typefaces on the website</td><td><span class="pill ok"><i></i>Live</span></td><td>Free</td></tr>
+<tr><td>Elo touchscreen</td><td>The lobby kiosk at Lexen North Hollywood</td><td><span class="pill ok"><i></i>Live</span></td><td>Hardware, one-time</td></tr>
+<tr><td>Stripe Payment Links</td><td>Online payment for ad packages</td><td><span class="pill warn"><i></i>Setting up</span></td><td>Per-payment fee</td></tr>
+<tr><td>Google Workspace</td><td>sales@ and support@citypulsekiosks.com; Gmail sending in Sales Studio</td><td><span class="pill warn"><i></i>Setting up</span></td><td>Per user, monthly</td></tr>
+<tr><td>Twilio</td><td>Calls and texts from Sales Studio</td><td><span class="pill off"><i></i>Ready to connect</span></td><td>Number plus usage</td></tr>
+<tr><td>WordPress</td><td>WordPress version of the website, handed to a developer</td><td><span class="pill off"><i></i>Handed off</span></td><td>Depends on host</td></tr>
+<tr><td>Claude (Anthropic)</td><td>Optional stronger concierge model</td><td><span class="pill off"><i></i>Optional</span></td><td>Pay per use</td></tr>
+<tr><td>T-Mobile 4G</td><td>A data card per kiosk, so screens stay online without venue Wi-Fi</td><td><span class="pill off"><i></i>Planned</span></td><td>Per kiosk, monthly</td></tr>
+</tbody></table></div>
