@@ -1168,7 +1168,7 @@ function parseRows(txt){
 
 /* ========================= TEAM ========================= */
 function vTeam(){
-  const ids=teamIds(), adm=isAdmin();
+  const ids=teamIds(), adm=S.isOwner && S.canWrite; /* levels, on/off and goals: the owner's call */
   const qaBy=id=>{ const a=[...S.qa.values()].filter(q=>q.agent===id); return a.length?Math.round(a.reduce((s,q)=>s+(q.total||0),0)/a.length)+'%':'—'; };
   return `<div class="hd"><div><div class="eyebrow">Team</div><h1>${plural(ids.length,'person','people')}</h1></div></div>
   <div class="panel" style="margin-bottom:16px"><div class="tablewrap"><table><thead><tr><th>Person</th><th>Role</th><th class="r">Daily dials</th><th class="r">Daily talks</th><th class="r">Accounts</th><th class="r">QA avg</th><th>Status now</th><th>Active</th></tr></thead><tbody>
@@ -1413,9 +1413,9 @@ V.addEventListener('submit', async e=>{
 });
 
 /* ========================= Standalone-only panels ========================= */
-async function loadLogins(){ if(!HOST || !isAdmin()) return; try{ S.logins=(await HOST.users.list()).users; }catch(e){ S.logins=[]; } if(S.view==='team') render(); }
+async function loadLogins(){ if(!HOST || !S.isOwner) return; try{ S.logins=(await HOST.users.list()).users; }catch(e){ S.logins=[]; } if(S.view==='team') render(); }
 function loginsHtml(){
-  if(!isAdmin()) return `<div class="panel pad" style="margin-bottom:16px"><p class="small">Ask an admin to add people or reset passwords.</p></div>`;
+  if(!S.isOwner) return `<div class="panel pad" style="margin-bottom:16px"><p class="small">Only the owner adds people, sets their level and resets passwords.</p></div>`;
   if(!S.logins){ setTimeout(loadLogins,0); S.logins=[]; }
   return `<div class="cols" style="margin-bottom:16px"><div class="panel"><div class="pad card-t" style="margin:0"><h3>Logins</h3><span class="small muted">${plural(S.logins.length,'login')}</span></div><div class="tablewrap"><table><thead><tr><th>Name</th><th>Username</th><th>Role</th><th>Last sign-in</th><th></th></tr></thead><tbody>
     ${S.logins.map(x=>`<tr><td><strong>${esc(x.name)}</strong>${x.owner?' <span class="small muted">(owner)</span>':''}${x.email?`<div class="small muted">${esc(x.email)}</div>`:''}</td><td class="small">${esc(x.username)}</td><td class="small">${esc(cap(x.role))}${x.active?'':' <span class="chip c-red">Off</span>'}${x.mustChange?' <span class="chip c-amber">Temp password</span>':''}</td><td class="small">${esc(x.lastLogin?fmtWhen(x.lastLogin):'Never')}</td><td><div class="row" style="flex-wrap:nowrap">${x.owner?'':`<button class="btn sm" type="button" data-resetpw="${esc(x.id)}">Reset password</button>`}${x.active?'':`<button class="btn sm" type="button" data-reactivate="${esc(x.id)}">Turn on</button>`}</div></td></tr>`).join('') || '<tr><td colspan="5" class="empty">Loading…</td></tr>'}

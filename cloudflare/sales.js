@@ -1,11 +1,13 @@
 /* CityPulse Sales Studio: the call-center CRM, served by this worker at /sales.
 
    Uses the same D1 database (binding DB) as the kiosk dashboard, in its own crm_* tables.
-   Sign-in is per person (username + password). The first admin is created with the staff dashboard password.
+   Sign-in is per person (username + password). One owner login is created automatically on first use (OWNER_SEED
+   below: a one-time temporary password that must be changed at first sign-in). Only the owner adds people, sets
+   their level and resets passwords.
 
-   Secrets (Workers & Pages > spotlight-kiosks > Settings > Variables and Secrets). All optional except ADMIN_PASSWORD:
-     ADMIN_PASSWORD            already set for the kiosk dashboard; needed once to create the first Sales Studio admin
-     SALES_SECRET              signs sign-in cookies; if missing, ADMIN_PASSWORD is used (changing it signs everyone out)
+   Secrets (Workers & Pages > spotlight-kiosks > Settings > Variables and Secrets). All optional:
+     SALES_SECRET              signs sign-in cookies and seals Gmail tokens; if missing, a random key kept in the
+                               database is used. Adding or changing it later signs everyone out and disconnects Gmail.
      TWILIO_ACCOUNT_SID        Twilio account (AC…)                         } browser calling
      TWILIO_API_KEY            Twilio API key SID (SK…)                     }
      TWILIO_API_SECRET         that key's secret                            }
@@ -33,7 +35,8 @@ const SCHEMA = [
   "CREATE TABLE IF NOT EXISTS crm_users (id TEXT PRIMARY KEY, username TEXT UNIQUE NOT NULL, name TEXT NOT NULL, email TEXT, role TEXT NOT NULL, pass TEXT NOT NULL, active INTEGER NOT NULL DEFAULT 1, owner INTEGER NOT NULL DEFAULT 0, must_change INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL, last_login TEXT)",
   "CREATE TABLE IF NOT EXISTS crm_locks (path TEXT PRIMARY KEY, holder TEXT NOT NULL, exp INTEGER NOT NULL)",
   "CREATE TABLE IF NOT EXISTS crm_google (user_id TEXT PRIMARY KEY, email TEXT, token TEXT NOT NULL, updated_at TEXT NOT NULL)",
-  "CREATE TABLE IF NOT EXISTS crm_recordings (call_sid TEXT PRIMARY KEY, recording_sid TEXT NOT NULL, duration INTEGER, created_at TEXT NOT NULL)"
+  "CREATE TABLE IF NOT EXISTS crm_recordings (call_sid TEXT PRIMARY KEY, recording_sid TEXT NOT NULL, duration INTEGER, created_at TEXT NOT NULL)",
+  "CREATE TABLE IF NOT EXISTS crm_meta (k TEXT PRIMARY KEY, v TEXT NOT NULL)"
 ];
 const ROLES = ["agent", "supervisor", "admin"];
 const SEG_RE = /^[A-Za-z0-9_\-.~:@+]{1,200}$/, FIELD_RE = /^[A-Za-z0-9_]{1,60}$/, USER_RE = /^[a-z0-9._-]{3,32}$/;
@@ -49,7 +52,25 @@ const fromB64 = s => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/"
 const rid = n => b64url(crypto.getRandomValues(new Uint8Array(n))).replace(/[-_]/g, "x").slice(0, Math.ceil(n * 4 / 3));
 const normPhone = p => { let d = String(p || "").replace(/\D/g, ""); if (d.length === 10) d = "1" + d; return d; };
 const xml = s => String(s ?? "").replace(/[<>&"']/g, c => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;", "'": "&apos;" }[c]));
-const secret = env => env.SALES_SECRET || env.ADMIN_PASSWORD || "";
+/* The owner's first login. The password is a random one-time value given to the owner directly; only its hash is
+   here, and it must be changed at first sign-in. */
+const OWNER_SEED = { username: "sarvesh", name: "Sarvesh Joshi", pass: "pbkdf2$100000$T7C0tyiRyeddMOoSy7F/ww==$CL5YymR1zmXwfaQqbtw7GV+8BUCxTRFxAoOmAlyHT+4=" };
+let SECRET = "";
+const secret = () => SECRET;
+async function loadSecret(env) {
+  if (SECRET) return SECRET;
+  if (env.SALES_SECRET) return (SECRET = env.SALES_SECRET);
+  await env.DB.prepare("INSERT OR IGNORE INTO crm_meta (k, v) VALUES ('session_key', ?)").bind(b64(crypto.getRandomValues(new Uint8Array(32)))).run();
+  return (SECRET = (await env.DB.prepare("SELECT v FROM crm_meta WHERE k = 'session_key'").first()).v);
+}
+async function seedOwner(env) {
+  const count = (await env.DB.prepare("SELECT COUNT(*) n FROM crm_users").first()).n;
+  if (count > 0) return;
+  const id = "u_" + rid(16);
+  const r = await env.DB.prepare("INSERT OR IGNORE INTO crm_users (id, username, name, email, role, pass, active, owner, must_change, created_at) VALUES (?, ?, ?, '', 'admin', ?, 1, 1, 1, ?)")
+    .bind(id, OWNER_SEED.username, OWNER_SEED.name, OWNER_SEED.pass, nowIso()).run();
+  if (r.meta && r.meta.changes) { await putDoc(env, "staff/" + id, { role: "admin", active: true }); await putDoc(env, "members/" + id, { joinedAt: nowIso() }); }
+}
 
 let schemaReady = null;
 function ensure(env) {
@@ -132,7 +153,8 @@ function canWrite(u, path) {
   const s = path.split("/"), admin = u.role === "admin";
   if (s[0] === "data" && s[1] === "users") return s[2] === u.id;
   if (s[0] === "members" || s[0] === "agentStatus") return s.length === 2 && (s[1] === u.id || admin);
-  if (["staff", "config", "library", "templates"].includes(s[0])) return admin;
+  if (s[0] === "staff") return !!u.owner;
+  if (["config", "library", "templates"].includes(s[0])) return admin;
   if (s[0] === "locks") return false;
   return true;
 }
@@ -242,6 +264,8 @@ export async function handleSales(req, env, ctx) {
   const url = new URL(req.url), path = url.pathname.replace(/\/+$/, "") || "/";
   if (!hasDB(env)) return jsonRes(503, { error: "The database isn't set up on this worker." });
   await ensure(env);
+  await loadSecret(env);
+  await seedOwner(env);
 
   if (path === "/sales" && req.method === "GET") return new Response(SALES_HTML, { headers: { "Content-Type": "text/html; charset=utf-8", ...SEC } });
   if (path.startsWith("/sales/voice/") && req.method === "POST") return voiceHook(req, env, path.slice(13), url);
@@ -258,22 +282,9 @@ export async function handleSales(req, env, ctx) {
   if (api === "me") {
     const u = await currentUser(req, env);
     const count = (await env.DB.prepare("SELECT COUNT(*) n FROM crm_users").first()).n;
-    if (!u) return jsonRes(200, { signedIn: false, needsSetup: count === 0, ready: !!secret(env) });
+    if (!u) return jsonRes(200, { signedIn: false, needsSetup: false, ready: count > 0 });
     const g = await env.DB.prepare("SELECT email FROM crm_google WHERE user_id = ?").bind(u.id).first();
     return jsonRes(200, { signedIn: true, user: publicUser(u), status: { voice: voiceOn(env), sms: smsOn(env), google: googleOn(env), ai: !!(env.ANTHROPIC_API_KEY || env.AI) }, google: { connected: !!g, email: g ? g.email : "" } });
-  }
-  if (api === "setup" && req.method === "POST") {
-    const count = (await env.DB.prepare("SELECT COUNT(*) n FROM crm_users").first()).n;
-    if (count > 0) return jsonRes(409, { error: "Sales Studio is already set up. Sign in instead." });
-    if (tooManyTries(ip)) return jsonRes(429, { error: "Too many tries. Wait 15 minutes." });
-    if (!env.ADMIN_PASSWORD || !eq(body.adminPassword || "", env.ADMIN_PASSWORD)) { tooManyTries(ip, true); return jsonRes(403, { error: "That isn’t the staff dashboard password." }); }
-    const err = checkNewUser(body); if (err) return jsonRes(400, { error: err });
-    const id = "u_" + rid(16);
-    await env.DB.prepare("INSERT INTO crm_users (id, username, name, email, role, pass, active, owner, must_change, created_at) VALUES (?, ?, ?, ?, 'admin', ?, 1, 1, 0, ?)")
-      .bind(id, body.username.toLowerCase(), body.name.trim(), (body.email || "").trim(), await hashPassword(body.password), nowIso()).run();
-    await putDoc(env, "staff/" + id, { role: "admin", active: true });
-    await putDoc(env, "members/" + id, { joinedAt: nowIso() });
-    return jsonRes(200, { ok: true }, { "Set-Cookie": await sessionCookie(env, id) });
   }
   if (api === "login" && req.method === "POST") {
     if (tooManyTries(ip)) return jsonRes(429, { error: "Too many tries. Wait 15 minutes and try again." });
@@ -287,7 +298,7 @@ export async function handleSales(req, env, ctx) {
   /* ----- signed-in routes ----- */
   const u = await currentUser(req, env);
   if (!u) return jsonRes(401, { error: "Signed out. Sign in again." });
-  const admin = u.role === "admin";
+  const admin = u.role === "admin", owner = !!u.owner;
   try {
     switch (api) {
       case "password": {
@@ -299,7 +310,7 @@ export async function handleSales(req, env, ctx) {
         return jsonRes(200, { ok: true });
       }
       case "users": {
-        if (!admin) return jsonRes(403, { error: "Only admins manage logins." });
+        if (!owner) return jsonRes(403, { error: "Only the owner manages logins." });
         if (req.method === "GET") { const r = await env.DB.prepare("SELECT * FROM crm_users ORDER BY name").all(); return jsonRes(200, { users: (r.results || []).map(publicUser) }); }
         const err = checkNewUser(body); if (err) return jsonRes(400, { error: err });
         if (!ROLES.includes(body.role)) return jsonRes(400, { error: "Pick a role." });
@@ -329,7 +340,7 @@ export async function handleSales(req, env, ctx) {
           let data = body.data;
           if (body.op === "update") { const cur = await getDoc(env, p); if (!cur) throw bad("document does not exist"); data = merge(cur, data); }
           await putDoc(env, p, data);
-          if (p.startsWith("staff/") && admin) await syncStaff(env, u, p.split("/")[1], data);
+          if (p.startsWith("staff/") && owner) await syncStaff(env, u, p.split("/")[1], data);
         }
         const seq = (await env.DB.prepare("SELECT seq FROM crm_docs WHERE path = ?").bind(p).first() || {}).seq || 0;
         return jsonRes(200, { ok: true, seq });
@@ -435,7 +446,7 @@ export async function handleSales(req, env, ctx) {
       }
     }
     if (api.startsWith("users/") && req.method === "POST") {
-      if (!admin) return jsonRes(403, { error: "Only admins manage logins." });
+      if (!owner) return jsonRes(403, { error: "Only the owner manages logins." });
       const id = api.slice(6), t = await env.DB.prepare("SELECT * FROM crm_users WHERE id = ?").bind(id).first();
       if (!t) return jsonRes(404, { error: "No such person." });
       if (t.owner && (body.active === false || (body.role && body.role !== "admin"))) return jsonRes(400, { error: "The owner stays an active admin." });

@@ -117,8 +117,10 @@ connection to the server). Run `node cloudflare/build-sales.mjs` after editing e
 **Plan.** Use the Workers Paid plan ($5/month minimum) for a working call floor. The free plan's per-request CPU limit
 is too small for password checks and large lead lists.
 
-**First sign-in.** Open `/sales`. The first person creates the owner admin by entering the kiosk dashboard password
-(`ADMIN_PASSWORD`) once. Everyone else gets a login from Team > Add a person and picks their own password at first sign-in.
+**Logins.** The owner login (username `sarvesh`) exists from the start with a one-time password given to the owner
+directly; it must be changed at first sign-in. Only the owner adds people (Team > Add a person), sets their level
+(agent, supervisor, admin), turns them on or off and resets passwords. Everyone picks their own password at first sign-in.
+Sales Studio doesn't use the kiosk dashboard password.
 
 **Moving data from the Claude version.** Settings > Backup > Restore, then choose the backup file. `__OWNER__` in a
 backup is replaced with the signed-in admin.
@@ -127,7 +129,7 @@ backup is replaced with the signed-in admin.
 
 | Name | What it is | Needed for |
 | --- | --- | --- |
-| `SALES_SECRET` | any long random text; signs sign-in cookies (falls back to `ADMIN_PASSWORD`) | recommended |
+| `SALES_SECRET` | optional long random text that signs sign-ins and seals Gmail tokens; without it a random key kept in the database is used. Adding it later signs everyone out and disconnects Gmail | optional |
 | `TWILIO_ACCOUNT_SID` | Account SID (AC…) from the Twilio console | calls and texts |
 | `TWILIO_AUTH_TOKEN` | Auth Token from the Twilio console | calls and texts |
 | `TWILIO_API_KEY` / `TWILIO_API_SECRET` | an API key (SK…) and its secret: Twilio console > Account > API keys | calls and texts |
