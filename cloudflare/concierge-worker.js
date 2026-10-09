@@ -28,7 +28,7 @@ import { handleSales } from "./sales.js";
 
 const DEFAULTS = {
   VENUE_URL: "https://aeroassistindustries.github.io/spotlight-kiosks/assets/lexen-data.json",
-  ALLOWED_ORIGINS: "https://aeroassistindustries.github.io",
+  ALLOWED_ORIGINS: "https://aeroassistindustries.github.io,https://kiosk.citypulsekiosks.com,https://citypulsekiosks.com",
   MODEL: "claude-haiku-5-5",
   CF_MODEL: "@cf/google/gemma-4-26b-a4b-it"
 };
