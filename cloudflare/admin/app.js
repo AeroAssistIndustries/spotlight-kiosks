@@ -6,7 +6,34 @@
   const fmt = n => Number(n || 0).toLocaleString("en-US");
   const clone = o => JSON.parse(JSON.stringify(o));
 
-  const TABS = [["overview", "Overview"], ["ads", "Ads"], ["places", "Places"], ["answers", "Answers"], ["hotel", "Hotel"], ["notices", "Announcements"], ["kiosks", "Kiosks"], ["history", "History"]];
+  const TABS = [["overview", "Overview"], ["ads", "Ads"], ["places", "Places"], ["answers", "Answers"], ["notices", "Announcements"], ["notes", "Notes"], ["hotel", "Hotel"], ["kiosks", "Kiosks"], ["history", "History"]];
+  /* line icons (24px grid) */
+  const IC = {
+    overview: '<rect x="3" y="3" width="8" height="10" rx="2"/><rect x="13" y="3" width="8" height="6" rx="2"/><rect x="13" y="11" width="8" height="10" rx="2"/><rect x="3" y="15" width="8" height="6" rx="2"/>',
+    ads: '<path d="M3 11v2a2 2 0 0 0 2 2h1l5 4V5L6 9H5a2 2 0 0 0-2 2z"/><path d="M15 9a4 4 0 0 1 0 6M18 6a8 8 0 0 1 0 12"/>',
+    places: '<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+    answers: '<path d="M4 5h16v11H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/>',
+    notices: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10 20a2 2 0 0 0 4 0"/>',
+    notes: '<path d="M5 3h10l4 4v14H5z"/><path d="M15 3v4h4M8 11h8M8 15h6"/>',
+    hotel: '<path d="M3 21h18M5 21V5l7-2 7 2v16"/><path d="M9 9h2M13 9h2M9 13h2M13 13h2M10 21v-4h4v4"/>',
+    kiosks: '<rect x="6" y="2" width="12" height="15" rx="2"/><path d="M12 17v4M8 21h8"/>',
+    history: '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 3"/>',
+    search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
+    menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
+    logout: '<path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h11"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    up: '<path d="M7 14l5-5 5 5"/>', down: '<path d="M7 10l5 5 5-5"/>',
+    users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a5 5 0 0 1 3.5 6"/>',
+    eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+    qr: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v1M14 20h1M17 17h4v4h-4"/>',
+    pin: '<path d="M12 17v5M8 3h8l-1 7 3 3v2H6v-2l3-3z"/>',
+    check: '<path d="M5 12l5 5 9-10"/>', x: '<path d="M6 6l12 12M18 6L6 18"/>',
+    bolt: '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>', link: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+    dollar: '<path d="M12 2v20M17 6.5C16 5 14.2 4.5 12 4.5c-3 0-5 1.4-5 3.5 0 5 10 2.5 10 8 0 2.2-2.2 3.5-5 3.5-2.4 0-4.4-.8-5.5-2.5"/>',
+    sparkle: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/>',
+    refresh: '<path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/>'
+  };
+  const icon = (k, cls) => `<svg viewBox="0 0 24 24" class="ic${cls ? " " + cls : ""}" aria-hidden="true" focusable="false">${IC[k] || ""}</svg>`;
   const LOGO = cls => `<span class="logo${cls ? " " + cls : ""}"><img class="on-light" src="/admin/brand/logo.svg" alt="CityPulse Kiosks"><img class="on-dark" src="/admin/brand/logo-light.svg" alt="CityPulse Kiosks"></span>`;
   const ICONS = { fork: "Dining", bell: "Hotel", coffee: "Coffee", spark: "Things to do", bag: "Shopping", car: "Transport", pin: "Pin", star: "Star", walk: "Walking", sun: "Outdoors" };
 
@@ -90,15 +117,28 @@
 
   /* ---------- frame ---------- */
   function frame() {
-    app.innerHTML = `
-      <header class="top"><div class="top-in">
-        <div class="brand">${LOGO()}<span class="sep" aria-hidden="true"></span><div class="venue-name"><b>${esc(D.name)}</b><small>Kiosk dashboard</small></div></div>
-        <div class="state" id="state" aria-live="polite"></div>
-        <button class="btn ghost small" data-act="logout">Sign out</button>
-      </div>
-      <nav class="tabs" aria-label="Sections">${TABS.map(([k, l]) => `<button data-tab="${k}">${l}</button>`).join("")}</nav></header>
-      <main id="view"></main>
-      <footer class="foot"><img src="/admin/brand/favicon.svg" alt="" aria-hidden="true"><span>CityPulse Kiosks · Kiosk dashboard for ${esc(D.name)}</span></footer>
+    app.innerHTML = `<div class="shell">
+      <aside class="side" id="side" aria-label="Dashboard menu">
+        <div class="side-brand"><img src="/admin/brand/logo-light.svg" alt="CityPulse Kiosks"></div>
+        <div class="side-venue"><span class="dot-live"></span><div><b>${esc(D.name)}</b><small>Kiosk dashboard</small></div></div>
+        <nav class="side-nav" aria-label="Sections">${TABS.map(([k, l]) => `<button data-tab="${k}">${icon(k)}<span>${l}</span><em class="badge" id="badge-${k}"></em></button>`).join("")}</nav>
+        <div class="side-foot">
+          <button class="side-search" data-act="palette">${icon("search")}<span>Search or jump to…</span><kbd>${/Mac/.test(navigator.platform) ? "⌘" : "Ctrl"} K</kbd></button>
+          <button class="side-out" data-act="logout">${icon("logout")}<span>Sign out</span></button>
+        </div>
+      </aside>
+      <div class="scrim" data-act="close-menu"></div>
+      <div class="main">
+        <header class="topbar">
+          <button class="icon-btn menu-btn" data-act="open-menu" aria-label="Open menu">${icon("menu")}</button>
+          <div class="crumb"><span id="crumb-t">Overview</span><small>${esc(D.name)}</small></div>
+          <div class="state" id="state" aria-live="polite"></div>
+          <button class="top-search" data-act="palette" aria-label="Search or jump to">${icon("search")}<span>Search</span><kbd>${/Mac/.test(navigator.platform) ? "⌘" : "Ctrl"} K</kbd></button>
+          <div class="clock-chip" aria-label="Hotel time"><b id="clk-t">--:--</b><small id="clk-d"></small></div>
+        </header>
+        <main id="view"></main>
+        <footer class="foot"><img src="/admin/brand/favicon.svg" alt="" aria-hidden="true"><span>CityPulse Kiosks · Kiosk dashboard for ${esc(D.name)}</span></footer>
+      </div></div>
       <div class="publish-bar" id="pbar" role="region" aria-label="Unpublished changes">
         <span id="pbar-text">You have unpublished changes</span>
         <button class="btn ghost small" data-act="discard">Discard</button>
@@ -109,16 +149,45 @@
     view.addEventListener("change", onChange);
     app.addEventListener("click", onClick);
     markDirty();
+    tick();
+    loadNotes();
   }
+
+  /* ---------- live clock (the hotel's own time) ---------- */
+  const TZ = () => (D && D.tz) || "America/Los_Angeles";
+  function tick() {
+    const now = new Date();
+    const t = now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: TZ() });
+    const d = now.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: TZ() });
+    const a = document.getElementById("clk-t"), b = document.getElementById("clk-d");
+    if (a) a.textContent = t;
+    if (b) b.textContent = d + " · Pacific";
+    const big = document.getElementById("hero-time");
+    if (big) {
+      const parts = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit", second: "2-digit", hour12: true, timeZone: TZ() }).formatToParts(now);
+      const g = k => (parts.find(x => x.type === k) || {}).value || "";
+      big.innerHTML = `${g("hour")}:${g("minute")}<span class="sec">${g("second")}</span><span class="ampm">${g("dayPeriod")}</span>`;
+      const hh = +new Intl.DateTimeFormat("en-US", { hour: "numeric", hourCycle: "h23", timeZone: TZ() }).format(now), mm = +g("minute"), ss = +g("second");
+      const set = (id, deg) => { const el = document.getElementById(id); if (el) el.setAttribute("transform", `rotate(${deg} 50 50)`); };
+      set("hand-h", (hh % 12) * 30 + mm * 0.5); set("hand-m", mm * 6 + ss * 0.1); set("hand-s", ss * 6);
+      const gr = document.getElementById("hero-greet"); if (gr) gr.textContent = greeting(hh);
+    }
+  }
+  const greeting = h => h < 5 ? "Good evening" : h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+  setInterval(tick, 1000);
 
   function render() {
     const view = document.getElementById("view");
     if (!view) return;
-    document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-current", b.dataset.tab === tab ? "page" : "false"));
+    document.querySelectorAll(".side-nav button").forEach(b => b.setAttribute("aria-current", b.dataset.tab === tab ? "page" : "false"));
+    const ct = document.getElementById("crumb-t"); if (ct) ct.textContent = tab === "report" ? "Advertiser report" : (TABS.find(t => t[0] === tab) || [, ""])[1];
+    document.body.classList.remove("menu-open");
+    updateBadges();
     const y = window.scrollY;
     document.body.classList.toggle("is-report", tab === "report");
-    view.innerHTML = ({ overview: vOverview, ads: vAds, places: vPlaces, answers: vAnswers, hotel: vHotel, notices: vNotices, kiosks: vKiosks, history: vHistory, report: vReport })[tab]();
+    view.innerHTML = ({ overview: vOverview, ads: vAds, places: vPlaces, answers: vAnswers, hotel: vHotel, notices: vNotices, notes: vNotes, kiosks: vKiosks, history: vHistory, report: vReport })[tab]();
     window.scrollTo(0, y);
+    tick();
   }
 
   function isDirty() { return JSON.stringify(D) !== JSON.stringify(saved); }
@@ -219,7 +288,7 @@
   /* ---------- overview ---------- */
   async function loadStats() {
     statsErr = "";
-    try { stats = await api(`stats?days=${range}${kioskFilter ? "&kiosk=" + encodeURIComponent(kioskFilter) : ""}`); }
+    try { stats = await api(`stats?days=${range}${kioskFilter ? "&kiosk=" + encodeURIComponent(kioskFilter) : ""}`); updateBadges(); }
     catch (e) { if (e.message === "signed out") return; statsErr = e.message; }
     if (tab === "overview" || tab === "kiosks" || tab === "report") render();
   }
@@ -261,44 +330,124 @@
       }).join("")}
     </svg>`;
   }
+  /* ---------- overview: a bento grid of self-contained boxes ---------- */
+  function sparkline(type, color) {
+    if (!stats) return "";
+    const days = [], end = new Date(stats.to + "T12:00:00Z");
+    for (let i = stats.days - 1; i >= 0; i--) days.push(new Date(end.getTime() - i * 86400000).toISOString().slice(0, 10));
+    const v = days.map(d => stats.byDay.filter(r => r.day === d && r.type === type).reduce((a, r) => a + r.n, 0));
+    if (v.length < 2) return "";
+    const max = Math.max(1, ...v), W = 120, H = 32;
+    const pts = v.map((n, i) => `${(i / (v.length - 1) * W).toFixed(1)},${(H - 2 - n / max * (H - 4)).toFixed(1)}`).join(" ");
+    return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><polyline points="0,${H} ${pts} ${W},${H}" fill="${color}" fill-opacity=".12" stroke="none"/><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>`;
+  }
+  function delta(type, now) {
+    const was = stats && stats.prev ? +stats.prev[type] || 0 : 0;
+    if (!was && !now) return `<span class="delta flat">No change</span>`;
+    if (!was) return `<span class="delta up">${icon("up")}New</span>`;
+    const pct = Math.round((now - was) / was * 100);
+    if (pct === 0) return `<span class="delta flat">Same as before</span>`;
+    return `<span class="delta ${pct > 0 ? "up" : "down"}">${icon(pct > 0 ? "up" : "down")}${Math.abs(pct)}%</span>`;
+  }
+  const rangeLabel = () => range === 1 ? "today" : `the last ${range} days`;
+  const prevLabel = () => range === 1 ? "yesterday" : `the ${range} days before`;
+  function insight(ads) {
+    const sess = sumType("sessions"), was = stats.prev ? +stats.prev.sessions || 0 : 0;
+    const lines = [];
+    if (!sess) lines.push(`No guest sessions ${rangeLabel()} yet. The kiosk keeps showing your ads in the meantime.`);
+    else {
+      const ch = was ? Math.round((sess - was) / was * 100) : null;
+      lines.push(`<b>${fmt(sess)}</b> guest session${sess === 1 ? "" : "s"} ${rangeLabel()}${ch == null ? "" : ch === 0 ? ", the same as " + prevLabel() : `, <b class="${ch > 0 ? "pos" : "neg"}">${ch > 0 ? "up" : "down"} ${Math.abs(ch)}%</b> on ${prevLabel()}`}.`);
+    }
+    const topAd = ads.filter(r => r.engaged).sort((a, b) => b.engaged - a.engaged)[0];
+    if (topAd) lines.push(`<b>${esc(topAd.name)}</b> was seen by the most guests (${fmt(topAd.engaged)} views with a guest).`);
+    const tp = keysOf("places")[0]; if (tp) lines.push(`Most viewed place: <b>${esc(nameOf(tp.key))}</b>.`);
+    const h = Array(24).fill(0); keysOf("hours").forEach(r => { h[+r.key] += r.n; });
+    const mx = Math.max(...h); if (mx) { const i = h.indexOf(mx), lab = x => x === 0 ? "12 AM" : x < 12 ? x + " AM" : x === 12 ? "12 PM" : (x - 12) + " PM"; lines.push(`Busiest around <b>${lab(i)}</b>.`); }
+    return lines.join(" ");
+  }
+  function nextActions() {
+    const acts = [];
+    (stats ? stats.kiosks : []).filter(kioskOffline).forEach(k => acts.push({ tone: "bad", text: `<b>${esc(k.kiosk)}</b> is offline (last seen ${esc(ago(k.last_seen))}).`, btn: "Restart", act: `data-act="kiosk-reload" data-k="${esc(k.kiosk)}"` }));
+    if (isDirty()) acts.push({ tone: "warn", text: "You have changes that aren't on the kiosks yet.", btn: "Publish", act: 'data-act="publish"' });
+    D.sponsors.forEach(s => { const [cls, label] = adStatus(s); if (cls === "warn" && /^Ends/.test(label)) acts.push({ tone: "warn", text: `<b>${esc(s.name)}</b> ad ${esc(label.toLowerCase())}. Time to talk renewal.`, btn: "Open ad", act: 'data-tab="ads"' }); });
+    D.sponsors.filter(s => s.id && s.active !== false && !(deals[s.id] && deals[s.id].price != null)).slice(0, 2).forEach(s => acts.push({ tone: "info", text: `Add the monthly price for <b>${esc(s.name)}</b> to track revenue.`, btn: "Add deal", act: `data-act="goto-deal" data-id="${esc(s.id)}"` }));
+    D.sponsors.filter(s => !s.logo).slice(0, 1).forEach(s => acts.push({ tone: "info", text: `<b>${esc(s.name || "An ad")}</b> has no logo yet.`, btn: "Upload", act: 'data-tab="ads"' }));
+    const todos = notes.filter(n => n.todo && !n.done).length;
+    if (todos) acts.push({ tone: "info", text: `${todos} open to-do${todos > 1 ? "s" : ""} in your notes.`, btn: "View", act: 'data-tab="notes"' });
+    if (!(D.notices || []).some(n => n.active !== false)) acts.push({ tone: "idea", text: "Tip: post an announcement, like today's happy hour or a pool closure.", btn: "Post one", act: 'data-act="goto-notice"' });
+    return acts;
+  }
   function vOverview() {
     const kiosks = stats ? stats.kiosks : [];
     const seg = [[1, "Today"], [7, "7 days"], [30, "30 days"], [90, "90 days"]].map(([d, l]) => `<button data-act="range" data-days="${d}" aria-pressed="${range === d}">${l}</button>`).join("");
-    const head = `<div class="head"><div><h1>Overview</h1><p>What guests do on your kiosks. Counts include every kiosk and update every minute. Nothing personal is collected.</p></div>
-      <div class="seg" role="group" aria-label="Period">${seg}</div>
+    const filters = `<div class="filters"><div class="seg" role="group" aria-label="Period">${seg}</div>
       ${kiosks.length > 1 ? `<select id="range-kiosk" aria-label="Kiosk" style="width:auto"><option value="">All kiosks</option>${kiosks.map(k => `<option value="${esc(k.kiosk)}"${k.kiosk === kioskFilter ? " selected" : ""}>${esc(k.kiosk)}</option>`).join("")}</select>` : ""}</div>`;
-    if (statsErr) return head + `<div class="card"><div class="msg" role="alert">${esc(statsErr)}</div></div>`;
-    if (!stats) return head + `<div class="card loading">Loading numbers…</div>`;
+    const hero = `<section class="hero">
+        <div class="hero-main"><span class="eyebrow" id="hero-greet">${greeting(new Date().getHours())}</span>
+          <h1>${esc(D.name)}</h1>
+          <p class="hero-insight">${stats ? insight(adRows()) : "Loading today's numbers…"}</p>
+          ${filters}</div>
+        <div class="hero-clock" aria-label="Hotel time">
+          <svg viewBox="0 0 100 100" class="analog" aria-hidden="true"><circle cx="50" cy="50" r="47" class="face"/>
+            ${Array.from({ length: 12 }, (_, i) => `<line x1="50" y1="${i % 3 ? 8 : 6}" x2="50" y2="${i % 3 ? 11 : 14}" transform="rotate(${i * 30} 50 50)" class="tick${i % 3 ? "" : " major"}"/>`).join("")}
+            <line id="hand-h" x1="50" y1="50" x2="50" y2="28" class="hand h"/><line id="hand-m" x1="50" y1="52" x2="50" y2="16" class="hand m"/><line id="hand-s" x1="50" y1="56" x2="50" y2="12" class="hand s"/><circle cx="50" cy="50" r="2.6" class="pin"/></svg>
+          <div><div class="hero-time" id="hero-time">--:--</div><div class="hero-date">${esc(new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", timeZone: TZ() }))}<br><small>Hotel time · Pacific</small></div></div>
+        </div></section>`;
+    if (statsErr) return hero + `<div class="card"><div class="msg" role="alert">${esc(statsErr)}</div></div>`;
+    if (!stats) return hero + `<div class="card loading">Loading numbers…</div>`;
     const ads = adRows(), adViews = ads.reduce((a, r) => a + r.views, 0), adEngaged = ads.reduce((a, r) => a + r.engaged, 0), scans = sumType("qr");
     const placeScans = keysOf("qr").filter(r => r.key.startsWith("place:")).map(r => ({ key: r.key.slice(6), n: r.n }));
-    const card = (label, n, sub) => `<div class="card stat"><span>${label}</span><b>${fmt(n)}</b>${sub ? `<small>${sub}</small>` : ""}</div>`;
+    const kpi = (ic, tone, label, n, type, sub) => `<div class="kpi tone-${tone}"><div class="kpi-top"><span class="kpi-ic">${icon(ic)}</span><span class="kpi-l">${label}</span></div>
+      <b>${fmt(n)}</b><div class="kpi-bot">${delta(type, n)}<small>${sub}</small></div>${sparkline(type, `var(--t-${tone})`)}</div>`;
     const maxV = Math.max(1, ...ads.map(r => r.engaged));
-    const alerts = [];
-    (stats.kiosks || []).filter(kioskOffline).forEach(k => alerts.push(`<b>${esc(k.kiosk)}</b> hasn't checked in since ${esc(ago(k.last_seen))}. Check that the screen is on and connected to Wi-Fi.`));
-    D.sponsors.forEach(s => { const [cls, label] = adStatus(s); if (cls === "warn" && /^Ends/.test(label)) alerts.push(`<b>${esc(s.name)}</b>: ad ${esc(label.toLowerCase())}. Time to talk renewal.`); });
     const rev = monthlyRevenue();
-    return head + (alerts.length ? `<div class="alerts" role="status">${alerts.map(a => `<p>${a}</p>`).join("")}</div>` : "") + `
-      ${rev.count ? `<div class="revenue"><div><span>Monthly ad revenue</span><b>$${fmt(rev.total)}</b><small>from ${rev.count} active advertiser${rev.count > 1 ? "s" : ""} · $${fmt(rev.total * 12)} a year</small></div>${rev.pending ? `<div><span>Pending deals</span><b>$${fmt(rev.pending)}</b><small>a month, not yet active</small></div>` : ""}</div>` : ""}
-      <div class="grid g5">
-        ${card("Guest sessions", sumType("sessions"), "Someone tapped Start")}
-        ${card("Places viewed", sumType("places"))}
-        ${card("Questions asked", sumType("questions"))}
-        ${card("Ad views with a guest", adEngaged, `${fmt(adViews)} in total, including an empty lobby`)}
-        ${card("QR scans", scans, "Phones that opened a link")}
+    const acts = nextActions();
+    const online = kiosks.filter(k => !kioskOffline(k)).length;
+    return hero + `
+      <div class="kpis5">
+        ${kpi("users", "teal", "Guest sessions", sumType("sessions"), "sessions", "vs " + prevLabel())}
+        ${kpi("places", "blue", "Places viewed", sumType("places"), "places", "vs " + prevLabel())}
+        ${kpi("answers", "violet", "Questions asked", sumType("questions"), "questions", "vs " + prevLabel())}
+        ${kpi("eye", "gold", "Ad views with a guest", adEngaged, "adEngaged", `${fmt(adViews)} total`)}
+        ${kpi("qr", "pink", "QR scans", scans, "qr", "phones opened a link")}
       </div>
-      <div class="card"><div class="card-head"><div><h2>Activity</h2></div><div class="legend"><span><i style="background:var(--blue)"></i>Guest sessions</span><span><i style="background:var(--gold)"></i>QR scans</span></div></div>${chart()}</div>
-      <div class="card"><div class="card-head"><div><h2>Advertisers</h2><p>Proof of exposure for each business. <b>Total views</b> count every time the ad came on screen, even with nobody there. <b>With a guest</b> counts only times someone was using the kiosk while it showed. <b>Guests reached</b> counts each guest session once. <b>QR scans</b> are phones that opened the business's link.</p></div>
-        <button class="btn small" data-act="csv">Download report (CSV)</button></div>
-        ${ads.length ? `<div class="table-wrap"><table><thead><tr><th>Business</th><th class="num">Total views</th><th class="num">With a guest</th><th style="width:16%"></th><th class="num">Guests reached</th><th class="num">QR scans</th><th class="num">Scans per 100 guests</th><th></th></tr></thead><tbody>
-          ${ads.map(r => `<tr><td><button class="link" data-act="report" data-id="${esc(r.id)}" title="Open the advertiser report">${esc(r.name)}</button>${r.active ? "" : ` <span class="pill off">Not showing</span>`}</td><td class="num muted">${fmt(r.views)}</td><td class="num"><b>${fmt(r.engaged)}</b></td><td><div class="bar"><i style="width:${Math.round(r.engaged / maxV * 100)}%"></i></div></td><td class="num">${fmt(r.reach)}</td><td class="num">${fmt(r.scans)}</td><td class="num">${r.reach ? (r.scans / r.reach * 100).toFixed(1) : "–"}</td><td class="num"><button class="btn small" data-act="report" data-id="${esc(r.id)}">Report</button></td></tr>`).join("")}
-        </tbody></table></div>` : `<div class="empty">No ads yet. Add one in the Ads tab.</div>`}
-      </div>
-      <div class="card"><div class="card-head"><div><h2>Busiest times</h2><p>When guests start using the kiosk, by hour of the day (hotel time). Useful when pitching advertisers.</p></div></div>${hoursChart()}</div>
-      <div class="grid g2">
-        <div class="card"><h3>Most viewed places</h3>${topList(keysOf("places"), "place views", nameOf)}</div>
-        <div class="card"><h3>Directions scanned</h3>${topList(placeScans, "scans", nameOf)}</div>
-        <div class="card"><h3>Most opened sections</h3>${topList(keysOf("categories"), "section views", k => (D.categories[k] && D.categories[k].label) || k)}</div>
-        <div class="card"><h3>Top questions</h3>${topList(keysOf("questions"), "questions")}<p class="muted" style="font-size:13px;margin-top:10px">Free-typed questions are counted without their text, so guests' words stay private.</p></div>
+      <div class="bento">
+        <div class="card b-actions"><div class="card-head"><h2>${icon("bolt")} Next best actions</h2><span class="count">${acts.length}</span></div>
+          ${acts.length ? `<ul class="actions">${acts.slice(0, 6).map(a => `<li class="tone-${a.tone}"><i></i><p>${a.text}</p><button class="btn small" ${a.act}>${a.btn}</button></li>`).join("")}</ul>` : `<div class="all-good">${icon("check")}<b>All good.</b><span>Kiosks are online and nothing needs your attention.</span></div>`}</div>
+        <div class="card b-kiosks"><div class="card-head"><h2>${icon("kiosks")} Kiosks</h2><button class="btn small ghost" data-tab="kiosks">Manage</button></div>
+          <div class="k-big"><b>${online}</b><span>of ${kiosks.length} online</span></div>
+          <ul class="k-list">${kiosks.slice(0, 4).map(k => `<li><span class="dot ${kioskOffline(k) ? "off" : "on"}"></span><b>${esc(k.kiosk)}</b><small>${esc(ago(k.last_seen))}</small></li>`).join("") || `<li class="muted">No kiosk has checked in yet.</li>`}</ul>
+          ${kiosks.length ? `<button class="btn small" data-act="kiosk-reload" data-k="*">${icon("refresh")} Restart all</button>` : ""}</div>
+        <div class="card b-revenue"><div class="card-head"><h2>${icon("dollar")} Ad revenue</h2><button class="btn small ghost" data-tab="ads">Deals</button></div>
+          <div class="rev-big">$${fmt(rev.total)}<small>/month</small></div>
+          <p class="muted">${rev.count ? `${rev.count} active advertiser${rev.count > 1 ? "s" : ""} · $${fmt(rev.total * 12)} a year` : "Add prices under each ad's Deal details to see revenue here."}</p>
+          ${rev.pending ? `<p class="pending">+ $${fmt(rev.pending)}/month pending</p>` : ""}
+          <div class="rev-bar">${D.sponsors.filter(s => deals[s.id] && deals[s.id].status === "Active" && deals[s.id].price).map(s => `<i style="flex:${deals[s.id].price}" title="${esc(s.name)}: $${fmt(deals[s.id].price)}/month"></i>`).join("")}</div></div>
+        <div class="card b-activity"><div class="card-head"><h2>Activity</h2><div class="legend"><span><i style="background:var(--blue)"></i>Guest sessions</span><span><i style="background:var(--gold)"></i>QR scans</span></div></div>${chart()}</div>
+        <div class="card b-notes"><div class="card-head"><h2>${icon("notes")} Notes</h2><button class="btn small ghost" data-tab="notes">All notes</button></div>
+          <form class="quick-note" data-form="quick-note"><input type="text" id="qn-text" placeholder="Jot a note or to-do…" maxlength="2000" aria-label="New note"><button class="btn small primary" type="submit">${icon("plus")}</button></form>
+          <div class="mini-notes">${notes.slice(0, 4).map(n => noteCard(n, true)).join("") || `<p class="muted" style="font-size:14px">No notes yet. Notes are shared with everyone who signs in to this dashboard.</p>`}</div></div>
+        <div class="card b-quick"><div class="card-head"><h2>${icon("sparkle")} Quick actions</h2></div>
+          <div class="qa">
+            <button data-act="goto-notice">${icon("notices")}<span>Post an announcement</span></button>
+            <button data-act="add-ad-go">${icon("ads")}<span>Add an advertiser</span></button>
+            <button data-act="add-place-go">${icon("places")}<span>Add a place</span></button>
+            <button data-act="add-faq-go">${icon("answers")}<span>Add an answer</span></button>
+            <button data-act="csv">${icon("down")}<span>Download ad report</span></button>
+            <button data-act="palette">${icon("search")}<span>Find anything</span></button>
+          </div></div>
+        <div class="card b-ads"><div class="card-head"><div><h2>Advertisers</h2><p>Views with a guest, guests reached and QR scans. Click a name for its report.</p></div><button class="btn small" data-act="csv">Download CSV</button></div>
+          ${ads.length ? `<div class="table-wrap"><table><thead><tr><th>Business</th><th class="num">Total views</th><th class="num">With a guest</th><th style="width:16%"></th><th class="num">Guests reached</th><th class="num">QR scans</th><th class="num">Scans per 100 guests</th><th></th></tr></thead><tbody>
+            ${ads.map((r, i) => `<tr><td><span class="rank">${i + 1}</span><button class="link" data-act="report" data-id="${esc(r.id)}" title="Open the advertiser report">${esc(r.name)}</button>${r.active ? "" : ` <span class="pill off">Not showing</span>`}</td><td class="num muted">${fmt(r.views)}</td><td class="num"><b>${fmt(r.engaged)}</b></td><td><div class="bar"><i style="width:${Math.round(r.engaged / maxV * 100)}%"></i></div></td><td class="num">${fmt(r.reach)}</td><td class="num">${fmt(r.scans)}</td><td class="num">${r.reach ? (r.scans / r.reach * 100).toFixed(1) : "–"}</td><td class="num"><button class="btn small" data-act="report" data-id="${esc(r.id)}">Report</button></td></tr>`).join("")}
+          </tbody></table></div>` : `<div class="empty">No ads yet. Add one in the Ads tab.</div>`}</div>
+        <div class="card b-hours"><div class="card-head"><div><h2>Busiest times</h2><p>When guests start using the kiosk, by hour (hotel time).</p></div></div>${hoursChart()}</div>
+        <div class="card b-recent"><div class="card-head"><h2>${icon("history")} Recent changes</h2><button class="btn small ghost" data-tab="history">History</button></div>
+          <ul class="feed">${(meta.history || []).slice(0, 5).map(h => `<li><span class="v">v${h.version}</span><p>${esc(h.note || "Edited")}<small>${esc(ago(h.saved_at))}</small></p></li>`).join("") || `<li class="muted">Nothing published yet.</li>`}</ul></div>
+        <div class="card b-top"><h3>Most viewed places</h3>${topList(keysOf("places"), "place views", nameOf)}</div>
+        <div class="card b-top"><h3>Directions scanned</h3>${topList(placeScans, "scans", nameOf)}</div>
+        <div class="card b-top"><h3>Most opened sections</h3>${topList(keysOf("categories"), "section views", k => (D.categories[k] && D.categories[k].label) || k)}</div>
+        <div class="card b-top"><h3>Top questions</h3>${topList(keysOf("questions"), "questions")}<p class="muted" style="font-size:13px;margin-top:10px">Free-typed questions are counted without their text, so guests' words stay private.</p></div>
       </div>`;
   }
   function hoursChart() {
@@ -697,7 +846,7 @@
   /* ---------- actions ---------- */
   async function onClick(e) {
     const tb = e.target.closest("[data-tab]");
-    if (tb) { tab = tb.dataset.tab; open = null; history.replaceState(null, "", "#" + tab); render(); if (tab === "overview" || tab === "kiosks") loadStats(); return; }
+    if (tb) { go(tb.dataset.tab); return; }
     const b = e.target.closest("[data-act]");
     if (!b || b.disabled) return;
     /* destructive buttons need a second click */
@@ -720,6 +869,24 @@
       case "back-overview": tab = "overview"; render(); return;
       case "print": return window.print();
       case "save-deal": return saveDeal(d.id);
+      case "palette": return openPalette();
+      case "open-menu": document.body.classList.add("menu-open"); return;
+      case "close-menu": document.body.classList.remove("menu-open"); return;
+      case "goto-notice": go("notices"); if (!D.notices.length || D.notices[0].text) { D.notices.unshift({ text: "", active: true }); markDirty(); render(); } setTimeout(() => { const t = document.querySelector("[data-bind='notices.0.text']"); if (t) t.focus(); }, 40); return;
+      case "goto-deal": go("ads"); open = "d:" + d.id; render(); setTimeout(() => { const el = document.querySelector(`[data-key="d:${CSS.escape(d.id)}"]`); if (el) el.scrollIntoView({ block: "center" }); }, 40); return;
+      case "add-ad-go": go("ads"); D.sponsors.push({ id: "", name: "", kind: "", tagline: "", website: "", url: "https://", sponsored: true, active: true }); markDirty(); render(); setTimeout(() => { const t = document.querySelector(`[data-bind='sponsors.${D.sponsors.length - 1}.name']`); if (t) { t.scrollIntoView({ block: "center" }); t.focus(); } }, 40); return;
+      case "add-place-go": go("places"); return;
+      case "add-faq-go": go("answers"); clickAct("add-faq"); return;
+      case "note-filter": noteFilter = d.f; render(); return;
+      case "note-done": case "note-pin": case "note-todo": case "note-color": {
+        const n = notes.find(x => x.id === d.id); if (!n) return;
+        if (d.act === "note-done") n.done = n.done ? 0 : 1;
+        if (d.act === "note-pin") { n.pinned = n.pinned ? 0 : 1; notes.sort((a, b) => b.pinned - a.pinned); }
+        if (d.act === "note-todo") { n.todo = n.todo ? 0 : 1; if (!n.todo) n.done = 0; }
+        if (d.act === "note-color") n.color = d.c;
+        render(); updateBadges(); saveNote(n); return;
+      }
+      case "note-del": try { await api("notes", { method: "DELETE", json: { id: d.id } }); notes = notes.filter(x => x.id !== d.id); render(); updateBadges(); toast("Note deleted."); } catch (e) { if (e.message !== "signed out") toast(e.message, true); } return;
       case "share": return shareLink(d.id);
       case "close-share": { const m = document.getElementById("share"); if (m) m.hidden = true; return; }
       case "add-notice": D.notices.unshift({ text: "", active: true }); break;
@@ -781,6 +948,127 @@
     markDirty(); render();
     toast(`Location set: ${far(it) || "found"} from the hotel.`);
   }
+
+  /* ---------- notes & to-dos (shared by everyone who signs in) ---------- */
+  let notes = [], noteFilter = "all", noteQuery = "";
+  const NOTE_COLORS = ["yellow", "teal", "pink", "blue", "gray"];
+  async function loadNotes() { try { notes = (await api("notes")).notes || []; } catch (e) { notes = []; } if (tab === "overview" || tab === "notes") render(); updateBadges(); }
+  function noteCard(n, mini) {
+    return `<article class="note c-${esc(n.color || "yellow")}${n.done ? " done" : ""}${n.pinned ? " pinned" : ""}" data-note="${esc(n.id)}">
+      ${n.todo ? `<button class="note-check" data-act="note-done" data-id="${esc(n.id)}" aria-label="${n.done ? "Mark not done" : "Mark done"}" aria-pressed="${!!n.done}">${n.done ? icon("check") : ""}</button>` : ""}
+      ${mini ? `<p class="note-text">${esc(n.text)}</p>` : `<div class="note-text" contenteditable="plaintext-only" spellcheck="true" data-note-edit="${esc(n.id)}" role="textbox" aria-multiline="true" aria-label="Note">${esc(n.text)}</div>`}
+      <footer>${n.pinned ? `<span class="pin-tag">${icon("pin")}</span>` : ""}<small>${esc(ago(n.updated_at))}</small>
+        ${mini ? "" : `<span class="note-tools">
+          ${NOTE_COLORS.map(c => `<button class="sw c-${c}${(n.color || "yellow") === c ? " on" : ""}" data-act="note-color" data-id="${esc(n.id)}" data-c="${c}" aria-label="${c} note"></button>`).join("")}
+          <button class="icon-btn sm" data-act="note-pin" data-id="${esc(n.id)}" aria-label="${n.pinned ? "Unpin" : "Pin"}" title="${n.pinned ? "Unpin" : "Pin to top"}">${icon("pin")}</button>
+          <button class="icon-btn sm" data-act="note-todo" data-id="${esc(n.id)}" aria-label="${n.todo ? "Make a plain note" : "Make a to-do"}" title="${n.todo ? "Plain note" : "Make it a to-do"}">${icon("check")}</button>
+          <button class="icon-btn sm" data-act="note-del" data-id="${esc(n.id)}" data-armed-label="✕?" aria-label="Delete note" title="Delete">${icon("x")}</button></span>`}</footer>
+    </article>`;
+  }
+  function vNotes() {
+    const q = noteQuery.trim().toLowerCase();
+    const list = notes.filter(n => (noteFilter === "all" || (noteFilter === "todo" && n.todo && !n.done) || (noteFilter === "done" && n.done) || (noteFilter === "pinned" && n.pinned)) && (!q || n.text.toLowerCase().includes(q)));
+    const open = notes.filter(n => n.todo && !n.done).length;
+    const seg = [["all", "All"], ["todo", `To-do${open ? " · " + open : ""}`], ["pinned", "Pinned"], ["done", "Done"]].map(([k, l]) => `<button data-act="note-filter" data-f="${k}" aria-pressed="${noteFilter === k}">${l}</button>`).join("");
+    return `<div class="head"><div><h1>Notes</h1><p>A shared board for the team: reminders, follow-ups with advertisers, maintenance to-dos. Click a note to edit it; changes save automatically.</p></div></div>
+      <form class="note-new card" data-form="new-note">
+        <textarea id="nn-text" rows="2" maxlength="2000" placeholder="Write a note… (for example: Call Granville about renewal on Friday)" aria-label="New note"></textarea>
+        <div class="note-new-bar"><label class="check"><input type="checkbox" id="nn-todo"> To-do</label>
+          <div class="sws">${NOTE_COLORS.map((c, i) => `<label class="sw c-${c}"><input type="radio" name="nn-color" value="${c}"${i === 0 ? " checked" : ""} aria-label="${c}"></label>`).join("")}</div>
+          <span class="grow"></span><button class="btn primary small" type="submit">${icon("plus")} Add note</button></div></form>
+      <div class="notes-bar"><div class="seg" role="group" aria-label="Show">${seg}</div><input type="search" id="note-q" placeholder="Search notes" value="${esc(noteQuery)}" aria-label="Search notes"></div>
+      <div class="board">${list.map(n => noteCard(n)).join("") || `<div class="card empty">${notes.length ? "No notes match." : "No notes yet. Add your first one above."}</div>`}</div>`;
+  }
+  async function saveNote(n) {
+    try { const r = await api("notes", { method: "PUT", json: n }); n.updated_at = r.updated_at; }
+    catch (e) { if (e.message !== "signed out") toast(e.message, true); }
+  }
+  async function addNote(text, opts) {
+    text = (text || "").trim(); if (!text) return;
+    try { const r = await api("notes", { method: "POST", json: { text, ...(opts || {}) } }); notes.unshift(r.note); notes.sort((a, b) => b.pinned - a.pinned); render(); updateBadges(); toast("Note added."); }
+    catch (e) { if (e.message !== "signed out") toast(e.message, true); }
+  }
+  let noteTimer = null;
+  document.addEventListener("input", e => {
+    const ed = e.target.closest && e.target.closest("[data-note-edit]");
+    if (ed) { const n = notes.find(x => x.id === ed.dataset.noteEdit); if (!n) return; n.text = ed.innerText.slice(0, 2000); clearTimeout(noteTimer); noteTimer = setTimeout(() => { if (n.text.trim()) saveNote(n); }, 700); }
+    if (e.target.id === "note-q") { noteQuery = e.target.value; const pos = e.target.selectionStart; render(); const q = document.getElementById("note-q"); if (q) { q.focus(); q.setSelectionRange(pos, pos); } }
+  });
+  document.addEventListener("submit", e => {
+    const f = e.target.closest && e.target.closest("[data-form]");
+    if (!f) return;
+    e.preventDefault();
+    if (f.dataset.form === "quick-note") { const t = document.getElementById("qn-text"), re = /^(todo|to-do|\[\s?\])\s*:?\s*/i; addNote(t.value.replace(re, ""), { todo: re.test(t.value) }); }
+    if (f.dataset.form === "new-note") { const c = f.querySelector('input[name="nn-color"]:checked'); addNote(document.getElementById("nn-text").value, { todo: document.getElementById("nn-todo").checked, color: c ? c.value : "yellow" }); }
+  });
+
+  /* ---------- sidebar badges ---------- */
+  function updateBadges() {
+    const set = (k, v, tone) => { const b = document.getElementById("badge-" + k); if (b) { b.textContent = v || ""; b.className = "badge" + (v ? " show" : "") + (tone ? " " + tone : ""); } };
+    if (!D) return;
+    const off = stats ? stats.kiosks.filter(kioskOffline).length : 0;
+    set("kiosks", off ? off : "", "bad");
+    set("ads", D.sponsors.filter(x => /^Ends/.test(adStatus(x)[1])).length || "", "warn");
+    set("notes", notes.filter(n => n.todo && !n.done).length || "");
+    set("notices", (D.notices || []).filter(n => adStatus(n)[0] === "ok").length || "", "ok");
+  }
+
+  /* ---------- command palette (Ctrl/⌘ K) ---------- */
+  let pal = null;
+  function paletteItems() {
+    const it = [];
+    TABS.forEach(([k, l]) => it.push({ g: "Go to", t: l, ic: k, run: () => go(k) }));
+    it.push({ g: "Actions", t: "Publish to kiosks", ic: "bolt", run: () => publish() });
+    it.push({ g: "Actions", t: "Post an announcement", ic: "notices", run: () => clickAct("goto-notice") });
+    it.push({ g: "Actions", t: "Add an advertiser", ic: "ads", run: () => clickAct("add-ad-go") });
+    it.push({ g: "Actions", t: "Add a note", ic: "notes", run: () => { go("notes"); setTimeout(() => { const t = document.getElementById("nn-text"); if (t) t.focus(); }, 50); } });
+    it.push({ g: "Actions", t: "Restart all kiosks", ic: "refresh", run: () => clickAct("kiosk-reload", { k: "*" }) });
+    it.push({ g: "Actions", t: "Download ad report (CSV)", ic: "down", run: () => { if (stats) csv(); } });
+    it.push({ g: "Actions", t: "Sign out", ic: "logout", run: () => clickAct("logout") });
+    D.sponsors.forEach(s => s.id && it.push({ g: "Advertisers", t: s.name, sub: "Open report", ic: "ads", run: () => clickAct("report", { id: s.id }) }));
+    Object.entries(D.items).forEach(([id, x]) => it.push({ g: "Places", t: x.n, sub: x.k, ic: "places", run: () => { go("places"); open = "p:" + id; render(); setTimeout(() => { const el = document.querySelector(`[data-key="p:${CSS.escape(id)}"]`); if (el) el.scrollIntoView({ block: "center" }); }, 30); } }));
+    D.faq.forEach((f, i) => it.push({ g: "Answers", t: f.q, ic: "answers", run: () => { go("answers"); open = "f:" + i; render(); } }));
+    notes.slice(0, 50).forEach(n => it.push({ g: "Notes", t: n.text.split("\n")[0].slice(0, 80), ic: "notes", run: () => go("notes") }));
+    return it;
+  }
+  function go(k) { tab = k; open = null; history.replaceState(null, "", "#" + k); render(); window.scrollTo(0, 0); if (k === "overview" || k === "kiosks") loadStats(); }
+  function clickAct(act, data) { const b = document.createElement("button"); b.dataset.act = act; Object.assign(b.dataset, data || {}); b.hidden = true; app.appendChild(b); b.click(); b.remove(); }
+  function openPalette() {
+    if (!D) return;
+    pal = { items: paletteItems(), q: "", sel: 0 };
+    let m = document.getElementById("pal");
+    if (!m) { m = document.createElement("div"); m.id = "pal"; m.className = "pal"; document.body.appendChild(m); }
+    m.innerHTML = `<div class="pal-box" role="dialog" aria-modal="true" aria-label="Search or jump to"><div class="pal-in">${icon("search")}<input id="pal-q" placeholder="Search places, advertisers, answers, notes, or type an action…" autocomplete="off" aria-label="Search"><kbd>Esc</kbd></div><ul class="pal-list" id="pal-list" role="listbox"></ul></div>`;
+    m.hidden = false; drawPalette();
+    const q = document.getElementById("pal-q"); q.focus();
+    q.addEventListener("input", () => { pal.q = q.value; pal.sel = 0; drawPalette(); });
+  }
+  function palMatches() {
+    const q = pal.q.trim().toLowerCase();
+    return (q ? pal.items.filter(x => (x.t + " " + (x.sub || "") + " " + x.g).toLowerCase().includes(q)) : pal.items.filter(x => x.g !== "Places" && x.g !== "Answers" && x.g !== "Notes")).slice(0, 40);
+  }
+  function drawPalette() {
+    const list = palMatches(), ul = document.getElementById("pal-list"); if (!ul) return;
+    let g = "";
+    ul.innerHTML = list.map((x, i) => { const head = x.g !== g ? `<li class="pal-g" role="presentation">${esc(g = x.g)}</li>` : ""; return head + `<li role="option" aria-selected="${i === pal.sel}" class="pal-it${i === pal.sel ? " sel" : ""}" data-pal="${i}">${icon(x.ic)}<span>${esc(x.t)}</span>${x.sub ? `<small>${esc(x.sub)}</small>` : ""}</li>`; }).join("") || `<li class="pal-empty">Nothing found.</li>`;
+    const sel = ul.querySelector(".sel"); if (sel) sel.scrollIntoView({ block: "nearest" });
+  }
+  function closePalette() { const m = document.getElementById("pal"); if (m) m.hidden = true; pal = null; }
+  function runPalette(i) { const x = palMatches()[i]; closePalette(); if (x) x.run(); }
+  document.addEventListener("keydown", e => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); pal ? closePalette() : openPalette(); return; }
+    if (!pal) { if (e.key === "Escape") { const sh = document.getElementById("share"); if (sh && !sh.hidden) sh.hidden = true; document.body.classList.remove("menu-open"); } return; }
+    const n = palMatches().length;
+    if (e.key === "Escape") { e.preventDefault(); closePalette(); }
+    else if (e.key === "ArrowDown") { e.preventDefault(); pal.sel = Math.min(n - 1, pal.sel + 1); drawPalette(); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); pal.sel = Math.max(0, pal.sel - 1); drawPalette(); }
+    else if (e.key === "Enter") { e.preventDefault(); runPalette(pal.sel); }
+  });
+  document.addEventListener("click", e => {
+    if (!pal) return;
+    const it = e.target.closest(".pal-it"); if (it) { runPalette(+it.dataset.pal); return; }
+    if (!e.target.closest(".pal-box")) closePalette();
+  });
 
   function cleaned() {
     const c = clone(D);
