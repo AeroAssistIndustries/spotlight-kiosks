@@ -120,7 +120,7 @@ def footer():
       {socials_html()}
     </div>
   </div>
-  <div class="wrap footer-base"><span>© <span id="year">2026</span> CityPulse Kiosks. All rights reserved.</span><nav aria-label="Legal"><a href="{{R}}privacy/">Privacy Policy</a><a href="{{R}}terms/">Terms &amp; Conditions</a><a href="https://spotlight-kiosks.sarvesh-bb0.workers.dev/sales" rel="nofollow">Team login</a></nav></div>
+  <div class="wrap footer-base"><span>© <span id="year">2026</span> CityPulse Kiosks. All rights reserved.</span><nav aria-label="Legal"><a href="{{R}}privacy/">Privacy Policy</a><a href="{{R}}terms/">Terms &amp; Conditions</a><a href="https://sales.citypulsekiosks.com" rel="nofollow">Team login</a></nav></div>
 </footer>'''
 
 PAGES = []
