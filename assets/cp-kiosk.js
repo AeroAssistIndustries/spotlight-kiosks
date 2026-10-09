@@ -138,8 +138,10 @@
   function tick() {
     const d = new Date();
     root.querySelector("#cpk-clock").innerHTML = `<b>${d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: TZ })}</b><small>${d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: TZ })}</small>`;
+    const lc = root.querySelector("#lt-clock");
+    if (lc && typeof clockTileHTML === "function") { const g = lc.querySelector(".lt-greet"), lb = lc.querySelector(".lt-label"); lc.innerHTML = ""; lc.append(g); lc.insertAdjacentHTML("beforeend", clockTileHTML()); lc.append(lb); }
   }
-  tick(); setInterval(tick, 15000);
+  tick(); setInterval(tick, 5000);
   /* Weather: US National Weather Service (free, public, no key). Now in the top bar, 7 days on the home screen.
      The last forecast is kept on the kiosk, so it still shows if the internet drops. */
   function wxIcon(t, night) {
@@ -191,6 +193,7 @@
         try { localStorage.setItem(WKEY, JSON.stringify(S.wx)); } catch (e) { /* ignore */ }
         showNow();
         const wk = root.querySelector("#cpk-weekslot"); if (wk) wk.innerHTML = weekHTML();
+        const lw = root.querySelector("#lt-wx"); if (lw) lw.innerHTML = wxTileHTML();
       }).catch(() => {});
   }
   weather(); setInterval(weather, 30 * 60000);
@@ -282,22 +285,53 @@
       <span class="cpk-tile-txt"><b>${esc(t.label)}</b><small>${esc(t.sub)}</small></span>
       <span class="cpk-tile-go">${svg("chev")}</span></button>`;
   }
-  function vHome() {
-    return `<section class="cpk-home">
-      <h1 class="cpk-h1">${greet()}.</h1>
-      <p class="cpk-lede">How can we help you today?</p>
-      ${noticeHTML()}
-      <button class="cpk-askbar" data-act="ask">${svg("search")}<span>Ask the concierge</span><em>Wi-Fi, check-out, food, Universal…</em></button>
-      <div id="cpk-weekslot">${weekHTML()}</div>
-      <div class="cpk-tiles">${V.tiles.map(tileHTML).join("")}</div>
-      <div class="cpk-feats">
-        <button class="cpk-feat map" data-act="near"><span class="cpk-feat-art">${mapSVG({ labels: false })}</span><span class="cpk-feat-txt"><em>New</em><b>Your neighborhood</b><small>Everything in walking minutes</small></span></button>
-        <button class="cpk-feat plan" data-act="plan"><span class="cpk-feat-art route">${svg("route")}</span><span class="cpk-feat-txt"><em>One tap</em><b>Plan my ${partOfDay()}</b><small>${esc(PLANS[partOfDay()].map(p => p.t).slice(0, 2).join(" · "))}</small></span></button>
-        <button class="cpk-take" data-act="take">
-          <span class="cpk-take-qr">${qr(GO("guide", "", GUIDE), "QR code: open this guide on your phone")}</span>
-          <span class="cpk-take-txt"><b>Take this guide with you</b><small>Scan with your phone camera.</small></span>
-        </button></div></section>`;
+  /* ---------- home: a grid of square "live tiles" (inspired by Windows Phone / Metro) ----------
+     Each tile is one job. Some tiles are live: the clock ticks, the weather tile turns over to show
+     the next days, and the ask, plan and neighborhood tiles cycle real examples. */
+  function clockTileHTML() {
+    const d = new Date();
+    const t = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: TZ }).split(" ");
+    return `<b class="lt-time">${esc(t[0])}<small>${esc(t[1] || "")}</small></b>
+      <span class="lt-date">${esc(d.toLocaleDateString("en-US", { weekday: "long", timeZone: TZ }))}<br>${esc(d.toLocaleDateString("en-US", { month: "long", day: "numeric", timeZone: TZ }))}</span>`;
   }
+  function wxTileHTML() {
+    const w = S.wx && S.wx.now, days = ((S.wx && S.wx.days) || []).slice(0, 7);
+    if (!w) return `<span class="lt-big">—</span><span class="lt-label">Weather</span>`;
+    return `<div class="lt-wx-now">${svg(wxIcon(w.s, !w.day), "lt-wxic")}<span class="lt-big">${esc(w.t)}°</span><span class="lt-sub">${esc(w.s)}${days[0] && days[0].hi != null ? `<br>High ${esc(days[0].hi)}° · Low ${esc(days[0].lo != null ? days[0].lo : "–")}°` : ""}</span></div>
+      ${days.length ? `<div class="lt-week" aria-label="7-day forecast">${days.map((d, i) => `<span class="lt-wd${i === 0 ? " today" : ""}"><b>${esc(d.d)}</b>${svg(wxIcon(d.s, false))}<span>${d.hi != null ? esc(d.hi) + "°" : "–"}</span><em>${d.lo != null ? esc(d.lo) + "°" : ""}</em></span>`).join("")}</div>` : ""}`;
+  }
+  function vHome() {
+    const t = V.tiles.slice(0, 6), tryQs = TRY.slice(0, 6), plans = PLANS[partOfDay()];
+    const tile = (x, i) => `<button class="lt lt-cat${x.photo ? " photo" : ""} c-${esc(x.id)}" style="grid-area:t${i}${x.photo ? `;--img:url('${IMG(x.photo)}')` : ""}" data-act="cat" data-id="${esc(x.id)}">
+        <span class="lt-ic">${svg(x.icon)}</span><span class="lt-label">${esc(x.label)}</span><span class="lt-hint">${esc(x.sub)}</span></button>`;
+    return `<section class="cpk-home metro">
+      ${noticeHTML()}
+      <div class="lt-grid">
+        <div class="lt lt-clock" style="grid-area:clock" id="lt-clock" role="timer" aria-label="Local time"><span class="lt-greet">${greet()}</span>${clockTileHTML()}<span class="lt-label">${esc(V.short || V.name)}</span></div>
+        <button class="lt lt-ask" style="grid-area:ask" data-act="ask">
+          <span class="lt-ic">${svg("chat")}</span>
+          <span class="lt-faces${tryQs.length > 1 ? " live slow" : ""}">${(tryQs.length ? tryQs : ["Ask anything"]).slice(0, 2).map(q => `<span class="lt-face"><em>Try asking</em><b>“${esc(q)}”</b></span>`).join("")}</span>
+          <span class="lt-label">Ask the concierge</span></button>
+        <div class="lt lt-wx" style="grid-area:wx" id="lt-wx">${wxTileHTML()}</div>
+        <button class="lt lt-map" style="grid-area:map" data-act="near"><span class="lt-art">${mapSVG({ labels: false })}</span><span class="lt-tag">New</span><span class="lt-label">Your neighborhood<small>Everything in walking minutes</small></span></button>
+        ${t.map(tile).join("")}
+        <button class="lt lt-plan" style="grid-area:plan" data-act="plan">
+          <span class="lt-ic">${svg("route")}</span>
+          <span class="lt-faces live">${plans.slice(0, 2).map(p => `<span class="lt-face"><em>Plan my ${partOfDay()}</em><b>${esc(p.t)}</b></span>`).join("")}</span>
+          <span class="lt-label">One tap, a whole plan</span></button>
+        <button class="lt lt-take" style="grid-area:take" data-act="take"><span class="lt-qr">${qr(GO("guide", "", GUIDE), "QR code: open this guide on your phone")}</span><span class="lt-label">Take it with you</span></button>
+      </div></section>`;
+  }
+  /* Press feedback like Windows Phone: the tile tilts toward where it was touched. */
+  root.addEventListener("pointerdown", e => {
+    const el = e.target.closest && e.target.closest("button.lt");
+    if (!el || S.still) return;
+    const r = el.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+    el.style.setProperty("--rx", (-y * 7).toFixed(2) + "deg"); el.style.setProperty("--ry", (x * 7).toFixed(2) + "deg");
+    el.classList.add("tilt");
+    const up = () => { el.classList.remove("tilt"); window.removeEventListener("pointerup", up); window.removeEventListener("pointercancel", up); };
+    window.addEventListener("pointerup", up); window.addEventListener("pointercancel", up);
+  }, true);
   function rowHTML(id) {
     const it = item(id), f = howFar(it);
     return `<button class="cpk-row" data-act="item" data-id="${id}">
@@ -692,6 +726,7 @@
 
   function render(dir) {
     root.classList.toggle("is-attract", S.mode === "attract");
+    root.classList.toggle("is-home", S.mode !== "attract" && S.stack.length > 0 && S.stack[S.stack.length - 1].v === "home");
     root.classList.toggle("is-large", S.large);
     root.classList.toggle("is-contrast", S.contrast);
     root.classList.toggle("is-reach", S.reach);
