@@ -21,6 +21,7 @@ const SCHEMA = [
   /* advertiser deal details: staff only, never sent to kiosks */
   "CREATE TABLE IF NOT EXISTS deals (venue TEXT NOT NULL, sponsor TEXT NOT NULL, json TEXT NOT NULL, updated_at TEXT NOT NULL, PRIMARY KEY (venue, sponsor))",
   /* staff notes and to-dos (dashboard only) */
+  "CREATE TABLE IF NOT EXISTS auth (id TEXT PRIMARY KEY, json TEXT NOT NULL, updated_at TEXT NOT NULL)",
   "CREATE TABLE IF NOT EXISTS tasks (venue TEXT NOT NULL, id TEXT NOT NULL, done INTEGER NOT NULL DEFAULT 0, updated_at TEXT NOT NULL, PRIMARY KEY (venue, id))",
   "CREATE TABLE IF NOT EXISTS notes (id TEXT PRIMARY KEY, venue TEXT NOT NULL, text TEXT NOT NULL, color TEXT, pinned INTEGER DEFAULT 0, done INTEGER DEFAULT 0, todo INTEGER DEFAULT 0, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)"
 ];
@@ -245,11 +246,74 @@ async function sameSecret(a, b) {
   let diff = 0; for (let i = 0; i < u.length; i++) diff |= u[i] ^ v[i];
   return diff === 0;
 }
+/* Staff password. ADMIN_PASSWORD (a Cloudflare secret) is the starting password and the master reset:
+   once someone changes the password in the dashboard, a salted hash is kept in D1 (table auth) and the
+   secret stops working for sign-in. Changing ADMIN_PASSWORD in Cloudflare clears that hash and every
+   recovery code, so the new secret works again. Sessions carry an epoch that goes up on each change,
+   which signs out every other browser. */
+const PBKDF2_ITER = 4000;   // kept low for the Workers free plan CPU limit; the salt also mixes in a fingerprint of the Cloudflare secret, so a database copy alone cannot be cracked
+async function secretPrint(env) {
+  const k = await crypto.subtle.importKey("raw", enc.encode("citypulse-fp|" + (env.ADMIN_PASSWORD || "")), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  return b64url(await crypto.subtle.sign("HMAC", k, enc.encode("fingerprint"))).slice(0, 22);
+}
+async function pwHash(env, password, saltB64) {
+  const base = await crypto.subtle.importKey("raw", enc.encode(String(password)), "PBKDF2", false, ["deriveBits"]);
+  const salt = enc.encode(saltB64 + "|" + (await secretPrint(env)));
+  return b64url(await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt, iterations: PBKDF2_ITER }, base, 256));
+}
+async function codeHash(env, code) {
+  const k = await crypto.subtle.importKey("raw", enc.encode("citypulse-recovery|" + (env.ADMIN_PASSWORD || "")), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  return b64url(await crypto.subtle.sign("HMAC", k, enc.encode(String(code).toUpperCase().replace(/[^A-Z0-9]/g, ""))));
+}
+async function getAuth(env) {
+  const blank = { pw: null, codes: [], epoch: 0, fp: null, changed_at: null, codes_at: null };
+  if (!hasDB(env)) return blank;
+  await ensure(env);
+  const row = await env.DB.prepare("SELECT json FROM auth WHERE id = 'staff'").first();
+  let a = blank; try { if (row) a = { ...blank, ...JSON.parse(row.json) }; } catch (e) { /* keep blank */ }
+  if (a.fp !== await secretPrint(env)) a = { ...blank, epoch: a.epoch || 0 };   // the Cloudflare secret was changed: start over
+  return a;
+}
+async function putAuth(env, a) {
+  a.fp = await secretPrint(env);
+  await env.DB.prepare("INSERT INTO auth (id, json, updated_at) VALUES ('staff', ?, ?) ON CONFLICT(id) DO UPDATE SET json = excluded.json, updated_at = excluded.updated_at").bind(JSON.stringify(a), new Date().toISOString()).run();
+}
+async function passwordOk(env, a, password) {
+  if (a.pw) return sameSecret(await pwHash(env, password, a.pw.salt), a.pw.hash);
+  return sameSecret(String(password), env.ADMIN_PASSWORD);
+}
+function pwProblem(next) {
+  next = String(next || "");
+  if (next.length < 10) return "Use at least 10 characters.";
+  if (next.length > 200) return "Use 200 characters or fewer.";
+  if (/^(.)\1+$/.test(next) || /^(password|citypulse|1234567890)/i.test(next)) return "Pick something harder to guess.";
+  return "";
+}
+async function setPassword(env, a, next) {
+  const salt = b64url(crypto.getRandomValues(new Uint8Array(16)));
+  a.pw = { salt, hash: await pwHash(env, next, salt) };
+  a.epoch = (a.epoch || 0) + 1; a.changed_at = new Date().toISOString();
+  await putAuth(env, a);
+}
+async function sessionCookie(env, epoch) {
+  const exp = String(Date.now() + 12 * 3600000), body = exp + "." + (epoch || 0);
+  const sig = b64url(await crypto.subtle.sign("HMAC", await hmacKey(env), enc.encode(body)));
+  return `${COOKIE}=${body}.${sig}; Path=/admin; HttpOnly; Secure; SameSite=Strict; Max-Age=43200`;
+}
+const CODE_ABC = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+function newCode() {
+  const r = crypto.getRandomValues(new Uint8Array(12));
+  const c = [...r].map(x => CODE_ABC[x % CODE_ABC.length]).join("");
+  return c.slice(0, 4) + "-" + c.slice(4, 8) + "-" + c.slice(8, 12);
+}
 async function signedIn(req, env) {
   if (!env.ADMIN_PASSWORD) return false;
-  const m = (req.headers.get("Cookie") || "").match(/(?:^|;\s*)cp_admin=([0-9]+)\.([A-Za-z0-9_-]+)/);
+  const m = (req.headers.get("Cookie") || "").match(/(?:^|;\s*)cp_admin=([0-9]+)\.([0-9]+)\.([A-Za-z0-9_-]+)/);
   if (!m || +m[1] < Date.now()) return false;
-  try { return await crypto.subtle.verify("HMAC", await hmacKey(env), fromB64url(m[2]), enc.encode(m[1])); } catch (e) { return false; }
+  try {
+    if (!(await crypto.subtle.verify("HMAC", await hmacKey(env), fromB64url(m[3]), enc.encode(m[1] + "." + m[2])))) return false;
+    return +m[2] === ((await getAuth(env)).epoch || 0);
+  } catch (e) { return false; }
 }
 const tries = new Map();
 function tooManyTries(ip) {
@@ -431,7 +495,10 @@ async function admin(req, env, ctx, url, fetchSeed, onContentSaved) {
   if (req.method !== "GET" && (from !== url.origin || req.headers.get("X-CP") !== "1")) return send(403, { error: "Not allowed." });
   const api = path.slice(11);
 
-  if (api === "status") return send(200, { setup: { password: !!env.ADMIN_PASSWORD, database: hasDB(env) }, signedIn: await signedIn(req, env) });
+  if (api === "status") {
+    const a = env.ADMIN_PASSWORD ? await getAuth(env).catch(() => null) : null;
+    return send(200, { setup: { password: !!env.ADMIN_PASSWORD, database: hasDB(env) }, signedIn: await signedIn(req, env), canRecover: !!(a && a.codes.some(c => !c.used)) });
+  }
 
   if (api === "login" && req.method === "POST") {
     if (!env.ADMIN_PASSWORD) return send(503, { error: "The staff password has not been set yet." });
@@ -439,14 +506,33 @@ async function admin(req, env, ctx, url, fetchSeed, onContentSaved) {
     if (tooManyTries(ip)) return send(429, { error: "Too many tries. Wait 15 minutes and try again." });
     let body; try { body = await req.json(); } catch (e) { body = {}; }
     const pw = String((body && body.password) || "").slice(0, 200);
-    if (!(await sameSecret(pw, env.ADMIN_PASSWORD))) {
+    const auth = await getAuth(env);
+    if (!(await passwordOk(env, auth, pw))) {
       tries.get(ip).push(Date.now());
       await new Promise(r => setTimeout(r, 400));
       return send(401, { error: "That password is not right." });
     }
-    const exp = String(Date.now() + 12 * 3600000);
-    const sig = b64url(await crypto.subtle.sign("HMAC", await hmacKey(env), enc.encode(exp)));
-    return send(200, { ok: true }, "", { "Set-Cookie": `${COOKIE}=${exp}.${sig}; Path=/admin; HttpOnly; Secure; SameSite=Strict; Max-Age=43200` });
+    return send(200, { ok: true }, "", { "Set-Cookie": await sessionCookie(env, auth.epoch) });
+  }
+
+  /* Forgot password: a one-time recovery code sets a new password and signs this browser in. */
+  if (api === "recover" && req.method === "POST") {
+    if (!env.ADMIN_PASSWORD || !hasDB(env)) return send(503, { error: "Password reset is not available yet." });
+    const ip = req.headers.get("CF-Connecting-IP") || "local";
+    if (tooManyTries(ip)) return send(429, { error: "Too many tries. Wait 15 minutes and try again." });
+    let body; try { body = await req.json(); } catch (e) { body = {}; }
+    const problem = pwProblem(body && body.next);
+    if (problem) return send(400, { error: problem });
+    const auth = await getAuth(env), h = await codeHash(env, String((body && body.code) || "").slice(0, 40));
+    const hit = auth.codes.find(c => !c.used && c.h === h);
+    if (!hit) {
+      tries.get(ip).push(Date.now());
+      await new Promise(r => setTimeout(r, 400));
+      return send(400, { error: "That recovery code is not right, or it was already used." });
+    }
+    hit.used = new Date().toISOString();
+    await setPassword(env, auth, body.next);
+    return send(200, { ok: true, left: auth.codes.filter(c => !c.used).length }, "", { "Set-Cookie": await sessionCookie(env, auth.epoch) });
   }
   if (api === "logout" && req.method === "POST")
     return send(200, { ok: true }, "", { "Set-Cookie": `${COOKIE}=; Path=/admin; HttpOnly; Secure; SameSite=Strict; Max-Age=0` });
@@ -455,6 +541,36 @@ async function admin(req, env, ctx, url, fetchSeed, onContentSaved) {
   if (!hasDB(env)) return send(503, { error: "The database is not connected to the worker yet." });
   await ensure(env);
   const venue = venueId(env);
+
+  /* Password and recovery codes (signed in) */
+  if (api === "security" && req.method === "GET") {
+    const a = await getAuth(env);
+    return send(200, { custom: !!a.pw, changed_at: a.changed_at, codes: { total: a.codes.length, left: a.codes.filter(c => !c.used).length, created_at: a.codes_at } });
+  }
+  if (api === "password" && req.method === "POST") {
+    const ip = req.headers.get("CF-Connecting-IP") || "local";
+    if (tooManyTries(ip)) return send(429, { error: "Too many tries. Wait 15 minutes and try again." });
+    let body; try { body = await req.json(); } catch (e) { body = {}; }
+    const a = await getAuth(env);
+    if (!(await passwordOk(env, a, String((body && body.current) || "").slice(0, 200)))) { (tries.get(ip) || []).push(Date.now()); return send(400, { error: "Your current password is not right." }); }
+    const problem = pwProblem(body.next);
+    if (problem) return send(400, { error: problem });
+    if (String(body.next) === String(body.current)) return send(400, { error: "Pick a password different from the current one." });
+    await setPassword(env, a, body.next);
+    return send(200, { ok: true }, "", { "Set-Cookie": await sessionCookie(env, a.epoch) });
+  }
+  if (api === "recovery-codes" && req.method === "POST") {
+    const ip = req.headers.get("CF-Connecting-IP") || "local";
+    if (tooManyTries(ip)) return send(429, { error: "Too many tries. Wait 15 minutes and try again." });
+    let body; try { body = await req.json(); } catch (e) { body = {}; }
+    const a = await getAuth(env);
+    if (!(await passwordOk(env, a, String((body && body.current) || "").slice(0, 200)))) { (tries.get(ip) || []).push(Date.now()); return send(400, { error: "Your current password is not right." }); }
+    const codes = Array.from({ length: 8 }, newCode);
+    a.codes = await Promise.all(codes.map(async c => ({ h: await codeHash(env, c), used: null })));
+    a.codes_at = new Date().toISOString();
+    await putAuth(env, a);
+    return send(200, { codes });
+  }
 
   /* Owner files: guides and the launch checklist (signed-in only) */
   if (api === "files" && req.method === "GET")

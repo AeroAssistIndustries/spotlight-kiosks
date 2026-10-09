@@ -26,13 +26,20 @@
 <tr><td>History</td><td>Every published version; restore any of them in one click</td></tr>
 </tbody></table></div>
 
+<h2>Password and recovery codes</h2>
+<p>Open <b>Password &amp; security</b> at the bottom of the sidebar.</p>
+<ul>
+<li><b>Change password:</b> type the current one and the new one (at least 10 characters). Everyone else is signed out.</li>
+<li><b>Recovery codes:</b> create a set of 8 and print them or keep them in a password manager. Each code resets the password once.</li>
+</ul>
+
 <h2>Forgot the password</h2>
 <ol class="steps">
-<li>In Cloudflare, open Workers &amp; Pages &rarr; spotlight-kiosks &rarr; Settings &rarr; Variables and Secrets.</li>
-<li>Edit <b>ADMIN_PASSWORD</b>, click Rotate, type a new password and click <b>Deploy</b>.</li>
-<li>Sign in with the new password after about a minute.</li>
+<li>On the sign-in screen, click <b>Forgot password?</b></li>
+<li>Enter one of your recovery codes and a new password, then click <b>Reset and sign in</b>.</li>
 </ol>
-<div class="callout">Changing the password signs everyone out and turns off every advertiser's live report link. Send them new links from Ads &rarr; Advertiser report.</div>
+<p>No codes left? The account owner resets it in Cloudflare: Workers &amp; Pages &rarr; spotlight-kiosks &rarr; Settings &rarr; Variables and Secrets &rarr; edit <b>ADMIN_PASSWORD</b> &rarr; Rotate &rarr; Deploy. That password then signs in, and the old password and codes stop working.</p>
+<div class="callout">Changing the password in the dashboard keeps advertisers' report links working. Changing ADMIN_PASSWORD in Cloudflare turns them off, so send new links from Ads &rarr; Advertiser report.</div>
 
 <h2>Adding a new kiosk</h2>
 <p>On the new screen, open the kiosk link once with a name on the end, for example <b>&hellip;/kiosk-app/?kiosk=lobby-2</b>. It appears under Kiosks within 2 minutes and keeps that name.</p>
