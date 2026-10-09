@@ -666,7 +666,46 @@ kbd { border-radius: 2px; }
 .seg button { white-space: nowrap; }
 .pal-it.sel { box-shadow: inset 3px 0 0 var(--gold); }
 @media (max-width: 520px) { .seg button { padding: 7px 10px; letter-spacing: .04em; } }
-@media print { :root { --bg: #fff; --card: #fff; --ink: #111; --mute: #555; --soft: #eee; --line: #ccc; color-scheme: light; } body { background: #fff; } .card { background: #fff; } }
+/* v6.1 QA: one type scale (12 / 13 / 14 / 15 / 16 / 18 / 22 / 28+), 12px minimum, bigger touch targets */
+th { font-size: 12px; }
+.kpi .kpi-l, .kpi .kpi-bot small { font-size: 12px; }
+.clock-chip small, .hero-date small, .feed small, .k-list small, .note footer, .note footer *, .mini-notes .note footer { font-size: 12px !important; }
+.delta { font-size: 12px; }
+.pill, .chip { font-size: 13px; }
+label.f > span { font-size: 13px; letter-spacing: .01em; }
+.item-head .t small, .card h2 + p, .card h3 + p { font-size: 14px; }
+.head p { font-size: 16px; line-height: 1.55; }
+.sw { width: 28px !important; height: 28px !important; }
+.icon-btn.sm { width: 34px !important; height: 34px !important; }
+.note-check { width: 28px; height: 28px; }
+.chip button { width: 32px; height: 32px; }
+input[type=date] { min-height: 44px; padding: 0 12px; }
+/* rank badge stays beside long names */
+td:has(> .rank) { position: relative; padding-left: 42px; }
+td > .rank { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); margin: 0; }
+/* tables become stacked cards on phones (labels added by the app) */
+@media (max-width: 620px) {
+  .table-wrap table, .table-wrap tbody, .table-wrap tr, .table-wrap td { display: block; width: 100%; }
+  .table-wrap thead { display: none; }
+  .table-wrap tr { padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .table-wrap td { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 6px 2px; border: 0; text-align: right; }
+  .table-wrap td::before { content: attr(data-label); color: var(--mute); font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; text-align: left; }
+  .table-wrap td[data-label=""]::before { content: none; }
+  .table-wrap td:first-child { font-size: 16px; font-weight: 600; text-align: left; justify-content: flex-start; }
+  .table-wrap td:first-child::before { content: none; }
+  .table-wrap td:has(> .rank) { padding-left: 34px; }
+  .table-wrap td > .rank { left: 2px; }
+  .table-wrap td .bar { flex: 1; max-width: 60%; }
+  .kpis5 > .kpi:last-child:nth-child(odd) { grid-column: 1 / -1; }
+}
+@media print {
+  :root, :root:not([data-theme="light"]) { --bg: #fff; --card: #fff; --ink: #111; --ink2: #333; --mute: #555; --soft: #eee; --line: #ccc; --blue: #0B7F74; --teal: #16B8A8; --gold: #8A6A1F; --gold-2: #8A6A1F; color-scheme: light; }
+  html, body { background: #fff !important; color: #111; }
+  .card, .report, .kpi, .kpis .kpi { background: #fff !important; color: #111 !important; border-color: #ddd !important; }
+  .report .kpi b, .report .kpi span, .report .kpi small { color: #111 !important; }
+  .logo .on-light { display: block !important; } .logo .on-dark { display: none !important; }
+  th { color: #555; } td { border-color: #e5e5e5; }
+}
 </style>
 </head>
 <body>

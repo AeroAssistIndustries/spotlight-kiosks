@@ -186,8 +186,16 @@
     const y = window.scrollY;
     document.body.classList.toggle("is-report", tab === "report");
     view.innerHTML = ({ overview: vOverview, ads: vAds, places: vPlaces, answers: vAnswers, hotel: vHotel, notices: vNotices, notes: vNotes, kiosks: vKiosks, history: vHistory, report: vReport })[tab]();
+    labelTables(view);
     window.scrollTo(0, y);
     tick();
+  }
+  /* phones show tables as stacked cards: each cell carries its column name */
+  function labelTables(root) {
+    root.querySelectorAll(".table-wrap table").forEach(t => {
+      const heads = [...t.querySelectorAll("thead th")].map(th => th.textContent.trim());
+      t.querySelectorAll("tbody tr").forEach(tr => [...tr.children].forEach((td, i) => td.setAttribute("data-label", heads[i] || "")));
+    });
   }
 
   function isDirty() { return JSON.stringify(D) !== JSON.stringify(saved); }
