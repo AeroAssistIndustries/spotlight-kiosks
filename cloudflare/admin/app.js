@@ -352,7 +352,7 @@
     const q = qrcode(0, "M"); q.addData(text); q.make();
     const N = q.getModuleCount(); let d = "";
     for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (q.isDark(y, x)) d += `M${x} ${y}h1v1h-1z`;
-    return `<svg viewBox="-2 -2 ${N + 4} ${N + 4}" shape-rendering="crispEdges" aria-hidden="true"><rect x="-2" y="-2" width="${N + 4}" height="${N + 4}" fill="#fff"/><path fill="#0F1C2B" d="${d}"/></svg>`;
+    return `<svg viewBox="-3 -3 ${N + 6} ${N + 6}" shape-rendering="crispEdges" aria-hidden="true"><rect x="-3" y="-3" width="${N + 6}" height="${N + 6}" fill="#fff"/><path fill="#0F1C2B" d="${d}"/></svg>`;
   }
   function adPreview(s) {
     const it = s.item && D.items[s.item], walk = it ? far(it) : "";

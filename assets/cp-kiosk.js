@@ -87,7 +87,8 @@
     const q = qrcode(0, "M"); q.addData(text); q.make();
     const N = q.getModuleCount(); let r = "";
     for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (q.isDark(y, x)) r += `M${x} ${y}h1v1h-1z`;
-    return `<svg viewBox="-2 -2 ${N + 4} ${N + 4}" role="img" aria-label="${esc(label || "QR code")}" data-qr="${esc(text)}" shape-rendering="crispEdges"><rect x="-2" y="-2" width="${N + 4}" height="${N + 4}" fill="#fff"/><path fill="#0F1C2B" d="${r}"/></svg>`;
+    /* 3-module white border (plus the white card around it) so every phone camera finds the code quickly */
+    return `<svg viewBox="-3 -3 ${N + 6} ${N + 6}" role="img" aria-label="${esc(label || "QR code")}" data-qr="${esc(text)}" shape-rendering="crispEdges"><rect x="-3" y="-3" width="${N + 6}" height="${N + 6}" fill="#fff"/><path fill="#0F1C2B" d="${r}"/></svg>`;
   }
 
   /* ---------- tap counts (this device only, for staff) ---------- */
@@ -248,13 +249,26 @@
   Object.values(V.categories).forEach(c => c.items.forEach(i => { if (!ICON[i]) ICON[i] = c.icon; }));
   const iconOf = id => ICON[id] || "pin";
 
+  /* Welcome screen: invites guests in with real questions people ask, and shortcuts straight to the popular sections. */
+  const TRY = V.faq.map(f => f.q).slice(0, 10);
   function vAttract() {
-    return `<button class="cpk-attract" data-act="start">
+    const quick = (V.tiles || []).slice(0, 3).map(t => `<button class="cpk-quick" data-act="quick" data-id="${esc(t.id)}">${svg(t.icon)}<span>${esc(t.label)}</span></button>`).join("");
+    return `<div class="cpk-attract-wrap"><button class="cpk-attract" data-act="start">
       <span class="cpk-a-kicker">Welcome to</span>
       <span class="cpk-a-name">${esc(V.name)}</span>
       <span class="cpk-a-sub">Your guide to the hotel and North Hollywood</span>
-      <span class="cpk-a-touch"><span class="cpk-ring"></span>Touch anywhere to begin</span></button>`;
+      ${TRY.length ? `<span class="cpk-a-try">${svg("chat")}<span>Ask me: <b id="cpk-try">“${esc(TRY[S.tryI % TRY.length])}”</b></span></span>` : ""}
+      <span class="cpk-a-touch"><span class="cpk-ring"></span>Touch anywhere to begin</span></button>
+      <div class="cpk-quicks">${quick}<button class="cpk-quick ask" data-act="quick" data-id="ask">${svg("chat")}<span>Ask the concierge</span></button></div></div>`;
   }
+  S.tryI = 0;
+  setInterval(() => {
+    if (S.mode !== "attract" || S.still || !TRY.length) return;
+    const el = root.querySelector("#cpk-try"); if (!el) return;
+    S.tryI++;
+    el.classList.add("out");
+    setTimeout(() => { el.textContent = "“" + TRY[S.tryI % TRY.length] + "”"; el.classList.remove("out"); }, 350);
+  }, 4500);
   function tileHTML(t) {
     return `<button class="cpk-tile${t.photo ? " photo" : ""}" data-act="cat" data-id="${t.id}"${t.photo ? ` style="--img:url('${IMG(t.photo)}')"` : ""}>
       <span class="cpk-tile-ico">${svg(t.icon)}</span>
@@ -287,6 +301,16 @@
       <div class="cpk-cat-head"><span class="cpk-cat-ico">${svg(c.icon)}</span><div><h1 class="cpk-h2">${esc(c.label)}</h1><p class="cpk-intro">${esc(c.intro)}</p></div></div>
       <div class="cpk-list">${c.items.map(rowHTML).join("")}</div></section>`;
   }
+  /* More places like this one, nearest first, so guests can keep exploring without going back. */
+  function relatedHTML(id) {
+    const prev = S.stack[S.stack.length - 2];
+    const cat = (prev && prev.v === "cat" && V.categories[prev.id]) || Object.values(V.categories).find(c => c.items.includes(id));
+    if (!cat) return "";
+    const near = id => { const m = miles(item(id).ll); return m == null ? 99 : m; };
+    const ids = cat.items.filter(x => x !== id && item(x)).sort((a, b) => near(a) - near(b)).slice(0, 3);
+    if (!ids.length) return "";
+    return `<p class="cpk-kicker" style="margin-top:1.4em">More ${esc(cat.label.toLowerCase())}</p><div class="cpk-list">${ids.map(rowHTML).join("")}</div>`;
+  }
   function vItem(id) {
     const it = item(id), f = howFar(it);
     const link = it.ll ? GO("place", id, mapsUrl(it)) : GO("guide", id, guideUrl(id));
@@ -304,7 +328,9 @@
         <div class="cpk-qr">${qr(link, it.ll ? "QR code: directions on your phone" : "QR code: open on your phone")}</div>
         <div><b>${it.ll ? "Directions on your phone" : "Save this on your phone"}</b>
           <small>${it.ll ? "Point your phone camera at the code. Google Maps opens with the route, today's hours and phone number." : "Point your phone camera at the code to keep this information with you."}</small></div>
-      </div></section>`;
+      </div>
+      <button class="cpk-askabout" data-act="askabout" data-id="${esc(id)}">${svg("chat")}<span>Ask the concierge about ${esc(it.n)}</span>${svg("chev")}</button>
+      ${relatedHTML(id)}</section>`;
   }
   /* Built-in concierge: matches a question to the closest answer. */
   function answer(qs) {
@@ -336,13 +362,77 @@
       <p class="cpk-ask-sub">${AI ? `<span class="cpk-live"><i></i>Live</span>Ask anything about the hotel or North Hollywood, in any language.` : "Answers about the hotel and North Hollywood."}</p>
       ${chat.length ? `<div class="cpk-chat" id="cpk-chat">${chat.map(bubbleHTML).join("")}</div>` : ""}
       <form class="cpk-askform" data-form="ask" autocomplete="off">
-        ${svg("search")}<input id="cpk-q" type="text" enterkeyhint="send" placeholder="${chat.length ? "Ask a follow-up question" : "Type a question"}" aria-label="Your question" maxlength="300" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        ${svg("search")}<input id="cpk-q" type="text" inputmode="none" enterkeyhint="send" placeholder="${chat.length ? "Ask a follow-up question" : "Type a question"}" aria-label="Your question" maxlength="300" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
         <button type="submit" class="cpk-askgo">Ask</button>
       </form>
+      <div class="cpk-sugg" id="cpk-sugg" aria-live="polite"></div>
+      ${kbHTML()}
       ${chat.length ? `<button class="cpk-newchat" data-act="newchat">${svg("x")}<span>Start a new question</span></button>`
         : `<p class="cpk-kicker">Popular questions</p><div class="cpk-qs">${chips}</div>`}
       ${AI ? `<p class="cpk-ai-note">Answers come from an AI assistant and can be wrong. The front desk is open 24 hours at ${esc(V.phone)}.</p>` : ""}</section>`;
   }
+  /* ---------- built-in touch keyboard ----------
+     The kiosk uses its own large keyboard, so the device's keyboard (with its search, voice and settings shortcuts)
+     never opens. A physical keyboard still works. */
+  const KB = {
+    abc: ["q w e r t y u i o p ⌫", "a s d f g h j k l '", "⇧ z x c v b n m , . ?", "123 ␣ ⏎"],
+    num: ["1 2 3 4 5 6 7 8 9 0 ⌫", "- / : ; ( ) $ & @ \"", "# % + = ! ? , . '", "ABC ␣ ⏎"]
+  };
+  S.kb = { open: false, mode: "abc", shift: true };
+  function kbHTML() {
+    const label = { "⌫": "Delete", "⇧": "Shift", "123": "Numbers", "ABC": "Letters", "␣": "Space", "⏎": "Ask" };
+    const rows = KB[S.kb.mode].map(r => `<div class="cpk-kb-row">${r.split(" ").map(k => {
+      const cls = k === "␣" ? "space" : k === "⏎" ? "go" : /^(⌫|⇧|123|ABC)$/.test(k) ? "fn" : "";
+      const shown = k === "␣" ? "space" : k === "⏎" ? "Ask" : (S.kb.shift && k.length === 1 && /[a-z]/.test(k) ? k.toUpperCase() : k);
+      return `<button type="button" class="cpk-key ${cls}${k === "⇧" && S.kb.shift ? " on" : ""}" data-k="${esc(k)}" aria-label="${esc(label[k] || shown)}">${esc(shown)}</button>`;
+    }).join("")}</div>`).join("");
+    return `<div class="cpk-kb${S.kb.open ? " open" : ""}" id="cpk-kb" role="group" aria-label="On-screen keyboard">${rows}
+      <button type="button" class="cpk-kb-hide" data-k="hide" aria-label="Hide keyboard">${svg("down")}<span>Hide keyboard</span></button></div>`;
+  }
+  function kbRedraw() { const k = root.querySelector("#cpk-kb"); if (k) k.outerHTML = kbHTML(); }
+  function kbShow(on) { S.kb.open = on; const k = root.querySelector("#cpk-kb"); if (k) k.classList.toggle("open", on); if (on) setTimeout(() => { const f = root.querySelector(".cpk-askform"); if (f && view.scrollTop > f.offsetTop) view.scrollTop = Math.max(0, f.offsetTop - 20); }, 30); }
+  function suggest() {
+    const box = root.querySelector("#cpk-sugg"), inp = root.querySelector("#cpk-q");
+    if (!box || !inp) return;
+    const t = " " + inp.value.toLowerCase().replace(/[^a-z0-9\-\s]/g, " ").replace(/\s+/g, " ") + " ";
+    if (t.trim().length < 3) { box.innerHTML = ""; return; }
+    const hits = V.faq.map((f, i) => ({ i, s: f.keys.reduce((a, k) => a + (t.includes(" " + k) ? k.length : 0), 0) + (f.q.toLowerCase().includes(t.trim()) ? 10 : 0) }))
+      .filter(x => x.s > 0).sort((a, b) => b.s - a.s).slice(0, 3);
+    box.innerHTML = hits.map(x => `<button class="cpk-q small" data-act="q" data-i="${x.i}">${esc(V.faq[x.i].q)}</button>`).join("");
+  }
+  function press(k) {
+    const inp = root.querySelector("#cpk-q");
+    if (!inp) return;
+    armIdle();
+    if (k === "hide") { kbShow(false); inp.blur(); return; }
+    if (k === "⇧") { S.kb.shift = !S.kb.shift; kbRedraw(); return; }
+    if (k === "123" || k === "ABC") { S.kb.mode = k === "123" ? "num" : "abc"; kbRedraw(); return; }
+    if (k === "⏎") { S.kb.open = false; ask(inp.value); return; }
+    const a = inp.selectionStart != null ? inp.selectionStart : inp.value.length, b = inp.selectionEnd != null ? inp.selectionEnd : a;
+    let v = inp.value, pos = a;
+    if (k === "⌫") { if (a === b && a > 0) { v = v.slice(0, a - 1) + v.slice(b); pos = a - 1; } else { v = v.slice(0, a) + v.slice(b); } }
+    else {
+      let ch = k === "␣" ? " " : k;
+      if (S.kb.shift && /[a-z]/.test(ch)) ch = ch.toUpperCase();
+      if (v.length >= 300) return;
+      v = v.slice(0, a) + ch + v.slice(b); pos = a + ch.length;
+    }
+    inp.value = v;
+    try { inp.setSelectionRange(pos, pos); } catch (e) { /* ignore */ }
+    const wantShift = v.length === 0 || /[.?!]\s$/.test(v);
+    if (S.kb.shift !== wantShift) { S.kb.shift = wantShift; kbRedraw(); }
+    suggest();
+  }
+  root.addEventListener("pointerdown", e => {
+    const k = e.target.closest && e.target.closest("[data-k]");
+    if (!k) return;
+    e.preventDefault(); /* keeps the cursor in the question box */
+    k.classList.add("down"); setTimeout(() => k.classList.remove("down"), 120);
+    press(k.dataset.k);
+  });
+  root.addEventListener("focusin", e => { if (e.target.id === "cpk-q") kbShow(true); });
+  root.addEventListener("input", e => { if (e.target.id === "cpk-q") suggest(); });
+
   function onAskView() { const t = S.stack[S.stack.length - 1]; return S.mode === "session" && t && t.v === "ask"; }
   function chatEnd() { if (onAskView()) { const c = root.querySelector("#cpk-chat"); if (c) view.scrollTop = c.offsetTop + c.offsetHeight - view.clientHeight * 0.55; } }
   function updateMsg(m) {
@@ -395,7 +485,7 @@
   function ask(q) {
     q = String(q || "").replace(/\s+/g, " ").trim().slice(0, 300);
     if (!q || S.busy) return;
-    S.busy = true;
+    S.busy = true; S.kb.open = false; S.kb.shift = true;
     S.chat.push({ role: "user", text: q });
     const m = { role: "assistant", text: "", ids: [], pending: true };
     S.chat.push(m);
@@ -478,7 +568,7 @@
     if (LIVE) LIVE.count("hours", String(hourNow()).padStart(2, "0")); /* busiest times, for the dashboard */ showAd(S.ad); rotateAds(); render("fwd"); } /* the ad on screen gets a full turn in front of the guest */
   function reset() {
     clearTimeout(S.idle); hideWarn();
-    S.mode = "attract"; S.stack = []; S.panel = false; S.chat = []; S.busy = false;
+    S.mode = "attract"; S.stack = []; S.panel = false; S.chat = []; S.busy = false; S.kb = { open: false, mode: "abc", shift: true };
     S.large = S.contrast = S.reach = false;
     if (window.speechSynthesis) speechSynthesis.cancel();
     if (LIVE) LIVE.flush();
@@ -509,6 +599,11 @@
     const act = b.dataset.act;
     if (S.mode === "attract") {
       start();
+      if (act === "quick") {
+        const id = b.dataset.id;
+        if (id === "ask") { go({ v: "ask" }); setTimeout(() => { const i = root.querySelector("#cpk-q"); if (i) i.focus({ preventScroll: true }); }, 60); }
+        else if (V.categories[id]) { bump("categories", id); go({ v: "cat", id }); }
+      }
       return;
     }
     armIdle();
@@ -518,7 +613,8 @@
       case "cat": bump("categories", b.dataset.id); go({ v: "cat", id: b.dataset.id }); break;
       case "item": bump("places", b.dataset.id); go({ v: "item", id: b.dataset.id }); break;
       case "ask": if (!onAskView()) go({ v: "ask" }); setTimeout(() => { const i = root.querySelector("#cpk-q"); if (i) i.focus({ preventScroll: true }); }, 50); break;
-      case "q": ask(V.faq[+b.dataset.i].q); break;
+      case "q": if (!onAskView()) go({ v: "ask" }); ask(V.faq[+b.dataset.i].q); break;
+      case "askabout": { const it = item(b.dataset.id); go({ v: "ask" }); ask(it.hotel ? `Tell me about ${it.n} at the hotel.` : `Tell me about ${it.n}. Is it good, and how do I get there?`); break; }
       case "newchat": if (!S.busy) { S.chat = []; render(); } break;
       case "take": bump("takeHome", "open"); go({ v: "take" }); break;
       case "panel": S.panel = !S.panel; render(); break;
