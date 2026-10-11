@@ -1506,3 +1506,44 @@ button:focus-visible, [tabindex]:focus-visible { outline: 3px solid #0F1C2B !imp
 .page-hero.dark::before{opacity:.14}
 .page-hero>.wrap{position:relative;z-index:1}
 .hero-photo{box-shadow:0 30px 60px -30px rgba(15,28,43,.45)}
+
+/* ================= MOTION 2026 — the live city hero and scroll reveals ================= */
+.hero2.hero-live{background:#0a1522;color:#f4f6f7;border-bottom:0;isolation:isolate}
+.hero2.hero-live::before{display:none}
+.hero2.hero-live::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(90deg,rgba(10,21,34,.95) 0%,rgba(10,21,34,.82) 28%,rgba(10,21,34,.25) 52%,rgba(10,21,34,0) 64%),linear-gradient(180deg,rgba(10,21,34,.35) 0%,rgba(10,21,34,0) 18%,rgba(10,21,34,0) 76%,rgba(10,21,34,.85) 100%)}
+.hero-live .hero2-grid{z-index:2}
+.cp-city{position:absolute;inset:0;z-index:0;opacity:0;transition:opacity 1.4s ease}
+.cp-city.on{opacity:1}
+.cp-city canvas{display:block;width:100%;height:100%}
+.cp-city-labels{position:absolute;inset:0;pointer-events:none;z-index:1}
+.cp-city-label{position:absolute;left:0;top:0;translate:-50% -140%;display:inline-flex;align-items:center;gap:8px;padding:7px 12px 7px 10px;border-radius:999px;background:rgba(10,21,34,.78);border:1px solid rgba(34,199,182,.5);color:#e6f7f5;font:600 12.5px/1 var(--body);letter-spacing:.01em;white-space:nowrap;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);transition:opacity .45s ease;opacity:0}
+.cp-city-label i{width:7px;height:7px;border-radius:50%;background:var(--lamp);box-shadow:0 0 0 3px rgba(34,199,182,.28)}
+.hero-live h1{color:#fff}
+.hero-live .lede{color:#b5c2cf}
+.hero-live .hl{background:linear-gradient(transparent 64%,rgba(34,199,182,.5) 64%,rgba(34,199,182,.5) 88%,transparent 88%)}
+.hero-live .live-pill{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.16);color:#f4f6f7;box-shadow:none;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.hero-live .btn-ghost{color:#fff}
+.hero-live .hero2-points{border-color:rgba(255,255,255,.14)}
+.hero-live .hero2-points b{color:#fff}
+.hero-live .hero2-points span{color:#b5c2cf}
+.hero-live .slider{color:var(--ink);box-shadow:0 0 0 1px rgba(34,199,182,.28),0 40px 90px -30px rgba(0,0,0,.8)}
+@media (min-width:981px){
+  .hero2.hero-live{min-height:min(800px,calc(100vh - var(--head-h)));display:flex;align-items:center;padding:clamp(48px,6vw,84px) 0}
+  .hero2.hero-live>.wrap{width:100%}
+  .hero-live .slider{width:min(100%,460px);justify-self:end;align-self:end;margin-top:min(320px,26vh)}
+}
+@media (max-width:980px){
+  .hero2.hero-live::after{background:linear-gradient(180deg,rgba(10,21,34,.88) 0%,rgba(10,21,34,.8) 34%,rgba(10,21,34,.25) 44%,rgba(10,21,34,0) 52%,rgba(10,21,34,0) 60%,rgba(10,21,34,.75) 74%,rgba(10,21,34,.95) 100%)}
+  .hero-live .slider{margin-top:clamp(200px,52vw,320px)}
+}
+/* scroll reveals (added by site.js only to things below the first screen) */
+.rv{opacity:0;transform:translateY(28px);transition:opacity .8s cubic-bezier(.2,.7,.2,1) var(--rv-d,0ms),transform .9s cubic-bezier(.2,.7,.2,1) var(--rv-d,0ms)}
+.rv.in{opacity:1;transform:none}
+/* US map: pins send out pulses */
+.usmap .pin-ping{fill:none;stroke:var(--lamp);stroke-width:2;vector-effect:non-scaling-stroke;transform-box:fill-box;transform-origin:center;pointer-events:none;animation:pinPing 2.1s cubic-bezier(.2,.6,.3,1) forwards}
+@keyframes pinPing{0%{transform:scale(1);opacity:.95}100%{transform:scale(4.4);opacity:0}}
+/* CTA band: the ripple breathes */
+.cta-band::before{animation:ripBreath 8s ease-in-out infinite}
+@keyframes ripBreath{0%,100%{transform:translateY(-50%) scale(1)}50%{transform:translateY(-50%) scale(1.07)}}
+@media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}.cta-band::before{animation:none}.cp-city{transition:none}}

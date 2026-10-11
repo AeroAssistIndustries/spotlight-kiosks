@@ -418,3 +418,53 @@ ${lines.map((l, i) => `<text x="90" y="${(tall ? 200 : 380) + i * fs * 1.08}" fo
 
   const y = $("#year"); if (y) y.textContent = new Date().getFullYear();
 })();
+
+/* ---------- motion: the live city hero, scroll-in reveals, pulsing map pins ---------- */
+(function () {
+  var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var me = document.currentScript && document.currentScript.src;
+  var base = me ? me.replace(/site\.js(\?.*)?$/, "") : null;
+
+  // Home hero: load the 3D city only on the home page (three.js stays off every other page).
+  var hero = document.querySelector(".hero2");
+  if (hero && base && "IntersectionObserver" in window) {
+    var conn = navigator.connection || {};
+    if (!conn.saveData) import(base + "city-pulse.js?v=20261012").catch(function () {});
+  }
+
+  if (reduce || !("IntersectionObserver" in window)) return;
+
+  // Reveal sections as they scroll in. Only things below the first screen start hidden.
+  var sel = [".section-head", ".demo-head", ".tools > *", ".concepts > *", ".price-cards > *", ".step-list > *",
+    ".jump-grid > *", ".usmap", ".faq-list", ".co-grid", ".paths > *", ".tabs", ".cta-inner", ".hero-photo",
+    ".metric-list > li", ".loc-list > *", ".card-grid > *", ".pkg-notes > *", ".journey"].join(",");
+  var fold = innerHeight * 0.92, items = [];
+  document.querySelectorAll("main " + sel).forEach(function (el) {
+    if (el.closest(".hero2") || el.getBoundingClientRect().top < fold) return;
+    var sib = el.parentElement ? Array.prototype.indexOf.call(el.parentElement.children, el) : 0;
+    el.classList.add("rv"); el.style.setProperty("--rv-d", Math.min(sib, 5) * 70 + "ms"); items.push(el);
+  });
+  var io = new IntersectionObserver(function (es) {
+    es.forEach(function (e) { if (!e.isIntersecting) return; var el = e.target; el.classList.add("in"); io.unobserve(el);
+      setTimeout(function () { el.classList.remove("rv", "in"); el.style.removeProperty("--rv-d"); }, 1300); });
+  }, { rootMargin: "0px 0px -8% 0px" });
+  items.forEach(function (el) { io.observe(el); });
+
+  // US map: host pins send out pulses, a few at a time, while the map is on screen.
+  var map = document.querySelector(".usmap svg");
+  if (map) {
+    var pins = map.querySelectorAll(".pin"), timer = 0, NS = "http://www.w3.org/2000/svg";
+    var ping = function () {
+      if (!pins.length) return;
+      var p = pins[Math.floor(Math.random() * pins.length)], c = document.createElementNS(NS, "circle");
+      c.setAttribute("cx", p.getAttribute("cx")); c.setAttribute("cy", p.getAttribute("cy"));
+      c.setAttribute("r", p.classList.contains("multi") ? 9 : 7); c.setAttribute("class", "pin-ping");
+      p.parentNode.insertBefore(c, p);
+      setTimeout(function () { c.remove(); }, 2200);
+    };
+    new IntersectionObserver(function (es) {
+      clearInterval(timer);
+      if (es[0].isIntersecting) timer = setInterval(function () { ping(); if (Math.random() < 0.5) ping(); }, 520);
+    }).observe(map);
+  }
+})();

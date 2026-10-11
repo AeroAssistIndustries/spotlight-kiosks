@@ -183,7 +183,7 @@ def page(path, title, desc, body, active=None, kiosk=False, extra_js=()):
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{R}}assets/styles.css?v=20261011">
+<link rel="stylesheet" href="{{R}}assets/styles.css?v=20261012">
 </head>
 <body>
 {header(active or path)}
@@ -195,7 +195,7 @@ def page(path, title, desc, body, active=None, kiosk=False, extra_js=()):
 <script src="{{R}}assets/config.js"></script>
 <script src="{{R}}assets/integrations.js"></script>
 {''.join(f'<script src="{{R}}assets/{j}"></script>' for j in extra_js)}
-<script src="{{R}}assets/site.js"></script>
+<script src="{{R}}assets/site.js?v=20261012"></script>
 </body>
 </html>
 '''
