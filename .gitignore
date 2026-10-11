@@ -3,3 +3,5 @@ build/__pycache__/
 dist/
 .dev.vars
 .wrangler/
+build/brand/out/
+build/brand/fonts/

@@ -68,3 +68,11 @@ Orders & inquiries and emailed) and payment links are set in Settings → CityPu
 ## Notes
 
 - Businesses shown inside the kiosk demo and campaign examples are fictional.
+
+## Brand
+
+Logo files are in `assets/`: `logo.svg` (main, light backgrounds), `logo-light.svg` (dark backgrounds),
+`logo-on-teal.svg`, `logo-stacked*.svg`, `logo-compact*.svg` (no "KIOSKS"), `logo-mark*.svg` and `app-icon.svg`
+(the ripple icon), `favicon.*`, `apple-touch-icon.png`, `icon-192/512.png`, `og-card.png` (link previews) and
+`ripple.svg` (the background graphic). The header uses `logo-anim.svg`, which pulses the i-dot every few seconds.
+How the logo is built and the rules for using it: `build/brand/README.md`.

@@ -15,7 +15,7 @@
 <a class="skip" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="wrap header-inner">
-    <a class="brand" href="<?php echo esc_url( home_url( '/' ) ); ?>" aria-label="CityPulse Kiosks home"><img src="<?php echo esc_url( get_theme_file_uri( 'assets/' ) ); ?>logo.svg" alt="CityPulse Kiosks" width="380" height="116"></a>
+    <a class="brand" href="<?php echo esc_url( home_url( '/' ) ); ?>" aria-label="CityPulse Kiosks home"><picture><source media="(max-width: 560px)" srcset="<?php echo esc_url( get_theme_file_uri( 'assets/' ) ); ?>logo-compact.svg"><img src="<?php echo esc_url( get_theme_file_uri( 'assets/' ) ); ?>logo-anim.svg" alt="CityPulse Kiosks" width="580" height="97"></picture></a>
     <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav"><span class="sr">Menu</span><i></i><i></i></button>
     <nav id="site-nav" class="site-nav" aria-label="Main">
       <a href="<?php echo esc_url( home_url( '/' ) ); ?>kiosk/"<?php citypulse_current_attr( 'kiosk/' ); ?>>The kiosk</a>

@@ -55,6 +55,18 @@ function citypulse_install_pages( $overwrite = false ) {
 	return $res;
 }
 
+/** Once per brand update: fix the site name if the host set it as one word (e.g. "Citypulsekiosks"). */
+add_action( 'init', function () {
+	if ( (int) get_option( 'citypulse_brand_v' ) >= 2 ) {
+		return;
+	}
+	$name = (string) get_option( 'blogname' );
+	if ( $name !== 'CityPulse Kiosks' && preg_replace( '/[^a-z]/', '', strtolower( $name ) ) === 'citypulsekiosks' ) {
+		update_option( 'blogname', 'CityPulse Kiosks' );
+	}
+	update_option( 'citypulse_brand_v', 2 );
+} );
+
 add_action( 'after_switch_theme', function () {
 	citypulse_install_pages( false );
 	if ( ! get_option( 'permalink_structure' ) ) {

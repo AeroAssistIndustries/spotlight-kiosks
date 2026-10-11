@@ -5,7 +5,7 @@
  */
 defined( 'ABSPATH' ) || exit;
 
-define( 'CITYPULSE_VERSION', '1.0.2' );
+define( 'CITYPULSE_VERSION', '1.1.0' );
 
 require get_theme_file_path( 'inc/settings.php' );
 require get_theme_file_path( 'inc/setup.php' );
@@ -53,6 +53,8 @@ add_action( 'wp_head', function () {
 		echo '<meta property="og:title" content="' . esc_attr( wp_get_document_title() ) . "\">\n";
 		echo '<meta property="og:description" content="' . esc_attr( $desc ) . "\">\n";
 		echo '<meta property="og:image" content="' . esc_url( $uri . 'og-card.png' ) . "\">\n";
+		echo "<meta property=\"og:image:width\" content=\"1200\">\n<meta property=\"og:image:height\" content=\"630\">\n";
+		echo "<meta property=\"og:site_name\" content=\"CityPulse Kiosks\">\n";
 		echo "<meta name=\"twitter:card\" content=\"summary_large_image\">\n";
 	}
 	echo "<meta name=\"theme-color\" content=\"#0F1C2B\">\n";
@@ -60,6 +62,7 @@ add_action( 'wp_head', function () {
 		echo '<link rel="icon" href="' . esc_url( $uri . 'favicon.svg' ) . "\" type=\"image/svg+xml\">\n";
 		echo '<link rel="icon" href="' . esc_url( $uri . 'favicon.png' ) . "\" type=\"image/png\" sizes=\"64x64\">\n";
 		echo '<link rel="apple-touch-icon" href="' . esc_url( $uri . 'apple-touch-icon.png' ) . "\">\n";
+		echo '<link rel="manifest" href="' . esc_url( $uri . 'site.webmanifest' ) . "\">\n";
 	}
 }, 1 );
 

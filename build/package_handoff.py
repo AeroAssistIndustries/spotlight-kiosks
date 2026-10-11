@@ -33,7 +33,7 @@ def main():
     shutil.copy(os.path.join(DIST, "citypulse-theme.zip"), OUT)
     md = open(os.path.join(ROOT, "build", "HANDOFF.md")).read()
     open(os.path.join(OUT, "HANDOFF.md"), "w").write(md)
-    for f in ["logo.svg", "logo-light.svg", "logo-mark.svg", "logo.png", "logo-light.png", "favicon.svg", "favicon.png", "apple-touch-icon.png", "og-card.png"]:
+    for f in ["logo.svg", "logo-light.svg", "logo-on-teal.svg", "logo-stacked.svg", "logo-stacked-light.svg", "logo-compact.svg", "logo-compact-light.svg", "logo-mark.svg", "logo-mark-light.svg", "app-icon.svg", "logo.png", "logo-light.png", "logo-stacked.png", "logo-mark.png", "app-icon.png", "favicon.svg", "favicon.png", "apple-touch-icon.png", "icon-192.png", "icon-512.png", "og-card.png"]:
         shutil.copy(os.path.join(ROOT, "assets", f), os.path.join(OUT, "brand", f))
 
     logo = base64.b64encode(open(os.path.join(ROOT, "assets", "logo.svg"), "rb").read()).decode()

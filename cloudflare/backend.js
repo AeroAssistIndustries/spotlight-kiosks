@@ -790,7 +790,7 @@ async function sharedReport(env, url, fetchSeed) {
 <style>
 :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:#1d1d1f;background:#f5f5f7}
 body{margin:0;padding:24px 16px 60px}.r{max-width:900px;margin:0 auto;background:#fff;border-radius:20px;padding:34px 38px;box-shadow:0 6px 24px rgba(0,0,0,.06)}
-.h{display:flex;justify-content:space-between;align-items:center;gap:16px;padding-bottom:16px;border-bottom:3px solid #16B8A8}.h img{height:42px}
+.h{display:flex;justify-content:space-between;align-items:center;gap:16px;padding-bottom:16px;border-bottom:3px solid #22C7B6}.h img{height:30px}
 .t{text-align:right}.t span{display:block;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#0B7F74}.t b{font-size:15px}
 .biz{display:flex;gap:20px;align-items:center;margin:24px 0 18px}.lg{width:120px;height:90px;border:1px solid #d2d2d7;border-radius:14px;display:grid;place-items:center;padding:10px;flex:none}.lg img{max-width:100%;max-height:100%}
 h1{font-size:28px;margin:0;letter-spacing:-.02em}.biz p{color:#6e6e73;margin:4px 0 0}
@@ -798,7 +798,7 @@ h1{font-size:28px;margin:0;letter-spacing:-.02em}.biz p{color:#6e6e73;margin:4px
 .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.kpi{border:1px solid #e8e8ed;border-radius:14px;padding:14px 16px}.kpi span{color:#6e6e73;font-size:13px}.kpi b{display:block;font-size:30px;margin:2px 0;letter-spacing:-.03em}.kpi small{color:#6e6e73;font-size:12px}
 h2{font-size:18px;margin:28px 0 8px}svg{width:100%;height:auto;display:block}svg text{fill:#6e6e73;font-size:11px}.lgd{font-size:13px;color:#6e6e73;display:flex;gap:16px}.lgd i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}
 .f{margin-top:28px;padding-top:14px;border-top:1px solid #e8e8ed;color:#6e6e73;font-size:13px}
-@media(max-width:700px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.r{padding:22px 18px}.h img{height:32px}}
+@media(max-width:700px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.r{padding:22px 18px}.h img{height:24px}}
 @media print{body{background:#fff;padding:0}.r{box-shadow:none;padding:0}.seg{display:none}}
 </style></head><body><article class="r">
 <header class="h"><img src="/admin/brand/logo.svg" alt="CityPulse Kiosks"><div class="t"><span>Advertising report</span><b>${escH(nice(list[0]))} – ${escH(nice(list[list.length - 1]))}</b></div></header>

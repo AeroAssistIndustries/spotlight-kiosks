@@ -7,7 +7,8 @@ home = f'''
 <section class="hero2">
   <div class="wrap hero2-grid">
     <div class="hero2-copy">
-      <h1>Turn wait time into opportunity.</h1>
+      <p class="live-pill"><i aria-hidden="true"></i>Now booking in 153 cities · all 50 states</p>
+      <h1>Turn wait time into <em class="hl">opportunity.</em></h1>
       <p class="lede">Useful visitor information and local business advertising, together on one touch screen — in the lobbies, lounges and waiting rooms where people pause.</p>
       {btns(("Get started — $399/yr","#get-started"),("Host a kiosk for free","hosts/","btn-ghost"))}
       <ul class="hero2-points"><li><b>From $399</b><span>a year, or $60 a month</span></li><li><b>Every tap</b><span>counted and reported</span></li><li><b>$0</b><span>for qualified host venues</span></li></ul>

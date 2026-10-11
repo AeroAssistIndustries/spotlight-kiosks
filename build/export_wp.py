@@ -8,12 +8,12 @@ resolved when the page is shown, so the site keeps working if the domain changes
 import os, re, json, shutil, sys, zipfile
 sys.path.insert(0, os.path.dirname(__file__))
 import build  # builds the static site and fills PAGE_DATA
-from lib import PAGE_DATA, NAV, icon, footer, e, EMAIL, PHONE, TEL, ADDR1, ADDR2, SITE
+from lib import PAGE_DATA, NAV, icon, footer, e, EMAIL, PHONE, TEL, ADDR1, ADDR2, SITE, BRAND_LOGO
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DIST = os.path.join(ROOT, "dist")
 THEME = os.path.join(DIST, "citypulse-theme")
-VERSION = "1.0.2"
+VERSION = "1.1.0"
 
 def tok(html):
     return html.replace("{R}assets/", "{{CP_ASSETS}}").replace("{R}", "{{CP_HOME}}")
@@ -73,7 +73,7 @@ def wp_header():
 <a class="skip" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="wrap header-inner">
-    <a class="brand" href="{{R}}" aria-label="{SITE} home"><img src="{{R}}assets/logo.svg" alt="{SITE}" width="380" height="116"></a>
+    <a class="brand" href="{{R}}" aria-label="{SITE} home">{BRAND_LOGO}</a>
     <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav"><span class="sr">Menu</span><i></i><i></i></button>
     <nav id="site-nav" class="site-nav" aria-label="Main">
       {nav}
@@ -158,6 +158,8 @@ add_action( 'wp_head', function () {
 		echo '<meta property="og:title" content="' . esc_attr( wp_get_document_title() ) . "\">\n";
 		echo '<meta property="og:description" content="' . esc_attr( $desc ) . "\">\n";
 		echo '<meta property="og:image" content="' . esc_url( $uri . 'og-card.png' ) . "\">\n";
+		echo "<meta property=\"og:image:width\" content=\"1200\">\n<meta property=\"og:image:height\" content=\"630\">\n";
+		echo "<meta property=\"og:site_name\" content=\"CityPulse Kiosks\">\n";
 		echo "<meta name=\"twitter:card\" content=\"summary_large_image\">\n";
 	}
 	echo "<meta name=\"theme-color\" content=\"#0F1C2B\">\n";
@@ -165,6 +167,7 @@ add_action( 'wp_head', function () {
 		echo '<link rel="icon" href="' . esc_url( $uri . 'favicon.svg' ) . "\" type=\"image/svg+xml\">\n";
 		echo '<link rel="icon" href="' . esc_url( $uri . 'favicon.png' ) . "\" type=\"image/png\" sizes=\"64x64\">\n";
 		echo '<link rel="apple-touch-icon" href="' . esc_url( $uri . 'apple-touch-icon.png' ) . "\">\n";
+		echo '<link rel="manifest" href="' . esc_url( $uri . 'site.webmanifest' ) . "\">\n";
 	}
 }, 1 );
 
@@ -445,6 +448,18 @@ function citypulse_install_pages( $overwrite = false ) {
 	kses_init_filters();
 	return $res;
 }
+
+/** Once per brand update: fix the site name if the host set it as one word (e.g. "Citypulsekiosks"). */
+add_action( 'init', function () {
+	if ( (int) get_option( 'citypulse_brand_v' ) >= 2 ) {
+		return;
+	}
+	$name = (string) get_option( 'blogname' );
+	if ( $name !== 'CityPulse Kiosks' && preg_replace( '/[^a-z]/', '', strtolower( $name ) ) === 'citypulsekiosks' ) {
+		update_option( 'blogname', 'CityPulse Kiosks' );
+	}
+	update_option( 'citypulse_brand_v', 2 );
+} );
 
 add_action( 'after_switch_theme', function () {
 	citypulse_install_pages( false );

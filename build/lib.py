@@ -74,6 +74,10 @@ NAV = [
   ("link", "About", "about/"),
 ]
 
+# Header logo: the full lockup (with a gentle pulse on the i-dot), the shorter wordmark on phones.
+BRAND_LOGO = ('<picture><source media="(max-width: 560px)" srcset="{R}assets/logo-compact.svg">'
+              '<img src="{R}assets/logo-anim.svg" alt="CityPulse Kiosks" width="580" height="97"></picture>')
+
 def header(active):
     out = []
     for item in NAV:
@@ -92,7 +96,7 @@ def header(active):
     return f'''<a class="skip" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="wrap header-inner">
-    <a class="brand" href="{{R}}" aria-label="CityPulse Kiosks home"><img src="{{R}}assets/logo.svg" alt="CityPulse Kiosks" width="380" height="116"></a>
+    <a class="brand" href="{{R}}" aria-label="CityPulse Kiosks home">{BRAND_LOGO}</a>
     <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav"><span class="sr">Menu</span><i></i><i></i></button>
     <nav id="site-nav" class="site-nav" aria-label="Main">
       {"".join(out)}
@@ -110,7 +114,7 @@ def footer():
     col = lambda title, links: f'<div><h2>{title}</h2><nav aria-label="{title}">' + "".join(f'<a href="{{R}}{h}">{t}</a>' for t, h in links) + "</nav></div>"
     return f'''<footer class="site-footer">
   <div class="wrap footer-grid">
-    <div class="footer-brand"><img src="{{R}}assets/logo-light.svg" alt="CityPulse Kiosks" width="380" height="116"><p>Turning wait time into opportunity. Smart kiosks, useful information and local connection.</p></div>
+    <div class="footer-brand"><img src="{{R}}assets/logo-stacked-light.svg" alt="CityPulse Kiosks" width="402" height="122"><p>Turning wait time into opportunity. Smart kiosks, useful information and local connection.</p></div>
     {col("Explore CityPulse", [("The kiosk","kiosk/"),("Venues","venues/"),("Who you can reach","audience/"),("Market planning","locations/"),("How it works","how-it-works/"),("About us","about/")])}
     {col("Advertise", [("Advertising options","advertise/"),("Pricing & calculator","pricing/"),("Campaign planner","campaign-planner/"),("Creative studio","creative-studio/"),("Campaign ideas","campaign-ideas/"),("Measurement guide","measurement/"),("For agencies","agencies/")])}
     {col("Keep it useful", [("Request a kiosk","hosts/#inquiry"),("Guides & resources","resources/"),("Media overview","media-kit/"),("Common questions","faqs/"),("Contact CityPulse","contact/"),("Help & support","support/")])}
@@ -123,11 +127,36 @@ def footer():
   <div class="wrap footer-base"><span>© <span id="year">2026</span> CityPulse Kiosks. All rights reserved.</span><nav aria-label="Legal"><a href="{{R}}privacy/">Privacy Policy</a><a href="{{R}}terms/">Terms &amp; Conditions</a><a href="https://sales.citypulsekiosks.com" rel="nofollow">Team login</a><a href="https://spotlight-kiosks.sarvesh-bb0.workers.dev/admin" rel="nofollow">Owner login</a></nav></div>
 </footer>'''
 
+# Short labels shown above section headings (with the brand's pulse dot).
+EYEBROWS = {
+  "How it works, start to finish.": "How it works", "Get on a kiosk today.": "Self-serve checkout",
+  "Try the kiosk.": "Live demo", "Hosts in all 50 states.": "Coast to coast",
+  "Two ways in. One local connection.": "Advertisers &amp; venues", "Real places. Relevant possibilities.": "Venues",
+  "Give your next idea some room to grow.": "Planning tools", "A little clarity before you start.": "Questions",
+  "Designed to work for everyone involved.": "Our approach", "Simple. Relevant. Thoughtfully managed.": "What we believe",
+  "Choose the right way to be seen.": "Ad formats", "Pick a package. Grow your reach.": "Packages",
+  "A campaign that fits. Start with a place.": "Placement", "Put the next step on their radar.": "Why it works",
+  "Bring the strategy. Let's discuss the fit.": "For agencies", "A better brief makes the next step easier.": "The brief",
+  "The setting shapes the message.": "Audience", "Three questions to start with.": "Getting started",
+  "Make the message easy to understand.": "Creative", "We bring the kiosk. You bring the space.": "For hosts",
+  "Good fits for a CityPulse kiosk.": "Venue fit", "From a local idea to a clear proposal.": "For advertisers",
+  "From a useful space to a managed amenity.": "For venues", "Five different signals.": "Measurement",
+  "Your price. At the scale you choose.": "Calculator", "What can we help you with?": "Support",
+  "Plan it around your space.": "Planning",
+}
+def add_eyebrows(body):
+    import re as _re
+    def rep(m):
+        label = EYEBROWS.get(m.group(2))
+        return f'<p class="eyebrow">{label}</p>{m.group(0)}' if label else m.group(0)
+    return _re.sub(r'<h2(\s[^>]*)?>(.*?)</h2>', rep, body)
+
 PAGES = []
 PAGE_DATA = []  # used by build/export_wp.py
 
 def page(path, title, desc, body, active=None, kiosk=False, extra_js=()):
     """path like 'advertise/' or '' for home."""
+    body = add_eyebrows(body)
     PAGE_DATA.append(dict(path=path, title=title, desc=desc, body=body, active=active, kiosk=kiosk, extra_js=list(extra_js)))
     depth = path.count("/")
     root = "../" * depth if depth else "./"
@@ -142,15 +171,19 @@ def page(path, title, desc, body, active=None, kiosk=False, extra_js=()):
 <meta property="og:title" content="{e(full_title)}">
 <meta property="og:description" content="{e(desc)}">
 <meta property="og:image" content="https://aeroassistindustries.github.io/spotlight-kiosks/assets/og-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="CityPulse Kiosks">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#0F1C2B">
 <link rel="icon" href="{{R}}assets/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="{{R}}assets/favicon.png" type="image/png" sizes="64x64">
 <link rel="apple-touch-icon" href="{{R}}assets/apple-touch-icon.png">
+<link rel="manifest" href="{{R}}assets/site.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{R}}assets/styles.css?v=20261008b">
+<link rel="stylesheet" href="{{R}}assets/styles.css?v=20261011">
 </head>
 <body>
 {header(active or path)}
