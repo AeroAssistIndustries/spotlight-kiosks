@@ -4,7 +4,7 @@
 (function () {
   "use strict";
   var V = window.CP_VENUE;
-  if (!V || !V.id) return;
+  if (!V || !V.id || window.CP_DEMO) return; /* website demo: never load or send live data */
   var EP = ((V.ai && V.ai.endpoint) || "").replace(/\/$/, "");
   var AI = V.ai, KEY = "cp-content-" + V.id, QKEY = "cp-countq-" + V.id;
   var isKiosk = !!document.getElementById("cpk");

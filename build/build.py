@@ -122,7 +122,7 @@ page("", "Turn wait time into opportunity", "Touch-screen kiosks that give visit
 # ================================================================ THE KIOSK
 kiosk_page = page_hero([("The kiosk","kiosk/")], "One screen. A world of possibility.",
   "A digital concierge, information hub and local advertising platform in one professionally managed touch-screen kiosk.",
-  btns(("Try the kiosk","#demo"),("Explore hosting","hosts/","btn-ghost")),
+  btns(("Test the kiosk","test-the-kiosk/"),("Try the quick demo","#demo","btn-ghost")),
   aside=f'<div class="hero-photo"><img src="{{R}}assets/kiosk-lexen-sm.jpg" alt="CityPulse kiosk showing the Hotel Lexen guest directory in the hotel lounge" width="900" height="675"></div>') + f'''
 {section(head("Useful information. A local next step.", "A digital concierge and local discovery hub, together on one approachable touch screen.") + '''<div class="cards">
   <div class="card"><h3>Know the venue.</h3><p>Amenities, directions and helpful answers in one place.</p></div>
@@ -146,6 +146,8 @@ kiosk_page = page_hero([("The kiosk","kiosk/")], "One screen. A world of possibi
   <div class="card"><h3>Maintenance & support</h3><p>Content updates and routine service are handled by CityPulse.</p></div></div>''')}
 {cta_band()}'''
 page("kiosk/", "The kiosk", "A digital concierge, information hub and local advertising platform in one managed touch-screen kiosk. Try the interactive demo.", kiosk_page, kiosk=True)
+from test_kiosk import tk_page
+page("test-the-kiosk/", "Test the kiosk", "Tap around the real CityPulse kiosk software, then see the kiosk to scale in five sizes from a 21.5-inch countertop to a 55-inch tower.", tk_page(), active="kiosk/", extra_js=("test-kiosk.js",))
 page("operations/", "Team library (demo)", "Demo of the CityPulse team library. Enter the access code to preview file names.", '<section class="section"><div class="wrap"><div class="ops-app" id="ops-app"><p>Loading…</p><noscript><p>Turn on JavaScript to open this page.</p></noscript></div></div></section>', extra_js=("operations.js",))
 page("host/", "Host dashboard (demo)", "Demo of the host dashboard: kiosk status and visit counts. Sample data only.", '<section class="section"><div class="wrap"><div class="ops-app" id="host-app"><p>Loading…</p><noscript><p>Turn on JavaScript to open this page.</p></noscript></div></div></section>', extra_js=("host.js",))
 page("kiosk-test/", "Kiosk test", "Test page for a CityPulse kiosk: connection check and a test check-in to the website.", '<section class="section"><div class="wrap"><div class="ktest" id="ktest-app"><p>Loading…</p><noscript><p>Turn on JavaScript to run this test.</p></noscript></div></div></section>', extra_js=("kiosk-test.js",))
@@ -302,15 +304,15 @@ planner = page_hero([("Advertise","advertise/"),("Campaign planner","campaign-pl
 page("campaign-planner/", "Campaign planner", "Build a local kiosk campaign brief in four steps: goal, setting, message and next step.", planner)
 
 # ================================================================ CREATIVE STUDIO
-studio_presets = "".join(f'<button type="button" class="chip" data-preset="{i}" aria-pressed="{str(n==0).lower()}">{l}</button>' for n, (i, l) in enumerate([("dinner-nearby","Dining & drinks"),("weekend-experience","Local experiences"),("service-reminder","Automotive & services"),("local-event","Events & community")]))
+studio_presets = "".join(f'<button type="button" class="chip" data-preset="{i}" aria-pressed="false">{l}</button>' for n, (i, l) in enumerate([("dinner-nearby","Dining & drinks"),("weekend-experience","Local experiences"),("service-reminder","Automotive & services"),("local-event","Events & community")]))
 studio = page_hero([("Advertise","advertise/"),("Creative studio","creative-studio/")], "A clear message. A useful next step.",
   "Try a campaign concept in your browser. Write a message, see it in the kiosk's ad space, and download a draft to share with your designer or the CityPulse team.") + f'''
 <section class="section"><div class="wrap studio">
   <form class="studio-form" id="studio" novalidate>
     <div><span class="fine" style="font-weight:600">Start from an example</span><div class="presets" style="margin:8px 0 0">{studio_presets}</div></div>
-    <label class="field">Business name<input name="brand" value="Willow Kitchen" maxlength="40"></label>
-    <label class="field"><span>Headline <span class="count" id="hl-count">29 of 65 characters</span></span><input name="headline" value="A good evening starts nearby." maxlength="90"></label>
-    <label class="field">Call to action<input name="action" value="Explore the menu" maxlength="30"></label>
+    <label class="field">Business name<input name="brand" value="Your business" maxlength="40"></label>
+    <label class="field"><span>Headline <span class="count" id="hl-count">34 of 65 characters</span></span><input name="headline" value="Your message, seen by every guest." maxlength="90"></label>
+    <label class="field">Call to action<input name="action" value="Scan to visit" maxlength="30"></label>
     <label class="field"><span>Destination URL <span class="opt">(optional)</span></span><input name="url" type="url" placeholder="https://yourbusiness.com/offer"><small>Add a destination to test the link from the preview.</small></label>
     <label class="field">Format<select name="format"><option value="tile">Kiosk ad space · bottom of screen</option><option value="banner">Featured banner · landscape</option><option value="panel">Rotating panel · landscape</option></select></label>
     <fieldset style="border:0;padding:0;margin:0"><legend class="field" style="margin-bottom:8px">Color</legend><div class="swatches">
@@ -321,7 +323,7 @@ studio = page_hero([("Advertise","advertise/"),("Creative studio","creative-stud
     <div class="btn-row" style="margin-top:4px"><button class="btn" type="button" data-studio="download">Download SVG concept</button><a class="btn btn-ghost" href="{{R}}campaign-planner/">Build the brief</a></div>
     <p class="fine">Final artwork dimensions and accepted formats are confirmed for your placement. Your changes stay in this page.</p>
   </form>
-  <div class="studio-preview" aria-live="polite"><div class="lbl"><span>Live preview</span><span id="fmt-label">Kiosk ad space · bottom of screen</span></div><div id="studio-preview" style="width:100%;display:flex;justify-content:center"></div><a class="text-link" id="studio-link" href="#" target="_blank" rel="noopener" hidden>Test your destination link</a><p class="fine">One business identity. One main message. One clear next step.</p></div>
+  <div class="studio-preview" aria-live="polite"><div class="lbl"><span>Live preview</span><span id="fmt-label">Kiosk ad space · bottom of screen</span></div><div id="studio-preview" style="width:100%;display:flex;justify-content:center"></div><template id="studio-lx">{lx_kiosk(lx_screen(ad='<div class="lx-slot"></div>'), cls="studio-kiosk")}</template><a class="text-link" id="studio-link" href="#" target="_blank" rel="noopener" hidden>Test your destination link</a><p class="fine">One business identity. One main message. One clear next step.</p></div>
 </div></section>
 <section class="section" style="background:#fff;border-top:1px solid var(--line)"><div class="wrap">
   {head("Make the message easy to understand.", "Three checks before artwork is final.")}

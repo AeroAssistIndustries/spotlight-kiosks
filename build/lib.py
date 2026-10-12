@@ -115,7 +115,7 @@ def footer():
     return f'''<footer class="site-footer">
   <div class="wrap footer-grid">
     <div class="footer-brand"><img src="{{R}}assets/logo-stacked-light.svg" alt="CityPulse Kiosks" width="402" height="122"><p>Turning wait time into opportunity. Smart kiosks, useful information and local connection.</p></div>
-    {col("Explore CityPulse", [("The kiosk","kiosk/"),("Venues","venues/"),("Who you can reach","audience/"),("Market planning","locations/"),("How it works","how-it-works/"),("About us","about/")])}
+    {col("Explore CityPulse", [("The kiosk","kiosk/"),("Test the kiosk","test-the-kiosk/"),("Venues","venues/"),("Who you can reach","audience/"),("Market planning","locations/"),("How it works","how-it-works/"),("About us","about/")])}
     {col("Advertise", [("Advertising options","advertise/"),("Pricing & calculator","pricing/"),("Campaign planner","campaign-planner/"),("Creative studio","creative-studio/"),("Campaign ideas","campaign-ideas/"),("Measurement guide","measurement/"),("For agencies","agencies/")])}
     {col("Keep it useful", [("Request a kiosk","hosts/#inquiry"),("Guides & resources","resources/"),("Media overview","media-kit/"),("Common questions","faqs/"),("Contact CityPulse","contact/"),("Help & support","support/")])}
     <div class="footer-talk"><h2>Let's talk</h2>
@@ -183,7 +183,7 @@ def page(path, title, desc, body, active=None, kiosk=False, extra_js=()):
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{R}}assets/styles.css?v=20261012c">
+<link rel="stylesheet" href="{{R}}assets/styles.css?v=20261012e">
 </head>
 <body>
 {header(active or path)}
@@ -195,7 +195,7 @@ def page(path, title, desc, body, active=None, kiosk=False, extra_js=()):
 <script src="{{R}}assets/config.js"></script>
 <script src="{{R}}assets/integrations.js"></script>
 {''.join(f'<script src="{{R}}assets/{j}"></script>' for j in extra_js)}
-<script src="{{R}}assets/site.js?v=20261012b"></script>
+<script src="{{R}}assets/site.js?v=20261012e"></script>
 </body>
 </html>
 '''
@@ -253,14 +253,47 @@ TILEG = {
   "Menu": "linear-gradient(135deg,#7a3b1f,#c9773a)", "Specials": "linear-gradient(135deg,#a2740a,#e8b923)",
   "Wellness": "linear-gradient(135deg,#6e4772,#d29ab0)", "Offers": "linear-gradient(135deg,#a2740a,#e8b923)",
 }
+# Lexen-style kiosk screen (the real CityPulse UI, drawn in HTML so it scales anywhere)
+LX_SQ = ("#6b4329", "#0f7d6e", "#2c4f8f", "#5b3d8a")
+LX_AD = (
+    '<div class="lx-ad"><span class="lx-logo"><b>YOUR</b><b>LOGO</b></span>'
+    '<span class="lx-ad-txt"><s>Your ad here</s><b>Your business</b><em>Seen by every guest who taps</em>'
+    '<small>citypulsekiosks.com</small></span><span class="lx-qr"><i></i><small>Scan to visit</small></span></div>'
+)
+def lx_screen(venue="your venue", tiles=("Eat & drink", "Hotel services", "Coffee", "Things to do"), ad=LX_AD,
+              extra_cls="", venue_id="", hl=""):
+    lexen = venue in ("your venue", "Hotel Lexen") or "Lexen" in venue
+    top = ('<img src="{R}assets/lexen/logo-sm.png" alt="" loading="lazy" decoding="async">' if lexen
+           else f'<b>{e(venue)}</b>')
+    place = "Lexen North Hollywood" if lexen else venue
+    vid = f' id="{venue_id}"' if venue_id else ""
+    t = list(tiles) + ["Essentials", "Getting around"] * 2
+    a, b = t[0], t[1]
+    sq = "".join(f'<i class="lx-t lx-sq" style="--c:{LX_SQ[i]}"><span>{e(t[2 + i])}</span></i>' for i in range(4))
+    ph = (lambda n, lbl: f'<i class="lx-t lx-ph lx-ph{n}{" hl" if hl == "banner" else ""}"><span>{e(lbl)}</span></i>')
+    ph_style = "" if lexen else " lx-noimg"
+    return f'''<div class="mini-screen lx{ph_style} {extra_cls}"><div class="lx-top">{top}</div><div class="lx-grid">\
+<i class="lx-t lx-clock"><s>Good evening</s><b class="lx-time">7:20<sup>PM</sup></b><small class="lx-date">Sunday<br>October 11</small><em{vid}>{e(place)}</em></i>\
+<i class="lx-t lx-wx"><b>74°</b><em>Weather</em></i>\
+<i class="lx-t lx-ask"><s>Try asking</s><b>“What time is check-out?”</b><em>Ask the concierge</em></i>\
+{ph(1, a)}{ph(2, b)}{sq}\
+<i class="lx-t lx-map"><s>New</s><u></u><em>Your neighborhood</em></i>\
+<i class="lx-t lx-plan"><s>Plan my evening</s><b>Dinner &amp; a show</b></i>\
+<i class="lx-t lx-take{" hl" if hl == "qr" else ""}"><u></u><em>Take it with you</em></i>\
+</div>{ad}<div class="lx-nav"><i class="on">Home</i><i>Back</i><i>Ask</i><i>Access</i></div></div>'''
+
+def lx_kiosk(screen, finish="black", cls=""):
+    return f'''<div class="mini lxk {cls}" data-finish="{finish}" aria-hidden="true"><div class="mini-head">{screen}</div><div class="mini-pole"></div><div class="mini-base"></div></div>'''
+
+LX_TILEMAP = {"Dining": "Eat & drink", "Amenities": "Hotel services", "Local guide": "Things to do", "Events": "Tonight"}
 def mini(venue="your venue", tiles=("Dining", "Amenities", "Local guide", "Events"), finish="black", ad=True, extra_cls=""):
-    t = "".join(f'<span style="--g:{TILEG.get(x, "#556")}">{x}</span>' for x in tiles)
-    adhtml = '<div class="mini-ad"><i>YOUR AD HERE<em>Ad space for local businesses</em></i></div>' if ad else ""
-    return f'''<div class="mini" data-finish="{finish}" aria-hidden="true"><div class="mini-head"><div class="mini-screen {extra_cls}"><b>Welcome</b><small>to {e(venue)}</small><div class="mini-tiles">{t}</div>{adhtml}</div></div><div class="mini-pole"></div><div class="mini-base"></div></div>'''
+    tl = [LX_TILEMAP.get(x, x) if ("Lexen" in venue or venue == "your venue") else x for x in tiles]
+    return lx_kiosk(lx_screen(venue, tuple(tl), LX_AD if ad else "", extra_cls), finish)
 
 def placement_mini(kind):
-    ph = {"ph-banner": "Featured banner", "ph-panel": "YOUR AD HERE", "ph-qr": "<i></i>QR offer"}[kind]
-    return f'''<div class="mini" data-finish="black" aria-hidden="true"><div class="mini-head"><div class="mini-screen {kind}"><b>Welcome</b><small>to your venue</small><div class="mini-tiles"><span style="--g:{TILEG["Dining"]}">Dining</span><span style="--g:{TILEG["Events"]}">Events</span></div><div class="ph">{ph}</div></div></div><div class="mini-pole"></div><div class="mini-base"></div></div>'''
+    hl = {"ph-banner": "banner", "ph-qr": "qr", "ph-panel": "ad"}[kind]
+    ad = LX_AD.replace('class="lx-ad"', 'class="lx-ad hl"') if hl == "ad" else LX_AD
+    return lx_kiosk(lx_screen(ad=ad, hl=hl, extra_cls=kind))
 
 def demo_block(heading="Try the kiosk.", hid="demo-title"):
     return f'''<section class="demo" id="demo" aria-labelledby="{hid}">
@@ -292,7 +325,7 @@ def demo_block(heading="Try the kiosk.", hid="demo-title"):
         </dl>
         <h4>Activity</h4>
         <ol class="feed" id="feed"><li class="feed-empty">Tap the kiosk screen to start a session.</li></ol>
-        <button class="btn btn-ghost btn-small" id="reset-demo" type="button">Reset demo</button>
+        <div class="btn-row demo-btns"><a class="btn btn-small" href="{{R}}test-the-kiosk/">Test the real kiosk</a><button class="btn btn-ghost btn-small" id="reset-demo" type="button">Reset demo</button></div>
       </aside>
     </div>
   </div>
@@ -648,7 +681,7 @@ def checkout_section():
 
   <aside class="co-side" aria-label="Your order">
     <div class="co-preview">
-      <div class="mini co-kiosk" data-finish="black"><div class="mini-head"><div class="mini-screen"><b>Welcome</b><small id="co-venue-name">to a venue near you</small><div class="mini-tiles"><span style="--g:{TILEG["Dining"]}">Dining</span><span style="--g:{TILEG["Events"]}">Events</span><span style="--g:{TILEG["Local guide"]}">Local guide</span><span style="--g:{TILEG["Amenities"]}">Amenities</span></div><div class="co-ad" id="co-ad"></div></div></div><div class="mini-pole"></div><div class="mini-base"></div></div>
+      {lx_kiosk(lx_screen(ad='<div class="co-ad" id="co-ad"></div>', venue_id="co-venue-name"), cls="co-kiosk")}
       <div class="co-ad-big" aria-label="Close-up of your ad"><div class="co-ad" id="co-ad-big"></div></div>
       <p class="fine">Live preview of your ad on the kiosk</p>
     </div>

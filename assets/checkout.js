@@ -62,7 +62,7 @@
       ad.innerHTML = `${logo}<span class="co-ad-txt"><small>${esc(biz)}</small><b>${esc(hl)}</b>${offer ? `<em>${esc(offer)}</em>` : ""}<i>${esc(cta)}</i></span><span class="co-qr" aria-hidden="true"></span>`;
     }
     const m = market();
-    $("#co-venue-name").textContent = m ? `to a venue in ${m}` : "to a venue near you";
+    $("#co-venue-name").textContent = m ? `A venue in ${m}` : "A venue near you";
     $("#co-sum-plan").textContent = billing() === "annual" ? "1 location · yearly" : "1 location · monthly";
     $("#co-sum-city").textContent = m || "Not chosen yet";
     $("#co-sum-total").textContent = billing() === "annual" ? "$399/yr" : "$60/mo";
