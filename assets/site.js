@@ -468,3 +468,61 @@ ${lines.map((l, i) => `<text x="90" y="${(tall ? 200 : 380) + i * fs * 1.08}" fo
     }).observe(map);
   }
 })();
+
+/* ---------- How it works: the film (plays by itself, loops, pauses off-screen) ---------- */
+(function () {
+  var f = document.querySelector("[data-film]"); if (!f) return;
+  var stage = f.querySelector(".film-stage"), canvas = f.querySelector(".film-canvas");
+  var steps = [].slice.call(f.querySelectorAll(".film-steps li")), segs = [].slice.call(f.querySelectorAll(".film-seg i"));
+  var ad = f.querySelector(".f-ad"), hl = f.querySelector(".f-ad-hl"), typ = f.querySelector(".f-type");
+  var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var DUR = [4200, 3800, 4600, 3900, 4800, 5600, 5200];
+  // where the ad sits in each scene (stage pixels in the 3840-wide world): x, y, scale, visible
+  var AD = { 1: [402, 404, .6, 0], 2: [402, 404, .6, 0], 3: [402, 404, .6, 1], 4: [402, 404, .6, 0], 5: [1310, 140, 1, 1], 6: [2321, 306, .608, 1], 7: [2321, 306, .608, 1] };
+
+  function fit() {
+    var w = stage.clientWidth, narrow = w < 560, vw = narrow ? 620 : 960, s = w / vw;
+    stage.style.aspectRatio = "auto"; stage.style.height = Math.round(540 * s) + "px";
+    canvas.style.transform = "scale(" + s + ")" + (narrow ? " translateX(-170px)" : "");
+  }
+  fit();
+  if ("ResizeObserver" in window) new ResizeObserver(fit).observe(stage); else addEventListener("resize", fit);
+
+  function placeAd(n) { var a = AD[n]; ad.style.transform = "translate(" + a[0] + "px," + a[1] + "px) scale(" + a[2] + ")"; ad.style.opacity = a[3]; }
+  var timers = [];
+  function later(fn, ms) { timers.push(setTimeout(fn, ms)); }
+  function clear() { timers.forEach(clearTimeout); timers = []; }
+  function type(el, text, start, speed) { el.textContent = ""; for (var i = 0; i <= text.length; i++) (function (k) { later(function () { el.textContent = text.slice(0, k); }, start + k * speed); })(i); }
+  function count(el, to, start, ms) { el.textContent = "0"; var t0; later(function () { t0 = performance.now(); (function tick(now) { var p = Math.min(1, ((now || performance.now()) - t0) / ms); el.textContent = Math.round(to * (1 - Math.pow(1 - p, 3))).toLocaleString("en-US"); if (p < 1 && running) requestAnimationFrame(tick); else if (p >= 1) el.textContent = to.toLocaleString("en-US"); })(t0); }, start); }
+
+  function mark(n) {
+    steps.forEach(function (li, i) { li.classList.toggle("on", i === n - 1); li.classList.toggle("done", i < n - 1); li.classList.remove("run"); li.style.setProperty("--dur", DUR[i] + "ms"); });
+    segs.forEach(function (s, i) { s.classList.toggle("done", i < n - 1); s.classList.remove("on"); s.style.setProperty("--dur", DUR[i] + "ms"); });
+    void f.offsetWidth; // restart the progress bars
+    if (!reduce) { steps[n - 1].classList.add("run"); if (segs[n - 1]) segs[n - 1].classList.add("on"); }
+  }
+
+  var scene = 0, running = false;
+  function go(n) {
+    clear(); scene = n;
+    if (n === 1) { f.classList.add("reset"); hl.textContent = ""; placeAd(1); void f.offsetWidth; f.classList.remove("reset"); }
+    f.dataset.scene = n; mark(n); placeAd(n);
+    if (n === 1) type(typ, typ.dataset.type, 500, 85);
+    if (n === 3) type(hl, hl.dataset.hl, 2300, 55);
+    if (n === 7) f.querySelectorAll(".f-kpis b").forEach(function (b, i) { count(b, +b.dataset.to, 500 + i * 180, 1700); });
+    later(function () { go(n % 7 + 1); }, DUR[n - 1]);
+  }
+  function play() { if (running) return; running = true; go(scene || 1); }
+  function pause() { running = false; clear(); }
+
+  if (reduce || !("IntersectionObserver" in window)) {
+    // still frame: the ad live on the kiosk, every chapter listed
+    hl.textContent = hl.dataset.hl; typ.textContent = typ.dataset.type; placeAd(6); mark(6);
+    f.querySelectorAll(".f-kpis b").forEach(function (b) { b.textContent = (+b.dataset.to).toLocaleString("en-US"); });
+    return;
+  }
+  hl.textContent = hl.dataset.hl; placeAd(6); mark(6);
+  var visible = false;
+  new IntersectionObserver(function (es) { visible = es[0].isIntersecting; visible && !document.hidden ? play() : pause(); }, { threshold: 0.35 }).observe(stage);
+  document.addEventListener("visibilitychange", function () { document.hidden || !visible ? pause() : play(); });
+})();

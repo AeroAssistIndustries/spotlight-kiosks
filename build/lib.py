@@ -183,7 +183,7 @@ def page(path, title, desc, body, active=None, kiosk=False, extra_js=()):
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{R}}assets/styles.css?v=20261012">
+<link rel="stylesheet" href="{{R}}assets/styles.css?v=20261012b">
 </head>
 <body>
 {header(active or path)}
@@ -195,7 +195,7 @@ def page(path, title, desc, body, active=None, kiosk=False, extra_js=()):
 <script src="{{R}}assets/config.js"></script>
 <script src="{{R}}assets/integrations.js"></script>
 {''.join(f'<script src="{{R}}assets/{j}"></script>' for j in extra_js)}
-<script src="{{R}}assets/site.js?v=20261012"></script>
+<script src="{{R}}assets/site.js?v=20261012b"></script>
 </body>
 </html>
 '''
@@ -695,4 +695,67 @@ def journey():
     return f'''<div class="journey" data-journey>
   <div class="j-stage" aria-live="polite">{stages}<div class="j-prog"><i></i></div></div>
   <ol class="j-rail">{rail}</ol>
+</div>'''
+
+# ---------------------------------------------------------------- how it works: the film
+# One advertiser's ad travels across the stage: sign-up on a phone -> our review -> live on a
+# hotel kiosk -> results. Plays by itself (site.js); the chapter list is the readable content.
+FILM = [
+  ("Pick your city", "Choose a location. We have hosts in 153 cities across all 50 states."),
+  ("Choose your plan", "$399 a year for one location, or $60 a month."),
+  ("Add your logo", "Upload a finished ad, or just your logo and we'll design it. Included."),
+  ("Check out", "Pay securely online. The whole thing takes about five minutes."),
+  ("We review it", "Our team reviews your ad and places it at your venue."),
+  ("Your ad goes live", "Typically within about 2 days, on every screen at the venue."),
+  ("Watch it work", "Views, taps and QR scans, counted for you in your own dashboard."),
+]
+
+def film():
+    qr = "".join(f'<rect x="{x}" y="{y}" width="1" height="1"/>' for y in range(9) for x in range(9)
+                 if (x * 7 + y * 3 + x * y) % 5 < 2 or (x < 3 and y < 3) or (x > 5 and y < 3) or (x < 3 and y > 5))
+    qr_svg = f'<svg viewBox="-1 -1 11 11" class="f-qr"><rect x="-1" y="-1" width="11" height="11" fill="#fff"/><g fill="#0F1C2B">{qr}</g></svg>'
+    person = '<svg viewBox="0 0 20 40" class="f-man"><circle class="f-head" cx="10" cy="6" r="5.2"/><rect class="f-body" x="3" y="13" width="14" height="26" rx="7"/></svg>'
+    people = "".join(f'<span class="f-walker{" rev" if i % 2 else ""}" style="--d:{-i * 1.45:.2f}s;--t:{7.6 + (i % 3) * 0.9:.1f}s">{person}</span>' for i in range(6))
+    dots = "".join(f'<i style="left:{x}%;top:{y}%"></i>' for x, y in [(16,28),(30,60),(46,24),(62,50),(78,26),(84,66),(24,80),(56,82),(70,40),(38,44)])
+    steps = "".join(f'<li data-n="{i+1}"><span class="fs-n">{i+1}</span><div><b>{t}</b><p>{d}</p></div><i class="fs-bar"></i></li>' for i, (t, d) in enumerate(FILM))
+    segs = "".join('<i></i>' for _ in FILM)
+    return f'''<div class="film" data-film data-scene="6">
+  <div class="film-stage" aria-hidden="true"><div class="film-canvas"><div class="film-world">
+    <div class="f-st f-a">
+      <div class="f-map"><div class="f-map-dots">{dots}</div><span class="f-pin"><svg viewBox="0 0 24 24"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.6" fill="#0F1C2B"/></svg></span><span class="f-pin-ring"></span><em>Phoenix, AZ</em></div>
+      <div class="f-chip f-chip-day"><b>$1.09</b> a day</div>
+      <div class="f-chip f-chip-file"><span class="f-file"></span>logo.png</div>
+      <div class="f-chip f-chip-time"><span class="f-clock"></span>About 5 minutes</div>
+      <div class="f-phone"><div class="f-screen">
+        <div class="f-ph-head"><img src="{{R}}assets/logo-compact.svg" alt=""><div class="f-steps4"><i></i><i></i><i></i><i></i></div></div>
+        <div class="f-panel f-p1"><b>Choose your city</b><span class="f-field"><span class="f-type" data-type="Phoenix, AZ"></span><i class="f-caret"></i></span>
+          <ul class="f-list"><li>Phoenix, AZ</li><li>Philadelphia, PA</li><li>Pittsburgh, PA</li></ul></div>
+        <div class="f-panel f-p2"><b>Choose your plan</b><div class="f-opt f-opt-y"><span></span><div><b>Yearly · $399</b><small>About $1.09 a day</small></div></div><div class="f-opt"><span></span><div><b>Monthly · $60</b><small>Billed every month</small></div></div></div>
+        <div class="f-panel f-p3"><b>Your ad</b><div class="f-drop"><span class="f-drop-logo">S</span><small>Logo added</small></div><small class="f-note">Design it for me · included</small></div>
+        <div class="f-panel f-p4"><b>Review and pay</b><dl><div><dt>City</dt><dd>Phoenix, AZ</dd></div><div><dt>Plan</dt><dd>1 location</dd></div><div><dt>Total</dt><dd>$399/yr</dd></div></dl><span class="f-pay"><em>Pay $399</em><svg viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7"/></svg></span></div>
+      </div></div>
+    </div>
+    <div class="f-st f-b">
+      <div class="f-board"><span class="f-board-k">CityPulse review</span>
+        <ul class="f-checks"><li><i></i>Reviewed by our team</li><li><i></i>Placed at your venue</li><li><i></i>Switched on</li></ul>
+        <span class="f-stamp">Approved</span></div>
+    </div>
+    <div class="f-st f-c">
+      <span class="f-lamp"><i></i></span><span class="f-sofa"></span><span class="f-sofa s2"></span>
+      <span class="f-ring"></span><span class="f-ring r2"></span><span class="f-ring r3"></span>
+      <div class="f-kiosk"><div class="f-k-screen"><b>Welcome</b><small>to the Arden Hotel</small><div class="f-k-tiles"><i></i><i></i><i></i><i></i></div></div><span class="f-live">Live</span></div>
+      <div class="f-floor"></div>{people}
+    </div>
+    <div class="f-st f-d">
+      <div class="f-dash"><div class="f-dash-top"><b>Your dashboard</b><span>Example</span></div>
+        <div class="f-kpis"><div><b data-to="1284">0</b><small>Views</small></div><div><b data-to="212">0</b><small>Taps</small></div><div><b data-to="64">0</b><small>QR scans</small></div></div>
+        <svg class="f-spark" viewBox="0 0 400 90" preserveAspectRatio="none"><path class="f-area" d="M0 82 L50 72 L100 76 L150 58 L200 62 L250 42 L300 46 L350 22 L400 14 L400 90 L0 90Z"/><path class="f-line" d="M0 82 L50 72 L100 76 L150 58 L200 62 L250 42 L300 46 L350 22 L400 14"/></svg></div>
+    </div>
+    <div class="f-ad"><span class="f-ad-logo">S</span><div class="f-ad-t"><small>Sonoran Coffee</small><b class="f-ad-hl" data-hl="Your morning, made local."></b><em>Visit us today</em></div>{qr_svg}</div>
+  </div></div></div>
+  <div class="film-side">
+    <ol class="film-steps">{steps}</ol>
+    <div class="film-seg">{segs}</div>
+    <p class="fine film-note">An example campaign. Numbers in the animation are illustrations.</p>
+  </div>
 </div>'''

@@ -40,13 +40,12 @@ home = f'''
 
 <section class="section journey-sec" aria-labelledby="jy-title"><div class="wrap">
   <div class="section-head"><h2 id="jy-title">How it works, start to finish.</h2><p>New to kiosk advertising? People in a lobby or waiting room have a few minutes and a question — where to eat, what to do. Our kiosk answers it, and your ad is on every screen while they look.</p></div>
-  {journey()}
+  {film()}
   <div class="roi">
     <div><b>$1.09</b><span>a day for one location ($399 a year)</span></div>
     <div><b>~2 days</b><span>from upload to live, typically</span></div>
     <div><b>1</b><span>new regular customer can pay for the whole year</span></div>
   </div>
-  <p class="fine" style="margin-top:12px">Figures in the animation are examples.</p>
 </div></section>
 
 {checkout_section()}
