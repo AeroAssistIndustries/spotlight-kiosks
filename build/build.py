@@ -556,10 +556,13 @@ about = page_hero([("About us","about/")], "Good places. Useful connections.",
   <div class="cards"><div class="card"><h3>The visitor finds something useful.</h3><p>Venue information, local services and experiences from one approachable screen.</p><a class="text-link" href="{{R}}kiosk/">Explore the kiosk</a></div>
   <div class="card"><h3>The venue adds an amenity.</h3><p>Qualified hosts add a managed kiosk, with setup, content and routine maintenance included.</p><a class="text-link" href="{{R}}hosts/">See the host offering</a></div>
   <div class="card"><h3>The business is part of the moment.</h3><p>A relevant message in front of people deciding what to do, where to go or what to choose next.</p><a class="text-link" href="{{R}}advertise/">Explore advertising</a></div></div></div></section>
-<section class="section" id="story"><div class="wrap faq-grid"><div><h2>A focused start. A wider possibility.</h2><p class="lede" style="margin-top:16px">The idea began with hotel lobbies. CityPulse now looks well beyond hospitality.</p></div>
-  <ol class="timeline"><li><b>2022–2023</b><h3>The Trident concept</h3><p>Early planning focused on hotel and motel lobbies: a digital concierge for guests, supported by local business advertising.</p></li>
-  <li><b>2025</b><h3>Spotlight Kiosks</h3><p>A new brand, website and host and advertiser offering, built around the same core opportunity.</p></li>
-  <li><b>2026</b><h3>CityPulse Kiosks</h3><p>A new name for a national network — and a broader venue vision: hotels, medical offices, car dealerships, restaurants and other places where people spend time.</p></li></ol></div></section>
+<section class="section" id="story"><div class="wrap faq-grid"><div><h2>From a tap to a network.</h2><p class="lede" style="margin-top:16px">People learned to tap, scan and look things up on a screen. CityPulse puts that in the places where they wait.</p></div>
+  <ol class="timeline"><li><b>2010</b><h3>Touch screens become everyday</h3><p>Tablets and smartphones teach everyone to tap for answers. A screen stops being something you watch and becomes something you use.</p></li>
+  <li><b>2015</b><h3>Lobbies start to go digital</h3><p>Hotels, clinics and dealerships add screens and self-service kiosks. Local businesses nearby are still mostly left off them.</p></li>
+  <li><b>2020</b><h3>QR codes come back</h3><p>Menus, check-ins and payments move to the phone in your hand. Scanning a code becomes second nature.</p></li>
+  <li><b>2022</b><h3>The CityPulse idea takes shape</h3><p>A digital concierge for hotel lobbies, paid for by the local businesses guests are looking for.</p></li>
+  <li><b>2025</b><h3>The offering comes together</h3><p>Kiosk hardware, venue content, simple advertising packages and a no-cost program for host venues.</p></li>
+  <li><b>2026</b><h3>CityPulse Kiosks launches</h3><p>A national network for hotels, medical offices, car dealerships, restaurants and other places where people spend time. The first local ads go on screen in October.</p></li></ol></div></section>
 <section class="section" style="background:#fff;border-top:1px solid var(--line)"><div class="wrap">{head("Simple. Relevant. Thoughtfully managed.")}
   <div class="cards"><div class="card"><h3>Useful comes first.</h3><p>Venue information gives visitors a reason to explore. Local promotions should add to that experience.</p></div>
   <div class="card"><h3>Keep it relevant.</h3><p>Content starts with the place, its visitors and the businesses that can help them take a useful next step.</p></div>
