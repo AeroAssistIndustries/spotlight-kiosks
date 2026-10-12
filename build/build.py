@@ -16,7 +16,7 @@ home = f'''
     <div class="slider" data-slider aria-roledescription="carousel" aria-label="CityPulse Kiosks highlights">
       <div class="slides">
         <figure class="slide slide-photo" aria-roledescription="slide" aria-label="1 of 3">
-          <img src="{{R}}assets/kiosk-lobby.jpg" alt="Silver CityPulse kiosk in a marble hotel lobby" width="1536" height="1024" fetchpriority="high" style="object-position:72% 50%">
+          <img src="{{R}}assets/kiosk-lexen.jpg" alt="CityPulse kiosk showing the Hotel Lexen guest directory in the hotel lounge" width="1600" height="1200" fetchpriority="high" style="object-position:62% 50%">
           <figcaption><b>The Guest Directory</b><span>Dining, amenities and local guides for hotel guests.</span></figcaption>
         </figure>
         <div class="slide slide-cycle" aria-roledescription="slide" aria-label="2 of 3" hidden>
@@ -123,7 +123,7 @@ page("", "Turn wait time into opportunity", "Touch-screen kiosks that give visit
 kiosk_page = page_hero([("The kiosk","kiosk/")], "One screen. A world of possibility.",
   "A digital concierge, information hub and local advertising platform in one professionally managed touch-screen kiosk.",
   btns(("Try the kiosk","#demo"),("Explore hosting","hosts/","btn-ghost")),
-  aside=f'<div class="hero-photo"><img src="{{R}}assets/kiosk-lobby-sm.jpg" alt="Silver CityPulse kiosk in a marble hotel lobby" width="900" height="600"></div>') + f'''
+  aside=f'<div class="hero-photo"><img src="{{R}}assets/kiosk-lexen-sm.jpg" alt="CityPulse kiosk showing the Hotel Lexen guest directory in the hotel lounge" width="900" height="675"></div>') + f'''
 {section(head("Useful information. A local next step.", "A digital concierge and local discovery hub, together on one approachable touch screen.") + '''<div class="cards">
   <div class="card"><h3>Know the venue.</h3><p>Amenities, directions and helpful answers in one place.</p></div>
   <div class="card"><h3>Discover the neighborhood.</h3><p>Dining, services and experiences with a local connection.</p></div>
@@ -132,7 +132,7 @@ kiosk_page = page_hero([("The kiosk","kiosk/")], "One screen. A world of possibi
 <section class="section" style="background:var(--stone)" id="hardware"><div class="wrap">
   {head("Two finishes. One welcome screen.", "Every kiosk runs the same software. The finish is chosen to suit the room.")}
   <div class="hw-grid">
-    <figure class="hw"><img src="{{R}}assets/kiosk-lobby-sm.jpg" alt="Silver kiosk in a bright marble hotel lobby near the reception desk" width="900" height="600" loading="lazy">
+    <figure class="hw"><img src="{{R}}assets/kiosk-lexen-sm.jpg" alt="CityPulse kiosk showing the Hotel Lexen guest directory in the hotel lounge" width="900" height="675" loading="lazy">
       <figcaption><h3>Guest Directory</h3><p>Brushed silver enclosure with an integrated card slot. Suits hotel lobbies, medical offices and service lounges.</p>
       <ul class="pills"><li>Portrait touch display</li><li>Dining, amenities, local guide and events</li><li>Ad space on every screen</li></ul></figcaption></figure>
     <figure class="hw hw-alt">{mini("your venue", ("Dining","Amenities","Local guide","Events"), "black")}
@@ -394,7 +394,7 @@ page("agencies/", "For agencies & partners", "CityPulse kiosk advertising for ag
 hosts = page_hero([("For venues","venues/"),("Host a kiosk","hosts/")], "Upgrade your space. Keep it simple.",
   "A premium digital amenity at no cost for qualified venues. Help visitors find useful information while your team focuses on service.",
   btns(("Request a kiosk","#inquiry"),("Prepare your venue","resources/host-preparation/","btn-ghost")),
-  aside=f'<div class="hero-photo"><img src="{{R}}assets/kiosk-lobby-sm.jpg" alt="Silver CityPulse kiosk in a hotel lobby" width="900" height="600"></div>') + f'''
+  aside=f'<div class="hero-photo"><img src="{{R}}assets/kiosk-lexen-sm.jpg" alt="CityPulse kiosk showing the Hotel Lexen guest directory in the hotel lounge" width="900" height="675"></div>') + f'''
 <section class="section"><div class="wrap">
   {head("We bring the kiosk. You bring the space.")}
   <div class="path"><div class="path-main"><h3>Included in the host offering</h3>{check_list(["Kiosk hardware and software","Coordinated installation and setup","Your venue information and content updates","Routine maintenance and ongoing support"])}</div>
@@ -418,7 +418,7 @@ venues = page_hero([("For venues","venues/")], "Useful in your space. Relevant t
 page("venues/", "Venues", "CityPulse kiosks for hotels, medical offices, car dealerships and restaurants.", venues)
 
 for v in VENUES:
-    aside = (f'<div class="hero-photo"><img src="{{R}}assets/{v["photo"]}" alt="{v["photo_alt"]}" width="900" height="600"></div>' if v.get("photo")
+    aside = (f'<div class="hero-photo"><img src="{{R}}assets/{v["photo"]}" alt="{v["photo_alt"]}" width="900" height="675"></div>' if v.get("photo")
              else f'<div class="moment" style="background:var(--stone)">{mini(v["venue"], v["tiles"], v["finish"])}<dl><dt>The visitor moment</dt><dd>{v["moment"]}</dd><dt>On screen</dt><dd>{v["mh"]}</dd></dl></div>')
     note = f'<div class="callout" style="margin-top:32px"><b>Keep healthcare content informational.</b><p>{v["note"].split(". ",1)[1]}</p></div>' if v.get("note") else ""
     demo_venue = {"hotels": "the hotel lobby", "medical": "the medical office", "automotive": "the dealership lounge"}.get(v["slug"])
@@ -549,7 +549,7 @@ page("faqs/", "Common questions", "Answers about hosting a CityPulse kiosk, adve
 about = page_hero([("About us","about/")], "Good places. Useful connections.",
   "We're building a simpler way for people to discover what's around them — and for local businesses to be part of that moment.",
   btns(("How CityPulse works","how-it-works/"),("Our story","#story","btn-ghost")),
-  aside=f'<div class="hero-photo"><img src="{{R}}assets/kiosk-lobby-sm.jpg" alt="Silver CityPulse kiosk in a hotel lobby" width="900" height="600"></div>') + f'''
+  aside=f'<div class="hero-photo"><img src="{{R}}assets/kiosk-lexen-sm.jpg" alt="CityPulse kiosk showing the Hotel Lexen guest directory in the hotel lounge" width="900" height="675"></div>') + f'''
 <section class="section"><div class="wrap faq-grid"><div><h2>Good places deserve to be found.</h2></div>
   <div class="prose"><p style="font-size:20px;color:var(--ink)">A few minutes in a lobby or waiting area can become a useful connection.</p><p>Visitors might be choosing lunch, looking for directions, exploring a service or learning what a venue offers. CityPulse brings those possibilities together on a professionally managed touch screen.</p><p>Our purpose is practical: useful information for visitors, a modern amenity for venues and relevant visibility for the surrounding business community.</p></div></div></section>
 <section class="section dark"><div class="wrap">{head("Designed to work for everyone involved.", "The venue, the visitor and the local business each have a place in the CityPulse model.")}

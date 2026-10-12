@@ -1,0 +1,46 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;background:#000}
+.frame{position:relative;width:1600px;height:1200px;overflow:hidden;background:#1a1410}
+.bg{position:absolute;inset:-40px;background:url(lounge.jpg) 18% 62%/cover;filter:blur(8px) saturate(1.15) brightness(.82) contrast(1.04);transform:scale(1.06)}
+.grade{position:absolute;inset:0;background:
+  radial-gradient(ellipse 60% 70% at 66% 52%,rgba(255,236,210,.10),transparent 60%),
+  linear-gradient(90deg,rgba(10,21,34,.35) 0%,rgba(10,21,34,.05) 45%,rgba(10,21,34,.22) 100%),
+  linear-gradient(180deg,rgba(10,21,34,.25) 0%,transparent 35%,transparent 70%,rgba(10,15,22,.55) 100%)}
+.floor-glow{position:absolute;left:880px;top:990px;width:700px;height:170px;border-radius:50%;background:radial-gradient(ellipse,rgba(190,230,255,.20),transparent 70%);filter:blur(8px)}
+	.shadow{position:absolute;left:955px;top:1062px;width:520px;height:56px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.75),transparent 70%);filter:blur(6px)}
+.stage{position:absolute;left:930px;top:150px;width:600px;height:1080px;perspective:2600px;perspective-origin:30% 40%;transform:scale(.84);transform-origin:50% 0}
+.kiosk{position:absolute;left:60px;top:0;width:480px;height:1060px;transform-style:preserve-3d;transform:rotateY(-17deg)}
+/* totem body */
+.body{position:absolute;inset:0;border-radius:30px 30px 18px 18px;background:linear-gradient(90deg,#20262d 0%,#2f363e 40%,#262c33 100%);box-shadow:inset 0 0 0 2px rgba(255,255,255,.06),inset 0 2px 0 rgba(255,255,255,.18),inset 3px 0 0 rgba(255,255,255,.14),inset 14px 0 24px -12px rgba(255,240,220,.18)}
+.side{position:absolute;right:-34px;top:0;width:34px;height:100%;transform-origin:0 50%;transform:rotateY(90deg);background:linear-gradient(90deg,#3c444d,#181c21);border-radius:0 14px 14px 0}
+.screen{position:absolute;left:22px;top:24px;width:436px;height:775px;border-radius:12px;overflow:hidden;background:#000;box-shadow:0 0 0 2px #0b0e11}
+.screen img{width:100%;height:100%;object-fit:cover;display:block}
+.glare{position:absolute;inset:0;background:linear-gradient(115deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,.04) 28%,transparent 42%,transparent 70%,rgba(255,255,255,.05) 100%);pointer-events:none}
+.lower{position:absolute;left:0;right:0;top:822px;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.lower img{height:30px;opacity:.92}
+.scan{width:120px;height:8px;border-radius:4px;background:linear-gradient(90deg,#1a1f24,#3a434c,#1a1f24)}
+.base{position:absolute;left:-46px;right:-46px;bottom:-30px;height:30px;border-radius:10px 10px 14px 14px;background:linear-gradient(180deg,#4a535d 0,#2a3036 18%,#15181c 100%);box-shadow:0 1px 0 rgba(255,255,255,.12) inset}
+.rim{position:absolute;left:22px;right:22px;top:806px;height:2px;background:rgba(34,199,182,.55);box-shadow:0 0 14px rgba(34,199,182,.6)}
+.screen-light{position:absolute;left:820px;top:120px;width:760px;height:900px;background:radial-gradient(ellipse 50% 50% at 50% 45%,rgba(200,170,110,.18),transparent 70%);mix-blend-mode:screen}
+.rings{position:absolute;left:1215px;top:1082px;width:0;height:0}
+.rings i{position:absolute;left:0;top:0;border:2px solid rgba(34,199,182,.5);border-radius:50%;transform:translate(-50%,-50%)}
+.rings i:nth-child(1){width:560px;height:84px;opacity:.55}
+.rings i:nth-child(2){width:760px;height:118px;opacity:.3}
+.rings i:nth-child(3){width:980px;height:156px;opacity:.14}
+.callout{position:absolute;left:150px;top:470px;width:640px;perspective:1600px}
+.callout .eb{display:inline-flex;align-items:center;gap:10px;margin:0 0 16px 4px;font:600 17px/1 "Instrument Sans",sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#e6f7f5}
+.callout .eb::before{content:"";width:10px;height:10px;border-radius:50%;background:#22c7b6;box-shadow:0 0 0 5px rgba(34,199,182,.25)}
+.card{transform:rotateY(9deg) rotateX(2deg);transform-origin:100% 50%;border-radius:18px;overflow:hidden;box-shadow:0 0 0 2px rgba(217,183,110,.55),0 0 0 8px rgba(34,199,182,.12),0 40px 80px -24px rgba(0,0,0,.85)}
+.card img{display:block;width:100%}
+.link{position:absolute;z-index:6;left:792px;top:595px;width:322px;height:2px;background:linear-gradient(90deg,rgba(34,199,182,.9),rgba(34,199,182,.15));transform-origin:0 50%;transform:rotate(23.5deg);box-shadow:0 0 10px rgba(34,199,182,.5)}
+.link::after{content:"";position:absolute;right:-6px;top:-5px;width:12px;height:12px;border-radius:50%;background:#22c7b6;box-shadow:0 0 0 6px rgba(34,199,182,.25)}
+</style></head><body><div class="frame">
+<div class="bg"></div><div class="grade"></div><div class="screen-light"></div><div class="floor-glow"></div><div class="rings"><i></i><i></i><i></i></div><div class="shadow"></div>
+<div class="callout"><span class="eb">Your local ad</span><div class="card"><img src="ad-card.png"></div></div><div class="link"></div><div class="stage"><div class="kiosk">
+  <div class="side"></div><div class="body"></div>
+  <div class="screen"><img src="kiosk-portrait-home.png"><div class="glare"></div></div>
+  <div class="rim"></div>
+  <div class="lower"><img src="logo.svg"><span class="scan"></span></div>
+  <div class="base"></div>
+</div></div>
+</div></body></html>

@@ -99,7 +99,7 @@ Multi-location packages (3 for $1,099/yr, 5 for $1,200/yr, +$300/yr for each loc
 
 - **Page content.** Each page is a series of **Custom HTML** blocks, one per section, editable in the block editor.
   - Links inside the content are written as `{{CP_HOME}}advertise/`.
-  - Theme images are written as `{{CP_ASSETS}}kiosk-lobby.jpg`.
+  - Theme images are written as `{{CP_ASSETS}}kiosk-lexen.jpg`.
   - The theme swaps these tokens for the real URLs when the page is shown, so content survives a domain change. Keep the tokens when editing.
 - **Page titles and meta descriptions.** The meta description is stored in post meta `_citypulse_desc`. If you install Yoast, Rank Math, All in One SEO or SEOPress, the theme stops printing its own description and social tags, and the plugin takes over.
 - **Header and footer:**
