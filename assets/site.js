@@ -319,6 +319,19 @@
     show(0);
   }
 
+  /* ---------- phones: a sticky "Get started" bar once the hero is out of view ---------- */
+  const mcta = $("#m-cta");
+  if (mcta) {
+    const blockers = $$("#get-started, .cta-band, .site-footer, .checkout");
+    let seen = new Set();
+    const sync = () => mcta.classList.toggle("on", window.scrollY > 520 && seen.size === 0);
+    if ("IntersectionObserver" in window && blockers.length) {
+      const io = new IntersectionObserver(es => { es.forEach(en => en.isIntersecting ? seen.add(en.target) : seen.delete(en.target)); sync(); }, { rootMargin: "0px 0px -10% 0px" });
+      blockers.forEach(b => io.observe(b));
+    }
+    window.addEventListener("scroll", sync, { passive: true }); sync();
+  }
+
   /* ---------- Lexen-style mini screens: show the real time ---------- */
   const lxTick = () => {
     const d = new Date(), h = d.getHours(), hh = h % 12 || 12, mm = String(d.getMinutes()).padStart(2, "0");
@@ -499,7 +512,7 @@ ${lines.map((l, i) => `<text x="90" y="${(tall ? 200 : 380) + i * fs * 1.08}" fo
   var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
   var DUR = [4200, 3800, 4600, 3900, 4800, 5600, 5200];
   // where the ad sits in each scene (stage pixels in the 3840-wide world): x, y, scale, visible
-  var AD = { 1: [402, 404, .6, 0], 2: [402, 404, .6, 0], 3: [402, 404, .6, 1], 4: [402, 404, .6, 0], 5: [1310, 140, 1, 1], 6: [2321, 306, .608, 1], 7: [2321, 306, .608, 1] };
+  var AD = { 1: [402, 404, .6, 0], 2: [402, 404, .6, 0], 3: [402, 404, .6, 1], 4: [402, 404, .6, 0], 5: [1310, 140, 1, 1], 6: [2321, 313, .608, 1], 7: [2321, 313, .608, 1] };
 
   function fit() {
     var w = stage.clientWidth, narrow = w < 560, vw = narrow ? 620 : 960, s = w / vw;

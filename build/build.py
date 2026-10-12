@@ -48,13 +48,7 @@ home = f'''
   </div>
 </div></section>
 
-{checkout_section()}
-
-
-
-
-
-{demo_block()}
+{try_band(home=True)}
 
 <section class="section markets" aria-labelledby="mk-title"><div class="wrap">
   {head("Hosts in all 50 states.", f"Kiosks in hotel lobbies, medical offices, dealership lounges and restaurants in {N_MARKETS} cities, from Anchorage to Miami. Tap a pin to advertise there.", "mk-title")}
@@ -62,51 +56,14 @@ home = f'''
   <p style="margin-top:18px"><a class="text-link" href="{{R}}locations/">See every market</a></p>
 </div></section>
 
-<section class="section"><div class="wrap">
-  {head("Two ways in. One local connection.", "Start with the opportunity that fits your business or venue.")}
-  <div class="paths">
-    <article class="path" id="advertise">
-      <div class="path-main"><p class="who">For local businesses</p><h3>Be part of their next decision.</h3>
-        <p class="desc">Introduce your business while visitors explore where to go, what to try and what to do next.</p>
-        <div class="btn-row">{btns(("Plan a campaign","campaign-planner/"))[21:-6]}<a class="text-link" href="{{R}}advertise/">View advertising options</a></div></div>
-      <div class="path-panel"><h4>Start with a clear brief</h4><dl class="brief">
-        <div><dt>Place</dt><dd>Your market and a relevant venue setting</dd></div>
-        <div><dt>Purpose</dt><dd>The business goal and the visitor's next step</dd></div>
-        <div><dt>Message</dt><dd>One offer, a clear identity and useful creative</dd></div>
-        <div><dt>Review</dt><dd>Availability, pricing, timing and reporting</dd></div></dl>
-        <p class="fine">Use the planner to organize an inquiry. Campaign details are confirmed with CityPulse.</p></div>
-    </article>
-    <article class="path" id="host">
-      <div class="path-main"><p class="who">For host venues</p><h3>Add something useful. Keep it simple.</h3>
-        <p class="desc">A managed digital amenity for qualified venues, with information planned around your space and visitors.</p>
-        <div class="btn-row">{btns(("Request a kiosk","hosts/#inquiry"))[21:-6]}<a class="text-link" href="{{R}}hosts/">Review the host offering</a></div></div>
-      <div class="path-panel"><h4>The managed host offering</h4><dl class="brief">
-        <div><dt>Equipment</dt><dd>Kiosk hardware and software</dd></div>
-        <div><dt>Setup</dt><dd>Coordinated installation and venue content</dd></div>
-        <div><dt>Care</dt><dd>Content updates and routine maintenance</dd></div>
-        <div><dt>Fit</dt><dd>Accessible space, power, connectivity and a signed agreement</dd></div></dl>
-        <p class="fine">No-cost hosting depends on qualification, availability and a signed Host Agreement.</p></div>
-    </article>
-  </div>
-</div></section>
+{checkout_section()}
 
 <section class="section" style="background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)"><div class="wrap">
-  {head("Real places. Relevant possibilities.", "Explore the visitor moment in each kind of venue, then dig into the details.")}
+  {head("Who sees your ad.", "Hotel guests, patients and customers with a few minutes to spare — and a reason to look for something nearby.")}
   {venue_tabs()}
 </div></section>
 
-
-
-<section class="section dark"><div class="wrap">
-  {head("Give your next idea some room to grow.", "Explore a local campaign, preview a message and bring a clear starting point to the conversation.")}
-  <div class="tools">
-    <a class="tool" href="{{R}}campaign-planner/">{icon("pin")}<h3>Build the brief.</h3><p>Connect your business goal to a market, venue setting and useful next step.</p><span class="go">Open the campaign planner</span></a>
-    <a class="tool lamp" href="{{R}}creative-studio/">{icon("spark")}<h3>Try the message.</h3><p>Write a headline and action, and see it in the kiosk's ad space.</p><span class="go">Try the creative studio</span></a>
-    <a class="tool" href="{{R}}campaign-ideas/">{icon("people")}<h3>Find a starting point.</h3><p>Browse local campaign playbooks built around real visitor moments.</p><span class="go">Explore campaign ideas</span></a>
-  </div>
-</div></section>
-
-
+{host_band()}
 
 <section class="section" style="background:#fff;border-top:1px solid var(--line)"><div class="wrap faq-grid">
   <div><h2>A little clarity before you start.</h2><a class="text-link" href="{{R}}faqs/">All common questions</a></div>
@@ -117,18 +74,18 @@ home = f'''
 
 {cta_band()}
 '''
-page("", "Turn wait time into opportunity", "Touch-screen kiosks that give visitors useful venue information and put local businesses in front of them. Free for qualified venues. Local ads from $399 a year or $60 a month.", home, active="", kiosk=True, extra_js=("checkout.js",))
+page("", "Turn wait time into opportunity", "Touch-screen kiosks that give visitors useful venue information and put local businesses in front of them. Free for qualified venues. Local ads from $399 a year or $60 a month.", home, active="", extra_js=("checkout.js",))
 
 # ================================================================ THE KIOSK
 kiosk_page = page_hero([("The kiosk","kiosk/")], "One screen. A world of possibility.",
   "A digital concierge, information hub and local advertising platform in one professionally managed touch-screen kiosk.",
-  btns(("Test the kiosk","test-the-kiosk/"),("Try the quick demo","#demo","btn-ghost")),
+  btns(("Test the kiosk","test-the-kiosk/"),("See pricing","pricing/","btn-ghost")),
   aside=f'<div class="hero-photo"><img src="{{R}}assets/kiosk-lexen-sm.jpg" alt="CityPulse kiosk showing the Hotel Lexen guest directory in the hotel lounge" width="900" height="675"></div>') + f'''
 {section(head("Useful information. A local next step.", "A digital concierge and local discovery hub, together on one approachable touch screen.") + '''<div class="cards">
   <div class="card"><h3>Know the venue.</h3><p>Amenities, directions and helpful answers in one place.</p></div>
   <div class="card"><h3>Discover the neighborhood.</h3><p>Dining, services and experiences with a local connection.</p></div>
   <div class="card"><h3>Find a useful next step.</h3><p>A relevant message and a QR code to take it home.</p></div></div>''')}
-{demo_block("See it for yourself.", "demo-title-k")}
+{try_band()}
 <section class="section" style="background:var(--stone)" id="hardware"><div class="wrap">
   {head("Two finishes. One welcome screen.", "Every kiosk runs the same software. The finish is chosen to suit the room.")}
   <div class="hw-grid">
@@ -145,7 +102,7 @@ kiosk_page = page_hero([("The kiosk","kiosk/")], "One screen. A world of possibi
   <div class="card"><h3>Installation & content</h3><p>We coordinate setup and relevant venue information with your team.</p></div>
   <div class="card"><h3>Maintenance & support</h3><p>Content updates and routine service are handled by CityPulse.</p></div></div>''')}
 {cta_band()}'''
-page("kiosk/", "The kiosk", "A digital concierge, information hub and local advertising platform in one managed touch-screen kiosk. Try the interactive demo.", kiosk_page, kiosk=True)
+page("kiosk/", "The kiosk", "A digital concierge, information hub and local advertising platform in one managed touch-screen kiosk. Tap the real kiosk in the live demo.", kiosk_page)
 from test_kiosk import tk_page
 page("test-the-kiosk/", "Test the kiosk", "Tap around the real CityPulse kiosk software, then see the kiosk to scale in five sizes from a 21.5-inch countertop to a 55-inch tower.", tk_page(), active="kiosk/", extra_js=("test-kiosk.js",))
 page("operations/", "Team library (demo)", "Demo of the CityPulse team library. Enter the access code to preview file names.", '<section class="section"><div class="wrap"><div class="ops-app" id="ops-app"><p>Loading…</p><noscript><p>Turn on JavaScript to open this page.</p></noscript></div></div></section>', extra_js=("operations.js",))
@@ -426,9 +383,9 @@ for v in VENUES:
     note = f'<div class="callout" style="margin-top:32px"><b>Keep healthcare content informational.</b><p>{v["note"].split(". ",1)[1]}</p></div>' if v.get("note") else ""
     demo_venue = {"hotels": "the hotel lobby", "medical": "the medical office", "automotive": "the dealership lounge"}.get(v["slug"])
     right = (f'<div class="moment">{mini(v["venue"], v["tiles"], v["finish"])}<dl><dt>The visitor moment</dt><dd>{v["moment"]}</dd><dt>On screen</dt><dd>{v["mh"]}</dd><dt>Ad space</dt><dd>Local businesses relevant to your visitors</dd></dl></div>' if v.get("photo")
-             else f'<div class="path-panel" style="border-radius:22px"><h4>On every screen</h4><dl class="brief"><div><dt>Top half</dt><dd>Your venue information, chosen with your team</dd></div><div><dt>Bottom half</dt><dd>Ad space for local businesses relevant to your visitors</dd></div><div><dt>Take-home</dt><dd>QR codes and send-to-phone links for the next step</dd></div><div><dt>Upkeep</dt><dd>Content updates and maintenance handled by CityPulse</dd></div></dl>' + (f'<p style="margin-top:18px"><a class="text-link" href="{{R}}kiosk/#demo">Try {demo_venue} in the kiosk demo</a></p>' if demo_venue else "") + '</div>')
+             else f'<div class="path-panel" style="border-radius:22px"><h4>On every screen</h4><dl class="brief"><div><dt>Top half</dt><dd>Your venue information, chosen with your team</dd></div><div><dt>Bottom half</dt><dd>Ad space for local businesses relevant to your visitors</dd></div><div><dt>Take-home</dt><dd>QR codes and send-to-phone links for the next step</dd></div><div><dt>Upkeep</dt><dd>Content updates and maintenance handled by CityPulse</dd></div></dl>' + (f'<p style="margin-top:18px"><a class="text-link" href="{{R}}test-the-kiosk/">Test the kiosk</a></p>' if demo_venue else "") + '</div>')
     others = "".join(f'<a class="chip" href="{{R}}venues/{o["slug"]}/"{" aria-current=\"page\"" if o is v else ""}>{o["name"]}</a>' for o in VENUES)
-    body = page_hero([("For venues","venues/"),(v["name"], f'venues/{v["slug"]}/')], v["h"], v["lede"], btns(("Start a venue inquiry","hosts/#inquiry"),("Try the kiosk demo","kiosk/#demo","btn-ghost")), aside=aside) + f'''
+    body = page_hero([("For venues","venues/"),(v["name"], f'venues/{v["slug"]}/')], v["h"], v["lede"], btns(("Start a venue inquiry","hosts/#inquiry"),("Test the kiosk","test-the-kiosk/","btn-ghost")), aside=aside) + f'''
 <section class="section"><div class="wrap"><div class="tab-panel">
   <div><h3>Keep the information close at hand.</h3>{check_list(v["bullets"])}{note}</div>
   {right}
@@ -614,7 +571,7 @@ welcome = f'''<section class="page-hero"><div class="wrap narrow">
     <li><h3>You see the results</h3><p>Your report shows how often your ad was shown, tapped and scanned.</p></li>
   </ol>
   <div class="callout"><b>Need to change something?</b><p>Reply to your receipt or email <a href="mailto:{EMAIL}">{EMAIL}</a>. You can also call <a href="tel:{TEL}">{PHONE}</a>.</p></div>
-  {btns(("Back to the home page",""),("Try the kiosk demo","kiosk/#demo","btn-ghost"))}
+  {btns(("Back to the home page",""),("Test the kiosk","test-the-kiosk/","btn-ghost"))}
 </div></section>'''
 page("welcome/", "Welcome", "Thanks for your CityPulse Kiosks order.", welcome, extra_js=("checkout.js",))
 
@@ -629,7 +586,7 @@ page("terms/", "Terms & Conditions", "The terms that apply to your use of the Ci
 page("privacy/", "Privacy Policy", "How CityPulse Kiosks collects, uses and protects information on its website and kiosks.", legal_page("privacy/", "Privacy Policy", "What information we collect on our website and kiosks, how we use it and the choices you have.", PRIVACY))
 
 # ================================================================ 404
-nf = f'''<section class="page-hero"><div class="wrap"><h1>This page took a different turn.</h1><p class="lede" style="margin-top:20px">The page you're looking for isn't here. Try one of these instead.</p>{btns(("Go to the home page",""),("Try the kiosk","kiosk/#demo","btn-ghost"),("Contact CityPulse","contact/","btn-ghost"))}</div></section>'''
+nf = f'''<section class="page-hero"><div class="wrap"><h1>This page took a different turn.</h1><p class="lede" style="margin-top:20px">The page you're looking for isn't here. Try one of these instead.</p>{btns(("Go to the home page",""),("Test the kiosk","test-the-kiosk/","btn-ghost"),("Contact CityPulse","contact/","btn-ghost"))}</div></section>'''
 page("404/", "Page not found", "Page not found.", nf)
 import shutil
 src = os.path.join(OUT, "404", "index.html")

@@ -41,37 +41,39 @@ def icon(name, cls="ico"):
 
 # ---------------------------------------------------------------- navigation
 NAV = [
-  ("link", "The kiosk", "kiosk/"),
+  ("menu", "The kiosk", "kiosk", [
+    ("The kiosk", "kiosk/", "What guests see, the hardware and the finishes", True),
+    ("Test the kiosk", "test-the-kiosk/", "Tap the real screen and compare five sizes"),
+    ("How it works", "how-it-works/", "From sign-up to your ad going live"),
+    ("Measurement", "measurement/", "What we count and report"),
+  ]),
   ("menu", "Advertise", "advertise", [
-    ("Advertise with CityPulse", "advertise/", "Placements, pricing and how a campaign comes together", True),
-    ("Pricing & calculator", "pricing/", "Annual rates and a multi-kiosk estimate"),
+    ("Advertise with CityPulse", "advertise/", "Placements, packages and how a campaign comes together", True),
+    ("Creative studio", "creative-studio/", "Write your ad and preview it on the kiosk"),
     ("Campaign planner", "campaign-planner/", "Build a brief step by step"),
-    ("Creative studio", "creative-studio/", "Preview your message on the kiosk"),
     ("Campaign ideas", "campaign-ideas/", "Eight local playbooks to adapt"),
     ("Who you can reach", "audience/", "Visitor moments in each venue"),
-    ("Market planning", "locations/", "Cities and regions in our plans"),
+    ("Markets", "locations/", "153 cities across all 50 states"),
     ("For agencies", "agencies/", "Start with a client brief"),
   ]),
+  ("link", "Pricing", "pricing/"),
   ("menu", "For venues", "venues", [
     ("Host a kiosk", "hosts/", "The managed offering, at no cost for qualified venues", True),
     ("Venues overview", "venues/", "Where CityPulse fits"),
-    ("Prepare your venue", "resources/host-preparation/", "What to have ready for a first call"),
     ("Hotels & hospitality", "venues/hotels/", "A useful lobby experience"),
     ("Medical offices", "venues/medical/", "Information while visitors wait"),
     ("Car dealerships", "venues/automotive/", "Sales and service lounges"),
     ("Restaurants & venues", "venues/restaurants/", "Menus, events and local discovery"),
+    ("Prepare your venue", "resources/host-preparation/", "What to have ready for a first call"),
   ]),
-  ("menu", "Resources", "resources", [
-    ("All resources", "resources/", "Guides, tools and inspiration", True),
-    ("How it works", "how-it-works/", "The advertiser and host journeys"),
+  ("menu", "Company", "resources", [
+    ("About CityPulse", "about/", "Who we are and where we're headed", True),
+    ("Guides & resources", "resources/", "Guides, tools and inspiration"),
     ("Media overview", "media-kit/", "The concept in one place"),
-    ("First campaign guide", "resources/first-local-campaign/", "From goal to a useful brief"),
-    ("Creative guide", "resources/screen-creative/", "A screen message people can read"),
-    ("Measurement guide", "measurement/", "What the numbers mean"),
     ("Common questions", "faqs/", "Answers for advertisers and hosts"),
+    ("Contact us", "contact/", "Talk with the CityPulse team"),
     ("Help & support", "support/", "For existing kiosks and campaigns"),
   ]),
-  ("link", "About", "about/"),
 ]
 
 # Header logo: the full lockup (with a gentle pulse on the i-dot), the shorter wordmark on phones.
@@ -115,9 +117,9 @@ def footer():
     return f'''<footer class="site-footer">
   <div class="wrap footer-grid">
     <div class="footer-brand"><img src="{{R}}assets/logo-stacked-light.svg" alt="CityPulse Kiosks" width="402" height="122"><p>Turning wait time into opportunity. Smart kiosks, useful information and local connection.</p></div>
-    {col("Explore CityPulse", [("The kiosk","kiosk/"),("Test the kiosk","test-the-kiosk/"),("Venues","venues/"),("Who you can reach","audience/"),("Market planning","locations/"),("How it works","how-it-works/"),("About us","about/")])}
-    {col("Advertise", [("Advertising options","advertise/"),("Pricing & calculator","pricing/"),("Campaign planner","campaign-planner/"),("Creative studio","creative-studio/"),("Campaign ideas","campaign-ideas/"),("Measurement guide","measurement/"),("For agencies","agencies/")])}
-    {col("Keep it useful", [("Request a kiosk","hosts/#inquiry"),("Guides & resources","resources/"),("Media overview","media-kit/"),("Common questions","faqs/"),("Contact CityPulse","contact/"),("Help & support","support/")])}
+    {col("The kiosk", [("The kiosk","kiosk/"),("Test the kiosk","test-the-kiosk/"),("How it works","how-it-works/"),("Venues","venues/"),("Who you can reach","audience/"),("Markets","locations/")])}
+    {col("Advertise", [("Get started — $399","#get-started"),("Pricing & calculator","pricing/"),("Advertising options","advertise/"),("Creative studio","creative-studio/"),("Campaign planner","campaign-planner/"),("Campaign ideas","campaign-ideas/"),("For agencies","agencies/")])}
+    {col("Company", [("About us","about/"),("Host a kiosk","hosts/"),("Guides & resources","resources/"),("Common questions","faqs/"),("Contact us","contact/"),("Help & support","support/")])}
     <div class="footer-talk"><h2>Let's talk</h2>
       <a class="big" href="mailto:{EMAIL}">{EMAIL}</a><a class="big" href="tel:{TEL}">{PHONE}</a>
       <p class="footer-addr">{ADDR1}<br>{ADDR2}</p>
@@ -125,7 +127,8 @@ def footer():
     </div>
   </div>
   <div class="wrap footer-base"><span>© <span id="year">2026</span> CityPulse Kiosks. All rights reserved.</span><nav aria-label="Legal"><a href="{{R}}privacy/">Privacy Policy</a><a href="{{R}}terms/">Terms &amp; Conditions</a><a href="https://sales.citypulsekiosks.com" rel="nofollow">Team login</a><a href="https://spotlight-kiosks.sarvesh-bb0.workers.dev/admin" rel="nofollow">Owner login</a></nav></div>
-</footer>'''
+</footer>
+<div class="m-cta" id="m-cta"><span><b>$399/yr</b>one location, or $60/mo</span><a class="btn" href="{{R}}#get-started">Get started</a></div>'''
 
 # Short labels shown above section headings (with the brand's pulse dot).
 EYEBROWS = {
@@ -183,7 +186,7 @@ def page(path, title, desc, body, active=None, kiosk=False, extra_js=()):
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{R}}assets/styles.css?v=20261012e">
+<link rel="stylesheet" href="{{R}}assets/styles.css?v=20261012f">
 </head>
 <body>
 {header(active or path)}
@@ -195,7 +198,7 @@ def page(path, title, desc, body, active=None, kiosk=False, extra_js=()):
 <script src="{{R}}assets/config.js"></script>
 <script src="{{R}}assets/integrations.js"></script>
 {''.join(f'<script src="{{R}}assets/{j}"></script>' for j in extra_js)}
-<script src="{{R}}assets/site.js?v=20261012e"></script>
+<script src="{{R}}assets/site.js?v=20261012f"></script>
 </body>
 </html>
 '''
@@ -231,7 +234,7 @@ def page_hero(trail, h1, lede, buttons="", aside="", dark=False):
 
 def cta_band(h="Let's put your business on the city's pulse.", p="Host a useful amenity. Reach your next customer. Start with a conversation."):
     return f'''<section class="cta-band"><div class="wrap cta-inner"><div><h2>{h}</h2><p>{p}</p></div>
-  {btns(("Plan a campaign","campaign-planner/"),("Request a kiosk","hosts/#inquiry","btn-ghost"))}</div></section>'''
+  <div class="btn-row"><a class="btn" href="{{R}}#get-started">Get started — $399/yr</a><a class="btn btn-ghost" href="{{R}}hosts/#inquiry">Host a kiosk for free</a></div></div></section>'''
 
 def section(inner, cls="", id=None):
     idattr = f' id="{id}"' if id else ""
@@ -294,6 +297,25 @@ def placement_mini(kind):
     hl = {"ph-banner": "banner", "ph-qr": "qr", "ph-panel": "ad"}[kind]
     ad = LX_AD.replace('class="lx-ad"', 'class="lx-ad hl"') if hl == "ad" else LX_AD
     return lx_kiosk(lx_screen(ad=ad, hl=hl, extra_cls=kind))
+
+
+def try_band(home=False):
+    go = "#get-started" if home else "{R}#get-started"
+    return f'''<section class="try-band" id="demo" aria-labelledby="try-title"><div class="wrap try-grid">
+  <div class="try-copy"><p class="eyebrow">Live demo</p><h2 id="try-title">Tap the real kiosk.</h2>
+    <p>The same screen guests use at Hotel Lexen in North Hollywood. Ask the concierge, plan an evening and see exactly where your ad sits — on every screen.</p>
+    <ul class="try-points"><li>Real kiosk software, placeholder ads</li><li>Five sizes, from countertop to a 7-foot tower</li><li>Works on your phone too</li></ul>
+    <div class="btn-row"><a class="btn" href="{{R}}test-the-kiosk/">Test the kiosk</a><a class="btn btn-ghost" href="{go}">Get started — $399/yr</a></div></div>
+  <a class="try-shot" href="{{R}}test-the-kiosk/" aria-label="Open the live kiosk demo"><span class="try-device"><img src="{{R}}assets/kiosk-screen-sm.jpg" alt="" width="360" height="640" loading="lazy" decoding="async"></span><span class="try-play">Tap to try it</span></a>
+</div></section>'''
+
+def host_band():
+    return f'''<section class="host-band" id="host" aria-labelledby="host-title"><div class="wrap host-grid">
+  <div><p class="eyebrow">For venue owners</p><h2 id="host-title">Own a lobby or waiting room? Host a kiosk for free.</h2>
+    <p>We supply the kiosk, set it up with your venue information and keep it running. Your visitors get a useful concierge, and you get a modern amenity at no cost.</p></div>
+  <div class="host-cta"><div class="btn-row"><a class="btn btn-dark" href="{{R}}hosts/#inquiry">Request a kiosk</a><a class="btn btn-ghost" href="{{R}}hosts/">How hosting works</a></div>
+    <p class="fine">No-cost hosting depends on qualification, availability and a signed Host Agreement.</p></div>
+</div></section>'''
 
 def demo_block(heading="Try the kiosk.", hid="demo-title"):
     return f'''<section class="demo" id="demo" aria-labelledby="{hid}">
@@ -776,7 +798,7 @@ def film():
     <div class="f-st f-c">
       <span class="f-lamp"><i></i></span><span class="f-sofa"></span><span class="f-sofa s2"></span>
       <span class="f-ring"></span><span class="f-ring r2"></span><span class="f-ring r3"></span>
-      <div class="f-kiosk"><div class="f-k-screen"><b>Welcome</b><small>to the Arden Hotel</small><div class="f-k-tiles"><i></i><i></i><i></i><i></i></div></div><span class="f-live">Live</span></div>
+      <div class="f-kiosk"><div class="f-k-screen">{lx_screen(ad=LX_AD.replace('class="lx-ad"', 'class="lx-ad f-k-slot"'))}</div><span class="f-live">Live</span></div>
       <div class="f-floor"></div>{people}
     </div>
     <div class="f-st f-d">
