@@ -25,7 +25,18 @@ const SCHEMA = [
   "CREATE TABLE IF NOT EXISTS tasks (venue TEXT NOT NULL, id TEXT NOT NULL, done INTEGER NOT NULL DEFAULT 0, updated_at TEXT NOT NULL, PRIMARY KEY (venue, id))",
   "CREATE TABLE IF NOT EXISTS notes (id TEXT PRIMARY KEY, venue TEXT NOT NULL, text TEXT NOT NULL, color TEXT, pinned INTEGER DEFAULT 0, done INTEGER DEFAULT 0, todo INTEGER DEFAULT 0, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)"
 ];
-const EVENT_TYPES = ["sessions", "hours", "categories", "places", "questions", "takeHome", "adShown", "adEngaged", "adReach", "qr"];
+SCHEMA.push(
+  /* one row per kiosk per 5-minute slot it checked in: uptime and the 24-hour status strip */
+  "CREATE TABLE IF NOT EXISTS beats (venue TEXT NOT NULL, kiosk TEXT NOT NULL, slot INTEGER NOT NULL, PRIMARY KEY (venue, kiosk, slot))",
+  /* offline incidents: when a kiosk went quiet, when it came back, whether staff were emailed */
+  "CREATE TABLE IF NOT EXISTS incidents (id TEXT PRIMARY KEY, venue TEXT NOT NULL, kiosk TEXT NOT NULL, started_at TEXT NOT NULL, ended_at TEXT, notified_down INTEGER DEFAULT 0, notified_up INTEGER DEFAULT 0)",
+  /* dashboard settings: alert emails, thresholds, digests */
+  "CREATE TABLE IF NOT EXISTS settings (venue TEXT PRIMARY KEY, json TEXT NOT NULL, updated_at TEXT NOT NULL)",
+  /* who changed what (the name each person types in on this browser) */
+  "CREATE TABLE IF NOT EXISTS audit (id TEXT PRIMARY KEY, venue TEXT NOT NULL, at TEXT NOT NULL, who TEXT, action TEXT NOT NULL, detail TEXT)"
+);
+const EVENT_TYPES = ["sessions", "hours", "categories", "places", "questions", "takeHome", "adShown", "adEngaged", "adReach", "qr", "dwell"];
+const SLOT_MS = 300000;
 const ICONS = ["fork", "bell", "coffee", "spark", "bag", "car", "home", "pin", "star", "walk", "phone", "chat", "sun"];
 const MAX_MEDIA = 1024 * 1024, MAX_CONTENT = 300 * 1024, HISTORY_KEEP = 40;
 const ID_RE = /^[a-z0-9][a-z0-9-]{0,40}$/, KIOSK_RE = /^[A-Za-z0-9][A-Za-z0-9-]{0,31}$/, DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -37,7 +48,7 @@ export const dayKey = (tz, d) => new Intl.DateTimeFormat("en-CA", { timeZone: tz
 
 let schemaReady = null;
 /* Columns added after the first release; adding one that already exists fails harmlessly. */
-const UPGRADES = ["ALTER TABLE kiosks ADD COLUMN screen TEXT", "ALTER TABLE kiosks ADD COLUMN app TEXT", "ALTER TABLE kiosks ADD COLUMN reload_at TEXT"];
+const UPGRADES = ["ALTER TABLE kiosks ADD COLUMN screen TEXT", "ALTER TABLE kiosks ADD COLUMN app TEXT", "ALTER TABLE kiosks ADD COLUMN reload_at TEXT", "ALTER TABLE history ADD COLUMN by_name TEXT", "ALTER TABLE kiosks ADD COLUMN label TEXT"];
 function ensure(env) {
   if (!schemaReady) schemaReady = env.DB.batch(SCHEMA.map(s => env.DB.prepare(s)))
     .then(() => Promise.all(UPGRADES.map(u => env.DB.prepare(u).run().catch(() => null))))
@@ -393,8 +404,9 @@ export async function handle(req, env, ctx, { origin, allowedOrigin, fetchSeed, 
       const t = nowIso(), ua = (req.headers.get("User-Agent") || "").slice(0, 160);
       const screen = /^\d{2,5}x\d{2,5}$/.test(url.searchParams.get("s") || "") ? url.searchParams.get("s") : null;
       const app = /^[\w.-]{1,16}$/.test(url.searchParams.get("app") || "") ? url.searchParams.get("app") : null;
-      ctx.waitUntil(env.DB.prepare("INSERT INTO kiosks (venue, kiosk, first_seen, last_seen, version, ua, screen, app) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (venue, kiosk) DO UPDATE SET last_seen = excluded.last_seen, version = excluded.version, ua = excluded.ua, screen = excluded.screen, app = excluded.app")
-        .bind(venue, kiosk, t, t, +url.searchParams.get("have") || 0, ua, screen, app).run().catch(() => {}));
+      ctx.waitUntil(env.DB.batch([env.DB.prepare("INSERT INTO kiosks (venue, kiosk, first_seen, last_seen, version, ua, screen, app) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (venue, kiosk) DO UPDATE SET last_seen = excluded.last_seen, version = excluded.version, ua = excluded.ua, screen = excluded.screen, app = excluded.app")
+        .bind(venue, kiosk, t, t, +url.searchParams.get("have") || 0, ua, screen, app),
+        env.DB.prepare("INSERT OR IGNORE INTO beats (venue, kiosk, slot) VALUES (?, ?, ?)").bind(venue, kiosk, Math.floor(Date.now() / SLOT_MS))]).catch(() => {}));
     }
     if (+url.searchParams.get("have") === c.version) return send(200, { version: c.version, same: true, reload }, origin);
     return send(200, { version: c.version, data: c.data, reload }, origin);
@@ -472,6 +484,143 @@ export async function handle(req, env, ctx, { origin, allowedOrigin, fetchSeed, 
   return send(404, { error: "not found" }, allowedOrigin ? origin : "");
 }
 
+/* ---------- fleet health, alerts, digests and advertiser report emails ----------
+   Email goes out through Resend when the RESEND_API_KEY secret is set (the same key Sales Studio uses).
+   ALERT_FROM sets the sender (default alerts@citypulsekiosks.com, on the verified domain). */
+const DEFAULT_SETTINGS = { alertEmails: [], alertAfterMin: 15, quietFrom: null, quietTo: null, digest: true, reports: true };
+const EMAIL_OK = /^[^\s@<>"]+@[^\s@<>"]+\.[a-z]{2,}$/i;
+export const cleanName = v => String(v || "").replace(/[^\p{L}\p{N} .'-]/gu, "").trim().slice(0, 40);
+async function audit(env, venue, who, action, detail) {
+  const id = Date.now().toString(36) + [...crypto.getRandomValues(new Uint8Array(4))].map(b => b.toString(16).padStart(2, "0")).join("");
+  await env.DB.prepare("INSERT INTO audit (id, venue, at, who, action, detail) VALUES (?, ?, ?, ?, ?, ?)").bind(id, venue, nowIso(), who || "", action, String(detail || "").slice(0, 300)).run().catch(() => {});
+}
+async function getSettings(env, venue) {
+  const r = await env.DB.prepare("SELECT json FROM settings WHERE venue = ?").bind(venue).first().catch(() => null);
+  let s = {}; try { s = r ? JSON.parse(r.json) : {}; } catch (e) { s = {}; }
+  return { ...DEFAULT_SETTINGS, ...s };
+}
+const putSettings = (env, venue, s) => env.DB.prepare("INSERT INTO settings (venue, json, updated_at) VALUES (?, ?, ?) ON CONFLICT (venue) DO UPDATE SET json = excluded.json, updated_at = excluded.updated_at").bind(venue, JSON.stringify(s), nowIso()).run();
+function cleanSettings(b, prev) {
+  const emails = (Array.isArray(b.alertEmails) ? b.alertEmails : String(b.alertEmails || "").split(/[\s,;]+/)).map(x => String(x).trim()).filter(Boolean);
+  if (emails.length > 5) bad("Use up to 5 email addresses.");
+  const badOne = emails.find(e => !EMAIL_OK.test(e) || e.length > 120); if (badOne) bad(`“${badOne}” is not an email address.`);
+  const after = Math.round(+b.alertAfterMin || 15); if (after < 5 || after > 240) bad("Alert after must be between 5 and 240 minutes.");
+  const hr = v => v === "" || v == null ? null : (Number.isInteger(+v) && +v >= 0 && +v <= 23 ? +v : bad("Quiet hours must be whole hours, 0 to 23."));
+  return { ...prev, alertEmails: [...new Set(emails.map(e => e.toLowerCase()))], alertAfterMin: after, quietFrom: hr(b.quietFrom), quietTo: hr(b.quietTo), digest: b.digest !== false, reports: b.reports !== false };
+}
+const mailOn = env => !!env.RESEND_API_KEY;
+async function sendMail(env, { to, subject, html, text, replyTo }) {
+  if (!mailOn(env)) return { error: "Email isn’t set up yet (RESEND_API_KEY)." };
+  try {
+    const r = await fetch(env.RESEND_URL || "https://api.resend.com/emails", { method: "POST", headers: { Authorization: "Bearer " + env.RESEND_API_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({ from: env.ALERT_FROM || "CityPulse Kiosks <alerts@citypulsekiosks.com>", to: Array.isArray(to) ? to : [to], subject, html, text, ...(replyTo ? { reply_to: replyTo } : {}) }) });
+    if (!r.ok) { const j = await r.json().catch(() => ({})); return { error: "The email service said: " + String(j.message || r.status).slice(0, 160) }; }
+    return { ok: true };
+  } catch (e) { return { error: "Couldn’t reach the email service." }; }
+}
+/* A plain, branded email that reads well in every mail app. `rows` are [label, value] pairs. */
+function mailShell({ title, intro, rows, button, foot }) {
+  const tr = (rows || []).map(([k, v]) => `<tr><td style="padding:9px 0;border-bottom:1px solid #EEF1F4;color:#5B6675">${escH(k)}</td><td style="padding:9px 0;border-bottom:1px solid #EEF1F4;text-align:right;font-weight:700;color:#0F1C2B">${escH(v)}</td></tr>`).join("");
+  const html = `<div style="background:#F4F6F8;padding:24px 12px;font-family:Helvetica,Arial,sans-serif"><div style="max-width:560px;margin:0 auto;background:#fff;border-radius:14px;overflow:hidden;border:1px solid #E3E8EE">
+<div style="background:#0F1C2B;padding:16px 22px;color:#fff;font-weight:800;font-size:17px">CityPulse <span style="color:#22C7B6">Kiosks</span></div>
+<div style="padding:22px"><h1 style="font-size:20px;margin:0 0 8px;color:#0F1C2B">${escH(title)}</h1>${intro ? `<p style="margin:0 0 14px;color:#3D4753;line-height:1.5">${intro}</p>` : ""}
+${tr ? `<table style="width:100%;border-collapse:collapse;font-size:14px">${tr}</table>` : ""}
+${button ? `<p style="margin:20px 0 4px"><a href="${escH(button[1])}" style="display:inline-block;background:#22C7B6;color:#0F1C2B;font-weight:700;text-decoration:none;padding:11px 18px;border-radius:999px">${escH(button[0])}</a></p>` : ""}
+${foot ? `<p style="margin:18px 0 0;font-size:12px;color:#8A94A0;line-height:1.5">${foot}</p>` : ""}</div></div></div>`;
+  const text = [title, intro ? intro.replace(/<[^>]+>/g, "") : "", ...(rows || []).map(([k, v]) => `${k}: ${v}`), button ? `${button[0]}: ${button[1]}` : "", foot ? foot.replace(/<[^>]+>/g, "") : ""].filter(Boolean).join("\n\n");
+  return { html, text };
+}
+const localParts = (tz, d) => { const p = Object.fromEntries(new Intl.DateTimeFormat("en-US", { timeZone: tz, hour: "numeric", hourCycle: "h23", weekday: "short", day: "numeric" }).formatToParts(d || new Date()).map(x => [x.type, x.value])); return { hour: +p.hour, weekday: p.weekday, day: +p.day }; };
+const inQuiet = (s, hour) => s.quietFrom == null || s.quietTo == null || s.quietFrom === s.quietTo ? false : s.quietFrom < s.quietTo ? hour >= s.quietFrom && hour < s.quietTo : hour >= s.quietFrom || hour < s.quietTo;
+const ago = ms => { const m = Math.round(ms / 60000); return m < 60 ? `${m} min` : m < 2880 ? `${Math.round(m / 60)} h` : `${Math.round(m / 1440)} days`; };
+function dashUrl(env) { return (env.DASHBOARD_URL || "https://spotlight-kiosks.sarvesh-bb0.workers.dev") + "/admin"; }
+
+/* Advertiser numbers for a date range (inclusive day keys). */
+async function adSummary(env, venue, sponsor, from, to) {
+  const r = await env.DB.prepare("SELECT type, SUM(n) AS n FROM events WHERE venue = ? AND day >= ? AND day <= ? AND ((type IN ('adShown', 'adEngaged', 'adReach') AND key = ?) OR (type = 'qr' AND key = ?)) GROUP BY type").bind(venue, from, to, sponsor, "ad:" + sponsor).all();
+  const m = Object.fromEntries((r.results || []).map(x => [x.type, x.n]));
+  return { reach: m.adReach || 0, engaged: m.adEngaged || 0, shown: m.adShown || 0, qr: m.qr || 0 };
+}
+async function sendAdReport(env, origin, venue, sponsorId, { from, to, label, toAddr }) {
+  const c = await getContent(env, venue); const v = c && c.data, s = v && (v.sponsors || []).find(x => x.id === sponsorId);
+  if (!s) return { error: "That ad isn’t on the kiosk anymore." };
+  const d = await env.DB.prepare("SELECT json FROM deals WHERE venue = ? AND sponsor = ?").bind(venue, sponsorId).first();
+  const deal = d ? JSON.parse(d.json) : {}, addr = toAddr || deal.email;
+  if (!addr || !EMAIL_OK.test(addr)) return { error: "Add the advertiser’s email under Deal details first." };
+  const n = await adSummary(env, venue, sponsorId, from, to), fmt = x => Number(x).toLocaleString("en-US");
+  const link = `${origin}/r/${venue}/${sponsorId}/${await shareToken(env, venue, sponsorId)}`;
+  const m = mailShell({ title: `${s.name}: your CityPulse report for ${label}`, intro: `Hi${deal.contact ? " " + escH(String(deal.contact).split(" ")[0]) : ""}, here’s how your ad did on the CityPulse concierge kiosk at <b>${escH(v.name)}</b>.`,
+    rows: [["Guests reached", fmt(n.reach)], ["Views with a guest", fmt(n.engaged)], ["Total times on screen", fmt(n.shown)], ["QR code scans", fmt(n.qr)]],
+    button: ["See your live report", link], foot: `Counts are anonymous: no cameras, no names. Questions or changes to your ad? Just reply to this email.<br>CityPulse Kiosks · 4750 S 44th Pl, Suite E20, Phoenix, AZ 85040 · Reply “stop reports” and we’ll stop sending these.` });
+  const r = await sendMail(env, { to: addr, subject: `${s.name} · CityPulse kiosk report, ${label}`, html: m.html, text: m.text, replyTo: env.REPORT_REPLY_TO || "sales@citypulsekiosks.com" });
+  if (r.ok) await env.DB.prepare("UPDATE deals SET json = json_set(json, '$.lastReportAt', ?) WHERE venue = ? AND sponsor = ?").bind(nowIso(), venue, sponsorId).run().catch(() => {});
+  return r.ok ? { ok: true, to: addr } : r;
+}
+
+/* Runs every 5 minutes from the worker's cron trigger. */
+export async function monitor(env, origin) {
+  if (!hasDB(env)) return;
+  await ensure(env);
+  const venue = venueId(env), c = await getContent(env, venue).catch(() => null), tz = (c && c.data.tz) || "America/Los_Angeles", vname = (c && c.data.name) || venue;
+  const s = await getSettings(env, venue), now = Date.now(), lp = localParts(tz), quiet = inQuiet(s, lp.hour);
+  const kiosks = (await env.DB.prepare("SELECT kiosk, label, last_seen FROM kiosks WHERE venue = ?").bind(venue).all()).results || [];
+  const open = (await env.DB.prepare("SELECT * FROM incidents WHERE venue = ? AND ended_at IS NULL").bind(venue).all()).results || [];
+  const openBy = new Map(open.map(x => [x.kiosk, x])), down = [], up = [];
+  for (const k of kiosks) {
+    const gone = now - Date.parse(k.last_seen) > s.alertAfterMin * 60000, inc = openBy.get(k.kiosk);
+    if (gone && !inc) { const id = k.kiosk + "-" + now.toString(36); await env.DB.prepare("INSERT INTO incidents (id, venue, kiosk, started_at) VALUES (?, ?, ?, ?)").bind(id, venue, k.kiosk, k.last_seen).run(); down.push({ ...k, id }); }
+    else if (gone && inc && !inc.notified_down) down.push({ ...k, id: inc.id });
+    else if (!gone && inc) { await env.DB.prepare("UPDATE incidents SET ended_at = ? WHERE id = ?").bind(k.last_seen, inc.id).run(); if (inc.notified_down) up.push({ ...k, inc }); }
+  }
+  for (const inc of open) if (!kiosks.some(k => k.kiosk === inc.kiosk)) await env.DB.prepare("UPDATE incidents SET ended_at = ? WHERE id = ?").bind(nowIso(), inc.id).run(); /* removed kiosks */
+  const to = s.alertEmails;
+  if (to.length && mailOn(env) && !quiet && down.length) {
+    const m = mailShell({ title: `${down.length === 1 ? (down[0].label || down[0].kiosk) + " is" : down.length + " kiosks are"} offline at ${vname}`, intro: "These kiosks stopped checking in. Usually a restart, a loose power cable or the Wi-Fi fixes it.",
+      rows: down.map(k => [k.label || k.kiosk, `last seen ${ago(now - Date.parse(k.last_seen))} ago`]), button: ["Open the dashboard", dashUrl(env) + "#kiosks"], foot: `You get this because your address is in Kiosk alerts in the dashboard. You’ll get one more email when ${down.length === 1 ? "it’s" : "they’re"} back.` });
+    if ((await sendMail(env, { to, subject: `Kiosk offline: ${down.map(k => k.label || k.kiosk).join(", ")} · ${vname}`, html: m.html, text: m.text })).ok)
+      for (const k of down) await env.DB.prepare("UPDATE incidents SET notified_down = 1 WHERE id = ?").bind(k.id).run();
+  }
+  if (to.length && mailOn(env) && up.length) {
+    const m = mailShell({ title: `Back online at ${vname}`, rows: up.map(k => [k.label || k.kiosk, `offline for ${ago(Date.parse(k.last_seen) - Date.parse(k.inc.started_at))}`]), button: ["Open the dashboard", dashUrl(env) + "#kiosks"] });
+    if ((await sendMail(env, { to, subject: `Back online: ${up.map(k => k.label || k.kiosk).join(", ")} · ${vname}`, html: m.html, text: m.text })).ok)
+      for (const k of up) await env.DB.prepare("UPDATE incidents SET notified_up = 1 WHERE id = ?").bind(k.inc.id).run();
+  }
+  /* housekeeping, about once an hour */
+  if (new Date(now).getUTCMinutes() < 5) await env.DB.prepare("DELETE FROM beats WHERE slot < ?").bind(Math.floor(now / SLOT_MS) - 40 * 288).run();
+  /* Monday 8 AM: weekly summary to the alert list */
+  const week = dayKey(tz).slice(0, 10);
+  if (s.digest && to.length && mailOn(env) && lp.weekday === "Mon" && lp.hour === 8 && s.lastDigest !== week) {
+    await putSettings(env, venue, { ...s, lastDigest: week });
+    await sendDigest(env, origin, venue, tz, vname, to);
+  }
+  /* the 1st of the month, 9 AM: last month's report to each advertiser who has it turned on */
+  const month = dayKey(tz).slice(0, 7);
+  if (s.reports && mailOn(env) && lp.day === 1 && lp.hour === 9 && s.lastReports !== month) {
+    await putSettings(env, venue, { ...(await getSettings(env, venue)), lastReports: month });
+    const first = new Date(Date.parse(month + "-01T12:00:00Z")), prevEnd = new Date(first.getTime() - 86400000), prevStart = prevEnd.toISOString().slice(0, 8) + "01";
+    const label = prevEnd.toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
+    const deals = (await env.DB.prepare("SELECT sponsor, json FROM deals WHERE venue = ?").bind(venue).all()).results || [];
+    for (const d of deals) { const j = JSON.parse(d.json); if (j.autoReport && j.email && j.status !== "Ended") { await sendAdReport(env, origin, venue, d.sponsor, { from: prevStart, to: prevEnd.toISOString().slice(0, 10), label }); await new Promise(r => setTimeout(r, 600)); } }
+  }
+}
+async function sendDigest(env, origin, venue, tz, vname, to) {
+  const from = dayKey(tz, new Date(Date.now() - 7 * 86400000)), end = dayKey(tz, new Date(Date.now() - 86400000)), pfrom = dayKey(tz, new Date(Date.now() - 14 * 86400000));
+  const [cur, prev, ads, inc] = await env.DB.batch([
+    env.DB.prepare("SELECT type, SUM(n) AS n FROM events WHERE venue = ? AND day >= ? AND day <= ? GROUP BY type").bind(venue, from, end),
+    env.DB.prepare("SELECT SUM(n) AS n FROM events WHERE venue = ? AND day >= ? AND day < ? AND type = 'sessions'").bind(venue, pfrom, from),
+    env.DB.prepare("SELECT key, SUM(n) AS n FROM events WHERE venue = ? AND day >= ? AND day <= ? AND type = 'adEngaged' GROUP BY key ORDER BY n DESC LIMIT 1").bind(venue, from, end),
+    env.DB.prepare("SELECT COUNT(*) AS n FROM incidents WHERE venue = ? AND started_at >= ?").bind(venue, new Date(Date.now() - 7 * 86400000).toISOString())
+  ]);
+  const m = Object.fromEntries((cur.results || []).map(x => [x.type, x.n])), p = (prev.results[0] || {}).n || 0, ss = m.sessions || 0;
+  const c = await getContent(env, venue), top = ads.results[0], topName = top ? ((c.data.sponsors || []).find(x => x.id === top.key) || {}).name || top.key : "—";
+  const change = p ? ` (${ss >= p ? "up" : "down"} ${Math.abs(Math.round((ss - p) / p * 100))}%)` : "";
+  const ending = (c.data.sponsors || []).filter(x => x.end && x.end >= dayKey(tz) && Date.parse(x.end) - Date.now() < 30 * 86400000).map(x => `${x.name} (${x.end})`);
+  const mm = mailShell({ title: `Your week at ${vname}`, intro: `${Number(ss).toLocaleString("en-US")} guest sessions last week${change}.`,
+    rows: [["Guest sessions", String(ss)], ["Places opened", String(m.places || 0)], ["Questions asked", String(m.questions || 0)], ["Ad views with a guest", String(m.adEngaged || 0)], ["QR scans", String(m.qr || 0)], ["Most-seen ad", topName], ["Offline incidents", String((inc.results[0] || {}).n || 0)], ...(ending.length ? [["Ads ending within 30 days", ending.join(", ")]] : [])],
+    button: ["Open the dashboard", dashUrl(env)], foot: "Turn this weekly summary off in the dashboard under Kiosks › Alerts." });
+  return sendMail(env, { to, subject: `Weekly kiosk summary · ${vname}`, html: mm.html, text: mm.text });
+}
+
 /* ---------- staff dashboard ---------- */
 const PAGE_HEADERS = {
   "Content-Security-Policy": "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self'; font-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'",
@@ -540,7 +689,7 @@ async function admin(req, env, ctx, url, fetchSeed, onContentSaved) {
   if (!(await signedIn(req, env))) return send(401, { error: "Please sign in again." });
   if (!hasDB(env)) return send(503, { error: "The database is not connected to the worker yet." });
   await ensure(env);
-  const venue = venueId(env);
+  const venue = venueId(env), who = cleanName(req.headers.get("X-CP-Name"));
 
   /* Password and recovery codes (signed in) */
   if (api === "security" && req.method === "GET") {
@@ -595,7 +744,7 @@ async function admin(req, env, ctx, url, fetchSeed, onContentSaved) {
   if (api === "content" && req.method === "GET") {
     const c = await getContent(env, venue, fetchSeed);
     if (!c) return send(404, { error: "No content yet." });
-    const hist = await env.DB.prepare("SELECT version, saved_at, note FROM history WHERE venue = ? ORDER BY version DESC LIMIT ?").bind(venue, HISTORY_KEEP).all();
+    const hist = await env.DB.prepare("SELECT version, saved_at, note, by_name FROM history WHERE venue = ? ORDER BY version DESC LIMIT ?").bind(venue, HISTORY_KEEP).all();
     return send(200, { version: c.version, updated_at: c.updated_at, data: c.data, history: hist.results || [], assets: assetsBase(env), media: url.origin + "/media/" });
   }
 
@@ -605,7 +754,7 @@ async function admin(req, env, ctx, url, fetchSeed, onContentSaved) {
     if (!cur) return send(404, { error: "No content yet." });
     if (+body.base !== cur.version) return send(409, { error: "Someone else published changes since you opened this page. Reload to see them, then make your changes again.", version: cur.version });
     let clean; try { clean = validateContent(body.data, cur.data); } catch (e) { if (e instanceof Bad) return send(422, { error: e.message }); throw e; }
-    return save(env, venue, cur.version, clean, str(body.note, 120, "Note") || "Edited in the dashboard", onContentSaved);
+    return save(env, venue, cur.version, clean, str(body.note, 120, "Note") || "Edited in the dashboard", onContentSaved, who);
   }
 
   if (api === "restore" && req.method === "POST") {
@@ -613,7 +762,7 @@ async function admin(req, env, ctx, url, fetchSeed, onContentSaved) {
     const row = await env.DB.prepare("SELECT json FROM history WHERE venue = ? AND version = ?").bind(venue, +body.version || 0).first();
     if (!row) return send(404, { error: "That version is no longer kept." });
     const cur = await getContent(env, venue, fetchSeed);
-    return save(env, venue, cur.version, JSON.parse(row.json), `Restored version ${+body.version}`, onContentSaved);
+    return save(env, venue, cur.version, JSON.parse(row.json), `Restored version ${+body.version}`, onContentSaved, who);
   }
 
   if (api === "media" && req.method === "POST") {
@@ -657,11 +806,19 @@ async function admin(req, env, ctx, url, fetchSeed, onContentSaved) {
     if (body.action === "reload") {
       const r = k === "*" ? await env.DB.prepare("UPDATE kiosks SET reload_at = ? WHERE venue = ?").bind(nowIso(), venue).run()
         : await env.DB.prepare("UPDATE kiosks SET reload_at = ? WHERE venue = ? AND kiosk = ?").bind(nowIso(), venue, k).run();
+      await audit(env, venue, who, "Restarted", k === "*" ? "All kiosks" : k);
       return send(200, { ok: true, kiosks: (r.meta && r.meta.changes) || 0 });
     }
     if (body.action === "remove" && k !== "*") {
-      await env.DB.prepare("DELETE FROM kiosks WHERE venue = ? AND kiosk = ?").bind(venue, k).run();
+      await env.DB.batch([env.DB.prepare("DELETE FROM kiosks WHERE venue = ? AND kiosk = ?").bind(venue, k), env.DB.prepare("UPDATE incidents SET ended_at = ? WHERE venue = ? AND kiosk = ? AND ended_at IS NULL").bind(nowIso(), venue, k)]);
+      await audit(env, venue, who, "Removed kiosk", k);
       return send(200, { ok: true });
+    }
+    if (body.action === "label" && k !== "*") {
+      const label = String(body.label || "").replace(/[^\p{L}\p{N} .,'&()/-]/gu, "").trim().slice(0, 40);
+      await env.DB.prepare("UPDATE kiosks SET label = ? WHERE venue = ? AND kiosk = ?").bind(label || null, venue, k).run();
+      await audit(env, venue, who, "Renamed kiosk", `${k} → ${label || "(code name)"}`);
+      return send(200, { ok: true, label });
     }
     return send(400, { error: "Unknown action." });
   }
@@ -677,7 +834,10 @@ async function admin(req, env, ctx, url, fetchSeed, onContentSaved) {
     if (!ID_RE.test(body.sponsor || "")) return send(400, { error: "Unknown ad." });
     let d; try { d = cleanDeal(body.deal || {}); } catch (e) { if (e instanceof Bad) return send(422, { error: e.message }); throw e; }
     const t = nowIso();
+    const prevDeal = await env.DB.prepare("SELECT json FROM deals WHERE venue = ? AND sponsor = ?").bind(venue, body.sponsor).first();
+    if (prevDeal) { try { const pj = JSON.parse(prevDeal.json); if (pj.lastReportAt) d.lastReportAt = pj.lastReportAt; } catch (e) { /* keep going */ } }
     await env.DB.prepare("INSERT INTO deals (venue, sponsor, json, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT (venue, sponsor) DO UPDATE SET json = excluded.json, updated_at = excluded.updated_at").bind(venue, body.sponsor, JSON.stringify(d), t).run();
+    await audit(env, venue, who, "Updated deal", body.sponsor);
     return send(200, { ok: true, deal: { ...d, updated_at: t } });
   }
 
@@ -718,6 +878,35 @@ async function admin(req, env, ctx, url, fetchSeed, onContentSaved) {
     return send(200, { url: `${url.origin}/r/${venue}/${sp}/${await shareToken(env, venue, sp)}` });
   }
 
+  /* alert and digest settings */
+  if (api === "settings" && req.method === "GET") return send(200, { settings: await getSettings(env, venue), email: { on: mailOn(env), from: env.ALERT_FROM || "CityPulse Kiosks <alerts@citypulsekiosks.com>" } });
+  if (api === "settings" && req.method === "PUT") {
+    let body; try { body = await req.json(); } catch (e) { body = {}; }
+    let next; try { next = cleanSettings(body || {}, await getSettings(env, venue)); } catch (e) { if (e instanceof Bad) return send(422, { error: e.message }); throw e; }
+    await putSettings(env, venue, next); await audit(env, venue, who, "Changed alert settings", next.alertEmails.join(", ") || "no emails");
+    return send(200, { ok: true, settings: next });
+  }
+  if (api === "settings/test" && req.method === "POST") {
+    const st = await getSettings(env, venue);
+    if (!st.alertEmails.length) return send(400, { error: "Add an email address first, then save." });
+    const m = mailShell({ title: "Test email from your kiosk dashboard", intro: "Kiosk alerts are working. You’ll get an email when a kiosk stops checking in, and another when it’s back.", button: ["Open the dashboard", dashUrl(env)] });
+    const r = await sendMail(env, { to: st.alertEmails, subject: "Test: CityPulse kiosk alerts", html: m.html, text: m.text });
+    return r.ok ? send(200, { ok: true, to: st.alertEmails }) : send(502, { error: r.error });
+  }
+  if (api === "report-email" && req.method === "POST") {
+    let body; try { body = await req.json(); } catch (e) { body = {}; }
+    if (!ID_RE.test(body.sponsor || "")) return send(400, { error: "Unknown ad." });
+    if (!mailOn(env)) return send(503, { error: "Email isn’t set up yet. Add the RESEND_API_KEY secret to the kiosk server." });
+    const c = await getContent(env, venue, fetchSeed), tz = (c && c.data.tz) || "America/Los_Angeles";
+    const r = await sendAdReport(env, url.origin, venue, body.sponsor, { from: dayKey(tz, new Date(Date.now() - 29 * 86400000)), to: dayKey(tz), label: "the last 30 days" });
+    if (r.ok) await audit(env, venue, who, "Emailed advertiser report", `${body.sponsor} → ${r.to}`);
+    return r.ok ? send(200, r) : send(400, { error: r.error });
+  }
+  if (api === "audit" && req.method === "GET") {
+    const r = await env.DB.prepare("SELECT at, who, action, detail FROM audit WHERE venue = ? ORDER BY at DESC LIMIT 200").bind(venue).all();
+    return send(200, { log: r.results || [] });
+  }
+
   if (api === "stats" && req.method === "GET") {
     const c = await getContent(env, venue, fetchSeed);
     const tz = (c && c.data.tz) || "America/Los_Angeles";
@@ -733,10 +922,18 @@ async function admin(req, env, ctx, url, fetchSeed, onContentSaved) {
       env.DB.prepare(`SELECT type, key, SUM(n) AS n FROM events WHERE ${where} GROUP BY type, key ORDER BY n DESC`).bind(...args),
       env.DB.prepare(`SELECT day, type, SUM(n) AS n FROM events WHERE ${where} GROUP BY day, type ORDER BY day`).bind(...args),
       env.DB.prepare(`SELECT day, type, key, SUM(n) AS n FROM events WHERE ${where} AND (type IN ('adShown', 'adEngaged', 'adReach') OR (type = 'qr' AND key LIKE 'ad:%')) GROUP BY day, type, key ORDER BY day`).bind(...args),
-      env.DB.prepare("SELECT kiosk, first_seen, last_seen, version, ua, screen, app FROM kiosks WHERE venue = ? ORDER BY last_seen DESC").bind(venue),
+      env.DB.prepare("SELECT kiosk, first_seen, last_seen, version, ua, screen, app, label FROM kiosks WHERE venue = ? ORDER BY last_seen DESC").bind(venue),
       env.DB.prepare(`SELECT type, SUM(n) AS n FROM events WHERE ${prevWhere} GROUP BY type`).bind(...prevArgs)
     ]);
-    return send(200, { from, to, days, tz, now: nowIso(), version: c ? c.version : 0, byKey: byKey.results || [], byDay: byDay.results || [], adDays: adDays.results || [], kiosks: kiosks.results || [], prev: Object.fromEntries((prev.results || []).map(r => [r.type, r.n])) });
+    const slot = Math.floor(Date.now() / SLOT_MS);
+    const [strip, up, inc] = await env.DB.batch([
+      env.DB.prepare("SELECT kiosk, slot FROM beats WHERE venue = ? AND slot > ?").bind(venue, slot - 288),
+      env.DB.prepare("SELECT kiosk, SUM(CASE WHEN slot > ? THEN 1 ELSE 0 END) AS d1, SUM(CASE WHEN slot > ? THEN 1 ELSE 0 END) AS d7, COUNT(*) AS d30 FROM beats WHERE venue = ? AND slot > ? GROUP BY kiosk").bind(slot - 288, slot - 2016, venue, slot - 8640),
+      env.DB.prepare("SELECT id, kiosk, started_at, ended_at, notified_down FROM incidents WHERE venue = ? ORDER BY started_at DESC LIMIT 40").bind(venue)
+    ]);
+    const strips = {}; for (const r of strip.results || []) (strips[r.kiosk] = strips[r.kiosk] || []).push(slot - r.slot);
+    const uptime = { slot, strips, counts: Object.fromEntries((up.results || []).map(r => [r.kiosk, { d1: r.d1, d7: r.d7, d30: r.d30 }])), incidents: inc.results || [] };
+    return send(200, { from, to, days, tz, uptime, now: nowIso(), version: c ? c.version : 0, byKey: byKey.results || [], byDay: byDay.results || [], adDays: adDays.results || [], kiosks: kiosks.results || [], prev: Object.fromEntries((prev.results || []).map(r => [r.type, r.n])) });
   }
 
   return send(404, { error: "Not found." });
@@ -748,7 +945,7 @@ function cleanDeal(d) {
   if (price != null && (!isFinite(price) || price < 0 || price > 100000)) bad("Monthly price must be a number.");
   const email = str(d.email, 120, "Email");
   if (email && !/^[^\s@<>"]+@[^\s@<>"]+\.[a-z]{2,}$/i.test(email)) bad("Email address is not valid.");
-  return { contact: str(d.contact, 80, "Contact name"), email, phone: str(d.phone, 30, "Phone"), price, status: STAT.includes(d.status) ? d.status : "Active", notes: str(d.notes, 1000, "Notes") };
+  return { contact: str(d.contact, 80, "Contact name"), email, phone: str(d.phone, 30, "Phone"), price, status: STAT.includes(d.status) ? d.status : "Active", notes: str(d.notes, 1000, "Notes"), autoReport: !!d.autoReport };
 }
 
 async function shareToken(env, venue, sponsor) {
@@ -829,15 +1026,16 @@ function placeName(href) {
   return m ? m[1].replace(/\+/g, " ").slice(0, 80) : "";
 }
 
-async function save(env, venue, base, data, note, onContentSaved) {
+async function save(env, venue, base, data, note, onContentSaved, who) {
   const next = base + 1, json = JSON.stringify(data), t = nowIso();
   const res = await env.DB.batch([
     env.DB.prepare("UPDATE content SET json = ?, version = ?, updated_at = ? WHERE venue = ? AND version = ?").bind(json, next, t, venue, base),
-    env.DB.prepare("INSERT OR REPLACE INTO history (venue, version, json, saved_at, note) SELECT ?, ?, ?, ?, ? WHERE changes() > 0").bind(venue, next, json, t, note),
+    env.DB.prepare("INSERT OR REPLACE INTO history (venue, version, json, saved_at, note, by_name) SELECT ?, ?, ?, ?, ?, ? WHERE changes() > 0").bind(venue, next, json, t, note, who || ""),
     env.DB.prepare("DELETE FROM history WHERE venue = ? AND version <= ?").bind(venue, next - HISTORY_KEEP)
   ]);
   if (!res[0].meta || !res[0].meta.changes) return send(409, { error: "Someone else published changes at the same moment. Reload and try again." });
   contentCache.delete(venue);
+  await audit(env, venue, who, "Published", `Version ${next}: ${note}`);
   if (onContentSaved) onContentSaved();
   return send(200, { ok: true, version: next, updated_at: t, data });
 }

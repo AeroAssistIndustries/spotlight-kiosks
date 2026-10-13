@@ -144,7 +144,7 @@ input[type=text], input[type=url], input[type=email], input[type=tel], input[typ
 textarea { min-height: 96px; resize: vertical; line-height: 1.45; }
 input:focus, select:focus, textarea:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 4px color-mix(in srgb, var(--blue) 18%, transparent); }
 .check { display: flex; align-items: center; gap: 10px; min-height: 36px; cursor: pointer; font-size: 15px; }
-.check input { width: 20px; height: 20px; accent-color: var(--blue); }
+.check input { width: 20px; height: 20px; flex: none; accent-color: var(--blue); }
 .checks { display: flex; flex-wrap: wrap; gap: 4px 18px; }
 .switch { position: relative; display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-size: 15px; min-height: 44px; }
 .switch input { appearance: none; -webkit-appearance: none; width: 51px; height: 31px; border-radius: 999px; background: var(--line); position: relative; cursor: pointer; transition: background .2s; margin: 0; flex: none; }
@@ -790,6 +790,42 @@ small.muted { color: var(--mute); }
   .logo .on-light { display: block !important; } .logo .on-dark { display: none !important; }
   th { color: #555; } td { border-color: #e5e5e5; }
 }
+
+/* ===== fleet health, alerts, activity log (2026-10) ===== */
+.fleet-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+.fleet-kpis > div { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; display: grid; gap: 4px; }
+.fleet-kpis span { font-size: 13px; color: var(--mute); }
+.fleet-kpis b { font-size: 26px; font-weight: 700; letter-spacing: -.02em; }
+.fleet-kpis b small { font-size: 14px; color: var(--mute); font-weight: 600; }
+.fleet-kpis b.ok, .up.ok { color: var(--green); } .fleet-kpis b.warn, .up.warn { color: var(--amber); } .fleet-kpis b.bad, .up.bad { color: var(--red); }
+.strip { display: grid; grid-template-columns: repeat(48, 1fr); gap: 2px; width: 220px; height: 22px; }
+.strip i { border-radius: 2px; background: var(--soft); }
+.strip i.on { background: color-mix(in srgb, var(--green) 75%, transparent); }
+.strip i.part { background: color-mix(in srgb, var(--amber) 80%, transparent); }
+.strip i.off { background: color-mix(in srgb, var(--red) 80%, transparent); }
+.strip-lab { display: flex; justify-content: space-between; width: 220px; font-size: 11px; color: var(--mute); margin-top: 3px; }
+.k-table td { vertical-align: top; }
+.link.small { font-size: 12.5px; }
+.two-col { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.two-col > .card { margin: 0; }
+.inc { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.inc li { display: grid; grid-template-columns: 10px 1fr; gap: 10px; align-items: start; padding: 10px 12px; border-radius: 12px; background: var(--soft); font-size: 14px; }
+.inc li i { width: 10px; height: 10px; border-radius: 50%; margin-top: 5px; background: var(--green); }
+.inc li.open i { background: var(--red); box-shadow: 0 0 0 4px color-mix(in srgb, var(--red) 18%, transparent); }
+.inc small { display: block; color: var(--mute); font-size: 12.5px; margin-top: 2px; }
+.dwell { text-align: right; display: grid; gap: 2px; }
+.dwell span { font-size: 12px; color: var(--mute); text-transform: uppercase; letter-spacing: .08em; font-weight: 700; }
+.dwell b { font-size: 22px; letter-spacing: -.02em; }
+.dwell small { font-size: 12.5px; color: var(--mute); }
+.b-method { grid-column: span 12; }
+.b-method summary { cursor: pointer; list-style: none; display: flex; align-items: baseline; gap: 10px; }
+.b-method summary::-webkit-details-marker { display: none; }
+.b-method summary::after { content: "+"; margin-left: auto; font-size: 20px; color: var(--mute); }
+.b-method[open] summary::after { content: "–"; }
+.method { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 28px; margin: 16px 0 0; }
+.method dt { font-weight: 700; } .method dd { margin: 3px 0 0; color: var(--ink2, var(--mute)); font-size: 14px; line-height: 1.5; }
+@media (max-width: 1000px) { .fleet-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .two-col, .method { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 640px) { .strip, .strip-lab { width: 160px; } .dwell { text-align: left; } }
 </style>
 </head>
 <body>

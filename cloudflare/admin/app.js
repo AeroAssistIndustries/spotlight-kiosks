@@ -48,11 +48,18 @@
   let range = 7, kioskFilter = "", stats = null, statsErr = "";
   let busy = false;
   let deals = {}; /* private advertiser deal details, saved separately from what kiosks show */
+  let settings = null, emailInfo = null, auditLog = null; /* alert settings, email status, who-changed-what */
+  const myName = () => { try { return (localStorage.getItem("cp-name") || "").slice(0, 40); } catch (e) { return ""; } };
+  function askName() {
+    const n = (window.prompt("Your name (it shows in History next to the changes you make):", myName()) || "").trim().slice(0, 40);
+    if (n) { try { localStorage.setItem("cp-name", n); } catch (e) { /* private window */ } toast(`Thanks, ${n}.`); const el = document.getElementById("me-name"); if (el) el.textContent = n; render(); }
+  }
 
   /* ---------- server ---------- */
   async function api(path, opts) {
     opts = opts || {};
-    const headers = { "X-CP": "1" };
+    const headers = { "X-CP": "1" }, who = myName();
+    if (who) headers["X-CP-Name"] = who;
     let body = opts.body;
     if (opts.json !== undefined) { headers["Content-Type"] = "application/json"; body = JSON.stringify(opts.json); }
     if (opts.type) headers["Content-Type"] = opts.type;
@@ -148,7 +155,7 @@
       return;
     }
     frame(); render();
-    loadStats();
+    loadStats(); loadSettings();
   }
 
   /* ---------- frame ---------- */
@@ -160,6 +167,7 @@
         <nav class="side-nav" aria-label="Sections">${TABS.map(([k, l]) => `<button data-tab="${k}">${icon(k)}<span>${l}</span><em class="badge" id="badge-${k}"></em></button>`).join("")}</nav>
         <div class="side-foot">
           <button class="side-search" data-act="palette">${icon("search")}<span>Search or jump to…</span><kbd>${/Mac/.test(navigator.platform) ? "⌘" : "Ctrl"} K</kbd></button>
+          <button class="side-out" data-act="set-name" title="Shown in History next to your changes">${icon("users")}<span id="me-name">${esc(myName() || "Add your name")}</span></button>
           <button class="side-out" data-tab="security">${icon("lock")}<span>Password &amp; security</span></button>
           <button class="side-out" data-act="logout">${icon("logout")}<span>Sign out</span></button>
         </div>
@@ -332,9 +340,41 @@
     if (s.end) { const d = dayDiff(t, s.end); return d <= 7 ? ["warn", d === 0 ? "Ends today" : `Ends in ${d} day${d > 1 ? "s" : ""}`] : ["ok", "Running until " + niceDay(s.end)]; }
     return ["ok", "Running"];
   }
-  const kioskOffline = k => Date.now() - Date.parse(k.last_seen) > 15 * 60000;
+  const kioskOffline = k => Date.now() - Date.parse(k.last_seen) > ((settings && settings.alertAfterMin) || 15) * 60000;
+  const kName = k => k.label || k.kiosk;
+  /* uptime: share of 5-minute slots the kiosk checked in, since it first appeared (max 1 / 7 / 30 days) */
+  function uptimeOf(k, days) {
+    const u = stats && stats.uptime; if (!u) return null;
+    const c = u.counts[k.kiosk] || { d1: 0, d7: 0, d30: 0 };
+    const since = Math.max(1, Math.floor((Date.now() - Date.parse(k.first_seen || k.last_seen)) / 300000));
+    const den = Math.min(days * 288, since), num = days === 1 ? c.d1 : days === 7 ? c.d7 : c.d30;
+    return den < 3 ? null : Math.min(100, Math.round(num / den * 1000) / 10);
+  }
+  const upTone = p => p == null ? "" : p >= 99 ? "ok" : p >= 95 ? "warn" : "bad";
+  /* last 24 hours as 48 half-hour cells: green = checked in, amber = partly, red = silent, blank = before it started */
+  function strip(k) {
+    const u = stats && stats.uptime; if (!u) return "";
+    const seen = new Set(u.strips[k.kiosk] || []), born = Math.floor((Date.now() - Date.parse(k.first_seen || k.last_seen)) / 300000);
+    let out = "";
+    for (let c = 47; c >= 0; c--) {
+      let n = 0, alive = 0; for (let j = 0; j < 6; j++) { const a = c * 6 + j; if (a <= born) { alive++; if (seen.has(a)) n++; } }
+      const t = new Date(Date.now() - c * 1800000).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: TZ() });
+      const cls = !alive ? "none" : n >= Math.min(alive, 5) ? "on" : n ? "part" : "off";
+      out += `<i class="${cls}" title="${esc(t)}: ${!alive ? "not set up yet" : n >= Math.min(alive, 5) ? "online" : n ? "dropped out for a while" : "offline"}"></i>`;
+    }
+    return `<span class="strip" role="img" aria-label="Last 24 hours of check-ins">${out}</span>`;
+  }
 
   /* ---------- overview ---------- */
+  async function loadSettings() { try { const r = await api("settings"); settings = r.settings; emailInfo = r.email; if (tab === "kiosks" || tab === "overview") render(); } catch (e) { /* older server */ } }
+  async function saveAlerts(f) {
+    const btn = f.querySelector("button[type=submit]"); btn.disabled = true;
+    const v = id => document.getElementById(id).value;
+    try { const r = await api("settings", { method: "PUT", json: { alertEmails: v("al-emails"), alertAfterMin: +v("al-after"), quietFrom: v("al-qf"), quietTo: v("al-qt"), digest: document.getElementById("al-digest").checked, reports: document.getElementById("al-reports").checked } });
+      settings = r.settings; render(); toast(settings.alertEmails.length ? "Alerts saved." : "Saved. Alerts are off until you add an email."); }
+    catch (e) { if (e.message !== "signed out") toast(e.message, true); btn.disabled = false; }
+  }
+  async function loadAudit() { try { auditLog = (await api("audit")).log || []; } catch (e) { auditLog = []; } if (tab === "history") render(); }
   async function loadStats() {
     statsErr = "";
     try { stats = await api(`stats?days=${range}${kioskFilter ? "&kiosk=" + encodeURIComponent(kioskFilter) : ""}`); updateBadges(); }
@@ -419,7 +459,11 @@
     const acts = [];
     (stats ? stats.kiosks : []).filter(kioskOffline).forEach(k => acts.push({ tone: "bad", text: `<b>${esc(k.kiosk)}</b> is offline (last seen ${esc(ago(k.last_seen))}).`, btn: "Restart", act: `data-act="kiosk-reload" data-k="${esc(k.kiosk)}"` }));
     if (isDirty()) acts.push({ tone: "warn", text: "You have changes that aren't on the kiosks yet.", btn: "Publish", act: 'data-act="publish"' });
-    D.sponsors.forEach(s => { const [cls, label] = adStatus(s); if (cls === "warn" && /^Ends/.test(label)) acts.push({ tone: "warn", text: `<b>${esc(s.name)}</b> ad ${esc(label.toLowerCase())}. Time to talk renewal.`, btn: "Open ad", act: 'data-tab="ads"' }); });
+    D.sponsors.forEach(s => { if (!s.end || s.active === false) return; const left = dayDiff(today(), s.end);
+      if (left >= 0 && left <= 30) acts.push({ tone: left <= 7 ? "warn" : "info", text: `<b>${esc(s.name)}</b> ad ends ${left === 0 ? "today" : `in ${left} day${left > 1 ? "s" : ""}`} (${esc(niceDay(s.end))}). Time to talk renewal.`, btn: "Open deal", act: s.id ? `data-act="goto-deal" data-id="${esc(s.id)}"` : 'data-tab="ads"' });
+      else if (left < 0) acts.push({ tone: "warn", text: `<b>${esc(s.name)}</b> ended ${esc(niceDay(s.end))} and is no longer showing. Renew it, or turn it off to tidy up.`, btn: "Open ad", act: 'data-tab="ads"' }); });
+    if (settings && !(settings.alertEmails || []).length) acts.push({ tone: "info", text: "<b>Set up offline alerts</b> so you hear about a dark kiosk before the hotel does.", btn: "Set up", act: 'data-tab="kiosks"' });
+    if (!myName()) acts.push({ tone: "idea", text: "Add your name so History shows who changed what.", btn: "Add name", act: 'data-act="set-name"' });
     D.sponsors.filter(s => s.id && s.active !== false && !(deals[s.id] && deals[s.id].price != null)).slice(0, 2).forEach(s => acts.push({ tone: "info", text: `Add the monthly price for <b>${esc(s.name)}</b> to track revenue.`, btn: "Add deal", act: `data-act="goto-deal" data-id="${esc(s.id)}"` }));
     D.sponsors.filter(s => !s.logo).slice(0, 1).forEach(s => acts.push({ tone: "info", text: `<b>${esc(s.name || "An ad")}</b> has no logo yet.`, btn: "Upload", act: 'data-tab="ads"' }));
     if (sec && !(sec.codes && sec.codes.left)) acts.push({ tone: "warn", text: `<b>No recovery codes yet.</b> Create them so you can reset the password yourself if it's forgotten.`, btn: "Set up", act: 'data-tab="security"' });
@@ -434,7 +478,7 @@
     const kiosks = stats ? stats.kiosks : [];
     const seg = [[1, "Today"], [7, "7 days"], [30, "30 days"], [90, "90 days"]].map(([d, l]) => `<button data-act="range" data-days="${d}" aria-pressed="${range === d}">${l}</button>`).join("");
     const filters = `<div class="filters"><div class="seg" role="group" aria-label="Period">${seg}</div>
-      ${kiosks.length > 1 ? `<select id="range-kiosk" aria-label="Kiosk" style="width:auto"><option value="">All kiosks</option>${kiosks.map(k => `<option value="${esc(k.kiosk)}"${k.kiosk === kioskFilter ? " selected" : ""}>${esc(k.kiosk)}</option>`).join("")}</select>` : ""}</div>`;
+      ${kiosks.length > 1 ? `<select id="range-kiosk" aria-label="Kiosk" style="width:auto"><option value="">All kiosks</option>${kiosks.map(k => `<option value="${esc(k.kiosk)}"${k.kiosk === kioskFilter ? " selected" : ""}>${esc(kName(k))}</option>`).join("")}</select>` : ""}</div>`;
     const hero = `<section class="hero">
         <div class="hero-main"><span class="eyebrow" id="hero-greet">${greeting(new Date().getHours())}</span>
           <h1>${esc(D.name)}</h1>
@@ -469,7 +513,7 @@
           ${acts.length ? `<ul class="actions">${acts.slice(0, 6).map(a => `<li class="tone-${a.tone}"><i></i><p>${a.text}</p><button class="btn small" ${a.act}>${a.btn}</button></li>`).join("")}</ul>` : `<div class="all-good">${icon("check")}<b>All good.</b><span>Kiosks are online and nothing needs your attention.</span></div>`}</div>
         <div class="card b-kiosks"><div class="card-head"><h2>${icon("kiosks")} Kiosks</h2><button class="btn small ghost" data-tab="kiosks">Manage</button></div>
           <div class="k-big"><b>${online}</b><span>of ${kiosks.length} online</span></div>
-          <ul class="k-list">${kiosks.slice(0, 4).map(k => `<li><span class="dot ${kioskOffline(k) ? "off" : "on"}"></span><b>${esc(k.kiosk)}</b><small>${esc(ago(k.last_seen))}</small></li>`).join("") || `<li class="muted">No kiosk has checked in yet.</li>`}</ul>
+          <ul class="k-list">${kiosks.slice(0, 4).map(k => { const u = uptimeOf(k, 7); return `<li><span class="dot ${kioskOffline(k) ? "off" : "on"}"></span><b>${esc(kName(k))}</b><small>${u == null ? "" : `<span class="up ${upTone(u)}">${u}%</span> · `}${esc(ago(k.last_seen))}</small></li>`; }).join("") || `<li class="muted">No kiosk has checked in yet.</li>`}</ul>
           ${kiosks.length ? `<button class="btn small" data-act="kiosk-reload" data-k="*">${icon("refresh")} Restart all</button>` : ""}</div>
         <div class="card b-revenue"><div class="card-head"><h2>${icon("dollar")} Ad revenue</h2><button class="btn small ghost" data-tab="ads">Deals</button></div>
           <div class="rev-big">$${fmt(rev.total)}<small>/month</small></div>
@@ -493,14 +537,33 @@
           ${ads.length ? `<div class="table-wrap"><table><thead><tr><th>Business</th><th class="num">Total views</th><th class="num">With a guest</th><th style="width:16%"></th><th class="num">Guests reached</th><th class="num">QR scans</th><th class="num">Scans per 100 guests</th><th></th></tr></thead><tbody>
             ${ads.map((r, i) => `<tr><td><span class="rank">${i + 1}</span><button class="link" data-act="report" data-id="${esc(r.id)}" title="Open the advertiser report">${esc(r.name)}</button>${r.active ? "" : ` <span class="pill off">Not showing</span>`}</td><td class="num muted">${fmt(r.views)}</td><td class="num"><b>${fmt(r.engaged)}</b></td><td><div class="bar"><i style="width:${Math.round(r.engaged / maxV * 100)}%"></i></div></td><td class="num">${fmt(r.reach)}</td><td class="num">${fmt(r.scans)}</td><td class="num">${r.reach ? (r.scans / r.reach * 100).toFixed(1) : "–"}</td><td class="num"><button class="btn small" data-act="report" data-id="${esc(r.id)}">Report</button></td></tr>`).join("")}
           </tbody></table></div>` : `<div class="empty">No ads yet. Add one in the Ads tab.</div>`}</div>
-        <div class="card b-hours"><div class="card-head"><div><h2>Busiest times</h2><p>When guests start using the kiosk, by hour (hotel time).</p></div></div>${hoursChart()}</div>
+        <div class="card b-hours"><div class="card-head"><div><h2>Busiest times</h2><p>When guests start using the kiosk, by hour (hotel time).</p></div>${dwellChip()}</div>${hoursChart()}</div>
         <div class="card b-recent"><div class="card-head"><h2>${icon("history")} Recent changes</h2><button class="btn small ghost" data-tab="history">History</button></div>
           <ul class="feed">${(meta.history || []).slice(0, 5).map(h => `<li><span class="v">v${h.version}</span><p>${esc(h.note || "Edited")}<small>${esc(ago(h.saved_at))}</small></p></li>`).join("") || `<li class="muted">Nothing published yet.</li>`}</ul></div>
         <div class="card b-top"><h3>Most viewed places</h3>${topList(keysOf("places"), "place views", nameOf)}</div>
         <div class="card b-top"><h3>Directions scanned</h3>${topList(placeScans, "scans", nameOf)}</div>
         <div class="card b-top"><h3>Most opened sections</h3>${topList(keysOf("categories"), "section views", k => (D.categories[k] && D.categories[k].label) || k)}</div>
         <div class="card b-top"><h3>Top questions</h3>${topList(keysOf("questions"), "questions")}<p class="muted" style="font-size:13px;margin-top:10px">Free-typed questions are counted without their text, so guests' words stay private.</p></div>
+        <details class="card b-method"><summary><h2 style="display:inline">How we count</h2> <span class="muted">what each number means</span></summary>
+          <dl class="method">
+            <div><dt>Guest session</dt><dd>Someone taps the welcome screen. It ends when the kiosk goes back to the welcome screen after a minute or two without a touch.</dd></div>
+            <div><dt>Time with a guest</dt><dd>From the first tap to the last tap of a session (the idle wait at the end isn't counted).</dd></div>
+            <div><dt>Ad view with a guest</dt><dd>An ad was on screen while a guest was using the kiosk. Ads rotate every 8 seconds, so one session usually shows several ads.</dd></div>
+            <div><dt>Total ad views</dt><dd>Every time an ad came on screen, including when nobody was using the kiosk (people walking past can still see it). We don't multiply this into “impressions”.</dd></div>
+            <div><dt>Guests reached</dt><dd>Sessions that saw a given ad at least once.</dd></div>
+            <div><dt>QR scan</dt><dd>A phone opened one of the kiosk’s QR codes. Link-preview bots are left out.</dd></div>
+            <div><dt>Uptime</dt><dd>The share of 5-minute periods a kiosk checked in with the server, around the clock.</dd></div>
+            <div><dt>Privacy</dt><dd>No cameras, no names, no device IDs and nothing stored on guests' phones. Free-typed questions are counted without their words. Counts are kept per kiosk per day.</dd></div>
+          </dl></details>
       </div>`;
+  }
+  /* average time with a guest, from the kiosk's session-length buckets */
+  const DWELL = { lt30: 20, "30to60": 45, "1to2m": 90, "2to5m": 210, "5mplus": 420 };
+  function dwellChip() {
+    const rows = keysOf("dwell").filter(r => DWELL[r.key]), n = rows.reduce((a, r) => a + r.n, 0);
+    if (n < 5) return "";
+    const sec = Math.round(rows.reduce((a, r) => a + r.n * DWELL[r.key], 0) / n), long = rows.filter(r => r.key === "2to5m" || r.key === "5mplus").reduce((a, r) => a + r.n, 0);
+    return `<div class="dwell"><span>Average time with a guest</span><b>${sec >= 60 ? Math.floor(sec / 60) + " min " + (sec % 60 ? (sec % 60) + " s" : "") : sec + " s"}</b><small>${Math.round(long / n * 100)}% stay over 2 minutes</small></div>`;
   }
   function hoursChart() {
     const h = Array(24).fill(0);
@@ -604,7 +667,7 @@
             <div class="preview-wrap small" id="ad-prev-${i}">${adPreview(s)}</div>
           </div>
           <div>
-            <div class="ad-top"><h3 id="ad-t-${i}">${esc(s.name || "New ad")}</h3><span class="pill ${adStatus(s)[0]}"><i></i>${esc(adStatus(s)[1])}</span>
+            <div class="ad-top"><h3 id="ad-t-${i}">${esc(s.name || "New ad")}</h3><span class="pill ${adStatus(s)[0]}"><i></i>${esc(adStatus(s)[1])}</span>${sovPill(s)}
               <label class="switch"><input type="checkbox" data-bind="${p}.active" ${s.active !== false ? "checked" : ""} aria-label="Show on kiosks">Show on kiosks</label></div>
             <div class="fields">
               ${field("Business name", p + ".name", { max: 60, title: "ad-t-" + i, req: true })}
@@ -627,6 +690,13 @@
       }).join("") || `<div class="card empty">No ads yet.</div>`}`;
   }
   /* ---------- deals (private: never sent to kiosks) ---------- */
+  /* share of voice: this ad's part of all ad time on screen in the selected period */
+  function sovPill(s) {
+    if (!stats || !s.id) return "";
+    const all = sumType("adShown"), mine = keysOf("adShown").filter(r => r.key === s.id).reduce((a, r) => a + r.n, 0);
+    if (!all || !mine) return "";
+    return `<span class="pill" title="Share of all ad time on screen, last ${stats.days} day${stats.days > 1 ? "s" : ""}">${Math.round(mine / all * 100)}% of ad time</span>`;
+  }
   function monthlyRevenue() {
     let total = 0, count = 0, pending = 0;
     D.sponsors.forEach(s => { const d = deals[s.id]; if (!d || d.price == null) return; if (d.status === "Active") { total += +d.price; count++; } else if (d.status === "Pending") pending += +d.price; });
@@ -643,14 +713,15 @@
         ${f("Email", "email", "email", ' maxlength="120"')}${f("Phone", "phone", "tel", ' maxlength="30"')}
         <label class="f"><span>Status</span><select data-deal="${id}" data-key="status">${["Active", "Pending", "Paused", "Ended"].map(o => `<option${(d.status || "Active") === o ? " selected" : ""}>${o}</option>`).join("")}</select></label>
         <label class="f full"><span>Notes</span><textarea data-deal="${id}" data-key="notes" maxlength="1000" rows="3" placeholder="Package, renewal date, who to talk to…">${esc(d.notes || "")}</textarea></label>
+        <label class="check full"><input type="checkbox" data-deal="${id}" data-key="autoReport"${d.autoReport ? " checked" : ""}> Email them a report on the 1st of every month${d.lastReportAt ? ` <small class="muted">· last sent ${esc(ago(d.lastReportAt))}</small>` : ""}</label>
       </div>
       <div class="item-actions" style="border-top:0;padding-top:0"><span class="grow muted" style="font-size:13px">${d.updated_at ? "Saved " + esc(ago(d.updated_at)) : "Not saved yet"}</span>
-        <button class="btn small" data-act="share" data-id="${id}">Copy report link</button><button class="btn small primary" data-act="save-deal" data-id="${id}">Save deal</button></div>` : ""}
+        <button class="btn small" data-act="share" data-id="${id}">Copy report link</button><button class="btn small" data-act="report-email" data-id="${id}" title="Emails the last 30 days and the live link to the contact email"${d.email ? "" : " disabled"}>Email report now</button><button class="btn small primary" data-act="save-deal" data-id="${id}">Save deal</button></div>` : ""}
     </div>`;
   }
   async function saveDeal(id) {
     const deal = {};
-    document.querySelectorAll(`[data-deal="${CSS.escape(id)}"]`).forEach(el => { deal[el.dataset.key] = el.value; });
+    document.querySelectorAll(`[data-deal="${CSS.escape(id)}"]`).forEach(el => { deal[el.dataset.key] = el.type === "checkbox" ? el.checked : el.value; });
     try { const r = await api("deals", { method: "PUT", json: { sponsor: id, deal } }); deals[id] = r.deal; render(); toast("Deal saved."); }
     catch (e) { if (e.message !== "signed out") toast(e.message, true); }
   }
@@ -833,9 +904,10 @@
   function ago(iso) {
     const s = Math.max(0, (Date.now() - Date.parse(iso)) / 1000);
     if (s < 90) return "just now";
-    if (s < 3600) return `${Math.round(s / 60)} minutes ago`;
-    if (s < 86400) return `${Math.round(s / 3600)} hours ago`;
-    return `${Math.round(s / 86400)} days ago`;
+    const n = (v, u) => `${v} ${u}${v === 1 ? "" : "s"} ago`;
+    if (s < 3600) return n(Math.round(s / 60), "minute");
+    if (s < 86400) return n(Math.round(s / 3600), "hour");
+    return n(Math.round(s / 86400), "day");
   }
   function device(ua) {
     ua = ua || "";
@@ -843,28 +915,65 @@
     const br = /Edg\//.test(ua) ? "Edge" : /Chrome\//.test(ua) ? "Chrome" : /Firefox\//.test(ua) ? "Firefox" : /Safari\//.test(ua) ? "Safari" : "";
     return [br, os].filter(Boolean).join(" on ") || "Unknown";
   }
+  const dur = ms => { const m = Math.max(1, Math.round(ms / 60000)); return m < 60 ? `${m} min` : m < 1440 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${Math.round(m / 1440 * 10) / 10} days`; };
   function vKiosks() {
-    const list = stats ? stats.kiosks : null;
+    const list = stats ? stats.kiosks : null, inc = (stats && stats.uptime && stats.uptime.incidents) || [], st = settings || {}, mail = emailInfo || {};
+    const fleet7 = list && list.length ? list.map(k => uptimeOf(k, 7)).filter(x => x != null) : [];
+    const avg7 = fleet7.length ? Math.round(fleet7.reduce((a, b) => a + b, 0) / fleet7.length * 10) / 10 : null;
+    const openInc = inc.filter(x => !x.ended_at);
+    const hours = Array.from({ length: 24 }, (_, h) => `<option value="${h}">${h === 0 ? "12 AM" : h < 12 ? h + " AM" : h === 12 ? "12 PM" : (h - 12) + " PM"}</option>`).join("");
+    const sel = (id, v) => `<select id="${id}" style="width:auto"><option value="">Off</option>${hours.replace(`value="${v}"`, `value="${v}" selected`)}</select>`;
     return `<div class="head"><div><h1>Kiosks</h1><p>Every screen running your kiosk. Kiosks check in every 2 minutes and pick up published changes the next time they're on the welcome screen. <b>Restart</b> reloads a kiosk remotely, when nobody is using it.</p></div>
       <button class="btn small" data-act="refresh">Update this list</button>${list && list.length ? `<button class="btn small" data-act="kiosk-reload" data-k="*">Restart all kiosks</button>` : ""}</div>
-      <div class="card">${!list ? `<div class="loading">Loading…</div>` : list.length ? `<div class="table-wrap"><table><thead><tr><th>Kiosk</th><th>Status</th><th>Last check-in</th><th>Content</th><th>Screen</th><th>Device</th><th></th></tr></thead><tbody>
-        ${list.map(k => { const off = kioskOffline(k), cur = k.version === base;
-          return `<tr><td><b>${esc(k.kiosk)}</b></td><td>${!off ? `<span class="pill ok"><i></i>Online</span>` : `<span class="pill bad"><i></i>Offline</span>`}</td>
-          <td>${esc(ago(k.last_seen))}</td><td>${cur ? `<span class="pill ok">Up to date</span>` : `<span class="pill">Version ${esc(k.version || "–")}, updating</span>`}</td>
-          <td class="muted">${k.screen ? esc(k.screen.replace("x", " × ")) : "–"}${k.app ? `<br><small>Kiosk software ${esc(k.app)}</small>` : ""}</td><td class="muted">${esc(device(k.ua))}</td>
+      ${list && list.length ? `<div class="fleet-kpis">
+        <div><span>Online now</span><b>${list.filter(k => !kioskOffline(k)).length} <small>of ${list.length}</small></b></div>
+        <div><span>Uptime, last 7 days</span><b class="${upTone(avg7)}">${avg7 == null ? "–" : avg7 + "%"}</b></div>
+        <div><span>Offline incidents, 30 days</span><b>${inc.filter(x => Date.now() - Date.parse(x.started_at) < 30 * 86400000).length}</b></div>
+        <div><span>Alerts</span><b class="${st.alertEmails && st.alertEmails.length && mail.on ? "ok" : "warn"}" style="font-size:18px">${st.alertEmails && st.alertEmails.length ? (mail.on ? "On" : "Waiting for email setup") : "Off"}</b></div></div>` : ""}
+      <div class="card">${!list ? `<div class="loading">Loading…</div>` : list.length ? `<div class="table-wrap"><table class="k-table"><thead><tr><th>Kiosk</th><th>Status</th><th>Last 24 hours</th><th class="num">Uptime 7d</th><th class="num">30d</th><th>Content</th><th>Device</th><th></th></tr></thead><tbody>
+        ${list.map(k => { const off = kioskOffline(k), cur = k.version === base, u7 = uptimeOf(k, 7), u30 = uptimeOf(k, 30);
+          return `<tr><td><b>${esc(kName(k))}</b>${k.label ? `<br><small class="muted">${esc(k.kiosk)}</small>` : ""}<br><button class="link small" data-act="kiosk-label" data-k="${esc(k.kiosk)}" data-l="${esc(k.label || "")}">${k.label ? "Rename" : "Name it"}</button></td>
+          <td>${!off ? `<span class="pill ok"><i></i>Online</span>` : `<span class="pill bad"><i></i>Offline</span>`}<br><small class="muted">${esc(ago(k.last_seen))}</small></td>
+          <td>${strip(k)}<div class="strip-lab"><span>24 h ago</span><span>now</span></div></td>
+          <td class="num"><b class="up ${upTone(u7)}">${u7 == null ? "–" : u7 + "%"}</b></td><td class="num muted">${u30 == null ? "–" : u30 + "%"}</td>
+          <td>${cur ? `<span class="pill ok">Up to date</span>` : `<span class="pill">Version ${esc(k.version || "–")}, updating</span>`}</td>
+          <td class="muted">${esc(device(k.ua))}${k.screen ? `<br><small>${esc(k.screen.replace("x", " × "))}</small>` : ""}${k.app ? `<br><small>Kiosk software ${esc(k.app)}</small>` : ""}<br><small>Since ${esc(new Date(k.first_seen || k.last_seen).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }))}</small></td>
           <td class="num nowrap"><button class="btn small" data-act="kiosk-reload" data-k="${esc(k.kiosk)}" title="Reloads the kiosk page within about 2 minutes, when nobody is using it">Restart</button> ${armed("kiosk-remove", "Remove", ` data-k="${esc(k.kiosk)}" title="Removes it from this list. Its numbers stay in the totals."`)}</td></tr>`; }).join("")}
-      </tbody></table></div>` : `<div class="empty">No kiosk has checked in yet.</div>`}</div>
-      <div class="card"><h3>Naming a kiosk</h3><p>Each kiosk gets a code name the first time it starts. To give one a clear name, open the kiosk page once on that screen with <b>?kiosk=</b> and a name at the end of the address, for example <b>…/kiosk-app/?kiosk=lobby</b>. Use letters, numbers and dashes.</p></div>`;
+      </tbody></table></div><p class="muted" style="font-size:13px;margin:10px 0 0">Uptime counts the 5-minute periods each kiosk checked in, around the clock. A kiosk that is switched off at night shows lower uptime; set quiet hours below so it doesn't send alerts.</p>` : `<div class="empty">No kiosk has checked in yet.</div>`}</div>
+      <div class="two-col">
+        <div class="card"><div class="card-head"><h2>${icon("kiosks")} Offline incidents</h2>${openInc.length ? `<span class="pill bad">${openInc.length} open</span>` : `<span class="pill ok">None open</span>`}</div>
+          ${inc.length ? `<ul class="inc">${inc.slice(0, 12).map(x => { const k = (list || []).find(y => y.kiosk === x.kiosk) || { kiosk: x.kiosk };
+            return `<li class="${x.ended_at ? "" : "open"}"><i></i><div><b>${esc(kName(k))}</b> ${x.ended_at ? `was offline for <b>${esc(dur(Date.parse(x.ended_at) - Date.parse(x.started_at)))}</b>` : `<b>offline for ${esc(dur(Date.now() - Date.parse(x.started_at)))}</b>, still out`}
+              <small>${esc(new Date(x.started_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: TZ() }))}${x.notified_down ? " · team emailed" : ""}</small></div></li>`; }).join("")}</ul>`
+          : `<div class="empty" style="padding:18px">No outages recorded. Incidents show here when a kiosk misses check-ins for ${st.alertAfterMin || 15} minutes.</div>`}</div>
+        <form class="card" data-form="alerts"><div class="card-head"><h2>${icon("notices")} Alerts &amp; summaries</h2>${mail.on ? `<span class="pill ok">Email ready</span>` : `<span class="pill warn">Email not set up</span>`}</div>
+          ${mail.on ? "" : `<div class="note" style="margin-bottom:12px">To send emails, add the <b>RESEND_API_KEY</b> secret to the kiosk server in Cloudflare (the same key Sales Studio uses). Until then, incidents still show here.</div>`}
+          <label class="f full"><span>Email these people</span><input id="al-emails" type="text" value="${esc((st.alertEmails || []).join(", "))}" placeholder="you@citypulsekiosks.com, frontdesk@hotel.com"></label>
+          <div class="fields">
+            <label class="f"><span>Alert when offline for</span><select id="al-after">${[5, 10, 15, 30, 60, 120].map(m => `<option value="${m}"${(st.alertAfterMin || 15) === m ? " selected" : ""}>${m < 60 ? m + " minutes" : m / 60 + " hour" + (m > 60 ? "s" : "")}</option>`).join("")}</select></label>
+            <label class="f"><span>Quiet hours (no alerts)</span><span class="row" style="gap:6px;align-items:center">${sel("al-qf", st.quietFrom)} to ${sel("al-qt", st.quietTo)}</span></label>
+          </div>
+          <label class="check"><input type="checkbox" id="al-digest"${st.digest !== false ? " checked" : ""}> Monday 8 AM summary: sessions, top ad, outages, ads ending soon</label>
+          <label class="check"><input type="checkbox" id="al-reports"${st.reports !== false ? " checked" : ""}> On the 1st, email each advertiser last month’s report (turn on per advertiser in their Deal details)</label>
+          <div class="item-actions" style="border-top:0"><span class="grow"></span><button class="btn small" type="button" data-act="alert-test"${mail.on && st.alertEmails && st.alertEmails.length ? "" : " disabled"}>Send a test email</button><button class="btn small primary" type="submit">Save</button></div>
+        </form>
+      </div>`;
   }
 
   /* ---------- history ---------- */
   function vHistory() {
     const h = meta.history || [];
-    return `<div class="head"><div><h1>History</h1><p>Every published version. Restoring one publishes it again as a new version, so nothing is lost.</p></div></div>
-      <div class="card">${h.length ? `<div class="table-wrap"><table><thead><tr><th>Version</th><th>Published</th><th>What changed</th><th></th></tr></thead><tbody>
-        ${h.map(r => `<tr><td><b>${r.version}</b>${r.version === base ? ` <span class="pill ok">Live</span>` : ""}</td><td>${esc(new Date(r.saved_at).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" }))}</td><td>${esc(r.note || "")}</td>
+    if (auditLog === null) { auditLog = undefined; loadAudit(); }
+    const log = auditLog || [];
+    return `<div class="head"><div><h1>History</h1><p>Every published version, and who did what. Restoring a version publishes it again as a new version, so nothing is lost.</p></div>${myName() ? "" : `<button class="btn small" data-act="set-name">Add your name</button>`}</div>
+      <div class="card">${h.length ? `<div class="table-wrap"><table><thead><tr><th>Version</th><th>Published</th><th>By</th><th>What changed</th><th></th></tr></thead><tbody>
+        ${h.map(r => `<tr><td><b>${r.version}</b>${r.version === base ? ` <span class="pill ok">Live</span>` : ""}</td><td>${esc(new Date(r.saved_at).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short", timeZone: TZ() }))}</td><td class="muted">${esc(r.by_name || "–")}</td><td>${esc(r.note || "")}</td>
           <td class="num">${r.version === base ? "" : `<button class="btn small" data-act="restore" data-v="${r.version}" data-armed-label="Click again to restore">Restore</button>`}</td></tr>`).join("")}
-      </tbody></table></div>` : `<div class="empty">No versions yet.</div>`}</div>`;
+      </tbody></table></div>` : `<div class="empty">No versions yet.</div>`}</div>
+      <div class="card"><div class="card-head"><div><h2>${icon("history")} Activity log</h2><p>Publishing, restarts, deals, alert settings and report emails. Names come from “Add your name” on each person’s browser.</p></div></div>
+        ${auditLog === undefined ? `<div class="loading">Loading…</div>` : log.length ? `<div class="table-wrap"><table><thead><tr><th>When</th><th>Who</th><th>What</th><th>Details</th></tr></thead><tbody>
+        ${log.slice(0, 100).map(r => `<tr><td class="nowrap">${esc(new Date(r.at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: TZ() }))}</td><td>${esc(r.who || "–")}</td><td><b>${esc(r.action)}</b></td><td class="muted">${esc(r.detail || "")}</td></tr>`).join("")}
+        </tbody></table></div>` : `<div class="empty">Nothing logged yet. Actions from now on show here.</div>`}</div>`;
   }
 
   /* ---------- images ---------- */
@@ -873,12 +982,27 @@
     if (file.size > 25 * 1024 * 1024) return toast("That image is too large.", true);
     toast("Uploading…");
     try {
+      const warn = kind === "logo" ? await logoAdvice(file) : "";
       const blob = await shrink(file, kind === "photo" ? 2000 : 640, kind === "photo" ? "image/jpeg" : "image/png");
       const r = await api("media", { body: blob, type: blob.type });
       setPath(D, path, r.ref);
       markDirty(); render();
-      toast("Image added. Publish to send it to the kiosks.");
+      toast(warn ? "Image added. " + warn : "Image added. Publish to send it to the kiosks.", !!warn);
     } catch (e) { if (e.message !== "signed out") toast(e.message, true); }
+  }
+  /* Logo check: small or solid-background logos look poor on the ad card. Advice only; it still uploads. */
+  async function logoAdvice(file) {
+    try {
+      const bmp = await createImageBitmap(file), w = bmp.width, h = bmp.height, tips = [];
+      if (Math.max(w, h) < 300) tips.push(`it's small (${w}×${h}); 600 px or wider looks sharper`);
+      if (w / h > 5 || h / w > 3) tips.push("it's very long and thin, so it will show small");
+      const c = document.createElement("canvas"); c.width = 40; c.height = 40; const x = c.getContext("2d"); x.drawImage(bmp, 0, 0, 40, 40);
+      const px = x.getImageData(0, 0, 40, 40).data, corner = i => px[i + 3];
+      const solid = [0, (39) * 4, (39 * 40) * 4, (39 * 40 + 39) * 4].every(i => corner(i) > 250);
+      if (solid && file.type !== "image/jpeg") { const r = px[0], g = px[1], b = px[2]; if (r + g + b < 600) tips.push("it has a solid colored background; a transparent PNG blends in better"); }
+      if (solid && file.type === "image/jpeg") tips.push("a PNG with a transparent background usually looks cleaner than a JPG");
+      return tips.length ? "Tip: " + tips.join("; ") + "." : "";
+    } catch (e) { return ""; }
   }
   async function shrink(file, max, type) {
     let bmp;
@@ -949,6 +1073,11 @@
       case "add-notice": D.notices.unshift({ text: "", active: true }); break;
       case "del-notice": D.notices.splice(i, 1); break;
       case "kiosk-reload": try { const r = await api("kiosk-action", { json: { kiosk: d.k, action: "reload" } }); toast(d.k === "*" ? `Restarting ${r.kiosks} kiosk${r.kiosks === 1 ? "" : "s"} within about 2 minutes, when nobody is using them.` : `${d.k} will restart within about 2 minutes, when nobody is using it.`); } catch (e) { if (e.message !== "signed out") toast(e.message, true); } return;
+      case "set-name": return askName();
+      case "kiosk-label": { const n = window.prompt(`A clear name for ${d.k} (for example "Lobby" or "Pool deck"). Leave empty to use the code name.`, d.l || ""); if (n === null) return;
+        try { await api("kiosk-action", { json: { kiosk: d.k, action: "label", label: n } }); toast(n.trim() ? `Named ${n.trim()}.` : "Back to the code name."); loadStats(); } catch (e) { if (e.message !== "signed out") toast(e.message, true); } return; }
+      case "alert-test": b.disabled = true; try { const r = await api("settings/test", { json: {} }); toast(`Test email sent to ${r.to.join(", ")}.`); } catch (e) { if (e.message !== "signed out") toast(e.message, true); } b.disabled = false; return;
+      case "report-email": b.disabled = true; try { const r = await api("report-email", { json: { sponsor: d.id } }); toast(`Report emailed to ${r.to}.`); deals[d.id] = { ...(deals[d.id] || {}), lastReportAt: new Date().toISOString() }; render(); } catch (e) { if (e.message !== "signed out") toast(e.message, true); b.disabled = false; } return;
       case "kiosk-remove": try { await api("kiosk-action", { json: { kiosk: d.k, action: "remove" } }); toast(`${d.k} removed from the list.`); stats = null; render(); loadStats(); } catch (e) { if (e.message !== "signed out") toast(e.message, true); } return;
       case "maps": return findOnMaps(d.id);
       case "open": open = open === d.key ? null : d.key; render(); return;
@@ -1164,6 +1293,7 @@
     if (!f) return;
     e.preventDefault();
     if (f.dataset.form === "password" || f.dataset.form === "codes") return onSecuritySubmit(f);
+    if (f.dataset.form === "alerts") return saveAlerts(f);
     if (f.dataset.form === "quick-note") { const t = document.getElementById("qn-text"), re = /^(todo|to-do|\[\s?\])\s*:?\s*/i; addNote(t.value.replace(re, ""), { todo: re.test(t.value) }); }
     if (f.dataset.form === "new-note") { const c = f.querySelector('input[name="nn-color"]:checked'); addNote(document.getElementById("nn-text").value, { todo: document.getElementById("nn-todo").checked, color: c ? c.value : "yellow" }); }
   });
@@ -1259,7 +1389,8 @@
     try {
       const r = await api("content", { method: "PUT", json: { base, data: cleaned(), note: areas.length ? "Edited " + areas.join(", ") : "Edited in the dashboard" } });
       saved = r.data; D = clone(r.data); base = r.version;
-      meta.history = [{ version: r.version, saved_at: r.updated_at, note: areas.length ? "Edited " + areas.join(", ") : "Edited in the dashboard" }].concat(meta.history || []).slice(0, 40);
+      meta.history = [{ version: r.version, saved_at: r.updated_at, by_name: myName(), note: areas.length ? "Edited " + areas.join(", ") : "Edited in the dashboard" }].concat(meta.history || []).slice(0, 40);
+      auditLog = null;
       markDirty(); render();
       toast("Published. Kiosks update within 5 minutes, the next time they're on the welcome screen.");
     } catch (e) { if (e.message !== "signed out") toast(e.message, true); }
@@ -1271,7 +1402,7 @@
     try {
       const r = await api("restore", { json: { version: v } });
       saved = r.data; D = clone(r.data); base = r.version;
-      const c = await api("content"); meta.history = c.history;
+      const c = await api("content"); meta.history = c.history; auditLog = null;
       markDirty(); render(); toast(`Version ${v} restored and published as version ${r.version}.`);
     } catch (e) { if (e.message !== "signed out") toast(e.message, true); }
   }

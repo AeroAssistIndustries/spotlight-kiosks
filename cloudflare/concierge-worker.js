@@ -23,7 +23,7 @@
      GUIDE_URL          the phone guide (default: the CityPulse GitHub site's /concierge/)
 */
 
-import { handle as backend, getContent, venueId } from "./backend.js";
+import { handle as backend, getContent, venueId, monitor } from "./backend.js";
 
 const DEFAULTS = {
   VENUE_URL: "https://aeroassistindustries.github.io/spotlight-kiosks/assets/lexen-data.json",
@@ -203,6 +203,8 @@ export default {
   /* Every 5 minutes: nudge Sales Studio to send scheduled emails and sequence steps, even when nobody has it open. */
   async scheduled(event, env, ctx) {
     ctx.waitUntil(fetch(env.SALES_TICK_URL || "https://sales.citypulsekiosks.com/cron/tick", { headers: { "User-Agent": "CityPulse kiosk server (email scheduler)" } }).catch(() => {}));
+    /* and watch the kiosks: offline alerts, the Monday summary, monthly advertiser reports */
+    ctx.waitUntil(monitor(env, env.DASHBOARD_URL || "https://spotlight-kiosks.sarvesh-bb0.workers.dev").catch(e => console.error("monitor", e && e.message)));
   },
   async fetch(req, env, ctx) {
     const url = new URL(req.url);
