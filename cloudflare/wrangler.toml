@@ -3,6 +3,10 @@ name = "spotlight-kiosks"
 main = "concierge-worker.js"
 compatibility_date = "2026-09-01"
 
+# Every 5 minutes the kiosk server pings Sales Studio so scheduled emails go out on time (see scheduled() in concierge-worker.js).
+[triggers]
+crons = ["*/5 * * * *"]
+
 [vars]
 VENUE_URL = "https://aeroassistindustries.github.io/spotlight-kiosks/assets/lexen-data.json"
 ALLOWED_ORIGINS = "https://aeroassistindustries.github.io,https://kiosk.citypulsekiosks.com,https://citypulsekiosks.com"

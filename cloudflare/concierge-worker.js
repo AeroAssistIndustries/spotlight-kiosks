@@ -200,6 +200,10 @@ function relayStream(upstream) {
 }
 
 export default {
+  /* Every 5 minutes: nudge Sales Studio to send scheduled emails and sequence steps, even when nobody has it open. */
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(fetch(env.SALES_TICK_URL || "https://sales.citypulsekiosks.com/cron/tick", { headers: { "User-Agent": "CityPulse kiosk server (email scheduler)" } }).catch(() => {}));
+  },
   async fetch(req, env, ctx) {
     const url = new URL(req.url);
     const origin = req.headers.get("Origin") || "";
