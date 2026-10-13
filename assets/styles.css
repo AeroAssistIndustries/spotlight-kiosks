@@ -2156,3 +2156,17 @@ button:focus-visible, [tabindex]:focus-visible { outline: 3px solid #0F1C2B !imp
   .m-cta span b{display:block;color:var(--ink);font:800 17px/1.1 var(--display)}
   .nav-open .m-cta{display:none}
 }
+
+/* Launch sale: regular price crossed out, sale note and badge (pricing.js hides them when the sale ends) */
+.cp-was{text-decoration:line-through;text-decoration-thickness:2px;text-decoration-color:var(--signal);opacity:.55;font-weight:500;margin-right:.3em;white-space:nowrap}
+.price .cp-was{display:block;font:600 clamp(20px,2.2vw,26px)/1 var(--body);opacity:.6;margin:0 0 8px;letter-spacing:0}
+.cp-sale{color:#B8391F;font-weight:600}
+.dark .cp-sale,.section-dark .cp-sale,.checkout .cp-sale,footer .cp-sale{color:#FF9A80}
+.cp-badge{display:inline-block;font-style:normal;font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#fff;background:var(--signal);border-radius:999px;padding:3px 9px;margin-left:6px;vertical-align:2px}
+.m-cta span b .cp-was{font-size:13px;opacity:.6}
+.tier-list b .cp-was,.slide-pkgs b .cp-was{font-size:.82em}
+.hero2-points .cp-p,.m-cta .cp-p,.btn .cp-p,.co-opt .cp-p,.slide-pkgs .cp-p,.tier-list .cp-p{font:inherit;color:inherit;letter-spacing:inherit;max-width:none;display:inline;flex:none;margin:0}
+.hero2-points .cp-badge{margin-left:4px;font-size:10.5px;color:#fff}
+.m-cta .cp-sale{font-size:12px;max-width:none;display:inline}
+.btn .cp-was{opacity:.7}
+.calc-out .big .cp-was{display:block;font:600 clamp(20px,2.2vw,26px)/1 var(--body);letter-spacing:0;opacity:.55;margin-bottom:8px}

@@ -9,7 +9,7 @@
   window.CP_VENUE.sponsors = [
     { id: "demo-1", name: "Your business", house: true, kind: "Your ad here", tagline: "Seen by every guest who taps the screen, all year.", website: "citypulsekiosks.com", url: url, active: true },
     { id: "demo-2", name: "Your restaurant", house: true, kind: "Dinner nearby", tagline: "Put tonight's menu in front of hungry guests.", website: "citypulsekiosks.com", url: url, active: true },
-    { id: "demo-3", name: "Your shop or service", house: true, kind: "Local favorite", tagline: "From $399 a year, or $60 a month.", website: "citypulsekiosks.com", url: url, active: true }
+    { id: "demo-3", name: "Your shop or service", house: true, kind: "Local favorite", tagline: window.CP_PRICE ? "From " + CP_PRICE.money(CP_PRICE.now.y1) + " a year, or " + CP_PRICE.money(CP_PRICE.now.mo) + " a month." : "From $798 a year, or $120 a month.", website: "citypulsekiosks.com", url: url, active: true }
   ];
   document.documentElement.classList.add("cp-demo");
 })();

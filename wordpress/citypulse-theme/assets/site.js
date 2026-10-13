@@ -89,7 +89,7 @@
       $$(".pin.on", m).forEach(p => p.classList.remove("on")); pin.classList.add("on");
       const list = pin.dataset.markets.split("|");
       $("b", tip).textContent = pin.dataset.name;
-      $(".tip-links", tip).innerHTML = list.map(mk => `<a href="${home}?market=${encodeURIComponent(mk)}#get-started">${list.length > 1 ? mk + " — " : ""}Advertise here${list.length > 1 ? "" : " — $399/yr"}</a>`).join("");
+      $(".tip-links", tip).innerHTML = list.map(mk => `<a href="${home}?market=${encodeURIComponent(mk)}#get-started">${list.length > 1 ? mk + " — " : ""}Advertise here${list.length > 1 ? "" : " — " + (window.CP_PRICE ? CP_PRICE.money(CP_PRICE.now.y1) : "$798") + "/yr"}</a>`).join("");
       const r = pin.getBoundingClientRect(), b = m.getBoundingClientRect();
       tip.hidden = false;
       tip.style.left = Math.max(8, Math.min(b.width - tip.offsetWidth - 8, r.left - b.left + r.width / 2 - tip.offsetWidth / 2)) + "px";
@@ -403,9 +403,11 @@ ${lines.map((l, i) => `<text x="90" y="${(tall ? 200 : 380) + i * fs * 1.08}" fo
   const calc = $("#calc");
   if (calc) {
     const r = $("#n-range"), num = $("#n-num"), pre = $$("[data-preset-n]", calc), tiers = $$("#tiers li");
+    const PR = window.CP_PRICE || { sale: false, now: { y1: 798, y3: 2198, y5: 2400, extra: 600, mo: 120 }, reg: { y1: 798, y3: 2198, y5: 2400, extra: 600, mo: 120 }, money: function (n) { return "$" + Math.round(n).toLocaleString("en-US"); } }, P = PR.now, G = PR.reg;
     const money = n => "$" + Math.round(n).toLocaleString("en-US");
-    const annual = n => n <= 1 ? 399 : n <= 3 ? 1099 : n <= 5 ? 1200 : 1200 + 300 * (n - 5);
-    const label = n => n <= 1 ? "Single location" : n <= 3 ? `3-location package${n === 2 ? " (covers up to 3)" : ""}` : n <= 5 ? `5-location package${n === 4 ? " (covers up to 5)" : ""}` : `5-location package + ${n - 5} extra location${n - 5 > 1 ? "s" : ""} × $300`;
+    const tier = (p, n) => n <= 1 ? p.y1 : n <= 3 ? p.y3 : n <= 5 ? p.y5 : p.y5 + p.extra * (n - 5);
+    const annual = n => tier(P, n);
+    const label = n => n <= 1 ? "Single location" : n <= 3 ? `3-location package${n === 2 ? " (covers up to 3)" : ""}` : n <= 5 ? `5-location package${n === 4 ? " (covers up to 5)" : ""}` : `5-location package + ${n - 5} extra location${n - 5 > 1 ? "s" : ""} × ${money(P.extra)}`;
     let N = 5;
     function sync(src) {
       const raw = parseInt(src === num ? num.value : r.value, 10);
@@ -413,8 +415,8 @@ ${lines.map((l, i) => `<text x="90" y="${(tall ? 200 : 380) + i * fs * 1.08}" fo
       N = Math.max(1, Math.min(100, raw));
       if (src !== num) num.value = N;
       r.value = Math.min(50, N);
-      const A = annual(N), M = 60 * N;
-      $("#c-total").innerHTML = `${money(A)}<small>/ year</small>`;
+      const A = annual(N), M = P.mo * N;
+      $("#c-total").innerHTML = `${PR.sale ? `<s class="cp-was">${money(tier(G, N))}</s> ` : ""}${money(A)}<small>/ year</small>`;
       $("#c-eq").textContent = label(N);
       $("#c-per").textContent = money(A / N);
       $("#c-month").textContent = `${money(M)}/mo`;
@@ -428,8 +430,8 @@ ${lines.map((l, i) => `<text x="90" y="${(tall ? 200 : 380) + i * fs * 1.08}" fo
     num.addEventListener("blur", () => { num.value = N; });
     pre.forEach(p => p.addEventListener("click", () => { r.value = p.dataset.presetN; num.value = p.dataset.presetN; sync(num); }));
     $("[data-calc=carry]").addEventListener("click", () => {
-      const opt = N <= 1 ? "1 location — $399/yr" : N <= 3 ? "3 locations — $1,099/yr" : N <= 5 ? "5 locations — $1,200/yr" : "More than 5 locations — $1,200 + $300 per extra location/yr";
-      store.set("citypulse-handoff", { "Pricing": opt, "Notes": `Estimate for ${N} location${N > 1 ? "s" : ""}: ${label(N)} = ${money(annual(N))}/year (or ${money(60 * N)}/month). Please confirm available venues and a quote.` });
+      const opt = N <= 1 ? `1 location — ${money(P.y1)}/yr` : N <= 3 ? `3 locations — ${money(P.y3)}/yr` : N <= 5 ? `5 locations — ${money(P.y5)}/yr` : `More than 5 locations — ${money(P.y5)} + ${money(P.extra)} per extra location/yr`;
+      store.set("citypulse-handoff", { "Pricing": opt, "Notes": `Estimate for ${N} location${N > 1 ? "s" : ""}: ${label(N)} = ${money(annual(N))}/year (or ${money(P.mo * N)}/month)${PR.sale ? ` at launch-sale prices (${PR.off}% off through ${PR.end})` : ""}. Please confirm available venues and a quote.` });
       location.href = calc.dataset.next;
     });
     sync(num);

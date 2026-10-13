@@ -41,7 +41,7 @@ Support, Contact) and every kiosk order is emailed there.
 
 ### Payments (ready for Stripe)
 
-In Stripe create two Payment Links for "CityPulse kiosk ad — 1 location": $399 recurring yearly and $60 recurring monthly.
+In Stripe create two Payment Links for "CityPulse kiosk ad — 1 location": $598 recurring yearly and $90 recurring monthly during the launch sale (25% off through March 31, 2027). From April 1, 2027 switch them to the regular $798 yearly and $120 monthly. Prices live in `build/pricing.py`.
 Under *After payment* redirect to `https://aeroassistindustries.github.io/spotlight-kiosks/welcome/`. Paste the links into
 `payments.yearly` and `payments.monthly`.
 

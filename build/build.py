@@ -10,8 +10,8 @@ home = f'''
       <p class="live-pill"><i aria-hidden="true"></i>Now booking in 153 cities · all 50 states</p>
       <h1>Turn wait time into <em class="hl">opportunity.</em></h1>
       <p class="lede">Useful visitor information and local business advertising, together on one touch screen — in the lobbies, lounges and waiting rooms where people pause.</p>
-      {btns(("Get started — $399/yr","#get-started"),("Host a kiosk for free","hosts/","btn-ghost"))}
-      <ul class="hero2-points"><li><b>From $399</b><span>a year, or $60 a month</span></li><li><b>Every tap</b><span>counted and reported</span></li><li><b>$0</b><span>for qualified host venues</span></li></ul>
+      {btns(("Get started — [[P:y1]]/yr","#get-started"),("Host a kiosk for free","hosts/","btn-ghost"))}
+      <ul class="hero2-points"><li><b>From [[P:y1]]</b><span>a year, or [[P:mo]] a month [[BADGE]]</span></li><li><b>Every tap</b><span>counted and reported</span></li><li><b>$0</b><span>for qualified host venues</span></li></ul>
     </div>
     <div class="slider" data-slider aria-roledescription="carousel" aria-label="CityPulse Kiosks highlights">
       <div class="slides">
@@ -25,8 +25,8 @@ home = f'''
         <div class="slide slide-ad" aria-roledescription="slide" aria-label="3 of 3" hidden>
           <div class="slide-ad-in">{mini("your venue", ("Dining","Amenities","Local guide","Events"), "black")}
             <div><p class="slide-kicker">Your business here</p><h2>On every screen, all year.</h2>
-              <ul class="slide-pkgs"><li><span>1 location</span><b>$399/yr</b></li><li><span>3 locations</span><b>$1,099/yr</b></li><li class="best"><span>5 locations</span><b>$1,200/yr</b></li></ul>
-              <p class="slide-note">Or $60 a month per location.</p><a class="btn btn-dark btn-small" href="{{R}}pricing/">See packages</a></div></div>
+              <ul class="slide-pkgs"><li><span>1 location</span><b>[[W:y1]] [[P:y1]]/yr</b></li><li><span>3 locations</span><b>[[W:y3]] [[P:y3]]/yr</b></li><li class="best"><span>5 locations</span><b>[[W:y5]] [[P:y5]]/yr</b></li></ul>
+              <p class="slide-note">Or [[P:mo]] a month per location. [[SALE]]</p><a class="btn btn-dark btn-small" href="{{R}}pricing/">See packages</a></div></div>
         </div>
       </div>
       <div class="slider-ctrl">
@@ -42,7 +42,7 @@ home = f'''
   <div class="section-head"><h2 id="jy-title">How it works, start to finish.</h2><p>New to kiosk advertising? People in a lobby or waiting room have a few minutes and a question — where to eat, what to do. Our kiosk answers it, and your ad is on every screen while they look.</p></div>
   {film()}
   <div class="roi">
-    <div><b>$1.09</b><span>a day for one location ($399 a year)</span></div>
+    <div><b>[[P:day]]</b><span>a day for one location ([[P:y1]] a year)</span></div>
     <div><b>~2 days</b><span>from upload to live, typically</span></div>
     <div><b>1</b><span>new regular customer can pay for the whole year</span></div>
   </div>
@@ -74,7 +74,7 @@ home = f'''
 
 {cta_band()}
 '''
-page("", "Turn wait time into opportunity", "Touch-screen kiosks that give visitors useful venue information and put local businesses in front of them. Free for qualified venues. Local ads from $399 a year or $60 a month.", home, active="", extra_js=("checkout.js",))
+page("", "Turn wait time into opportunity", "Touch-screen kiosks that give visitors useful venue information and put local businesses in front of them. Free for qualified venues. Local ads from [[T:y1]] a year or [[T:mo]] a month.", home, active="", extra_js=("checkout.js",))
 
 # ================================================================ THE KIOSK
 kiosk_page = page_hero([("The kiosk","kiosk/")], "One screen. A world of possibility.",
@@ -109,7 +109,7 @@ page("operations/", "Team library (demo)", "Demo of the CityPulse team library. 
 page("host/", "Host dashboard (demo)", "Demo of the host dashboard: kiosk status and visit counts. Sample data only.", '<section class="section"><div class="wrap"><div class="ops-app" id="host-app"><p>Loading…</p><noscript><p>Turn on JavaScript to open this page.</p></noscript></div></div></section>', extra_js=("host.js",))
 page("kiosk-test/", "Kiosk test", "Test page for a CityPulse kiosk: connection check and a test check-in to the website.", '<section class="section"><div class="wrap"><div class="ktest" id="ktest-app"><p>Loading…</p><noscript><p>Turn on JavaScript to run this test.</p></noscript></div></div></section>', extra_js=("kiosk-test.js",))
 page("kiosk-show/", "Kiosk slideshow", "Full-screen slideshow for a CityPulse kiosk. Plays pictures and videos from a USB stick.", '<section class="section"><div class="show-app" id="show-app" data-github="https://api.github.com/repos/AeroAssistIndustries/spotlight-kiosks/contents/content?ref=main"><noscript><p>Turn on JavaScript to run the slideshow.</p></noscript></div></section>', extra_js=("kiosk-show.js",))
-page("kiosk-app/", "Kiosk screen", "The CityPulse concierge kiosk screen, for a live kiosk.", '<link rel="stylesheet" href="{R}assets/cp-kiosk.css?v=17"><div class="cpk" id="cpk" data-root="{R}" lang="en"></div><button class="kapp-fs" id="kapp-fs" type="button" aria-label="Full screen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button><div class="kapp-modal" id="kapp-modal" hidden role="dialog" aria-modal="true" aria-labelledby="kapp-modal-t"><div class="kapp-box"><form id="kapp-form" autocomplete="off"><h2 id="kapp-modal-t">Staff menu</h2><p>Enter the staff password.</p><input type="password" id="kapp-pass" aria-label="Staff password" required><p class="kapp-msg" id="kapp-msg" role="status"></p><div class="kapp-row"><button type="button" class="kapp-btn-ghost" data-close>Cancel</button><button type="submit" class="kapp-btn">Continue</button></div></form><div id="kapp-stats" hidden></div></div></div>', extra_js=("vendor/qrcode-generator.js", "lexen-data.js?v=10", "kiosk-demo.js?v=1", "cp-content.js?v=13", "cp-kiosk.js?v=18", "kiosk-app.js?v=10"))
+page("kiosk-app/", "Kiosk screen", "The CityPulse concierge kiosk screen, for a live kiosk.", '<link rel="stylesheet" href="{R}assets/cp-kiosk.css?v=17"><div class="cpk" id="cpk" data-root="{R}" lang="en"></div><button class="kapp-fs" id="kapp-fs" type="button" aria-label="Full screen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button><div class="kapp-modal" id="kapp-modal" hidden role="dialog" aria-modal="true" aria-labelledby="kapp-modal-t"><div class="kapp-box"><form id="kapp-form" autocomplete="off"><h2 id="kapp-modal-t">Staff menu</h2><p>Enter the staff password.</p><input type="password" id="kapp-pass" aria-label="Staff password" required><p class="kapp-msg" id="kapp-msg" role="status"></p><div class="kapp-row"><button type="button" class="kapp-btn-ghost" data-close>Cancel</button><button type="submit" class="kapp-btn">Continue</button></div></form><div id="kapp-stats" hidden></div></div></div>', extra_js=("vendor/qrcode-generator.js", "lexen-data.js?v=10", "kiosk-demo.js?v=2", "cp-content.js?v=13", "cp-kiosk.js?v=19", "kiosk-app.js?v=10"))
 # The live kiosk gets its own locked-down page: no website header, footer or links, and a browser rule that only allows
 # this site's own files plus the weather service. Written over the website version of /kiosk-app/.
 KIOSK_BODY = '<div class="cpk" id="cpk" data-root="{R}" lang="en"></div><button class="kapp-fs" id="kapp-fs" type="button" aria-label="Full screen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button><div class="kapp-modal" id="kapp-modal" hidden role="dialog" aria-modal="true" aria-labelledby="kapp-modal-t"><div class="kapp-box"><form id="kapp-form" autocomplete="off"><h2 id="kapp-modal-t">Staff menu</h2><p>Enter the staff password.</p><input type="password" id="kapp-pass" aria-label="Staff password" required><p class="kapp-msg" id="kapp-msg" role="status"></p><div class="kapp-row"><button type="button" class="kapp-btn-ghost" data-close>Cancel</button><button type="submit" class="kapp-btn">Continue</button></div></form><div id="kapp-stats" hidden></div></div></div>'
@@ -129,11 +129,12 @@ KIOSK_DOC = f'''<!doctype html>
 </head>
 <body class="kiosk-body">
 {KIOSK_BODY.replace("{R}", "../")}
+<script src="../assets/pricing.js?v=20261013"></script>
 <script src="../assets/vendor/qrcode-generator.js"></script>
 <script src="../assets/lexen-data.js?v=10"></script>
-<script src="../assets/kiosk-demo.js?v=1"></script>
+<script src="../assets/kiosk-demo.js?v=2"></script>
 <script src="../assets/cp-content.js?v=13"></script>
-<script src="../assets/cp-kiosk.js?v=18"></script>
+<script src="../assets/cp-kiosk.js?v=19"></script>
 <script src="../assets/kiosk-app.js?v=10"></script>
 </body>
 </html>
@@ -146,19 +147,19 @@ page("concierge/", "Your concierge", "Your CityPulse guide, opened from the kios
 def pkg_link(v): return "{R}advertise/?Pricing=" + v.replace(" ", "+").replace("$", "%24").replace(",", "%2C").replace("—", "%E2%80%94").replace("/", "%2F") + "#inquiry"
 INCL = "<ul><li>Ad artwork and digital copy</li><li>Your logo and business details</li><li>12 months in the kiosk ad space</li></ul>"
 price_cards = f'''<div class="price-cards three">
-  <div class="price-card"><span class="label">Single location</span><h3>One kiosk. A full year on screen.</h3>
-    <p class="price"><span>$399</span>/ year</p><p>Or $60 a month.</p>{INCL}
+  <div class="price-card"><span class="label">Single location [[BADGE]]</span><h3>One kiosk. A full year on screen.</h3>
+    <p class="price">[[W:y1]] [[P:y1]]/ year</p><p>Or [[P:mo]] a month.</p>{INCL}
     <a class="btn btn-dark" href="{pkg_link(PRICING[1])}">Choose 1 location</a></div>
-  <div class="price-card"><span class="label">3 locations</span><h3>Three kiosks near your customers.</h3>
-    <p class="price"><span>$1,099</span>/ year</p><p>About $366 per location — save $98. Or $180 a month.</p>{INCL}
+  <div class="price-card"><span class="label">3 locations [[BADGE]]</span><h3>Three kiosks near your customers.</h3>
+    <p class="price">[[W:y3]] [[P:y3]]/ year</p><p>About [[P:per3]] per location — save [[P:save3]]. Or [[P:mo3]] a month.</p>{INCL}
     <a class="btn btn-dark" href="{pkg_link(PRICING[2])}">Choose 3 locations</a></div>
-  <div class="price-card lamp"><span class="label">5 locations · Best value</span><h3>Five kiosks, one simple price.</h3>
-    <p class="price"><span>$1,200</span>/ year</p><p>Just $240 per location — save $795. Or $300 a month.</p>{INCL}
+  <div class="price-card lamp"><span class="label">5 locations · Best value [[BADGE]]</span><h3>Five kiosks, one simple price.</h3>
+    <p class="price">[[W:y5]] [[P:y5]]/ year</p><p>Just [[P:per5]] per location — save [[P:save5]]. Or [[P:mo5]] a month.</p>{INCL}
     <a class="btn" href="{pkg_link(PRICING[3])}">Choose 5 locations</a></div>
 </div>
 <div class="pkg-notes">
-  <p><b>More than 5 locations?</b> Each location after 5 is $300 a year.</p>
-  <p><b>Prefer monthly?</b> $60 per location, per month.</p>
+  <p><b>More than 5 locations?</b> Each location after 5 is [[W:extra]] [[P:extra]] a year.</p>
+  <p><b>Prefer monthly?</b> [[W:mo]] [[P:mo]] per location, per month.</p>
   <p><b>Need 2 or 4?</b> The 3- and 5-location packages cover them, with a spare location included.</p>
 </div>
 <p class="fine" style="margin-top:14px">A location is one CityPulse kiosk venue. Available venues and final terms are confirmed in your quote. <a class="text-link" href="{{R}}pricing/#calculator">Build an estimate</a></p>'''
@@ -168,7 +169,7 @@ adv = page_hero([("Advertise","advertise/")], "Your next customer could be right
   btns(("Plan a campaign","campaign-planner/"),("Discuss an opportunity","#inquiry","btn-ghost")),
   aside=f'<div class="moment" style="background:var(--stone)">{mini("The Arden Hotel", ("Dining","Amenities","Local guide","Events"), "silver")}<dl><dt>Where your ad runs</dt><dd>The bottom of every kiosk screen</dd><dt>Who sees it</dt><dd>Guests, patients and customers who stop to tap</dd></dl></div>') + f'''
 <nav class="jump" aria-label="Advertising tools"><div class="wrap jump-grid">
-  <a href="{{R}}pricing/"><span class="ico">{icon("mega","")}</span><span><b>Choose a package</b><span>$399 a year for one location, or $60 a month.</span></span></a>
+  <a href="{{R}}pricing/"><span class="ico">{icon("mega","")}</span><span><b>Choose a package</b><span>[[P:y1]] a year for one location, or [[P:mo]] a month.</span></span></a>
   <a href="{{R}}campaign-planner/"><span class="ico">{icon("pin","")}</span><span><b>Build a campaign brief</b><span>Four short steps to a brief you can share.</span></span></a>
   <a href="{{R}}creative-studio/"><span class="ico">{icon("spark","")}</span><span><b>Preview your creative</b><span>See your message in the kiosk ad space.</span></span></a>
 </div></nav>
@@ -191,11 +192,11 @@ adv = page_hero([("Advertise","advertise/")], "Your next customer could be right
   <p style="margin-top:18px"><a class="text-link" href="{{R}}campaign-ideas/">Explore all eight playbooks</a> &nbsp; <a class="text-link" href="{{R}}media-kit/">Review the media overview</a></p>
 </div></section>
 {form_section("inquiry", "Plan your next placement.", "Start with your business, market and goal. The team confirms the right placement and campaign terms.", ["Tell us your market and goal", "Confirm placements and pricing", "Plan creative, timing and reporting"], advertiser_form(), dark=True)}'''
-page("advertise/", "Advertise with CityPulse", "Put your local business on screen in hotel lobbies, medical offices, dealership lounges and restaurants. From $399 a year or $60 a month.", adv)
+page("advertise/", "Advertise with CityPulse", "Put your local business on screen in hotel lobbies, medical offices, dealership lounges and restaurants. From [[T:y1]] a year or [[T:mo]] a month.", adv)
 
 # ================================================================ PRICING
 pricing = page_hero([("Advertise","advertise/"),("Pricing & calculator","pricing/")], "Simple packages. Room to grow.",
-  "$399 a year for one location, $1,099 for three, $1,200 for five — or $60 a month per location. Hosting a kiosk costs qualified venues nothing.",
+  "[[P:y1]] a year for one location, [[P:y3]] for three, [[P:y5]] for five — or [[P:mo]] a month per location. [[SALE]] Hosting a kiosk costs qualified venues nothing.",
   btns(("Estimate your price","#calculator"),("Talk to us about a package","advertise/#inquiry","btn-ghost"))) + f'''
 {section(head("Pick a package. Grow your reach.", "Every package includes ad artwork, digital copy and 12 months in the kiosk ad space.") + price_cards)}
 <section class="section" id="calculator" style="background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)"><div class="wrap">
@@ -205,15 +206,15 @@ pricing = page_hero([("Advertise","advertise/"),("Pricing & calculator","pricing
       <div class="presets" role="group" aria-label="Presets"><button type="button" data-preset-n="1">1 location</button><button type="button" data-preset-n="3">3 locations</button><button type="button" data-preset-n="5">5 locations</button><button type="button" data-preset-n="10">10 locations</button></div>
       <div class="range-row"><label for="n-range">Locations <input id="n-num" type="number" min="1" max="100" value="5" aria-label="Number of locations" class="num-in"></label><input id="n-range" type="range" min="1" max="50" value="5"><small>1 to 50 on the slider · type up to 100</small></div>
       <ul class="tier-list" id="tiers">
-        <li data-tier="1"><span>1 location</span><b>$399/yr</b></li>
-        <li data-tier="3"><span>2–3 locations</span><b>$1,099/yr</b></li>
-        <li data-tier="5"><span>4–5 locations</span><b>$1,200/yr</b></li>
-        <li data-tier="6"><span>Each location after 5</span><b>+$300/yr</b></li>
-        <li data-tier="m"><span>Monthly, any number</span><b>$60/location/mo</b></li>
+        <li data-tier="1"><span>1 location</span><b>[[W:y1]] [[P:y1]]/yr</b></li>
+        <li data-tier="3"><span>2–3 locations</span><b>[[W:y3]] [[P:y3]]/yr</b></li>
+        <li data-tier="5"><span>4–5 locations</span><b>[[W:y5]] [[P:y5]]/yr</b></li>
+        <li data-tier="6"><span>Each location after 5</span><b>+[[P:extra]]/yr</b></li>
+        <li data-tier="m"><span>Monthly, any number</span><b>[[P:mo]]/location/mo</b></li>
       </ul>
     </div>
-    <div class="calc-out" aria-live="polite"><span>Your annual price</span><p class="big" id="c-total">$1,200<small>/ year</small></p><p id="c-eq" style="color:var(--muted-dark)">5-location package</p>
-      <dl><div><dt>Per location</dt><dd id="c-per">$240</dd></div><div><dt>Or pay monthly</dt><dd id="c-month">$300/mo</dd></div><div style="grid-column:1/-1"><dt>Annual saves you</dt><dd id="c-save">$2,400 vs. monthly</dd></div></dl>
+    <div class="calc-out" aria-live="polite"><span>Your annual price</span><p class="big" id="c-total">[[T:y5]]<small>/ year</small></p><p id="c-eq" style="color:var(--muted-dark)">5-location package</p>
+      <dl><div><dt>Per location</dt><dd id="c-per">[[T:per5]]</dd></div><div><dt>Or pay monthly</dt><dd id="c-month">[[T:mo5]]/mo</dd></div><div style="grid-column:1/-1"><dt>Annual saves you</dt><dd id="c-save">[[T:msave5]] vs. monthly</dd></div></dl>
       <button class="btn" type="button" data-calc="carry">Use this in an inquiry</button>
       <p class="fine" style="margin-top:14px">An estimate doesn't reserve kiosks or purchase advertising. Available venues are confirmed in your quote.</p></div>
   </div>
@@ -223,9 +224,9 @@ pricing = page_hero([("Advertise","advertise/"),("Pricing & calculator","pricing
   <div><span style="color:var(--lamp);font-weight:600">For qualified host venues</span><h2 style="font-size:clamp(30px,3.6vw,44px);margin-top:6px">A useful amenity. At no kiosk cost.</h2><p style="color:var(--muted-dark);margin-top:10px">Equipment, installation, service and maintenance at no cost, subject to a site review and a signed Host Agreement. Your venue supplies suitable space, power and available connectivity.</p></div>
   <p class="price"><span>$0</span></p><a class="btn" href="{{R}}hosts/">Explore the host offering</a></div></div></section>
 <section class="section" style="padding-top:0"><div class="wrap faq-grid"><div><h2>A little pricing clarity.</h2><a class="text-link" href="{{R}}faqs/">All common questions</a></div>
-  <div class="faq-list">{faq_html([FAQS[7], ("What counts as a location?", "One location is one CityPulse kiosk venue — for example, a hotel lobby or a medical office waiting room. Your quote lists the exact venues your ad runs in.", "advertisers"), ("What if I want 2 or 4 locations?", "Two locations are covered by the 3-location package ($1,099), and four by the 5-location package ($1,200), so you get a spare location included at no extra cost.", "advertisers"), FAQS[8], FAQS[9], FAQS[3]])}</div></div></section>
+  <div class="faq-list">{faq_html([FAQS[7], ("What counts as a location?", "One location is one CityPulse kiosk venue — for example, a hotel lobby or a medical office waiting room. Your quote lists the exact venues your ad runs in.", "advertisers"), ("What if I want 2 or 4 locations?", "Two locations are covered by the 3-location package ([[P:y3]]), and four by the 5-location package ([[P:y5]]), so you get a spare location included at no extra cost.", "advertisers"), FAQS[8], FAQS[9], FAQS[3]])}</div></div></section>
 {cta_band("Bring your next local idea.", "Choose a starting point, plan the scale and discuss a campaign that fits.")}'''
-page("pricing/", "Pricing & calculator", "Kiosk advertising packages: $399 a year for one location, $1,099 for three, $1,200 for five, or $60 a month per location. Free hosting for qualified venues.", pricing)
+page("pricing/", "Pricing & calculator", "Kiosk advertising packages: [[T:y1]] a year for one location, [[T:y3]] for three, [[T:y5]] for five, or [[T:mo]] a month per location. Free hosting for qualified venues.", pricing)
 
 # ================================================================ CAMPAIGN PLANNER
 def choice(name, value, sub, need=False):
@@ -326,7 +327,7 @@ for state, (ab, cities) in MARKETS.items():
 state_opts = '<option value="all">All states</option>' + "".join(f'<option value="{ab}">{st}</option>' for st, (ab, _) in MARKETS.items())
 locations = page_hero([("Advertise","advertise/"),("Locations","locations/")], "Hosts in all 50 states.",
   f"CityPulse kiosks stand in hotel lobbies, medical offices, dealership lounges and restaurants in {N_MARKETS} cities across the country. Pick your city and get on a kiosk today.",
-  btns(("Get started — $399/yr","#get-started-link"),("Host a kiosk","hosts/","btn-ghost")).replace('href="#get-started-link"','href="{R}#get-started"')) + f'''
+  btns(("Get started — [[P:y1]]/yr","#get-started-link"),("Host a kiosk","hosts/","btn-ghost")).replace('href="#get-started-link"','href="{R}#get-started"')) + f'''
 <section class="section markets"><div class="wrap">{us_map()}</div></section>
 <section class="section" style="padding-top:0"><div class="wrap" data-filter-root>
   <div class="filters"><label class="field" style="min-width:220px"><span class="sr">State</span><select data-filter-select>{state_opts}</select></label>{search_box("Try Phoenix, Texas or NY","Find a city")}</div>
@@ -335,8 +336,8 @@ locations = page_hero([("Advertise","advertise/"),("Locations","locations/")], "
   {empty_state("Don't see your city? We may still have a kiosk near you.", f' <a class="btn btn-small" href="{{R}}#get-started">Tell us your city</a>')}
   <p class="fine">Exact venues are confirmed with you before your ad goes live.</p>
 </div></section>
-{cta_band("Ready when you are.", "One location is $399 a year. Pick your city and check out in about five minutes.")}'''
-page("locations/", "Locations", f"CityPulse kiosk hosts in {N_MARKETS} cities across all 50 states. Find your city and advertise from $399 a year.", locations)
+{cta_band("Ready when you are.", "One location is [[P:y1]] a year. [[SALE]] Pick your city and check out in about five minutes.")}'''
+page("locations/", "Locations", f"CityPulse kiosk hosts in {N_MARKETS} cities across all 50 states. Find your city and advertise from [[T:y1]] a year.", locations)
 
 # ================================================================ AGENCIES
 agencies = page_hero([("Advertise","advertise/"),("For agencies","agencies/")], "Give your local brief another useful setting.",
@@ -470,7 +471,7 @@ media = page_hero([("Resources","resources/"),("Media overview","media-kit/")], 
   <div><dt>Venues</dt><dd>Hotels, medical offices, car dealerships, restaurants and other places where people spend time.</dd></div>
   <div><dt>Host offering</dt><dd>Kiosk equipment, software, coordinated setup, content updates and routine maintenance for qualified hosts, subject to review and a Host Agreement.</dd></div>
   <div><dt>Advertiser formats</dt><dd>The kiosk ad space along the bottom of the screen, featured banners, rotating panels and QR offer tiles. Available formats are confirmed for each venue.</dd></div>
-  <div><dt>Pricing</dt><dd>$399 a year for one location, $1,099 for three locations, $1,200 for five, and $300 a year for each location after five. Monthly: $60 per location. Venue availability and final terms are confirmed in your quote.</dd></div>
+  <div><dt>Pricing</dt><dd>[[P:y1]] a year for one location, [[P:y3]] for three locations, [[P:y5]] for five, and [[P:extra]] a year for each location after five. Monthly: [[P:mo]] per location. [[SALE]] Regular prices: [[R:y1]], [[R:y3]], [[R:y5]], [[R:extra]] and [[R:mo]] a month. Venue availability and final terms are confirmed in your quote.</dd></div>
   <div><dt>Reporting</dt><dd>Display impressions, screen interactions and QR activity where supported. Definitions and reporting terms are agreed for each campaign.</dd></div>
 </dl>
 <div class="cards four" style="margin-top:40px"><a class="card" href="{{R}}campaign-ideas/"><h3>Campaign ideas</h3><p>Eight playbooks to adapt.</p></a><a class="card" href="{{R}}creative-studio/"><h3>Preview your message</h3><p>See it in the ad space.</p></a><a class="card" href="{{R}}measurement/"><h3>Understand reporting</h3><p>What each number means.</p></a><a class="card" href="{{R}}contact/"><h3>Talk with CityPulse</h3><p>{PHONE}</p></a></div>
@@ -599,6 +600,11 @@ PAGES.remove("404/")
 if __name__ != "__main__": pass
 
 print(f"Built {len(PAGES)} pages")
+
+# Prices for the site's scripts and kiosk screens (and the switch when the launch sale ends).
+import pricing as _pricing
+with open(os.path.join(OUT, "assets", "pricing.js"), "w") as _f:
+    _f.write(_pricing.js())
 
 # Venue data as JSON for the AI concierge relay (cloudflare/concierge-worker.js reads it). Needs Node.
 import subprocess as _sp

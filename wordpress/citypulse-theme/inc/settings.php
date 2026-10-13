@@ -93,8 +93,8 @@ function citypulse_settings_page() {
 			<h2>Payments</h2>
 			<p>Paste hosted payment links. Checkout sends the customer there with their email filled in and the order number as the reference. Leave empty to take orders and invoice later.</p>
 			<table class="form-table" role="presentation">
-				<tr><th scope="row"><label for="cp-py">1 location, yearly ($399)</label></th><td><input id="cp-py" type="url" class="regular-text" placeholder="https://buy.stripe.com/..." name="<?php echo esc_attr( $n ); ?>[stripe_yearly]" value="<?php echo esc_attr( $o['stripe_yearly'] ); ?>"></td></tr>
-				<tr><th scope="row"><label for="cp-pm">1 location, monthly ($60)</label></th><td><input id="cp-pm" type="url" class="regular-text" placeholder="https://buy.stripe.com/..." name="<?php echo esc_attr( $n ); ?>[stripe_monthly]" value="<?php echo esc_attr( $o['stripe_monthly'] ); ?>"></td></tr>
+				<tr><th scope="row"><label for="cp-py">1 location, yearly ($598)</label></th><td><input id="cp-py" type="url" class="regular-text" placeholder="https://buy.stripe.com/..." name="<?php echo esc_attr( $n ); ?>[stripe_yearly]" value="<?php echo esc_attr( $o['stripe_yearly'] ); ?>"></td></tr>
+				<tr><th scope="row"><label for="cp-pm">1 location, monthly ($90)</label></th><td><input id="cp-pm" type="url" class="regular-text" placeholder="https://buy.stripe.com/..." name="<?php echo esc_attr( $n ); ?>[stripe_monthly]" value="<?php echo esc_attr( $o['stripe_monthly'] ); ?>"></td></tr>
 				<tr><th scope="row"><label for="cp-pp">Processor</label></th><td><select id="cp-pp" name="<?php echo esc_attr( $n ); ?>[payments_provider]"><?php foreach ( array( 'stripe' => 'Stripe Payment Links', 'other' => 'Other (Square, PayPal…)' ) as $k => $label ) : ?><option value="<?php echo esc_attr( $k ); ?>" <?php selected( $o['payments_provider'], $k ); ?>><?php echo esc_html( $label ); ?></option><?php endforeach; ?></select></td></tr>
 			</table>
 			<?php submit_button(); ?>

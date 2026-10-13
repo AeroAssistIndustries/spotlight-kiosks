@@ -8,12 +8,13 @@ resolved when the page is shown, so the site keeps working if the domain changes
 import os, re, json, shutil, sys, zipfile
 sys.path.insert(0, os.path.dirname(__file__))
 import build  # builds the static site and fills PAGE_DATA
+import pricing
 from lib import PAGE_DATA, NAV, icon, footer, e, EMAIL, PHONE, TEL, ADDR1, ADDR2, SITE, BRAND_LOGO
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DIST = os.path.join(ROOT, "dist")
 THEME = os.path.join(DIST, "citypulse-theme")
-VERSION = "1.3.6"
+VERSION = "1.3.7"
 
 def tok(html):
     return html.replace("{R}assets/", "{{CP_ASSETS}}").replace("{R}", "{{CP_HOME}}")
@@ -38,7 +39,7 @@ for d in PAGE_DATA:
     nav_title = d["title"] if path else "Home"
     pages.append({
         "path": "/".join(segs), "slug": segs[-1], "parent": "/".join(segs[:-1]),
-        "title": nav_title, "description": d["desc"], "content": blocks(tok(d["body"])),
+        "title": nav_title, "description": pricing.fill(d["desc"]), "content": pricing.fill(blocks(tok(d["body"]))),
         "active": d["active"] or d["path"], "front": not path,
     })
 pages.sort(key=lambda p: p["path"].count("/"))
@@ -77,7 +78,7 @@ def wp_header():
     <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav"><span class="sr">Menu</span><i></i><i></i></button>
     <nav id="site-nav" class="site-nav" aria-label="Main">
       {nav}
-      <a class="btn btn-small header-cta" href="{{R}}#get-started">Get started — $399</a>
+      <a class="btn btn-small header-cta" href="{{R}}#get-started"><span>Get started — [[P:y1]]</span></a>
     </nav>
   </div>
 </header>
@@ -135,6 +136,7 @@ add_action( 'wp_enqueue_scripts', function () {
 	wp_enqueue_style( 'citypulse-fonts', 'https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400;9..144,600&display=swap', array(), null );
 	wp_enqueue_style( 'citypulse', $uri . 'styles.css', array( 'citypulse-fonts' ), $v );
 
+	wp_enqueue_script( 'citypulse-pricing', $uri . 'pricing.js', array(), $v, false );
 	wp_enqueue_script( 'citypulse-qr', $uri . 'vendor/qrcode-generator.js', array(), $v, true );
 	wp_enqueue_script( 'citypulse-kiosk', $uri . 'kiosk.js', array( 'citypulse-qr' ), $v, true );
 	wp_enqueue_script( 'citypulse-concierge', $uri . 'concierge.js', array( 'citypulse-integrations' ), $v, true );
@@ -365,8 +367,8 @@ function citypulse_settings_page() {
 			<h2>Payments</h2>
 			<p>Paste hosted payment links. Checkout sends the customer there with their email filled in and the order number as the reference. Leave empty to take orders and invoice later.</p>
 			<table class="form-table" role="presentation">
-				<tr><th scope="row"><label for="cp-py">1 location, yearly ($399)</label></th><td><input id="cp-py" type="url" class="regular-text" placeholder="https://buy.stripe.com/..." name="<?php echo esc_attr( $n ); ?>[stripe_yearly]" value="<?php echo esc_attr( $o['stripe_yearly'] ); ?>"></td></tr>
-				<tr><th scope="row"><label for="cp-pm">1 location, monthly ($60)</label></th><td><input id="cp-pm" type="url" class="regular-text" placeholder="https://buy.stripe.com/..." name="<?php echo esc_attr( $n ); ?>[stripe_monthly]" value="<?php echo esc_attr( $o['stripe_monthly'] ); ?>"></td></tr>
+				<tr><th scope="row"><label for="cp-py">1 location, yearly ([[T:y1]])</label></th><td><input id="cp-py" type="url" class="regular-text" placeholder="https://buy.stripe.com/..." name="<?php echo esc_attr( $n ); ?>[stripe_yearly]" value="<?php echo esc_attr( $o['stripe_yearly'] ); ?>"></td></tr>
+				<tr><th scope="row"><label for="cp-pm">1 location, monthly ([[T:mo]])</label></th><td><input id="cp-pm" type="url" class="regular-text" placeholder="https://buy.stripe.com/..." name="<?php echo esc_attr( $n ); ?>[stripe_monthly]" value="<?php echo esc_attr( $o['stripe_monthly'] ); ?>"></td></tr>
 				<tr><th scope="row"><label for="cp-pp">Processor</label></th><td><select id="cp-pp" name="<?php echo esc_attr( $n ); ?>[payments_provider]"><?php foreach ( array( 'stripe' => 'Stripe Payment Links', 'other' => 'Other (Square, PayPal…)' ) as $k => $label ) : ?><option value="<?php echo esc_attr( $k ); ?>" <?php selected( $o['payments_provider'], $k ); ?>><?php echo esc_html( $label ); ?></option><?php endforeach; ?></select></td></tr>
 			</table>
 			<?php submit_button(); ?>
@@ -1529,13 +1531,13 @@ def main():
     w = lambda rel, txt: open(os.path.join(THEME, rel), "w").write(txt)
     w("style.css", STYLE)
     w("functions.php", FUNCTIONS.replace("__VERSION__", VERSION))
-    w("header.php", wp_header())
-    w("footer.php", wp_footer())
+    w("header.php", pricing.fill(wp_header()))
+    w("footer.php", pricing.fill(wp_footer()))
     w("page.php", PAGE_PHP); w("front-page.php", PAGE_PHP); w("index.php", INDEX_PHP); w("single.php", SINGLE_PHP)
     w("404.php", page404_php())
     cfg = open(os.path.join(ROOT, "assets/config.js")).read()
     to = re.search(r'to:\s*"([^"]+)"', cfg).group(1)
-    w("inc/settings.php", SETTINGS_PHP.replace("__FORMS_TO__", to))
+    w("inc/settings.php", pricing.fill(SETTINGS_PHP.replace("__FORMS_TO__", to)))
     w("inc/setup.php", SETUP_PHP)
     w("inc/forms.php", FORMS_PHP)
     w("inc/documents.php", DOCS_PHP)

@@ -210,24 +210,27 @@
   }
 
   /* ---------- frame (built once per venue) ---------- */
-  const PKGS = [["1 location", "$399"], ["3 locations", "$1,099"], ["5 locations", "$1,200"]];
+  /* prices come from pricing.js (launch sale until it ends, then regular) */
+  const PR = () => window.CP_PRICE || { now: { y1: 798, y3: 2198, y5: 2400, extra: 600, mo: 120 }, money: n => "$" + Math.round(n).toLocaleString("en-US") };
+  const $p = k => PR().money(PR().now[k]);
+  const PKGS_ = () => [["1 location", $p("y1")], ["3 locations", $p("y3")], ["5 locations", $p("y5")]];
   function buildSlides() {
     const v = V();
     S.slides = [{ type: "open" }, { type: "sp", id: v.sponsors[0] }, { type: "pkg" }, { type: "sp", id: v.sponsors[1] }];
   }
   function slideHTML(s, i) {
     if (s.type === "open") {
-      return `<button class="ad ad-open" data-act="adopen" data-i="${i}" aria-label="Your ad here. This ad space is available from $399 a year. Tap to see packages.">
+      return `<button class="ad ad-open" data-act="adopen" data-i="${i}" aria-label="Your ad here. This ad space is available from ${$p("y1")} a year. Tap to see packages.">
         <span class="ad-frame">${svg("mega", "ad-ico")}
           <span class="ad-txt"><span class="ad-big">YOUR AD HERE</span><span class="ad-sub">Put your business in front of every visitor at ${esc(V().name)}.</span></span>
-          <span class="ad-cta">From $399/yr<small>Tap to see packages</small></span>
+          <span class="ad-cta">From ${$p("y1")}/yr<small>Tap to see packages</small></span>
         </span></button>`;
     }
     if (s.type === "pkg") {
-      return `<button class="ad ad-pkg" data-act="adopen" data-i="${i}" aria-label="Advertise on this kiosk. 1 location $399 a year, 3 locations $1,099 a year, 5 locations $1,200 a year, or $60 a month per location. Tap to learn more.">
+      return `<button class="ad ad-pkg" data-act="adopen" data-i="${i}" aria-label="Advertise on this kiosk. 1 location ${$p("y1")} a year, 3 locations ${$p("y3")} a year, 5 locations ${$p("y5")} a year, or ${$p("mo")} a month per location. Tap to learn more.">
         <span class="ad-pkg-head"><b>Advertise on this kiosk</b><span>Tap to choose a package</span></span>
-        <span class="ad-pkgs">${PKGS.map(([l, p], j) => `<span class="pk${j === 2 ? " best" : ""}"><small>${l}</small><b>${p}</b><em>per year</em></span>`).join("")}</span>
-        <span class="ad-pkg-foot">Or $60/month per location · Each location after 5 is $300/yr</span>
+        <span class="ad-pkgs">${PKGS_().map(([l, p], j) => `<span class="pk${j === 2 ? " best" : ""}"><small>${l}</small><b>${p}</b><em>per year</em></span>`).join("")}</span>
+        <span class="ad-pkg-foot">Or ${$p("mo")}/month per location · Each location after 5 is ${$p("extra")}/yr</span>
       </button>`;
     }
     const it = I[s.id];
@@ -380,8 +383,8 @@
   function viewAdspace() {
     return `<div class="k-detail">
       <div class="k-detail-hero" style="--g:linear-gradient(135deg,#17231E,#2f4a3d 60%,#c9a227)"><div><h2>Advertise on this kiosk</h2><p>Your ad runs in the space below, on every screen</p></div></div>
-      <div class="k-pk-list">${PKGS.map(([l, p], j) => `<div class="${j === 2 ? "best" : ""}"><span><b>${l}</b><small>${j === 0 ? "Or $60 a month" : j === 1 ? "Or $180 a month" : "Best value · or $300 a month"}</small></span><strong>${p}<small>/yr</small></strong></div>`).join("")}</div>
-      <p class="k-pk-note">Each location after 5 is $300 a year. Includes ad artwork, digital copy and 12 months on screen.</p>
+      <div class="k-pk-list">${PKGS_().map(([l, p], j) => `<div class="${j === 2 ? "best" : ""}"><span><b>${l}</b><small>${j === 0 ? "Or " + $p("mo") + " a month" : j === 1 ? "Or " + PR().money(PR().now.mo * 3) + " a month" : "Best value · or " + PR().money(PR().now.mo * 5) + " a month"}</small></span><strong>${p}<small>/yr</small></strong></div>`).join("")}</div>
+      <p class="k-pk-note">${PR().sale ? PR().note + " " : ""}Each location after 5 is ${$p("extra")} a year. Includes ad artwork, digital copy and 12 months on screen.</p>
       <div class="k-take"><div class="k-qr">${qr(link("pricing/"))}</div>
         <div><b>Scan or tap to get started</b><a class="k-btn" href="${ROOT}pricing/" target="_top">${svg("mega")}See packages</a></div>
       </div></div>`;

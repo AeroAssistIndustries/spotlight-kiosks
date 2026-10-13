@@ -204,7 +204,7 @@
   /* Shown only while switched on and within the campaign dates set in the dashboard (venue's local date). */
   const TODAY = dayKey();
   const SPONS = (V.sponsors || []).filter(x => x && x.name && x.active !== false && (!x.start || TODAY >= x.start) && (!x.end || TODAY <= x.end));
-  const SLIDES = SPONS.length ? SPONS : [{ name: "Your business here", kind: "Advertise on this screen", tagline: "Reach every guest at " + V.name + ". From $399 a year.", website: "citypulsekiosks.com", url: PRICING, house: true }];
+  const SLIDES = SPONS.length ? SPONS : [{ name: "Your business here", kind: "Advertise on this screen", tagline: "Reach every guest at " + V.name + ". From " + (window.CP_PRICE ? CP_PRICE.money(CP_PRICE.now.y1) : "$798") + " a year.", website: "citypulsekiosks.com", url: PRICING, house: true }];
   const initials = n => n.replace(/^The /, "").split(/[\s.&]+/).filter(Boolean).slice(0, 2).map(w => w[0]).join("").toUpperCase();
   function adHTML(sp, i) {
     const it = sp.item && V.items[sp.item], f = it ? howFar(it) : null;

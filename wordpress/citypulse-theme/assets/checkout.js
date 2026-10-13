@@ -29,10 +29,11 @@
   const files = { logo: null, artwork: null };
   let cur = 0;
 
+  const PR = window.CP_PRICE || { sale: false, now: { y1: 798, y3: 2198, y5: 2400, extra: 600, mo: 120 }, reg: { y1: 798, y3: 2198, y5: 2400, extra: 600, mo: 120 }, money: function (n) { return "$" + Math.round(n).toLocaleString("en-US"); } }, Y1 = PR.money(PR.now.y1), MO = PR.money(PR.now.mo);
   const billing = () => form.elements.billing.value;
   const adSource = () => form.elements.ad_source.value;
   const market = () => form.elements.market.value === "other" ? form.elements.market_other.value.trim() : form.elements.market.value;
-  const planText = () => billing() === "annual" ? "1 location · yearly ($399/yr)" : "1 location · monthly ($60/mo)";
+  const planText = () => billing() === "annual" ? `1 location · yearly (${Y1}/yr)` : `1 location · monthly (${MO}/mo)`;
 
   /* preselect a city from ?market= (map pins and the Locations page link here) */
   const pm = new URLSearchParams(location.search).get("market");
@@ -65,7 +66,7 @@
     $("#co-venue-name").textContent = m ? `A venue in ${m}` : "A venue near you";
     $("#co-sum-plan").textContent = billing() === "annual" ? "1 location · yearly" : "1 location · monthly";
     $("#co-sum-city").textContent = m || "Not chosen yet";
-    $("#co-sum-total").textContent = billing() === "annual" ? "$399/yr" : "$60/mo";
+    $("#co-sum-total").textContent = billing() === "annual" ? `${Y1}/yr` : `${MO}/mo`;
     const n = form.elements.headline.value.length; $("#co-hl-count").textContent = `${n} of 60`;
   }
 
@@ -79,7 +80,7 @@
     if (form.elements.destination_url.value) rows.push(["QR code link", form.elements.destination_url.value]);
     $("#co-review").innerHTML = rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join("");
     $("#co-due-label").textContent = billing() === "annual" ? "Due today, 3-year term, billed yearly" : "Due today, 3-year term, billed monthly";
-    $("#co-due").textContent = billing() === "annual" ? "$399" : "$60";
+    $("#co-due").textContent = billing() === "annual" ? Y1 : MO;
   }
 
   /* ---------- files ---------- */
@@ -156,7 +157,7 @@
     back.disabled = i === 0; next.hidden = i === steps.length - 1; pay.hidden = i !== steps.length - 1;
     label.textContent = `Step ${i + 1} of ${steps.length}`;
     if (i === steps.length - 1) review();
-    pay.textContent = stripeLink() ? (billing() === "annual" ? "Pay $399 securely" : "Pay $60 securely") : "Place my order";
+    pay.textContent = stripeLink() ? (billing() === "annual" ? `Pay ${Y1} securely` : `Pay ${MO} securely`) : "Place my order";
     const lg = $("legend", steps[i]); lg.tabIndex = -1;
   }
   function go(i) { show(i); $("legend", steps[i]).focus({ preventScroll: true }); form.scrollIntoView({ behavior: "smooth", block: "start" }); }

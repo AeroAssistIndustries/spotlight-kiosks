@@ -71,7 +71,7 @@ Settings live in **Settings → CityPulse → Forms and orders**.
 - **If delivery fails** for any reason, the visitor gets that same email draft, so no lead is lost.
 
 **Forms on the site:**
-- Home-page checkout (one location, $399/yr or $60/mo, with logo/artwork upload)
+- Home-page checkout (one location, $598/yr or $90/mo during the launch sale — regular $798/yr or $120/mo — with logo/artwork upload)
 - Advertise inquiry (`/advertise/#inquiry`)
 - Host a kiosk (`/hosts/#inquiry`)
 - Support (`/support/#request`)
@@ -80,8 +80,8 @@ Settings live in **Settings → CityPulse → Forms and orders**.
 ### Payments — Stripe Payment Links
 
 1. In Stripe, create two products/prices:
-   - "CityPulse kiosk ad — 1 location", recurring **yearly $399**
-   - "CityPulse kiosk ad — 1 location", recurring **monthly $60**
+   - "CityPulse kiosk ad — 1 location", recurring **yearly $598** (launch sale; $798 from April 1, 2027)
+   - "CityPulse kiosk ad — 1 location", recurring **monthly $90** (launch sale; $120 from April 1, 2027)
 2. Create a Payment Link for each one. Under **After payment**, choose **Don't show confirmation page** and redirect to `https://YOUR-DOMAIN/welcome/`.
 3. Paste both links into **Settings → CityPulse → Payments**.
 
@@ -93,7 +93,7 @@ How checkout runs:
 
 Leave the links empty to take orders and invoice manually. Any processor with hosted checkout links (Square, PayPal) works the same way — choose "Other" as the processor.
 
-Multi-location packages (3 for $1,099/yr, 5 for $1,200/yr, +$300/yr for each location after 5) currently go through the Advertise inquiry form and are invoiced by the sales team. Self-serve checkout is one location only. Adding packages to checkout is a natural phase 2.
+Multi-location packages (3 for $1,648/yr, 5 for $1,800/yr, +$450/yr for each location after 5 during the launch sale; regular $2,198, $2,400 and +$600) currently go through the Advertise inquiry form and are invoiced by the sales team. Self-serve checkout is one location only. Adding packages to checkout is a natural phase 2.
 
 ## 6. Editing content
 

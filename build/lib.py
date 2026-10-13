@@ -1,6 +1,7 @@
 """Shared layout, components and content data for the CityPulse Kiosks site.
 Pages use {R} as a placeholder for the relative path back to the site root."""
 import html, os
+import pricing
 
 SITE = "CityPulse Kiosks"
 EMAIL = "sales@citypulsekiosks.com"
@@ -102,7 +103,7 @@ def header(active):
     <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav"><span class="sr">Menu</span><i></i><i></i></button>
     <nav id="site-nav" class="site-nav" aria-label="Main">
       {"".join(out)}
-      <a class="btn btn-small header-cta" href="{{R}}#get-started">Get started — $399</a>
+      <a class="btn btn-small header-cta" href="{{R}}#get-started"><span>Get started — [[P:y1]]</span></a>
     </nav>
   </div>
 </header>'''
@@ -118,7 +119,7 @@ def footer():
   <div class="wrap footer-grid">
     <div class="footer-brand"><img src="{{R}}assets/logo-stacked-light.svg" alt="CityPulse Kiosks" width="402" height="122"><p>Turning wait time into opportunity. Smart kiosks, useful information and local connection.</p></div>
     {col("The kiosk", [("The kiosk","kiosk/"),("Test the kiosk","test-the-kiosk/"),("How it works","how-it-works/"),("Venues","venues/"),("Who you can reach","audience/"),("Markets","locations/")])}
-    {col("Advertise", [("Get started — $399","#get-started"),("Pricing & calculator","pricing/"),("Advertising options","advertise/"),("Creative studio","creative-studio/"),("Campaign planner","campaign-planner/"),("Campaign ideas","campaign-ideas/"),("For agencies","agencies/")])}
+    {col("Advertise", [("Get started — [[P:y1]]","#get-started"),("Pricing & calculator","pricing/"),("Advertising options","advertise/"),("Creative studio","creative-studio/"),("Campaign planner","campaign-planner/"),("Campaign ideas","campaign-ideas/"),("For agencies","agencies/")])}
     {col("Company", [("About us","about/"),("Host a kiosk","hosts/"),("Guides & resources","resources/"),("Common questions","faqs/"),("Contact us","contact/"),("Help & support","support/")])}
     <div class="footer-talk"><h2>Let's talk</h2>
       <a class="big" href="mailto:{EMAIL}">{EMAIL}</a><a class="big" href="tel:{TEL}">{PHONE}</a>
@@ -128,7 +129,7 @@ def footer():
   </div>
   <div class="wrap footer-base"><span>© <span id="year">2026</span> CityPulse Kiosks. All rights reserved.</span><nav aria-label="Legal"><a href="{{R}}privacy/">Privacy Policy</a><a href="{{R}}terms/">Terms &amp; Conditions</a><a href="https://citypulse-sales-studio.pages.dev/" rel="nofollow">Team login</a><a href="https://spotlight-kiosks.sarvesh-bb0.workers.dev/admin" rel="nofollow">Owner login</a></nav></div>
 </footer>
-<div class="m-cta" id="m-cta"><span><b>$399/yr</b>one location, or $60/mo</span><a class="btn" href="{{R}}#get-started">Get started</a></div>'''
+<div class="m-cta" id="m-cta"><span><b>[[W:y1]] [[P:y1]]/yr</b>one location, or [[P:mo]]/mo<span class="cp-sale"> · 25% off</span></span><a class="btn" href="{{R}}#get-started">Get started</a></div>'''
 
 # Short labels shown above section headings (with the brand's pulse dot).
 EYEBROWS = {
@@ -186,7 +187,7 @@ def page(path, title, desc, body, active=None, kiosk=False, extra_js=()):
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{R}}assets/styles.css?v=20261012f">
+<link rel="stylesheet" href="{{R}}assets/styles.css?v=20261013p">
 </head>
 <body>
 {header(active or path)}
@@ -194,15 +195,16 @@ def page(path, title, desc, body, active=None, kiosk=False, extra_js=()):
 {body}
 </main>
 {footer()}
+<script src="{{R}}assets/pricing.js?v=PRICEV"></script>
 {'<script src="{R}assets/vendor/qrcode-generator.js"></script><script src="{R}assets/kiosk.js"></script>' if kiosk else ''}
 <script src="{{R}}assets/config.js"></script>
 <script src="{{R}}assets/integrations.js"></script>
 {''.join(f'<script src="{{R}}assets/{j}"></script>' for j in extra_js)}
-<script src="{{R}}assets/site.js?v=20261012f"></script>
+<script src="{{R}}assets/site.js?v=20261013p"></script>
 </body>
 </html>
 '''
-    doc = doc.replace("{R}", root)
+    doc = pricing.fill(doc.replace("{R}", root)).replace("PRICEV", pricing.SALE_END + ("s" if pricing.sale_on() else "r"))
     dest = os.path.join(OUT, path, "index.html")
     os.makedirs(os.path.dirname(dest), exist_ok=True)
     with open(dest, "w") as f:
@@ -222,6 +224,7 @@ def btns(*items):
     for it in items:
         label, href = it[0], it[1]
         kind = it[2] if len(it) > 2 else ""
+        if "[[P:" in label: label = f"<span>{label}</span>"  # keep a price inside the button on one line
         out.append(f'<a class="btn {kind}" href="{{R}}{href}">{label}</a>' if not href.startswith(("http", "mailto", "tel", "#")) else f'<a class="btn {kind}" href="{href}">{label}</a>')
     return f'<div class="btn-row">{"".join(out)}</div>'
 
@@ -234,7 +237,7 @@ def page_hero(trail, h1, lede, buttons="", aside="", dark=False):
 
 def cta_band(h="Let's put your business on the city's pulse.", p="Host a useful amenity. Reach your next customer. Start with a conversation."):
     return f'''<section class="cta-band"><div class="wrap cta-inner"><div><h2>{h}</h2><p>{p}</p></div>
-  <div class="btn-row"><a class="btn" href="{{R}}#get-started">Get started — $399/yr</a><a class="btn btn-ghost" href="{{R}}hosts/#inquiry">Host a kiosk for free</a></div></div></section>'''
+  <div class="btn-row"><a class="btn" href="{{R}}#get-started"><span>Get started — [[P:y1]]/yr</span></a><a class="btn btn-ghost" href="{{R}}hosts/#inquiry">Host a kiosk for free</a></div></div></section>'''
 
 def section(inner, cls="", id=None):
     idattr = f' id="{id}"' if id else ""
@@ -305,7 +308,7 @@ def try_band(home=False):
   <div class="try-copy"><p class="eyebrow">Live demo</p><h2 id="try-title">Tap the real kiosk.</h2>
     <p>The same screen guests use at Hotel Lexen in North Hollywood. Ask the concierge, plan an evening and see exactly where your ad sits — on every screen.</p>
     <ul class="try-points"><li>Real kiosk software, placeholder ads</li><li>Five sizes, from countertop to a 7-foot tower</li><li>Works on your phone too</li></ul>
-    <div class="btn-row"><a class="btn" href="{{R}}test-the-kiosk/">Test the kiosk</a><a class="btn btn-ghost" href="{go}">Get started — $399/yr</a></div></div>
+    <div class="btn-row"><a class="btn" href="{{R}}test-the-kiosk/">Test the kiosk</a><a class="btn btn-ghost" href="{go}"><span>Get started — [[P:y1]]/yr</span></a></div></div>
   <a class="try-shot" href="{{R}}test-the-kiosk/" aria-label="Open the live kiosk demo"><span class="try-device"><img src="{{R}}assets/kiosk-screen-sm.jpg" alt="" width="360" height="640" loading="lazy" decoding="async"></span><span class="try-play">Tap to try it</span></a>
 </div></section>'''
 
@@ -338,7 +341,7 @@ def demo_block(heading="Try the kiosk.", hid="demo-title"):
       <aside class="console" aria-labelledby="console-title">
         <h3 id="console-title">Behind the screen</h3>
         <p class="console-note">Counts update as you tap. Reports show totals, never who tapped.</p>
-        <div class="ad-note"><div><b>The bottom of the screen is for sale.</b>Every visitor sees the ad space while they browse. $399 a year for one location, $1,099 for three, $1,200 for five — or $60 a month. <a href="{{R}}pricing/">See packages</a></div></div>
+        <div class="ad-note"><div><b>The bottom of the screen is for sale.</b>Every visitor sees the ad space while they browse. [[P:y1]] a year for one location, [[P:y3]] for three, [[P:y5]] for five — or [[P:mo]] a month. [[SALE]] <a href="{{R}}pricing/">See packages</a></div></div>
         <dl class="stats">
           <div><dt>Sessions</dt><dd id="st-sessions">0</dd></div>
           <div><dt>Screens viewed</dt><dd id="st-views">0</dd></div>
@@ -419,7 +422,7 @@ def form_section(fid, h2, p, steps, form_html, dark=False):
 
 CATEGORIES = ["Dining & entertainment", "Medical & wellness", "Automotive services", "Retail & lifestyle", "Travel & local experiences", "Professional services", "Events & community", "Other"]
 PLACEMENTS = ["Help me choose", "Kiosk ad space (lower screen)", "Featured banner", "Rotating panel", "QR offer tile"]
-PRICING = ["Help me choose", "1 location — $399/yr", "3 locations — $1,099/yr", "5 locations — $1,200/yr", "More than 5 locations — $1,200 + $300 per extra location/yr", "Monthly — $60 per location per month"]
+PRICING = ["Help me choose", "1 location — [[T:y1]]/yr", "3 locations — [[T:y3]]/yr", "5 locations — [[T:y5]]/yr", "More than 5 locations — [[T:y5]] + [[T:extra]] per extra location/yr", "Monthly — [[T:mo]] per location per month"]
 
 def advertiser_form():
     return draft_form("inquiry-form", EMAIL, "Advertising inquiry", [
@@ -536,9 +539,9 @@ FAQS = [
   ("Do host venues receive revenue sharing?", "The standard Host Agreement provides the kiosk at no cost and doesn't include payments or revenue sharing. Any separate arrangement has to be agreed in writing.", "hosts"),
   ("Can we choose what appears on our kiosk?", "Yes. Your venue information is planned with your team, and advertising is reviewed for fit with your setting. Category restrictions, such as competitors, can be discussed before you sign.", "hosts"),
   ("Who can advertise?", "Local businesses, restaurants and entertainment, medical and wellness services, automotive businesses and retail brands can ask about placements that fit.", "advertisers"),
-  ("What does advertising cost?", "$399 a year for one location, $1,099 a year for three locations and $1,200 a year for five. Each location after five is $300 a year. You can also pay monthly at $60 per location. Every package includes ad artwork and digital copy. Each annual contract year includes 12 months of screen time, starting when your ad goes live.", "advertisers"),
+  ("What does advertising cost?", "[[P:y1]] a year for one location, [[P:y3]] a year for three locations and [[P:y5]] a year for five. Each location after five is [[P:extra]] a year. You can also pay monthly at [[P:mo]] per location. [[SALE]] Regular prices are [[R:y1]], [[R:y3]], [[R:y5]], [[R:extra]] and [[R:mo]] a month. Every package includes ad artwork and digital copy. Each annual contract year includes 12 months of screen time, starting when your ad goes live.", "advertisers"),
   ("What's included in a package?", "Ad artwork and digital copy, your logo and business details, and 12 months in the kiosk ad space at each location. Your quote confirms the exact venues, ad format and reporting.", "advertisers"),
-  ("Can I pay monthly?", "Yes. Monthly is $60 per location, per month — $60 for one location, $180 for three, $300 for five. Paying annually costs less.", "advertisers"),
+  ("Can I pay monthly?", "Yes. Monthly is [[P:mo]] per location, per month — [[P:mo]] for one location, [[P:mo3]] for three, [[P:mo5]] for five. Paying annually costs less.", "advertisers"),
   ("Can I update my ad?", "Creative changes and seasonal offers can be discussed with the team. Your campaign agreement sets the process, schedule and number of updates.", "advertisers"),
   ("How are campaign results measured?", "Reporting covers display impressions, screen interactions and QR activity where supported. A display impression doesn't identify a unique viewer or confirm a sale. See the measurement guide for what each number means.", "advertisers"),
   ("Is every market on the map available now?", "Availability changes as kiosks are placed. Contact the team to check current kiosks in your market.", "advertisers"),
@@ -579,7 +582,7 @@ CYCLE = [
   ("eye", "Ad viewed", "Visitors see your ad every time they use the kiosk."),
   ("tap", "Customer taps", "They tap your ad or scan the QR code to take it with them."),
   ("chart", "Trackable data", "Every view, tap and scan is counted in your report."),
-  ("trend", "High ROI", "From about $1.09 a day per location — one new customer can cover the year."),
+  ("trend", "High ROI", "From about [[P:day]] a day per location — one new customer can cover the year."),
 ]
 def cycle(variant="small"):
     areas = ["a", "b", "c", "d"]
@@ -639,7 +642,7 @@ def checkout_section():
     venues = "".join(f"<option>{v}</option>" for v in ["Any venue (fastest)", "Hotels & hospitality", "Medical offices", "Car dealerships", "Restaurants & venues"])
     ctas = "".join(f'<option value="{c}">' for c in CTAS)
     return f'''<section class="section checkout" id="get-started" aria-labelledby="co-title"><div class="wrap">
-  <div class="section-head"><h2 id="co-title">Get on a kiosk today.</h2><p>One location, $399 a year. Pick your city, upload your logo or ad, and check out — it takes about five minutes. Want 3 or 5 locations? <a class="text-link" href="{{R}}pricing/">See packages</a></p></div>
+  <div class="section-head"><h2 id="co-title">Get on a kiosk today.</h2><p>One location, [[W:y1]] [[P:y1]] a year. [[SALE]] Pick your city, upload your logo or ad, and check out — it takes about five minutes. Want 3 or 5 locations? <a class="text-link" href="{{R}}pricing/">See packages</a></p></div>
   <div class="co-grid">
   <form id="checkout" class="co-form" novalidate data-welcome="{{R}}welcome/">
     <input type="text" name="_gotcha" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
@@ -647,8 +650,8 @@ def checkout_section():
 
     <fieldset class="co-step" data-step="1"><legend>Choose your plan and city</legend>
       <div class="co-bill">
-        <label class="co-opt"><input type="radio" name="billing" value="annual" checked><span><b>Yearly — $399</b><small>Best price · about $1.09 a day</small></span></label>
-        <label class="co-opt"><input type="radio" name="billing" value="monthly"><span><b>Monthly — $60/mo</b><small>Billed every month</small></span></label>
+        <label class="co-opt"><input type="radio" name="billing" value="annual" checked><span><b>Yearly — [[W:y1]] [[P:y1]]</b><small>Best price · about [[P:day]] a day</small></span></label>
+        <label class="co-opt"><input type="radio" name="billing" value="monthly"><span><b>Monthly — [[W:mo]] [[P:mo]]/mo</b><small>Billed every month</small></span></label>
       </div>
       <label class="field full"><span>City</span><select name="market" required data-label="City">{market_options()}</select><small>{N_MARKETS} cities across all 50 states. We'll confirm the exact venue before your ad goes live.</small></label>
       <label class="field full" data-other hidden><span>Your city and state</span><input name="market_other" data-label="City (other)" placeholder="e.g. Bakersfield, CA"></label>
@@ -689,7 +692,7 @@ def checkout_section():
 
     <fieldset class="co-step" data-step="4" hidden><legend>Review and pay</legend>
       <dl class="co-review" id="co-review"></dl>
-      <div class="co-total"><span id="co-due-label">Due today</span><b id="co-due">$399</b></div>
+      <div class="co-total"><span id="co-due-label">Due today</span><b id="co-due">[[P:y1]]</b></div>
       <label class="ack"><input type="checkbox" name="agree_terms" required data-label="Terms"> <span>I agree to the <a href="{{R}}terms/" target="_blank">Terms &amp; Conditions</a>, including billing, the three-year term and cancellation.</span></label>
       <label class="ack"><input type="checkbox" name="agree_rights" required data-label="Artwork rights"> <span>I own or have permission to use the logo and artwork I'm sending.</span></label>
       <label class="ack"><input type="checkbox" name="agree_advertiser" required data-label="Advertiser Agreement"> <span>I accept the Advertiser Agreement for this package: placement, artwork, renewal and cancellation terms.</span></label>
@@ -707,7 +710,7 @@ def checkout_section():
       <div class="co-ad-big" aria-label="Close-up of your ad"><div class="co-ad" id="co-ad-big"></div></div>
       <p class="fine">Live preview of your ad on the kiosk</p>
     </div>
-    <dl class="co-sum"><div><dt>Plan</dt><dd id="co-sum-plan">1 location · yearly</dd></div><div><dt>City</dt><dd id="co-sum-city">Not chosen yet</dd></div><div><dt>Total</dt><dd id="co-sum-total">$399/yr</dd></div></dl>
+    <dl class="co-sum"><div><dt>Plan</dt><dd id="co-sum-plan">1 location · yearly</dd></div><div><dt>City</dt><dd id="co-sum-city">Not chosen yet</dd></div><div><dt>Total</dt><dd id="co-sum-total">[[P:y1]]/yr</dd></div></dl>
     <ul class="check-list co-incl"><li>Ad design and copy included</li><li>12 months on screen (or month to month)</li><li>QR code to your website</li><li>Report of views, taps and scans</li></ul>
   </aside>
   </div>
@@ -757,7 +760,7 @@ def journey():
 # hotel kiosk -> results. Plays by itself (site.js); the chapter list is the readable content.
 FILM = [
   ("Pick your city", "Choose a location. We have hosts in 153 cities across all 50 states."),
-  ("Choose your plan", "$399 a year for one location, or $60 a month."),
+  ("Choose your plan", "[[P:y1]] a year for one location, or [[P:mo]] a month."),
   ("Add your logo", "Upload a finished ad, or just your logo and we'll design it. Included."),
   ("Check out", "Pay securely online. The whole thing takes about five minutes."),
   ("We review it", "Our team reviews your ad and places it at your venue."),
@@ -778,16 +781,16 @@ def film():
   <div class="film-stage" aria-hidden="true"><div class="film-canvas"><div class="film-world">
     <div class="f-st f-a">
       <div class="f-map"><div class="f-map-dots">{dots}</div><span class="f-pin"><svg viewBox="0 0 24 24"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.6" fill="#0F1C2B"/></svg></span><span class="f-pin-ring"></span><em>Phoenix, AZ</em></div>
-      <div class="f-chip f-chip-day"><b>$1.09</b> a day</div>
+      <div class="f-chip f-chip-day"><b>[[P:day]]</b> a day</div>
       <div class="f-chip f-chip-file"><span class="f-file"></span>logo.png</div>
       <div class="f-chip f-chip-time"><span class="f-clock"></span>About 5 minutes</div>
       <div class="f-phone"><div class="f-screen">
         <div class="f-ph-head"><img src="{{R}}assets/logo-compact.svg" alt=""><div class="f-steps4"><i></i><i></i><i></i><i></i></div></div>
         <div class="f-panel f-p1"><b>Choose your city</b><span class="f-field"><span class="f-type" data-type="Phoenix, AZ"></span><i class="f-caret"></i></span>
           <ul class="f-list"><li>Phoenix, AZ</li><li>Philadelphia, PA</li><li>Pittsburgh, PA</li></ul></div>
-        <div class="f-panel f-p2"><b>Choose your plan</b><div class="f-opt f-opt-y"><span></span><div><b>Yearly · $399</b><small>About $1.09 a day</small></div></div><div class="f-opt"><span></span><div><b>Monthly · $60</b><small>Billed every month</small></div></div></div>
+        <div class="f-panel f-p2"><b>Choose your plan</b><div class="f-opt f-opt-y"><span></span><div><b>Yearly · [[P:y1]]</b><small>About [[P:day]] a day</small></div></div><div class="f-opt"><span></span><div><b>Monthly · [[P:mo]]</b><small>Billed every month</small></div></div></div>
         <div class="f-panel f-p3"><b>Your ad</b><div class="f-drop"><span class="f-drop-logo">S</span><small>Logo added</small></div><small class="f-note">Design it for me · included</small></div>
-        <div class="f-panel f-p4"><b>Review and pay</b><dl><div><dt>City</dt><dd>Phoenix, AZ</dd></div><div><dt>Plan</dt><dd>1 location</dd></div><div><dt>Total</dt><dd>$399/yr</dd></div></dl><span class="f-pay"><em>Pay $399</em><svg viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7"/></svg></span></div>
+        <div class="f-panel f-p4"><b>Review and pay</b><dl><div><dt>City</dt><dd>Phoenix, AZ</dd></div><div><dt>Plan</dt><dd>1 location</dd></div><div><dt>Total</dt><dd>[[P:y1]]/yr</dd></div></dl><span class="f-pay"><em>Pay [[P:y1]]</em><svg viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7"/></svg></span></div>
       </div></div>
     </div>
     <div class="f-st f-b">

@@ -23,8 +23,8 @@ window.CITYPULSE_CONFIG = {
   },
   payments: {
     provider: "stripe",
-    yearly: "",   // 1 location, $399 per year
-    monthly: ""   // 1 location, $60 per month
+    yearly: "",   // 1 location, yearly: $598 during the launch sale (regular $798 from April 1, 2027)
+    monthly: ""   // 1 location, monthly: $90 during the launch sale (regular $120 from April 1, 2027)
   },
   maxUploadMB: 5
 };
