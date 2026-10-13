@@ -5,7 +5,7 @@
  */
 defined( 'ABSPATH' ) || exit;
 
-define( 'CITYPULSE_VERSION', '1.3.2' );
+define( 'CITYPULSE_VERSION', '1.3.6' );
 
 require get_theme_file_path( 'inc/settings.php' );
 require get_theme_file_path( 'inc/setup.php' );
@@ -37,6 +37,9 @@ add_action( 'wp_enqueue_scripts', function () {
 	wp_add_inline_script( 'citypulse-integrations', 'window.CITYPULSE_CONFIG = ' . wp_json_encode( citypulse_public_config() ) . ';', 'before' );
 	wp_enqueue_script( 'citypulse-checkout', $uri . 'checkout.js', array( 'citypulse-integrations' ), $v, true );
 	wp_enqueue_script( 'citypulse-site', $uri . 'site.js', array( 'citypulse-integrations' ), $v, true );
+	if ( is_page( 'test-the-kiosk' ) ) {
+		wp_enqueue_script( 'citypulse-test-kiosk', $uri . 'test-kiosk.js', array(), $v, true );
+	}
 } );
 
 /** Icons, meta description and social tags. */

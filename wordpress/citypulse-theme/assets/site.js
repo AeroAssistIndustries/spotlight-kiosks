@@ -29,7 +29,12 @@
       const open = toggle.getAttribute("aria-expanded") !== "true";
       toggle.setAttribute("aria-expanded", String(open)); nav.classList.toggle("open", open);
       document.body.style.overflow = open ? "hidden" : "";
+      document.documentElement.classList.toggle("nav-open", open);
     });
+    const shut = () => { if (toggle.getAttribute("aria-expanded") !== "true") return; toggle.setAttribute("aria-expanded", "false"); nav.classList.remove("open"); document.body.style.overflow = ""; document.documentElement.classList.remove("nav-open"); };
+    nav.addEventListener("click", ev => { if (ev.target.closest("a")) shut(); });
+    document.addEventListener("keydown", ev => { if (ev.key === "Escape") shut(); });
+    window.matchMedia("(min-width: 981px)").addEventListener("change", m => { if (m.matches) shut(); });
   }
   const items = $$(".nav-item");
   const closeAll = except => items.forEach(i => { if (i !== except) { i.classList.remove("open"); $(".nav-btn", i).setAttribute("aria-expanded", "false"); } });
@@ -314,6 +319,33 @@
     show(0);
   }
 
+  /* ---------- phones: a sticky "Get started" bar once the hero is out of view ---------- */
+  const mcta = $("#m-cta");
+  if (mcta) {
+    const blockers = $$("#get-started, .cta-band, .site-footer, .checkout");
+    let seen = new Set();
+    const sync = () => mcta.classList.toggle("on", window.scrollY > 520 && seen.size === 0);
+    if ("IntersectionObserver" in window && blockers.length) {
+      const io = new IntersectionObserver(es => { es.forEach(en => en.isIntersecting ? seen.add(en.target) : seen.delete(en.target)); sync(); }, { rootMargin: "0px 0px -10% 0px" });
+      blockers.forEach(b => io.observe(b));
+    }
+    window.addEventListener("scroll", sync, { passive: true }); sync();
+  }
+
+  /* ---------- Lexen-style mini screens: show the real time ---------- */
+  const lxTick = () => {
+    const d = new Date(), h = d.getHours(), hh = h % 12 || 12, mm = String(d.getMinutes()).padStart(2, "0");
+    const greet = h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+    const day = d.toLocaleDateString("en-US", { weekday: "long" }), date = d.toLocaleDateString("en-US", { month: "long", day: "numeric" });
+    $$(".lx-clock").forEach(c => {
+      const t = $(".lx-time", c), dt = $(".lx-date", c), g = $("s", c);
+      if (t) t.innerHTML = `${hh}:${mm}<sup>${h < 12 ? "AM" : "PM"}</sup>`;
+      if (dt) dt.innerHTML = `${day}<br>${date}`;
+      if (g) g.textContent = greet;
+    });
+  };
+  lxTick(); setInterval(lxTick, 30000);
+
   /* ---------- creative studio ---------- */
   const studio = $("#studio");
   if (studio) {
@@ -335,9 +367,11 @@
       const ad = `<div class="studio-ad${light ? " light" : ""}" style="--sbg:${bg}"><span class="sa-brand">${esc(f.brand.value || "Your business")}</span><span class="sa-head">${esc(f.headline.value || "Your headline")}</span><span class="sa-cta">${esc(f.action.value || "Learn more")}${f.url.value ? " ↗" : ""}</span></div>`;
       const fmtName = { tile: "Kiosk ad space · bottom of screen", banner: "Featured banner · landscape", panel: "Rotating panel · landscape" }[fmt];
       $("#fmt-label").textContent = fmtName;
-      pv.innerHTML = fmt === "tile"
-        ? `<div class="mini studio-kiosk" data-finish="black"><div class="mini-head"><div class="mini-screen"><b>Welcome</b><small>to your venue</small><div class="mini-tiles"><span style="--g:linear-gradient(135deg,#7a3b1f,#c9773a)">Dining</span><span style="--g:linear-gradient(135deg,#2a2f5c,#8a64b0)">Events</span></div>${ad}</div></div><div class="mini-pole"></div><div class="mini-base"></div></div>`
-        : `<div class="studio-wide">${ad}</div>`;
+      if (fmt === "tile" && $("#studio-lx")) {
+        const k = $("#studio-lx").content.firstElementChild.cloneNode(true);
+        $(".lx-slot", k).outerHTML = ad.replace("</div>", '<span class="sa-tag">Your ad</span></div>');
+        pv.replaceChildren(k); lxTick();
+      } else pv.innerHTML = `<div class="studio-wide">${ad}</div>`;
       const link = $("#studio-link");
       if (/^https?:\/\//i.test(f.url.value.trim())) { link.href = f.url.value.trim(); link.hidden = false; } else link.hidden = true;
     }
@@ -478,7 +512,7 @@ ${lines.map((l, i) => `<text x="90" y="${(tall ? 200 : 380) + i * fs * 1.08}" fo
   var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
   var DUR = [4200, 3800, 4600, 3900, 4800, 5600, 5200];
   // where the ad sits in each scene (stage pixels in the 3840-wide world): x, y, scale, visible
-  var AD = { 1: [402, 404, .6, 0], 2: [402, 404, .6, 0], 3: [402, 404, .6, 1], 4: [402, 404, .6, 0], 5: [1310, 140, 1, 1], 6: [2321, 306, .608, 1], 7: [2321, 306, .608, 1] };
+  var AD = { 1: [402, 404, .6, 0], 2: [402, 404, .6, 0], 3: [402, 404, .6, 1], 4: [402, 404, .6, 0], 5: [1310, 140, 1, 1], 6: [2321, 313, .608, 1], 7: [2321, 313, .608, 1] };
 
   function fit() {
     var w = stage.clientWidth, narrow = w < 560, vw = narrow ? 620 : 960, s = w / vw;

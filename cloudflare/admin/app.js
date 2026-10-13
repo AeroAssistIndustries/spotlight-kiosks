@@ -1144,8 +1144,8 @@
   }
   function salesCard() {
     return `<div class="card">
-      <div class="card-head"><h2>${icon("users")} Sales Studio logins</h2><a class="btn small" href="https://sales.citypulsekiosks.com" target="_blank" rel="noopener">Open Sales Studio</a></div>
-      <p>Sales Studio runs at <b>sales.citypulsekiosks.com</b> with its own logins. To add someone, change a level or give anyone a temporary password, sign in there as the owner and open <b>Team</b>.</p>
+      <div class="card-head"><h2>${icon("users")} Sales Studio logins</h2><a class="btn small" href="https://citypulse-sales-studio.pages.dev/" target="_blank" rel="noopener">Open Sales Studio</a></div>
+      <p>Sales Studio runs at <b>citypulse-sales-studio.pages.dev</b> with its own logins. To add someone, change a level or give anyone a temporary password, sign in there as the super admin and open <b>Team</b>.</p>
     </div>`;
   }
   function vSecurity() {

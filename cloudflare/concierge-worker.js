@@ -214,8 +214,8 @@ export default {
     if (url.pathname === "/health") return json(200, { ok: true });
     /* Sales Studio moved to its own app. Old links and bookmarks go there. */
     if (url.pathname === "/sales" || url.pathname.startsWith("/sales/"))
-      return req.method === "GET" || req.method === "HEAD" ? Response.redirect("https://sales.citypulsekiosks.com/", 301)
-        : new Response(JSON.stringify({ error: "Sales Studio moved to https://sales.citypulsekiosks.com" }), { status: 410, headers: { "Content-Type": "application/json" } });
+      return req.method === "GET" || req.method === "HEAD" ? Response.redirect("https://citypulse-sales-studio.pages.dev/", 302)
+        : new Response(JSON.stringify({ error: "Sales Studio moved to https://citypulse-sales-studio.pages.dev" }), { status: 410, headers: { "Content-Type": "application/json" } });
     const b = await backend(req, env, ctx, { origin, allowedOrigin: ok, fetchSeed: () => fetchVenueFile(env) });
     if (b) return b;
     if (req.method === "OPTIONS") return ok ? new Response(null, { status: 204, headers: cors(origin) }) : new Response(null, { status: 403 });

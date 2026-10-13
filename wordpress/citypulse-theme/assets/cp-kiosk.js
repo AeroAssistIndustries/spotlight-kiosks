@@ -781,13 +781,16 @@
   /* Soft fade at the bottom when there is more to scroll. */
   function scrollHint() { const more = view.scrollHeight - view.clientHeight - view.scrollTop > 16; view.classList.toggle("has-more", more); }
   view.addEventListener("scroll", scrollHint, { passive: true });
-  function start() { S.mode = "session"; S.stack = [{ v: "home" }]; S.seen = new Set(); bump("sessions", "count");
+  function start() { S.mode = "session"; S.stack = [{ v: "home" }]; S.seen = new Set(); S.t0 = S.lastAct = Date.now(); bump("sessions", "count");
     if (LIVE) LIVE.count("hours", String(hourNow()).padStart(2, "0")); /* busiest times, for the dashboard */ showAd(S.ad); rotateAds(); render("fwd"); } /* the ad on screen gets a full turn in front of the guest */
   function reset() {
     clearTimeout(S.idle); hideWarn();
     S.mode = "attract"; S.stack = []; S.panel = false; S.chat = []; S.busy = false; S.kb = { open: false, mode: "abc", shift: true }; S.mapCat = "all"; S.mapSel = null; S.planDay = null; S.planI = 0;
     S.large = S.contrast = S.reach = false;
     if (window.speechSynthesis) speechSynthesis.cancel();
+    /* time with a guest: first tap to last tap (the idle wait isn't counted), in buckets so nothing personal is kept */
+    if (S.t0 && LIVE) { const sec = Math.max(0, (S.lastAct - S.t0) / 1000); LIVE.count("dwell", sec < 30 ? "lt30" : sec < 60 ? "30to60" : sec < 120 ? "1to2m" : sec < 300 ? "2to5m" : "5mplus"); }
+    S.t0 = 0;
     if (LIVE) LIVE.flush();
     render();
   }
@@ -795,7 +798,7 @@
   const WARN_S = 12;
   const idleMs = () => (S.large || S.contrast || S.reach) ? IDLE_MS * 2 : IDLE_MS;
   function hideWarn() { clearInterval(S.cd); if (!warnBox.hidden) warnBox.hidden = true; }
-  function armIdle() { clearTimeout(S.idle); hideWarn(); S.idle = setTimeout(warn, idleMs() - WARN_S * 1000); }
+  function armIdle() { S.lastAct = Date.now(); clearTimeout(S.idle); hideWarn(); S.idle = setTimeout(warn, idleMs() - WARN_S * 1000); }
   function warn() {
     if (S.mode === "attract") return;
     let n = WARN_S; const cd = root.querySelector("#cpk-cd");
