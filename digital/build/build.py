@@ -43,7 +43,7 @@ def website_cards():
         pop = ' popular' if w.get("popular") else ""
         price = f'<b>{pricing.money(w["price"])}</b><span>one-time</span>' if w["price"] else '<b>Custom</b><span>quoted</span>'
         inc = "".join(f"<li>{i}</li>" for i in w["includes"])
-        cards += f'''<article class="plan{pop}"><h3>{w["name"]}</h3><p class="plan-tag">{w["pages"]}</p><p class="plan-price">{price}</p><p class="plan-who">{w["lead"]}</p><ul class="plan-list">{inc}</ul><a class="btn btn-dark" href="{{R}}contact/?plan=website">Get a quote</a></article>'''
+        cards += f'''<article class="plan{pop}"><h3>{w["name"]}</h3><p class="plan-tag">{w["pages"]}</p><p class="plan-price">{price}</p><p class="plan-who">{w["lead"]}</p><ul class="plan-list">{inc}</ul><a class="btn{' btn-dark' if not w.get('popular') else ''}" href="{{R}}contact/?plan=website">Get a quote</a></article>'''
     return f'<div class="plans plans-3">{cards}</div>'
 
 def alacarte_table():
@@ -246,6 +246,7 @@ page("pricing/", "Pricing", f"CityPulse Digital plans: Pulse {pricing.money(PLAN
 {page_hero([("Pricing", "pricing/")], "Clear prices. No surprises.", "Every plan is month to month after an initial three months. Ad spend, if any, is billed to your own ad account. Everything we build stays yours.", btns(("Get a free audit first", "free-audit/"), ("Ask a question", "contact/", "btn-ghost")), eyebrow="Pricing")}
 <section class="section" id="plans"><div class="wrap">{head("Growth plans.", "Pick the plan that matches where you are. Upgrade any time.", "Monthly")}{plan_cards()}
   <p class="fine center">All plans include onboarding, a monthly report, and access to the team by email and phone. Pulse Max covers up to 3 locations; add more at $450 per location per month.</p></div></section>
+<section class="section" id="compare"><div class="wrap">{head("Compare the plans.", "Every plan includes onboarding, a monthly report and a team on the phone.", "Side by side")}{plan_matrix()}</div></section>
 <section class="section alt" id="websites"><div class="wrap">{head("Websites.", "One-time projects, built on WordPress so you can edit them yourself. Add the care plan for [[CARE]]/mo and never think about updates again.", "Design & build")}{website_cards()}</div></section>
 <section class="section" id="alacarte"><div class="wrap two-col wide">
   <div>{head("À la carte.", "One service, done well, month to month.", "Stand-alone")}{alacarte_table()}</div>
@@ -336,9 +337,10 @@ page("faqs/", "Common questions", "Answers about contracts, pricing, reporting, 
 # ---------------------------------------------------------------- free audit / contact / support
 page("free-audit/", "Free digital audit", "Request a free digital marketing audit from CityPulse Digital: website, Google Business Profile, reviews, social media and AI search visibility, with the three fixes that matter most.", f'''
 {page_hero([("Free audit", "free-audit/")], "See exactly where you stand.", "In two business days you'll get a written audit of your website, Google profile, reviews, social media and AI search visibility — and the three things we'd fix first. Free, and yours to keep.", eyebrow="Free digital audit", aside='<ul class="audit-list"><li>Website speed, mobile and SEO basics</li><li>Google Business Profile and listings accuracy</li><li>Review score, volume and response rate</li><li>Social presence and consistency</li><li>How ChatGPT and Gemini describe you</li><li>Your three highest-impact fixes</li></ul>')}
+{scorecard()}
 {form_section("audit", "Request your audit.", "Takes two minutes. No sales call required to get the results.", ["Tell us about your business", "We review everything a customer would see", "Your audit lands in your inbox in 2 business days"], audit_form())}
 {cta_band(h="Rather just talk?", p="Call or email and we'll walk through it together.", primary=("Contact us", "contact/"), secondary=("See pricing", "pricing/"))}
-''')
+''', extra_js=("scorecard.js",))
 
 page("contact/", "Contact", "Contact CityPulse Digital in Phoenix, Arizona — websites, SEO, social media and reputation management for local businesses nationwide.", f'''
 {page_hero([("Contact", "contact/")], "Let's talk about your business.", "Tell us what you're trying to do and we'll come back within one business day with honest next steps.", eyebrow="Contact", aside=f'<div class="contact-card"><a href="tel:{TEL}">{icon("phone","")}<span>{PHONE}</span></a><a href="mailto:{EMAIL}">{icon("mail","")}<span>{EMAIL}</span></a><p>{icon("pin","")}<span>{ADDR1}<br>{ADDR2}</span></p><p class="fine">Mon–Fri, 8am–6pm Arizona time</p></div>')}
@@ -367,4 +369,8 @@ page("404/", "Page not found", "That page doesn't exist.", f'''
 <section class="page-hero dark"><div class="wrap narrow"><p class="eyebrow">404</p><h1>That page moved on.</h1><p class="lede">Try one of these instead.</p>{btns(("Home", ""), ("Services", "services/", "btn-ghost"), ("Free audit", "free-audit/", "btn-ghost"))}</div></section>''')
 os.replace(os.path.join(OUT, "404", "index.html"), os.path.join(OUT, "404.html")); os.rmdir(os.path.join(OUT, "404"))
 
+# sitemap + robots for the static build
+urls = "".join(f"<url><loc>https://{DOMAIN}/{p}</loc></url>" for p in PAGES if p != "404/")
+open(os.path.join(OUT, "sitemap.xml"), "w").write(f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>')
+open(os.path.join(OUT, "robots.txt"), "w").write(f"User-agent: *\nAllow: /\nSitemap: https://{DOMAIN}/sitemap.xml\n")
 print(f"Built {len(PAGES)} pages")

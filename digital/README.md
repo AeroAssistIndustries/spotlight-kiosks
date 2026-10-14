@@ -40,3 +40,10 @@ All 19 pages are created on activation.
 github.com/google/fonts, OFL) — `pip install uharfbuzz fonttools`, then run it and copy `out/*.svg` to
 `assets/`. The descriptor reads DIGITAL; the kiosk company's reads KIOSKS. Rules in the kiosks repo:
 `build/brand/README.md`.
+
+## Platform logos
+
+`assets/logos/*.svg` are the companies' own marks, taken from the Simple Icons set (monochrome) and shown
+in the "Platforms we work in" strip. Each brand's trademark guidelines apply to how its mark is used;
+the strip shows them as the tools we work in, not as endorsements. Regenerate with
+`build/logos.json` + the `simple-icons` npm package if you add one.

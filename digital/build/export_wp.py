@@ -14,7 +14,7 @@ from lib import PAGE_DATA, NAV, icon, footer, e, EMAIL, PHONE, TEL, ADDR1, ADDR2
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DIST = os.path.join(ROOT, "dist")
 THEME = os.path.join(DIST, "citypulse-digital-theme")
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 FORMS_TO = "sarvesh.joshiaz@gmail.com"
 
 def tok(html):
@@ -135,6 +135,9 @@ add_action( 'wp_enqueue_scripts', function () {
 	if ( is_front_page() ) {
 		wp_enqueue_script( 'cpd-home', $uri . 'home.js', array(), $v, true );
 	}
+	if ( is_page( 'free-audit' ) ) {
+		wp_enqueue_script( 'cpd-scorecard', $uri . 'scorecard.js', array(), $v, true );
+	}
 	wp_enqueue_script( 'cpd-site', $uri . 'site.js', array( 'cpd-integrations' ), $v, true );
 } );
 
@@ -174,6 +177,32 @@ add_action( 'wp_head', function () {
 		) ) . '</script>' . "\n";
 	}
 }, 1 );
+
+/** FAQ and breadcrumb structured data, derived from the page's own markup. */
+add_action( 'wp_footer', function () {
+	if ( ! is_page() ) {
+		return;
+	}
+	$html = get_post_field( 'post_content', get_the_ID() );
+	$out  = array();
+	if ( preg_match_all( '#<details[^>]*>\s*<summary>(.*?)</summary>\s*<div>(.*?)</div>\s*</details>#s', $html, $m ) ) {
+		$qa = array();
+		foreach ( $m[1] as $i => $q ) {
+			$qa[] = array( '@type' => 'Question', 'name' => wp_strip_all_tags( $q ), 'acceptedAnswer' => array( '@type' => 'Answer', 'text' => trim( wp_strip_all_tags( $m[2][ $i ] ) ) ) );
+		}
+		$out[] = array( '@context' => 'https://schema.org', '@type' => 'FAQPage', 'mainEntity' => $qa );
+	}
+	if ( preg_match( '#<ol class="crumbs"[^>]*>(.*?)</ol>#s', $html, $c ) && preg_match_all( '#<li[^>]*>(?:<a href="\{\{CP_HOME\}\}([^"]*)">)?(.*?)(?:</a>)?</li>#', $c[1], $li ) ) {
+		$items = array();
+		foreach ( $li[2] as $i => $name ) {
+			$items[] = array( '@type' => 'ListItem', 'position' => $i + 1, 'name' => wp_strip_all_tags( $name ), 'item' => home_url( '/' . $li[1][ $i ] ) );
+		}
+		$out[] = array( '@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' => $items );
+	}
+	foreach ( $out as $o ) {
+		echo '<script type="application/ld+json">' . wp_json_encode( $o, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) . '</script>' . "\n";
+	}
+} );
 
 /** Page content stores links as {{CP_HOME}} and assets as {{CP_ASSETS}}; resolve them on output. */
 function cpd_resolve_tokens( $html ) {

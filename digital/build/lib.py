@@ -239,11 +239,32 @@ def page(path, title, desc, body, active=None, extra_js=()):
 </html>
 '''
     doc = pricing.fill(doc.replace("{R}", root))
+    doc = doc.replace("</head>", structured_data(path, title, body) + "</head>")
     dest = os.path.join(OUT, path, "index.html")
     os.makedirs(os.path.dirname(dest), exist_ok=True)
     with open(dest, "w") as f:
         f.write(doc)
     PAGES.append(path)
+
+import re as _re, json as _j
+def _strip(h):
+    return html.unescape(_re.sub(r"<[^>]+>", "", h)).strip()
+def structured_data(path, title, body):
+    """FAQPage and BreadcrumbList JSON-LD derived from the page's own markup."""
+    out = []
+    faqs = _re.findall(r"<details[^>]*>\s*<summary>(.*?)</summary>\s*<div>(.*?)</div>\s*</details>", body, _re.S)
+    if faqs:
+        out.append({"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": _strip(q), "acceptedAnswer": {"@type": "Answer", "text": _strip(a)}} for q, a in faqs]})
+    crumbs_m = _re.search(r'<ol class="crumbs"[^>]*>(.*?)</ol>', body, _re.S)
+    if crumbs_m:
+        items = _re.findall(r'<li[^>]*>(?:<a href="\{R\}([^"]*)">)?(.*?)(?:</a>)?</li>', crumbs_m.group(1))
+        lst = [{"@type": "ListItem", "position": i + 1, "name": _strip(n), "item": f"https://{DOMAIN}/{h}"} for i, (h, n) in enumerate(items)]
+        out.append({"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": lst})
+    if not path:
+        out.append({"@context": "https://schema.org", "@type": "ProfessionalService", "name": SITE, "legalName": LEGAL, "url": f"https://{DOMAIN}/", "logo": f"https://{DOMAIN}/assets/logo.png", "image": f"https://{DOMAIN}/assets/og-card.png", "telephone": "+1-602-887-4058", "email": EMAIL,
+                    "address": {"@type": "PostalAddress", "streetAddress": ADDR1, "addressLocality": "Phoenix", "addressRegion": "AZ", "postalCode": "85040", "addressCountry": "US"}, "areaServed": "US", "priceRange": "$$",
+                    "knowsAbout": [x["name"] for x in SERVICES]})
+    return "".join(f'<script type="application/ld+json">{_j.dumps(o, ensure_ascii=False)}</script>\n' for o in out)
 
 # ---------------------------------------------------------------- components
 def crumbs(trail):
@@ -475,8 +496,71 @@ def guide_card(g):
 def guide_grid(n=None, cls=""):
     return f'<div class="guide-grid {cls}">' + "".join(guide_card(g) for g in (GUIDES[:n] if n else GUIDES)) + "</div>"
 
+import json as _json
+LOGOS = _json.load(open(os.path.join(os.path.dirname(__file__), "logos.json")))
 def platform_strip():
-    return '<div class="platforms" aria-label="Platforms we work in"><div class="platforms-track">' + "".join(f"<span>{p}</span>" for p in PLATFORMS * 2) + "</div></div>"
+    """Marquee of the platforms we work in, using each company's own mark (monochrome, from the Simple Icons set)."""
+    items = "".join(f'<span><img src="{{R}}assets/logos/{slug}.svg" alt="" width="22" height="22" loading="lazy">{title}</span>' for slug, title in LOGOS)
+    return f'<div class="platforms" aria-label="Platforms we work in"><p class="platforms-lbl">Platforms we work in every day</p><div class="platforms-track">{items}{items}</div></div>'
+
+def scorecard():
+    """Instant digital-presence scorecard: eight questions, a score out of 100 and the three fixes to make first."""
+    Q = [
+      ("profile", "Google Business Profile", "Is your Google Business Profile complete — categories, services, 20+ photos — and posted to at least weekly?"),
+      ("speed", "Website speed", "Does your website load in under three seconds on a phone, with the phone number visible without scrolling?"),
+      ("reviews", "Reviews", "Is your Google rating 4.5 or higher, with new reviews every month?"),
+      ("replies", "Review responses", "Does someone reply to every review — good and bad — within a business day?"),
+      ("asking", "Review requests", "Do you ask every customer for a review automatically after a visit?"),
+      ("listings", "Listings", "Are your name, address, phone and hours identical on Google, Apple, Yelp, Facebook and your site?"),
+      ("social", "Social media", "Do you post designed content at least twice a week and answer comments and messages the same day?"),
+      ("ai", "AI search", "Does your site have schema markup and an FAQ page written the way customers ask questions?"),
+      ("tracking", "Lead tracking", "Do you know how many calls, forms and bookings came from search, social and your site last month?"),
+    ]
+    qs = "".join(f'''<fieldset class="sc-q" data-key="{k}" data-label="{e(l)}"><legend><span class="sc-qn">{i+1}</span>{q}</legend>
+      <div class="sc-opts"><label><input type="radio" name="{k}" value="2"><span>Yes</span></label><label><input type="radio" name="{k}" value="1"><span>Partly</span></label><label><input type="radio" name="{k}" value="0"><span>No / not sure</span></label></div></fieldset>''' for i, (k, l, q) in enumerate(Q))
+    return f'''<section class="section scorecard" id="scorecard" aria-labelledby="scorecard-title"><div class="wrap">
+  {head("Score your digital presence in two minutes.", "Nine questions, an instant score out of 100 and the three fixes we'd make first. Then request the full audit if you want us to check it properly.", "Instant scorecard", hid="scorecard-title")}
+  <div class="sc-grid">
+    <form class="sc-form" data-scorecard data-root="{{R}}" novalidate>{qs}
+      <p class="form-error" role="alert" hidden></p>
+      <div class="form-foot"><button class="btn" type="submit">Show my score</button><span class="fine">Nothing is sent — it runs in your browser.</span></div>
+    </form>
+    <aside class="sc-placeholder" data-sc-placeholder><div class="sc-ring"><svg viewBox="0 0 120 120"><circle class="sc-track" cx="60" cy="60" r="52"/></svg><div class="sc-num"><b>?</b><span>out of 100</span></div></div><b>Your score appears here.</b><p>Answer the nine questions and press “Show my score”.</p></aside>
+    <aside class="sc-result" data-sc-result hidden aria-live="polite">
+      <div class="sc-ring"><svg viewBox="0 0 120 120"><circle class="sc-track" cx="60" cy="60" r="52"/><circle class="sc-prog" cx="60" cy="60" r="52" style="stroke-dashoffset:327"/></svg><div class="sc-num"><b data-sc-score>0</b><span>out of 100</span></div></div>
+      <p class="sc-verdict" data-sc-verdict></p>
+      <ul class="sc-bars" data-sc-bars></ul>
+      <h3>Fix these first</h3><ol class="sc-fixes" data-sc-fixes></ol>
+      <div class="btn-row"><a class="btn" href="#audit" data-sc-cta>Get the full audit — free</a><button class="btn btn-ghost" type="button" data-sc-reset>Start over</button></div>
+    </aside>
+  </div>
+</div></section>'''
+
+PLAN_MATRIX = [
+  ("Google Business Profile optimization & weekly posts", (1, 1, 1)),
+  ("Listings synced across 40+ directories", (1, 1, 1)),
+  ("Review monitoring & responses within a business day", (1, 1, 1)),
+  ("Automated review requests", (1, 1, 1)),
+  ("Social media — platforms / posts a month", ("2 / 8", "3 / 16", "3 / 16")),
+  ("Stories, reels & community replies", (0, 1, 1)),
+  ("Local SEO: keywords, on-page, technical, local content", (0, 1, 1)),
+  ("AI search visibility (GEO)", (0, 1, 1)),
+  ("Review generation campaigns & competitor tracking", (0, 1, 1)),
+  ("Website care plan: updates, backups, security, edits", (0, 1, 1)),
+  ("Locations included", ("1", "1", "3")),
+  ("Blog articles or landing pages a month", ("—", "—", "2")),
+  ("Paid social & Google Ads management", (0, 0, 1)),
+  ("Short-form video edits a month", ("—", "—", "4")),
+  ("Strategy calls", ("Onboarding", "Quarterly", "Monthly")),
+  ("Dedicated account manager", (0, 0, 1)),
+  ("Monthly plain-English report", (1, 1, 1)),
+]
+def plan_matrix():
+    cell = lambda v: f'<td class="num">{v}</td>' if isinstance(v, str) else (f'<td class="yes">{icon("check","")}<span class="sr">Included</span></td>' if v else '<td class="no">—</td>')
+    rows = "".join(f'<tr><th>{f}</th>{"".join(cell(v) for v in vals)}</tr>' for f, vals in PLAN_MATRIX)
+    heads = "".join(f'<th class="num">{p["name"]}<small>{pricing.money(p["price"])}/mo</small></th>' for p in pricing.PLANS)
+    return f'<div class="matrix-wrap"><table class="matrix"><thead><tr><th>What\'s included</th>{heads}</tr></thead><tbody>{rows}</tbody></table></div>'
+
 
 def article_page(trail, title, lede, sections, meta="", cta=None, eyebrow=""):
     toc = "".join(f'<li><a href="#s{i+1}">{h}</a></li>' for i, (h, _) in enumerate(sections))
