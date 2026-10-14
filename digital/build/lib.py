@@ -3,6 +3,7 @@ Pages use {R} as a placeholder for the relative path back to the site root."""
 import html, os
 import pricing
 from content import ANNOUNCEMENTS, STORIES, GUIDES, PLATFORMS, INDUSTRY_DETAIL
+from photos import PHOTOS
 
 SITE = "CityPulse Digital"
 LEGAL = "City Pulse Digital LLC"
@@ -570,3 +571,71 @@ def article_page(trail, title, lede, sections, meta="", cta=None, eyebrow=""):
   <aside class="toc"><b>In this guide</b><ol>{toc}</ol><p class="meta">{meta}</p><p class="meta"><a class="text-link" href="{{R}}resources/">All guides</a></p></aside>
   <div class="prose">{body}{cta_html}</div>
 </div></section>'''
+
+# ---------------------------------------------------------------- photos (real people) with graceful fallbacks
+PHOTO_DIR = os.path.join(OUT, "assets", "photos")
+_SIZES = (2000, 1200, 700)
+def _variants(name):
+    """Resized JPG variants for srcset, generated once into assets/photos/r/."""
+    src = os.path.join(PHOTO_DIR, name)
+    if not os.path.exists(src):
+        return None
+    try:
+        from PIL import Image, ImageOps
+    except ImportError:
+        return [(name, 0)]
+    rdir = os.path.join(PHOTO_DIR, "r"); os.makedirs(rdir, exist_ok=True)
+    stem = os.path.splitext(name)[0]; out = []
+    im = None
+    for w in _SIZES:
+        dst = os.path.join(rdir, f"{stem}-{w}.jpg")
+        if not os.path.exists(dst) or os.path.getmtime(dst) < os.path.getmtime(src):
+            im = im or ImageOps.exif_transpose(Image.open(src).convert("RGB"))
+            v = im.copy(); v.thumbnail((w, w * 2)); v.save(dst, "JPEG", quality=80, optimize=True, progressive=True)
+        out.append((f"r/{stem}-{w}.jpg", w))
+    return out
+
+_ART_PAL = ["#0E6B63", "#1A2B3F", "#2E4439", "#1b6ca8", "#5a2c82", "#7a3b1f"]
+def photo(name, cls="", sizes="(max-width: 980px) 100vw, 50vw", eager=False, art=None):
+    """<figure> with a real photo when assets/photos/<name> exists, else an animated brand graphic."""
+    info = PHOTOS.get(name, ("", "", ""))
+    alt = info[1]
+    v = _variants(name)
+    if v:
+        srcset = ", ".join(f"{{R}}assets/photos/{f} {w}w" for f, w in v if w)
+        biggest = v[0][0]
+        load = 'fetchpriority="high"' if eager else 'loading="lazy" decoding="async"'
+        return f'<figure class="ph {cls}"><img src="{{R}}assets/photos/{biggest}" srcset="{srcset}" sizes="{sizes}" alt="{e(alt)}" {load}></figure>'
+    col = art or _ART_PAL[sum(map(ord, name)) % len(_ART_PAL)]
+    return f'<figure class="ph ph-art {cls}" style="--c:{col}" role="img" aria-label="{e(alt)}"><span class="ph-dot d1"></span><span class="ph-dot d2"></span><span class="ph-dot d3"></span><span class="ph-ring"></span><span class="ph-cap">Photo: {e(info[0][:70])}…</span></figure>'
+
+def has_photo(name):
+    return os.path.exists(os.path.join(PHOTO_DIR, name))
+
+def photo_bg(name):
+    """Inline style for a full-bleed background photo (industry heroes, bands)."""
+    v = _variants(name)
+    return f' style="--bg:url({{R}}assets/photos/{v[0][0]})"' if v else ""
+
+def words(text):
+    """Wrap each word for the staggered hero reveal."""
+    out, i = [], 0
+    for part in _re.split(r"(<[^>]+>|\s+)", text):
+        if not part: continue
+        if part.startswith("<") or part.isspace(): out.append(part); continue
+        out.append(f'<span class="w" style="--i:{i}">{part}</span>'); i += 1
+    return "".join(out)
+
+def photo_band(name, eyebrow, h2, p, buttons=""):
+    return f'''<section class="photo-band" data-parallax><div class="pb-media">{photo(name, "pb-img", sizes="100vw")}</div>
+  <div class="wrap pb-copy"><p class="eyebrow">{eyebrow}</p><h2>{h2}</h2><p>{p}</p>{buttons}</div></section>'''
+
+AI_ART = '''<div class="ai-art" aria-hidden="true">
+  <div class="ai-phone"><div class="ai-q"><span class="ai-cursor">best dentist near me that takes new patients</span></div>
+    <div class="ai-ans"><b>Here are three well-reviewed options nearby:</b>
+      <div class="ai-card c1"><i></i><span><b>Your practice</b><small>4.9 ★ · accepting new patients · open till 6</small></span></div>
+      <div class="ai-card c2"><i></i><span><b>Competitor A</b><small>4.6 ★ · 12 min away</small></span></div>
+      <div class="ai-card c3"><i></i><span><b>Competitor B</b><small>4.4 ★ · closed today</small></span></div>
+    </div></div>
+  <div class="ai-src s1">Google Business Profile</div><div class="ai-src s2">Schema markup</div><div class="ai-src s3">Reviews &amp; FAQs</div>
+</div>'''

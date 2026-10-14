@@ -171,3 +171,35 @@
     counters.forEach(c => io.observe(c));
   }
 })();
+
+/* ---------- parallax photo bands + hover tilt ---------- */
+(function () {
+  "use strict";
+  const reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const bands = [...document.querySelectorAll("[data-parallax] .pb-media .ph")];
+  if (bands.length && !reduce) {
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      bands.forEach(el => {
+        const r = el.parentElement.parentElement.getBoundingClientRect();
+        if (r.bottom < 0 || r.top > innerHeight) return;
+        const p = (r.top + r.height / 2 - innerHeight / 2) / innerHeight; // -1..1
+        el.style.transform = `translateY(${(p * -40).toFixed(1)}px)`;
+      });
+    };
+    addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+    update();
+  }
+  if (!reduce && matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    document.querySelectorAll(".svc-card,.plan,.story-card,.guide-card,.ind-card,.work-card").forEach(card => {
+      card.classList.add("tilt");
+      card.addEventListener("mousemove", e => {
+        const r = card.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+        card.classList.add("on");
+        card.style.transform = `translateY(-4px) perspective(900px) rotateX(${(-y * 5).toFixed(2)}deg) rotateY(${(x * 6).toFixed(2)}deg)`;
+      });
+      card.addEventListener("mouseleave", () => { card.classList.remove("on"); card.style.transform = ""; });
+    });
+  }
+})();
