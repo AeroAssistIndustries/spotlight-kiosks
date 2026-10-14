@@ -19,6 +19,11 @@ def score_card():
   <div class="sc-foot"><span>Before</span><span class="sc-arrow">{icon("arrow","")}</span><span>After 90 days with CityPulse</span></div>
 </div>'''
 
+def ticker():
+    items = [("<b>60%</b> of local searches end without a click", ), ("AI assistants now answer <b>1 in 5</b> “near me” questions", ), ("<b>93%</b> of customers read reviews before choosing", ), ("Sites loading in <b>&lt;2s</b> convert twice as often", ), ("<b>4.8★</b> average rating across CityPulse clients", ), ("Every review answered within <b>24 hours</b>", ), ("<b>1,000+</b> direct bookings from one hotel site", ), ("Phoenix-based · <b>clients nationwide</b>", )]
+    row = "".join(f"<span>{t[0]}</span>" for t in items)
+    return f'<div class="ticker" aria-hidden="true"><div class="ticker-track">{row}{row}</div></div>'
+
 def process_steps():
     steps = [("Audit", "We review your site, search, reviews and social and tell you plainly what's working and what isn't. Free, in two business days."),
              ("Plan", "One page: what we'll do, what it costs and what you should expect by when. You keep it even if you don't hire us."),
@@ -57,16 +62,17 @@ from pricing import PLANS, WEBSITES, ALACARTE
 page("", "Websites, SEO, social media & reputation for local businesses", "CityPulse Digital is a Phoenix digital marketing agency: website design, local SEO, social media management, reputation management and AI search visibility for hotels, restaurants, medical practices, dealerships and local businesses nationwide.", f'''
 <section class="hero"><div class="wrap hero-grid">
   <div class="hero-copy">
+    <div class="hero-search" aria-hidden="true"><span class="live">Live</span>{icon("search","")}<span class="q"></span><span class="ans">{icon("check","")}<b></b></span></div>
     <p class="eyebrow">Phoenix, Arizona · Clients nationwide</p>
     <h1 class="reveal-words">{words("Be found.<br>Be chosen.<br><em>Be talked about.</em>")}</h1>
     <p class="lede">Websites, search, social media and reviews — handled by one team, reported on one page. CityPulse Digital is the marketing department small businesses never had.</p>
     <div class="btn-row"><a class="btn" href="{{R}}free-audit/">Get a free digital audit</a><a class="btn btn-ghost" href="{{R}}pricing/">See plans from [[PLAN:pulse]]/mo</a></div>
     <ul class="hero-points"><li>No long contracts</li><li>You own everything</li><li>Reports you can read in 2 minutes</li></ul>
   </div>
-  <div class="hero-visual">{photo("hero-owner.jpg", "hero-photo", sizes="(max-width: 980px) 100vw, 45vw", eager=True)}{score_card()}</div>
+  <div class="hero-visual">{photo("hero-owner.jpg", "hero-photo", sizes="(max-width: 980px) 100vw, 45vw", eager=True).replace("</figure>", '<span class="scan"></span></figure>')}{score_card()}<div class="hud" aria-hidden="true"><div class="hud-chip c1"></div><div class="hud-chip c2"></div><div class="hud-chip c3"></div><div class="hud-chip c4"></div></div></div>
   <div class="signals" aria-hidden="true">{"".join(f'<i style="--x:{x}%;--y:{y}%;--d:{d}s;--s:{sz}"></i>' for x, y, d, sz in [(8,18,7,1),(22,72,9,.6),(35,30,11,.8),(48,80,8,.5),(60,14,10,.9),(72,60,12,.7),(85,26,9,1.1),(92,70,7,.6),(15,50,13,.5),(55,48,6,.4),(78,88,10,.8),(40,8,12,.6)])}</div>
 </div></section>
-
+{ticker()}
 {platform_strip()}
 
 <section class="section"><div class="wrap">
@@ -132,7 +138,7 @@ page("", "Websites, SEO, social media & reputation for local businesses", "CityP
 </div></section>
 
 {cta_band()}
-''', extra_js=("home.js",))
+''', extra_js=("home.js", "hero-fx.js"))
 
 # ---------------------------------------------------------------- services
 page("services/", "Services", "Website design, local SEO, social media management, reputation management, local listings and AI search visibility — from CityPulse Digital in Phoenix.", f'''

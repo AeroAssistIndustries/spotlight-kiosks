@@ -14,7 +14,7 @@ from lib import PAGE_DATA, NAV, icon, footer, e, EMAIL, PHONE, TEL, ADDR1, ADDR2
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DIST = os.path.join(ROOT, "dist")
 THEME = os.path.join(DIST, "citypulse-digital-theme")
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 FORMS_TO = "sarvesh.joshiaz@gmail.com"
 
 def tok(html):
@@ -130,15 +130,18 @@ add_action( 'wp_enqueue_scripts', function () {
 	$uri = get_theme_file_uri( 'assets/' );
 	wp_enqueue_style( 'cpd-fonts', 'https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&display=swap', array(), null );
 	wp_enqueue_style( 'cpd', $uri . 'styles.css', array( 'cpd-fonts' ), $v );
+	wp_enqueue_style( 'cpd-future', $uri . 'future.css', array( 'cpd' ), $v );
 	wp_enqueue_script( 'cpd-integrations', $uri . 'integrations.js', array(), $v, true );
 	wp_add_inline_script( 'cpd-integrations', 'window.CITYPULSE_CONFIG = ' . wp_json_encode( cpd_public_config() ) . ';', 'before' );
 	if ( is_front_page() ) {
 		wp_enqueue_script( 'cpd-home', $uri . 'home.js', array(), $v, true );
+		wp_enqueue_script( 'cpd-hero', $uri . 'hero-fx.js', array(), $v, true );
 	}
 	if ( is_page( 'free-audit' ) ) {
 		wp_enqueue_script( 'cpd-scorecard', $uri . 'scorecard.js', array(), $v, true );
 	}
 	wp_enqueue_script( 'cpd-site', $uri . 'site.js', array( 'cpd-integrations' ), $v, true );
+	wp_enqueue_script( 'cpd-fx', $uri . 'fx.js', array( 'cpd-site' ), $v, true );
 } );
 
 /** Icons, meta description and social tags. */
@@ -158,7 +161,7 @@ add_action( 'wp_head', function () {
 		echo "<meta property=\"og:site_name\" content=\"CityPulse Digital\">\n";
 		echo "<meta name=\"twitter:card\" content=\"summary_large_image\">\n";
 	}
-	echo "<meta name=\"theme-color\" content=\"#0F1C2B\">\n";
+	echo "<meta name=\"theme-color\" content=\"#05080F\">\n";
 	if ( ! has_site_icon() ) {
 		echo '<link rel="icon" href="' . esc_url( $uri . 'favicon.svg' ) . "\" type=\"image/svg+xml\">\n";
 		echo '<link rel="icon" href="' . esc_url( $uri . 'favicon.png' ) . "\" type=\"image/png\" sizes=\"64x64\">\n";

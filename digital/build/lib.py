@@ -129,8 +129,8 @@ NAV = [
   ]),
 ]
 
-BRAND_LOGO = ('<picture><source media="(max-width: 560px)" srcset="{R}assets/logo-compact.svg">'
-              '<img src="{R}assets/logo-anim.svg" alt="CityPulse Digital" width="591" height="97"></picture>')
+BRAND_LOGO = ('<picture><source media="(max-width: 560px)" srcset="{R}assets/logo-compact-light.svg">'
+              '<img src="{R}assets/logo-anim-light.svg" alt="CityPulse Digital" width="591" height="97"></picture>')
 
 def _href(h):
     return h if h.startswith("http") else "{R}" + h
@@ -216,7 +216,7 @@ def page(path, title, desc, body, active=None, extra_js=()):
 <meta property="og:image:height" content="630">
 <meta property="og:site_name" content="{SITE}">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#0F1C2B">
+<meta name="theme-color" content="#05080F">
 <link rel="icon" href="{{R}}assets/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="{{R}}assets/favicon.png" type="image/png" sizes="64x64">
 <link rel="apple-touch-icon" href="{{R}}assets/apple-touch-icon.png">
@@ -224,7 +224,8 @@ def page(path, title, desc, body, active=None, extra_js=()):
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{R}}assets/styles.css?v=1">
+<link rel="stylesheet" href="{{R}}assets/styles.css?v=2">
+<link rel="stylesheet" href="{{R}}assets/future.css?v=2">
 </head>
 <body>
 {header(active or path)}
@@ -235,7 +236,8 @@ def page(path, title, desc, body, active=None, extra_js=()):
 <script src="{{R}}assets/config.js"></script>
 <script src="{{R}}assets/integrations.js"></script>
 {''.join(f'<script src="{{R}}assets/{j}"></script>' for j in extra_js)}
-<script src="{{R}}assets/site.js?v=1"></script>
+<script src="{{R}}assets/site.js?v=2"></script>
+<script src="{{R}}assets/fx.js?v=2"></script>
 </body>
 </html>
 '''
