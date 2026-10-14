@@ -137,6 +137,9 @@ add_action( 'wp_enqueue_scripts', function () {
 		wp_enqueue_script( 'cpd-home', $uri . 'home.js', array(), $v, true );
 		wp_enqueue_script( 'cpd-hero', $uri . 'hero-fx.js', array(), $v, true );
 	}
+	if ( is_front_page() || is_page( array( 'free-audit', 'how-we-work' ) ) ) {
+		wp_enqueue_script( 'cpd-labs', $uri . 'labs.js', array(), $v, true );
+	}
 	if ( is_page( 'free-audit' ) ) {
 		wp_enqueue_script( 'cpd-scorecard', $uri . 'scorecard.js', array(), $v, true );
 	}

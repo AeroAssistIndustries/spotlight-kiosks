@@ -76,6 +76,45 @@ def feed_live():
   <div class="phone feed-phone" aria-hidden="true"><div class="phone-screen"><div class="ps-head"><i>▶</i>yourbusiness · 12.4k followers</div><div class="feed-scroll">{out}{out}</div></div></div>
 </div></section>'''
 
+def speed_check(compact=False):
+    return f'''<section class="section speed-sec" id="speed"><div class="wrap speed" data-speed data-root="{{R}}">
+  <div><p class="eyebrow">Try it now · free</p><h2>How fast is <span class="hl">your</span> site on a phone?</h2><p class="lede">Type your web address. We run Google's own PageSpeed engine live, right here, and show you what a customer sees — score, load time and a screenshot. Takes about 30 seconds.</p>
+    <form class="sp-form" novalidate><label class="sr" for="sp-url{'-c' if compact else ''}">Your website address</label><input id="sp-url{'-c' if compact else ''}" type="url" inputmode="url" autocomplete="url" placeholder="yourbusiness.com" required><button class="btn" type="submit">Test my site</button></form>
+    <p class="fine">Nothing is stored. Works on any public website.</p></div>
+  <div class="sp-out" aria-live="polite"><div class="sp-idle"><div class="sp-ring mid" style="--v:0"><b>?</b><span>mobile<br>performance</span></div><p>Your result appears here — with the three numbers Google uses to rank fast sites.</p></div></div>
+</div></section>'''
+
+def voice_demo():
+    return '''<div class="voice" data-voice><button type="button" class="btn btn-dark">{mic}<span>Try a voice search</span></button><p class="vs-q" aria-live="polite"></p><div class="vs-res"></div></div>'''.replace("{mic}", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>')
+
+def journey():
+    steps = [("Search", "“best hotel near me with free parking”", "It starts with a search — on Google, in Maps, or asked to an AI assistant. 8 in 10 local customers begin here.", "search"),
+             ("The map pack", "Three names. One of them gets the call.", "Google shows three businesses with stars and distance. If you're not in the three, most people never scroll further.", "map"),
+             ("The reviews", "4.8 ★ · 212 reviews · owner replies", "They open your profile and read the newest three reviews — and whether anyone answered them.", "reviews"),
+             ("The website", "Loads in 1.1 seconds. Phone number at the top.", "A tap takes them to your site. If it's slow, or the menu is a PDF, they go back to the list.", "site"),
+             ("The call", "“Hi, do you have a table for six tonight?”", "Every one of those moments is a step you either win or lose. CityPulse makes sure you win all five.", "call")]
+    st = "".join(f'<div class="jn-step"><span class="jn-num">0{i+1}</span><h3>{t}</h3><p class="jn-q">{q}</p><p>{d}</p></div>' for i, (t, q, d, _) in enumerate(steps))
+    scr = {
+      "search": '<div class="jn-ui"><div class="jn-bar">best hotel near me with free parking</div><div class="jn-sk"></div><div class="jn-sk w2"></div><div class="jn-sk"></div></div>',
+      "map": '<div class="jn-ui"><div class="jn-map"><i class="p1"></i><i class="p2"></i><i class="p3 you"></i></div><div class="jn-row you"><b>Your hotel</b><span>4.9 ★ (318) · 0.4 mi · Free parking</span></div><div class="jn-row"><b>Competitor A</b><span>4.5 ★ (96) · 1.2 mi</span></div><div class="jn-row"><b>Competitor B</b><span>4.3 ★ (41) · 2.0 mi</span></div></div>',
+      "reviews": '<div class="jn-ui"><div class="jn-rv"><b>Maria K.</b><span>★★★★★</span><p>Front desk went above and beyond — thank you Daniel!</p><em>Owner reply · 38 min</em></div><div class="jn-rv"><b>Tom R.</b><span>★★★★☆</span><p>Great location, spotless room, easy parking.</p><em>Owner reply · 2 hrs</em></div></div>',
+      "site": '<div class="jn-ui site"><div class="jn-nav"><b>Your Hotel</b><em>Book direct</em></div><div class="jn-hero"><span>Stay closer. Pay less.</span></div><div class="jn-row"><b>From $149 · free parking · pool</b><span>Loads in 1.1s</span></div></div>',
+      "call": '<div class="jn-ui call"><div class="jn-ring"></div><b>Your Hotel</b><span>Calling…</span><em>+31% calls from search this month</em></div>'}
+    sc = "".join(f'<div class="jn-screen">{scr[k]}</div>' for _, _, _, k in steps)
+    return f'''<section class="section journey-sec"><div class="wrap">{head("Five moments decide who gets the customer.", "Scroll through a real customer's path — and where businesses quietly lose them.", "The customer journey")}
+  <div class="journey" data-journey><div class="jn-steps">{st}</div><div class="jn-sticky"><div class="phone jn-phone"><div class="phone-screen"><div class="ps-head"><i>●</i>12:41</div><div class="jn-screens">{sc}</div><div class="jn-prog"><i></i></div></div></div></div></div>
+</div></section>'''
+
+def report_preview():
+    rows = [("Calls from search", 148, "+31%", "92,98,104,110,121,118,131,148"), ("Direct bookings", 63, "+22%", "40,42,47,45,52,55,58,63"), ("New reviews", 27, "+3×", "6,8,9,12,14,19,22,27"), ("Social reach", 48200, "+64%", "21,24,26,29,33,38,41,48"), ("Map pack rank", 1, "from #7", "1,2,2,3,4,5,6,7")]
+    r = "".join(f'<div class="rp-row"><span class="rp-l">{l}</span><b class="rp-n" data-n="{n}"{" data-pre=\"#\"" if l=="Map pack rank" else ""}>0</b><em class="rp-d">{d}</em><span class="rp-s" data-spark="{sp}"></span></div>' for l, n, d, sp in rows)
+    return f'''<section class="section alt"><div class="wrap rep">
+  <div><p class="eyebrow">Reports you can read in 2 minutes</p><h2>One page. <span class="hl">Every number that matters.</span></h2><p class="lede">No 40-page PDF. Each month you get one page: what we did, what moved, and what's next — in plain English, with the numbers that connect to revenue.</p>
+    {btns(("See how we work", "how-we-work/", "btn-dark"), ("Get a free audit", "free-audit/", "btn-ghost"))}</div>
+  <div class="report" data-report aria-label="Example monthly report"><div class="rp-head"><div><b>Monthly report</b><span>Your Hotel · September</span></div><span class="rp-tag">Live example</span></div>{r}
+    <div class="rp-foot"><b>What we did:</b> 14 posts, 9 review replies, 2 landing pages, schema markup on 12 pages. <b>Next:</b> parking FAQ for AI search, TripAdvisor sync.</div></div>
+</div></section>'''
+
 def process_steps():
     steps = [("Audit", "We review your site, search, reviews and social and tell you plainly what's working and what isn't. Free, in two business days."),
              ("Plan", "One page: what we'll do, what it costs and what you should expect by when. You keep it even if you don't hire us."),
@@ -135,6 +174,7 @@ page("", "Digital marketing for local businesses", "Phoenix digital marketing ag
 </div></section>
 
 {before_after()}
+{speed_check()}
 
 <section class="section alt ai-sec"><div class="wrap">
   {head("How AI is changing the way customers choose.", "Discovery is shifting from ten blue links to one recommended answer. The businesses that get recommended share three things — and we build all three.", "The shift")}
@@ -145,6 +185,7 @@ page("", "Digital marketing for local businesses", "Phoenix digital marketing ag
     <div><span class="big-num">3</span><h3>things the recommended businesses share</h3><p>Consistent facts everywhere, structured data on the site, and content that answers plainly. That's the core of every CityPulse plan.</p></div>
   </div>
   {btns(("AI search visibility", "services/ai-search/", "btn-dark"), ("Read the guide", "resources/show-up-in-ai-search/", "btn-ghost"))}
+  <div class="voice-wrap"><div><p class="eyebrow">Try it</p><h3>Ask out loud — like your customers do.</h3><p>Tap the mic and ask for a place near you. This is how a growing share of searches now start.</p></div>{voice_demo()}</div>
 </div></section>
 
 <section class="section dark proof"><div class="wrap">
@@ -155,6 +196,7 @@ page("", "Digital marketing for local businesses", "Phoenix digital marketing ag
   </div>
 </div></section>
 
+{journey()}
 {reviews_live()}
 {feed_live()}
 
@@ -163,6 +205,7 @@ page("", "Digital marketing for local businesses", "Phoenix digital marketing ag
   {process_steps()}
   {btns(("See how we work", "how-we-work/", "btn-dark"))}
 </div></section>
+{report_preview()}
 
 {photo_band("team-work.jpg", "People, not a platform", "A Phoenix team that answers the phone.", "Every account has a real person behind it — someone who knows your business, reads your reviews and picks up when you call. Software does the heavy lifting; people make the decisions.", btns(("Meet the team", "about/", "btn-ghost")))}
 
@@ -197,7 +240,7 @@ page("", "Digital marketing for local businesses", "Phoenix digital marketing ag
 </div></section>
 
 {cta_band()}
-''', extra_js=("home.js", "hero-fx.js"))
+''', extra_js=("home.js", "hero-fx.js", "labs.js"))
 
 # ---------------------------------------------------------------- services
 page("services/", "Services", "Website design, local SEO, social media management, reputation management, local listings and AI search visibility — from CityPulse Digital in Phoenix.", f'''
@@ -412,8 +455,9 @@ page("how-we-work/", "How we work", "From a free audit to a one-page plan, a 30-
 </div></section>
 <section class="section"><div class="wrap faq-wrap"><div>{head("What you get every month.", "", "Deliverables")}</div>
   <div>{check_list(["A one-page report: what we did, what moved, what's next", "Content calendar approved before anything is posted", "Every review answered within one business day", "SEO work log and ranking snapshot", "A real person on email and phone, in Phoenix"])}</div></div></section>
+{report_preview()}
 {cta_band()}
-''', active="company")
+''', extra_js=("labs.js",), active="company")
 
 page("faqs/", "Common questions", "Answers about contracts, pricing, reporting, ownership and how CityPulse Digital works with clients.", f'''
 {page_hero([("Company", "about/"), ("Common questions", "faqs/")], "A little clarity before you start.", "The questions we hear most, answered the way we'd answer them on a call.", eyebrow="Questions")}
@@ -424,10 +468,11 @@ page("faqs/", "Common questions", "Answers about contracts, pricing, reporting, 
 # ---------------------------------------------------------------- free audit / contact / support
 page("free-audit/", "Free digital audit", "Free digital marketing audit: your website, Google Business Profile, reviews, social media and AI search visibility — plus the three fixes that matter most.", f'''
 {page_hero([("Free audit", "free-audit/")], "See exactly where you stand.", "In two business days you'll get a written audit of your website, Google profile, reviews, social media and AI search visibility — and the three things we'd fix first. Free, and yours to keep.", eyebrow="Free digital audit", aside='<ul class="audit-list"><li>Website speed, mobile and SEO basics</li><li>Google Business Profile and listings accuracy</li><li>Review score, volume and response rate</li><li>Social presence and consistency</li><li>How ChatGPT and Gemini describe you</li><li>Your three highest-impact fixes</li></ul>')}
+{speed_check(compact=True)}
 {scorecard()}
 {form_section("audit", "Request your audit.", "Takes two minutes. No sales call required to get the results.", ["Tell us about your business", "We review everything a customer would see", "Your audit lands in your inbox in 2 business days"], audit_form()).replace('<div class="talk">', photo("audit-call.jpg", "form-photo", sizes="(max-width: 980px) 100vw, 35vw") + '<div class="talk">', 1)}
 {cta_band(h="Rather just talk?", p="Call or email and we'll walk through it together.", primary=("Contact us", "contact/"), secondary=("See pricing", "pricing/"))}
-''', extra_js=("scorecard.js",))
+''', extra_js=("scorecard.js", "labs.js"))
 
 page("contact/", "Contact", "Contact CityPulse Digital in Phoenix, Arizona — websites, SEO, social media and reputation management for local businesses nationwide.", f'''
 {page_hero([("Contact", "contact/")], "Let's talk about your business.", "Tell us what you're trying to do and we'll come back within one business day with honest next steps.", eyebrow="Contact", aside=f'<div class="contact-card"><a href="tel:{TEL}">{icon("phone","")}<span>{PHONE}</span></a><a href="mailto:{EMAIL}">{icon("mail","")}<span>{EMAIL}</span></a><p>{icon("pin","")}<span>{ADDR1}<br>{ADDR2}</span></p><p class="fine">Mon–Fri, 8am–6pm Arizona time</p></div>')}
