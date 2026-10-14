@@ -50,7 +50,7 @@ contact page preselects a plan (the pricing buttons use this).
 ## Go-live checklist
 
 - [ ] Domain pointed, HTTPS on, site URL set in Settings → General
-- [ ] Mailboxes: **hello@citypulsedigital.com** and **support@citypulsedigital.com** (both appear on the site)
+- [ ] Mailboxes: **hello@citypulsedigi.com** and **support@citypulsedigi.com** (both appear on the site)
 - [ ] SMTP plugin connected; test email received
 - [ ] Settings → CityPulse Digital: Delivery = WordPress, Send to = the sales inbox
 - [ ] Test all three forms

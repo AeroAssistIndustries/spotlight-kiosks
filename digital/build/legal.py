@@ -3,9 +3,9 @@ Adapted from the CityPulse Kiosks terms (same company group, same address)."""
 EFFECTIVE = "October 14, 2026"
 LEGAL = "City Pulse Digital LLC"
 SHORT = "CityPulse Digital"
-DOMAIN = "citypulsedigital.com"
-EMAIL = "hello@citypulsedigital.com"
-SUPPORT = "support@citypulsedigital.com"
+DOMAIN = "citypulsedigi.com"
+EMAIL = "hello@citypulsedigi.com"
+SUPPORT = "support@citypulsedigi.com"
 PHONE = "602-887-4058"
 ADDRESS = f"{LEGAL}, 4750 S 44th Pl, Suite E20, Phoenix, AZ 85040"
 
@@ -80,7 +80,10 @@ PRIVACY = [
 <li>when you're a client: access to your website, business profiles, social, advertising and analytics accounts, and materials you send us (logos, photos, video, copy, customer lists for review requests).</li></ul>
 <p>Please don't send us passwords or payment card numbers by email. Where a platform offers it, grant us access through its manager or team features instead.</p>"""),
 
-("How the Site's forms work", """<p>When you press send on the free audit, contact or support form, what you entered is delivered to our inbox and saved in our website system so we can reply. If delivery isn't available, the form instead opens a draft in your own email app, and nothing is sent until you send it. We don't add you to a marketing list for filling in a form.</p>"""),
+("How the Site's forms work", f"""<p>When you press send on the free audit, contact or support form, what you entered is delivered to our inbox and saved in our website system so we can reply. Delivery may pass through a form-delivery provider (currently FormSubmit, or the email service built into our website platform), which processes the submission only to deliver it to us. If delivery isn't available, the form instead opens a draft in your own email app, and nothing is sent until you send it. We don't add you to a marketing list for filling in a form.</p>
+<p><b>Calls and texts.</b> If you give us a phone number, we may call or text you about your inquiry or your account. Message and data rates may apply. Reply STOP to any text to opt out, or tell us by email at <a href="mailto:{EMAIL}">{EMAIL}</a>. We don't share your phone number with third parties for their marketing.</p>"""),
+
+("Cookies and local storage", """<p>The Site doesn't set advertising or tracking cookies, and it doesn't store identifiers in your browser. Our web host and, if you're a client signing in to our website platform, that platform may set strictly necessary cookies for security and sessions. If we add analytics or embedded content that uses cookies in the future, we'll update this policy and, where required, ask for your consent first. Because we don't track visitors across sites, the Site doesn't respond differently to “Do Not Track” signals.</p>"""),
 
 ("Information collected automatically", """<p>The Site uses fonts served by Google Fonts and is hosted by our web host. When your browser loads a page, these providers receive standard technical information such as your IP address, browser type, device information and the page requested, and may keep it in server logs for security and operations. Their use of that information is governed by their own privacy policies. If we add analytics to the Site, we'll say so here. The Site doesn't run advertising trackers.</p>"""),
 
@@ -104,11 +107,14 @@ PRIVACY = [
 ("How long we keep information", """<p>We keep inquiries, proposals, client records, reports and materials for as long as we have a relationship with you and for a reasonable period afterward to meet legal, tax and accounting requirements. Customer data you give us for a campaign is deleted or returned when the campaign or engagement ends, unless you ask us to keep it.</p>"""),
 
 ("Your choices and rights", f"""<p>You can ask us to access, correct or delete personal information we hold about you, or to stop sending you marketing emails, by contacting <a href="mailto:{EMAIL}">{EMAIL}</a>. We'll respond within a reasonable time and may need to verify your identity. We won't discriminate against you for exercising your rights.</p>
-<p>Depending on where you live, including California, you may have additional rights under local law, such as the right to know what categories of personal information we collect and how we use them. This policy describes those categories and uses. As noted above, we don't sell or share personal information for cross-context behavioral advertising.</p>"""),
+<p>Depending on where you live — including California (CCPA/CPRA), Colorado, Connecticut, Virginia, Texas and other states with privacy laws — you may have additional rights, such as the right to know what categories of personal information we collect, to correct or delete it, to obtain a copy of it, and to appeal a decision we make about your request. This policy describes those categories and uses. As noted above, we don't sell personal information and don't share it for cross-context behavioral advertising, so there's nothing to opt out of; we also don't use personal information for profiling that has legal or similarly significant effects. We're based in Arizona, United States, and information is stored and processed in the US.</p>
+<p><b>Marketing emails.</b> Every marketing email we send includes an unsubscribe link. Service emails about your account or an open request may still be sent after you unsubscribe.</p>"""),
 
-("Children's privacy", """<p>The Site and Services are meant for businesses and adults. We don't knowingly collect personal information from children under 13. If you believe a child has given us personal information, contact us and we'll delete it.</p>"""),
+("Children's privacy", """<p>The Site and Services are meant for businesses and adults. We don't knowingly collect personal information from children under 16, and we don't sell personal information of anyone, including minors. If you believe a child has given us personal information, contact us and we'll delete it.</p>"""),
 
-("Security", """<p>We use reasonable administrative, technical and physical safeguards to protect information, including two-factor sign-in on the accounts we manage and limited access to client credentials. No system is completely secure, so we can't guarantee absolute security.</p>"""),
+("Security", """<p>We use reasonable administrative, technical and physical safeguards to protect information, including HTTPS on the Site, two-factor sign-in on the accounts we manage and limited access to client credentials. No system is completely secure, so we can't guarantee absolute security. If we learn of a breach affecting your personal information, we'll notify you and the relevant authorities as the law requires.</p>"""),
+
+("Accessibility", """<p>We want everyone to be able to use the Site. It's built to follow WCAG 2.2 AA guidance — keyboard navigation, visible focus, text alternatives for images, sufficient color contrast and reduced-motion support. If you have trouble using any part of the Site, email us and we'll help you get what you need and fix the issue.</p>"""),
 
 ("Changes to this policy", """<p>We may update this Privacy Policy from time to time. When we do, we'll change the effective date at the top of this page. If a change is significant, we'll take reasonable steps to let you know.</p>"""),
 

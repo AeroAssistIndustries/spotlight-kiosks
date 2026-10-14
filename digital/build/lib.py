@@ -7,9 +7,9 @@ from photos import PHOTOS
 
 SITE = "CityPulse Digital"
 LEGAL = "City Pulse Digital LLC"
-DOMAIN = "citypulsedigital.com"
-EMAIL = "hello@citypulsedigital.com"
-SUPPORT = "support@citypulsedigital.com"
+DOMAIN = "citypulsedigi.com"
+EMAIL = "hello@citypulsedigi.com"
+SUPPORT = "support@citypulsedigi.com"
 PHONE = "602-887-4058"
 TEL = "+16028874058"
 ADDR1 = "4750 S 44th Pl, Suite E20"
@@ -215,8 +215,15 @@ def page(path, title, desc, body, active=None, extra_js=()):
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:site_name" content="{SITE}">
+<meta property="og:url" content="https://{DOMAIN}/{path if path != "404/" else ""}">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="en_US">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#05080F">
+<meta name="twitter:title" content="{e(full_title)}">
+<meta name="twitter:description" content="{e(desc)}">
+<meta name="twitter:image" content="https://{DOMAIN}/assets/og-card.png">
+{'<meta name="robots" content="noindex">' if path == "404/" else f'<link rel="canonical" href="https://{DOMAIN}/{path}">'}
+<meta name="theme-color" content="#F5F8FF">
 <link rel="icon" href="{{R}}assets/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="{{R}}assets/favicon.png" type="image/png" sizes="64x64">
 <link rel="apple-touch-icon" href="{{R}}assets/apple-touch-icon.png">
@@ -366,7 +373,7 @@ def draft_form(fid, to, subject, fieldsets, ack, button, subject_field=None, don
   <input type="text" name="_gotcha" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
   <label class="ack"><input type="checkbox" name="ack" required> <span>{ack}</span></label>
   <p class="form-error" role="alert" hidden></p>
-  <div class="form-foot"><button class="btn" type="submit">{button}</button><span class="fine">We reply within one business day.</span></div>
+  <div class="form-foot"><button class="btn" type="submit">{button}</button><span class="fine">We reply within one business day. By sending, you agree to our <a href="{{R}}privacy/">Privacy Policy</a>; we may call or text the number you give us about your request.</span></div>
 </form>
 <div class="draft-review" id="{fid}-review" hidden>
   <h3 tabindex="-1">Your message is ready.</h3>
@@ -607,8 +614,13 @@ def photo(name, cls="", sizes="(max-width: 980px) 100vw, 50vw", eager=False, art
     if v:
         srcset = ", ".join(f"{{R}}assets/photos/{f} {w}w" for f, w in v if w)
         biggest = v[0][0]
+        try:
+            from PIL import Image as _I
+            with _I.open(os.path.join(PHOTO_DIR, biggest)) as _im: dims = f' width="{_im.width}" height="{_im.height}"'
+        except Exception:
+            dims = ""
         load = 'fetchpriority="high"' if eager else 'loading="lazy" decoding="async"'
-        return f'<figure class="ph {cls}"><img src="{{R}}assets/photos/{biggest}" srcset="{srcset}" sizes="{sizes}" alt="{e(alt)}" {load}></figure>'
+        return f'<figure class="ph {cls}"><img src="{{R}}assets/photos/{biggest}" srcset="{srcset}" sizes="{sizes}" alt="{e(alt)}"{dims} {load}></figure>'
     col = art or _ART_PAL[sum(map(ord, name)) % len(_ART_PAL)]
     return f'<figure class="ph ph-art {cls}" style="--c:{col}" role="img" aria-label="{e(alt)}"><span class="ph-dot d1"></span><span class="ph-dot d2"></span><span class="ph-dot d3"></span><span class="ph-ring"></span><span class="ph-cap">Photo: {e(info[0][:70])}…</span></figure>'
 

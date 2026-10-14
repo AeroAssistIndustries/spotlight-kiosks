@@ -160,8 +160,22 @@ add_action( 'wp_head', function () {
 		echo "<meta property=\"og:image:width\" content=\"1200\">\n<meta property=\"og:image:height\" content=\"630\">\n";
 		echo "<meta property=\"og:site_name\" content=\"CityPulse Digital\">\n";
 		echo "<meta name=\"twitter:card\" content=\"summary_large_image\">\n";
+		echo '<meta name="twitter:title" content="' . esc_attr( wp_get_document_title() ) . "\">\n";
+		echo '<meta name="twitter:description" content="' . esc_attr( $desc ) . "\">\n";
+		echo '<meta name="twitter:image" content="' . esc_url( $uri . 'og-card.png' ) . "\">\n";
+		echo "<meta property=\"og:type\" content=\"website\">\n<meta property=\"og:locale\" content=\"en_US\">\n";
+		if ( is_singular() ) {
+			echo '<meta property="og:url" content="' . esc_url( get_permalink() ) . "\">\n";
+			echo '<link rel="canonical" href="' . esc_url( get_permalink() ) . "\">\n";
+		} elseif ( is_front_page() ) {
+			echo '<meta property="og:url" content="' . esc_url( home_url( '/' ) ) . "\">\n";
+			echo '<link rel="canonical" href="' . esc_url( home_url( '/' ) ) . "\">\n";
+		}
+		if ( is_404() || is_search() ) {
+			echo "<meta name=\"robots\" content=\"noindex\">\n";
+		}
 	}
-	echo "<meta name=\"theme-color\" content=\"#05080F\">\n";
+	echo "<meta name=\"theme-color\" content=\"#F5F8FF\">\n";
 	if ( ! has_site_icon() ) {
 		echo '<link rel="icon" href="' . esc_url( $uri . 'favicon.svg' ) . "\" type=\"image/svg+xml\">\n";
 		echo '<link rel="icon" href="' . esc_url( $uri . 'favicon.png' ) . "\" type=\"image/png\" sizes=\"64x64\">\n";
