@@ -115,6 +115,7 @@
     hero.querySelectorAll(".hero-ind button").forEach(b => b.addEventListener("click", () => {
       hero.querySelectorAll(".hero-ind button").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
       feed = FEEDS[b.dataset.ind] || FEEDS.hotel; k = 0;
+      hero.querySelectorAll(".hero-photo").forEach(f => f.classList.toggle("is-on", f.dataset.ind === b.dataset.ind));
       slots.forEach((s, i) => setTimeout(() => show(s), i * 180));
       if (window.__cpSetQueries) window.__cpSetQueries(QS[b.dataset.ind] || QS.hotel);
     }));

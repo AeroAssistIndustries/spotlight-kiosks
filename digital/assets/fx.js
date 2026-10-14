@@ -51,4 +51,24 @@
   // process progress line follows scroll
   const proc = document.querySelector(".process");
   if (proc) { const upd = () => { const r = proc.getBoundingClientRect(); const p = Math.max(0, Math.min(1, (innerHeight * .85 - r.top) / (r.height + innerHeight * .3))); proc.style.setProperty("--prog", p.toFixed(3)); }; addEventListener("scroll", upd, { passive: true }); upd(); }
+  // before/after tabs
+  document.querySelectorAll(".ba-tabs").forEach(tabs => tabs.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+    tabs.querySelectorAll("button").forEach(x => x.setAttribute("aria-selected", x === b ? "true" : "false"));
+    const side = tabs.closest(".ba-side"); side.querySelectorAll(".ba-stage").forEach(st => { st.hidden = st.dataset.pane !== b.dataset.tab; });
+  })));
+  // ROI calculator
+  const roi = document.querySelector("[data-roi]");
+  if (roi) {
+    const $ = id => document.getElementById(id), ins = ["roi-ticket", "roi-new", "roi-repeat"].map($);
+    const fmt = n => Math.round(n).toLocaleString("en-US");
+    const PLAN = 1799 * 12;
+    function calc() {
+      ins.forEach(i => { i.style.setProperty("--p", ((i.value - i.min) / (i.max - i.min) * 100) + "%"); $(i.id + "-v").textContent = fmt(i.value); });
+      const rev = +ins[0].value * +ins[1].value * 12 * +ins[2].value;
+      $("roi-rev").textContent = fmt(rev); $("roi-cost").textContent = fmt(PLAN); $("roi-x").textContent = (rev / PLAN).toFixed(2);
+      $("roi-be").textContent = Math.max(1, Math.ceil(PLAN / 12 / (+ins[0].value * +ins[2].value)));
+      $("roi-fill").style.setProperty("--w", Math.min(100, rev / PLAN * 8) + "%");
+    }
+    ins.forEach(i => i.addEventListener("input", calc)); calc();
+  }
 })();
