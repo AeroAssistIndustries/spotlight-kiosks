@@ -97,7 +97,28 @@
   /* ---------- live notifications over the visual ---------- */
   const hud = hero.querySelector(".hud");
   if (hud) {
-    const feed = [
+    const FEEDS = {
+      hotel: [["★", "star", "New 5-star review", "Google · 2 min ago"], ["✓", "ok", "Booked direct — $412", "Website · just now"], ["#1", "", "Ranked #1 on Maps", "“hotel near me” · Phoenix"], ["AI", "", "Recommended by ChatGPT", "“hotel near the convention center”"], ["▶", "", "Reel hit 48,000 views", "Instagram · today"], ["↗", "", "OTA commissions −18%", "This quarter"]],
+      restaurant: [["★", "star", "New 5-star review", "Yelp · 4 min ago"], ["✓", "ok", "Table for 6 reserved", "Google · just now"], ["#1", "", "Top of the map pack", "“italian restaurant near me”"], ["AI", "", "Recommended by Gemini", "“date night spot open late”"], ["▶", "", "Special of the day: 12k views", "Instagram · today"], ["↗", "", "Weekend covers +22%", "This month"]],
+      dental: [["★", "star", "4.9 ★ · 318 reviews", "All platforms in sync"], ["✓", "ok", "New patient booked", "Website · just now"], ["#1", "", "#1 for “dentist near me”", "Google Maps"], ["AI", "", "Cited by ChatGPT", "“dentist open Saturday”"], ["↗", "", "Calls from search +31%", "This month"], ["✓", "ok", "Insurance Q&A answered", "Google profile · today"]],
+      auto: [["★", "star", "New 5-star review", "DealerRater · 9 min ago"], ["✓", "ok", "Service appointment booked", "Website · just now"], ["#1", "", "Top 3 for “oil change near me”", "Google Maps"], ["AI", "", "Recommended by Perplexity", "“best place for brakes”"], ["▶", "", "Walkaround video: 31k views", "TikTok · today"], ["↗", "", "Service leads +27%", "This quarter"]],
+      home: [["★", "star", "New 5-star review", "Google · 1 min ago"], ["✓", "ok", "Estimate request received", "Website · just now"], ["#1", "", "#1 for “plumber near me”", "Google Maps"], ["AI", "", "Recommended by ChatGPT", "“emergency plumber tonight”"], ["↗", "", "Calls from search +40%", "This month"], ["✓", "ok", "Listing synced on 42 sites", "Today"]]
+    };
+    let feed = FEEDS.hotel;
+    const QS = {
+      hotel: [["best hotel near me", "Your hotel · #1"], ["hotel near convention center", "Your hotel · recommended"], ["boutique hotel phoenix", "Your hotel · 4.9★"]],
+      restaurant: [["italian restaurant near me", "Your restaurant · #1"], ["date night open late", "Your restaurant · recommended"], ["best brunch phoenix", "Your restaurant · 4.8★"]],
+      dental: [["dentist open saturday", "Your practice · top 3"], ["dentist near me new patients", "Your practice · #1"], ["emergency dentist phoenix", "Your practice · recommended"]],
+      auto: [["oil change near me", "Your dealership · #1"], ["best place for brakes", "Your service center · cited by AI"], ["used suv phoenix", "Your dealership · recommended"]],
+      home: [["plumber near me now", "Your company · #1"], ["emergency plumber tonight", "Your company · recommended"], ["water heater replacement cost", "Your company · cited by AI"]]
+    };
+    hero.querySelectorAll(".hero-ind button").forEach(b => b.addEventListener("click", () => {
+      hero.querySelectorAll(".hero-ind button").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+      feed = FEEDS[b.dataset.ind] || FEEDS.hotel; k = 0;
+      slots.forEach((s, i) => setTimeout(() => show(s), i * 180));
+      if (window.__cpSetQueries) window.__cpSetQueries(QS[b.dataset.ind] || QS.hotel);
+    }));
+    const _unused = [
       ["★", "star", "New 5-star review", "Google · 2 min ago"],
       ["✓", "ok", "Booked direct — $412", "Website · just now"],
       ["#1", "", "Ranked #1 on Maps", "“hotel near me” · Phoenix"],
@@ -122,9 +143,10 @@
   const srch = hero.querySelector(".hero-search");
   if (srch) {
     const q = srch.querySelector(".q"), ans = srch.querySelector(".ans b");
-    const qs = [["best hotel near me", "Your hotel · #1"], ["dentist open saturday", "Your practice · top 3"], ["italian restaurant phoenix", "Your restaurant · 4.9★"], ["plumber near me now", "Your company · recommended"], ["oil change deals", "Your dealership · cited by AI"]];
+    let qs = [["best hotel near me", "Your hotel · #1"], ["dentist open saturday", "Your practice · top 3"], ["italian restaurant phoenix", "Your restaurant · 4.9★"], ["plumber near me now", "Your company · recommended"], ["oil change deals", "Your dealership · cited by AI"]];
+    window.__cpSetQueries = list => { qs = list; qi = 0; };
     if (reduce) { q.textContent = qs[0][0]; ans.textContent = qs[0][1]; srch.classList.add("found"); return; }
-    let qi = 0;
+    var qi = 0;
     function type() {
       const [text, a] = qs[qi++ % qs.length]; let i = 0; srch.classList.remove("found"); q.textContent = "";
       (function step() { if (i <= text.length) { q.textContent = text.slice(0, i++); setTimeout(step, 45 + Math.random() * 60); } else { ans.textContent = a; setTimeout(() => srch.classList.add("found"), 350); setTimeout(erase, 3200); } })();

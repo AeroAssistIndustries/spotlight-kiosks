@@ -24,6 +24,52 @@ def ticker():
     row = "".join(f"<span>{t[0]}</span>" for t in items)
     return f'<div class="ticker" aria-hidden="true"><div class="ticker-track">{row}{row}</div></div>'
 
+def wordmark():
+    w = ["Be found", "Be chosen", "Be talked about", "Websites", "Local SEO", "Social", "Reviews", "AI search"]
+    row = "".join(f"<span>{x}</span>" for x in w)
+    return f'<div class="wordmark" aria-hidden="true"><div class="wordmark-track">{row}{row}</div></div>'
+
+def before_after():
+    ph = _variants("story-restaurant.jpg"); img = f'<img src="{{R}}assets/photos/{ph[2][0]}" alt="" loading="lazy">' if ph else "<i></i>"
+    ph2 = _variants("ind-restaurants.jpg"); img2 = f'<img src="{{R}}assets/photos/{ph2[2][0]}" alt="" loading="lazy">' if ph2 else "<i></i>"
+    return f'''<section class="section alt" id="before-after"><div class="wrap ba">
+  <div class="ba-copy"><p class="eyebrow">Before / after</p><h2>Same business. <span class="hl">Different first impression.</span></h2><p class="lede">This is what a customer sees in the two seconds before they decide. Drag the handle — the left side is what most local businesses look like today; the right is after 30 days with CityPulse.</p>
+    <ul class="ba-list"><li><b>01</b><span>Complete profile: categories, services, hours, menu, booking link — everything Google can show.</span></li><li><b>02</b><span>Real photos, refreshed monthly, and a weekly post so the profile never looks abandoned.</span></li><li><b>03</b><span>Review flow that keeps the stars fresh and every review answered within a business day.</span></li></ul>
+    {btns(("Get your free audit", "free-audit/"), ("Local listings service", "services/local-listings/", "btn-ghost"))}</div>
+  <div class="ba-stage" data-ba aria-label="Before and after comparison of a Google Business Profile">
+    <div class="ba-pane before"><span class="ba-tag">Before</span><div class="listing"><div class="l-top"><span class="l-logo">?</span><div><b>Bella Vita Trattoria</b><span class="l-stars">3.9 ★ · 41 reviews · last reply: never</span></div></div><div class="l-row"><span>Restaurant</span><span>Hours unknown</span></div><div class="l-photos"><i></i><i></i><i></i><i></i></div><p class="l-miss">✕ No menu · no booking link · 2 photos from 2019</p></div></div>
+    <div class="ba-pane after"><span class="ba-tag">After · 30 days</span><div class="listing"><div class="l-top"><span class="l-logo">BV</span><div><b>Bella Vita Trattoria</b><span class="l-stars">4.8 ★ · 212 reviews · replies within hours</span></div></div><div class="l-row"><span>Italian restaurant</span><span>Open · closes 10pm</span><span>Reserve a table</span><span>Menu</span></div><div class="l-photos">{img}{img2}<i></i><i></i></div><p class="l-ok">✓ 48 photos · weekly posts · Q&amp;A answered · #2 in the map pack</p></div></div>
+    <div class="ba-handle" role="slider" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" tabindex="0" aria-label="Drag to compare"></div>
+  </div>
+</div></section>'''
+
+def reviews_live():
+    return f'''<section class="section rep-sec"><div class="wrap rep">
+  <div class="phone" aria-hidden="true"><div class="phone-screen"><div class="ps-head"><i>★</i>Reviews · all platforms</div><div class="ps-feed" data-chat>
+    <div class="msg in"><span class="who">Google · Maria K.</span><span class="stars">★★★★★</span><br>Stayed two nights for a wedding. Front desk went above and beyond — thank you Daniel!</div>
+    <div class="msg out"><span class="who">Your reply · 38 min</span>Thank you, Maria! Daniel will be thrilled. Congratulations to the couple — come see us for the anniversary. 🥂</div>
+    <div class="msg in"><span class="who">Yelp · Tom R.</span><span class="stars">★★☆☆☆</span><br>Room was fine but the AC was loud and nobody answered the desk phone at 11pm.</div>
+    <div class="msg out"><span class="who">Your reply · 52 min</span>Tom, that’s not the stay we want for anyone. I’ve passed the AC issue to maintenance today and we’re fixing night coverage. Please email me directly — I’d like to make it right.</div>
+    <div class="msg in"><span class="who">Tripadvisor · Priya S.</span><span class="stars">★★★★★</span><br>Found you on ChatGPT of all places. Great location, spotless room.</div>
+  </div></div></div>
+  <div><p class="eyebrow">Reputation, live</p><h2>Reviews that <span class="hl">write back.</span></h2><p class="lede">Every review, on every platform, answered in your voice within a business day — the good ones thanked, the hard ones handled before they spread. Automated requests after each visit keep the stars fresh.</p>
+    <div class="rep-stat"><div><b>&lt; 24h</b><span>reply time, every platform</span></div><div><b>+0.6★</b><span>average rating lift in 6 months</span></div><div><b>3×</b><span>more reviews per month</span></div></div>
+    {btns(("Reputation management", "services/reputation/", "btn-dark"), ("How to get more reviews", "resources/get-more-google-reviews/", "btn-ghost"))}</div>
+</div></section>'''
+
+def feed_live():
+    posts = [("story-restaurant.jpg", "Tonight’s special: house-made tagliatelle 🍝", "1,284"), ("svc-social-media.jpg", "Behind the pass with Chef Ana", "2,410"), ("ind-hotels.jpg", "Sunset from the rooftop — book direct & save", "988"), ("customer-phone.jpg", "Weekend brunch is back ☀️", "1,732"), ("ind-medical.jpg", "Now accepting new patients — Saturdays too", "640")]
+    out = ""
+    for f, cap, likes in posts:
+        v = _variants(f); src = f'{{R}}assets/photos/{v[2][0]}' if v else ""
+        out += f'<div class="post"><div class="p-top"><i></i>yourbusiness</div><img src="{src}" alt="" loading="lazy"><div class="p-foot"><span>{cap}</span><b>♥ {likes}</b></div></div>'
+    return f'''<section class="section alt feed-sec"><div class="wrap rep">
+  <div><p class="eyebrow">Social, done for you</p><h2>Your feed, <span class="hl">handled.</span></h2><p class="lede">Planned a month ahead, shot and designed for you, posted on schedule, replied to the same day. Instagram, Facebook, TikTok and Google posts — one calendar, one approval, zero “what do we post today?”</p>
+    <div class="rep-stat"><div><b>16+</b><span>designed posts a month</span></div><div><b>4</b><span>platforms kept in sync</span></div><div><b>Same day</b><span>comments &amp; DMs answered</span></div></div>
+    {btns(("Social media management", "services/social-media/", "btn-dark"), ("Restaurant content calendar", "resources/restaurant-social-media-calendar/", "btn-ghost"))}</div>
+  <div class="phone feed-phone" aria-hidden="true"><div class="phone-screen"><div class="ps-head"><i>▶</i>yourbusiness · 12.4k followers</div><div class="feed-scroll">{out}{out}</div></div></div>
+</div></section>'''
+
 def process_steps():
     steps = [("Audit", "We review your site, search, reviews and social and tell you plainly what's working and what isn't. Free, in two business days."),
              ("Plan", "One page: what we'll do, what it costs and what you should expect by when. You keep it even if you don't hire us."),
@@ -68,17 +114,21 @@ page("", "Websites, SEO, social media & reputation for local businesses", "CityP
     <p class="lede">Websites, search, social media and reviews — handled by one team, reported on one page. CityPulse Digital is the marketing department small businesses never had.</p>
     <div class="btn-row"><a class="btn" href="{{R}}free-audit/">Get a free digital audit</a><a class="btn btn-ghost" href="{{R}}pricing/">See plans from [[PLAN:pulse]]/mo</a></div>
     <ul class="hero-points"><li>No long contracts</li><li>You own everything</li><li>Reports you can read in 2 minutes</li></ul>
+    <div class="hero-ind" role="group" aria-label="See it for your industry"><span>I run a</span>{"".join(f'<button type="button" data-ind="{k}" aria-pressed="{"true" if i==0 else "false"}">{v}</button>' for i,(k,v) in enumerate([("hotel","Hotel"),("restaurant","Restaurant"),("dental","Dental practice"),("auto","Dealership"),("home","Home services")]))}</div>
   </div>
   <div class="hero-visual">{photo("hero-owner.jpg", "hero-photo", sizes="(max-width: 980px) 100vw, 45vw", eager=True).replace("</figure>", '<span class="scan"></span></figure>')}{score_card()}<div class="hud" aria-hidden="true"><div class="hud-chip c1"></div><div class="hud-chip c2"></div><div class="hud-chip c3"></div><div class="hud-chip c4"></div></div></div>
   <div class="signals" aria-hidden="true">{"".join(f'<i style="--x:{x}%;--y:{y}%;--d:{d}s;--s:{sz}"></i>' for x, y, d, sz in [(8,18,7,1),(22,72,9,.6),(35,30,11,.8),(48,80,8,.5),(60,14,10,.9),(72,60,12,.7),(85,26,9,1.1),(92,70,7,.6),(15,50,13,.5),(55,48,6,.4),(78,88,10,.8),(40,8,12,.6)])}</div>
 </div></section>
 {ticker()}
 {platform_strip()}
+{wordmark()}
 
 <section class="section"><div class="wrap">
   {head("Everything your customers see before they call.", "Six services that work better together. Start with one, or hand us the whole thing.", "What we do")}
   {service_cards()}
 </div></section>
+
+{before_after()}
 
 <section class="section alt ai-sec"><div class="wrap">
   {head("How AI is changing the way customers choose.", "Discovery is shifting from ten blue links to one recommended answer. The businesses that get recommended share three things — and we build all three.", "The shift")}
@@ -98,6 +148,9 @@ page("", "Websites, SEO, social media & reputation for local businesses", "CityP
     {counters([("1,000+", "direct hotel bookings from one website in 12 months"), ("350+", "websites designed by our team"), ("$50M+", "in direct bookings driven for clients"), ("1 day", "to answer every review, every platform")])}
   </div>
 </div></section>
+
+{reviews_live()}
+{feed_live()}
 
 <section class="section"><div class="wrap">
   {head("Four steps. No mystery.", "You'll always know what we're doing, why, and what it cost.", "How we work")}

@@ -129,8 +129,8 @@ NAV = [
   ]),
 ]
 
-BRAND_LOGO = ('<picture><source media="(max-width: 560px)" srcset="{R}assets/logo-compact-light.svg">'
-              '<img src="{R}assets/logo-anim-light.svg" alt="CityPulse Digital" width="591" height="97"></picture>')
+BRAND_LOGO = ('<picture><source media="(max-width: 560px)" srcset="{R}assets/logo-compact.svg">'
+              '<img src="{R}assets/logo-anim.svg" alt="CityPulse Digital" width="591" height="97"></picture>')
 
 def _href(h):
     return h if h.startswith("http") else "{R}" + h
