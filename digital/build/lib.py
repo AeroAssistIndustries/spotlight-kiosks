@@ -2,6 +2,7 @@
 Pages use {R} as a placeholder for the relative path back to the site root."""
 import html, os
 import pricing
+from content import ANNOUNCEMENTS, STORIES, GUIDES, PLATFORMS, INDUSTRY_DETAIL
 
 SITE = "CityPulse Digital"
 LEGAL = "City Pulse Digital LLC"
@@ -106,17 +107,21 @@ INDUSTRIES = [
 # ---------------------------------------------------------------- navigation
 NAV = [
   ("menu", "Services", "services", [
-    ("All services", "services/", "Websites, SEO, social, reputation and AI search — together or one at a time", True),
+    ("All services", "services/", "Websites, SEO, social, reputation, listings and AI search — together or one at a time", True),
   ] + [(s["name"], f"services/{s['slug']}/", s["one"].split(" — ")[0][:70].rstrip(".")) for s in SERVICES]),
   ("menu", "Industries", "industries", [
     ("Who we work with", "industries/", "Marketing built around how your customers choose", True),
-  ] + [(i["name"], f"industries/#{i['slug']}", i["h"]) for i in INDUSTRIES]),
+  ] + [(i["name"], f"industries/{i['slug']}/", i["h"]) for i in INDUSTRIES]),
+  ("menu", "Results", "customer-stories", [
+    ("Customer stories", "customer-stories/", "What happened when businesses handed us the work", True),
+  ] + [(st["name"], f"customer-stories/{st['slug']}/", st["headline"]) for st in STORIES] + [("Our work", "work/", "Selected projects and testimonials")]),
+  ("menu", "Resources", "resources", [
+    ("Guides & resources", "resources/", "Plain-English guides from the team", True),
+  ] + [(g["title"][:52] + ("…" if len(g["title"]) > 52 else ""), f"resources/{g['slug']}/", g["cat"]) for g in GUIDES[:5]] + [("Common questions", "faqs/", "Contracts, reporting, ownership")]),
   ("link", "Pricing", "pricing/"),
-  ("link", "Work", "work/"),
   ("menu", "Company", "company", [
     ("About CityPulse Digital", "about/", "A Phoenix team with a national reach", True),
     ("How we work", "how-we-work/", "From audit to launch to monthly growth"),
-    ("Common questions", "faqs/", "Contracts, reporting, ownership and more"),
     ("Contact us", "contact/", "Talk with the team"),
     ("Client support", "support/", "For current clients"),
     ("CityPulse Kiosks", KIOSKS_URL, "Our sister company: ads on venue kiosks"),
@@ -144,7 +149,9 @@ def header(active):
                 f'<a href="{_href(l[1])}"{" class=\"mega-lead\"" if len(l) > 3 else ""}{" target=\"_blank\" rel=\"noopener\"" if l[1].startswith("http") else ""}><b>{l[0]}</b><span>{l[2]}</span></a>'
                 for l in links)
             out.append(f'<div class="nav-item{cur}"><button class="nav-btn" aria-expanded="false" aria-controls="{mid}">{label}{icon("chev","")}</button><div class="mega" id="{mid}">{lis}</div></div>')
+    ann = "".join(f'<a class="ann{" on" if i == 0 else ""}" href="{_href(h)}"><b>{t}</b><span>{m}</span>{icon("arrow","")}</a>' for i, (t, m, h) in enumerate(ANNOUNCEMENTS))
     return f'''<a class="skip" href="#main">Skip to content</a>
+<div class="ann-bar" data-ann><div class="wrap ann-inner"><button class="ann-nav" type="button" data-ann-prev aria-label="Previous announcement">{icon("chev","")}</button><div class="ann-track">{ann}</div><button class="ann-nav" type="button" data-ann-next aria-label="Next announcement">{icon("chev","")}</button><a class="ann-cta" href="{{R}}free-audit/">Is your business ready for AI search? <b>Request a free audit</b></a></div></div>
 <header class="site-header">
   <div class="wrap header-inner">
     <a class="brand" href="{{R}}" aria-label="CityPulse Digital home">{BRAND_LOGO}</a>
@@ -162,19 +169,26 @@ def socials_html():
 
 def footer():
     col = lambda title, links: f'<div><h2>{title}</h2><nav aria-label="{title}">' + "".join(f'<a href="{_href(h)}">{t}</a>' for t, h in links) + "</nav></div>"
-    return f'''<footer class="site-footer">
+    return f'''<section class="news-band" aria-labelledby="news-title"><div class="wrap news-grid">
+  <div><p class="eyebrow">Stay ahead with us</p><h2 id="news-title">Learn with us &amp; stay connected.</h2><p>One email a month: what changed in local search, reviews and AI answers, and what to do about it. No spam, ever.</p></div>
+  <form class="news-form draft-form" id="newsletter" data-to="{EMAIL}" data-subject="Newsletter signup" data-review="newsletter-review" data-done="You're on the list. Welcome." novalidate>
+    <label class="sr" for="news-email">Email</label><input id="news-email" type="email" name="Email" placeholder="Enter your email" required autocomplete="email"><input type="text" name="_gotcha" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true"><button class="btn" type="submit">Subscribe</button>
+    <p class="form-error" role="alert" hidden></p><p class="fine">We won't distribute or sell your information. <a href="{{R}}privacy/">Privacy policy</a>.</p>
+  </form>
+  <div class="draft-review" id="newsletter-review" hidden><h3 tabindex="-1">Almost there.</h3><p class="review-lede">We couldn't add you automatically — open the email and press send.</p><pre></pre><div class="btn-row"><button class="btn" type="button" data-draft="open">Open in email</button><button class="btn btn-ghost" type="button" data-draft="edit">Try again</button></div><p class="copied" role="status"></p></div>
+  <div class="form-done" id="newsletter-done" hidden><span class="done-ico">{icon("check","")}</span><h3 tabindex="-1">You're in.</h3><p>Welcome — the next issue will find you.</p></div>
+</div></section>
+<footer class="site-footer">
   <div class="wrap footer-grid">
-    <div class="footer-brand"><img src="{{R}}assets/logo-stacked-light.svg" alt="CityPulse Digital" width="402" height="122"><p>Websites, search, social and reputation for businesses that want to be found — and chosen.</p></div>
+    <div class="footer-brand"><img src="{{R}}assets/logo-stacked-light.svg" alt="CityPulse Digital" width="402" height="122"><p>Websites, search, social and reputation for businesses that want to be found — and chosen.</p>
+      <p class="footer-addr"><b>Headquarters</b>{ADDR1}<br>{ADDR2}</p>
+      <p class="footer-addr"><b>Sales</b><a href="tel:{TEL}">{PHONE}</a><b>Support</b><a href="mailto:{SUPPORT}">{SUPPORT}</a><b>Email</b><a href="mailto:{EMAIL}">{EMAIL}</a></p></div>
     {col("Services", [(s["short"], f"services/{s['slug']}/") for s in SERVICES] + [("Pricing", "pricing/")])}
-    {col("Company", [("About us","about/"),("How we work","how-we-work/"),("Our work","work/"),("Industries","industries/"),("Common questions","faqs/"),("Contact us","contact/"),("Client support","support/")])}
-    {col("CityPulse", [("Free digital audit","free-audit/"),("CityPulse Kiosks", KIOSKS_URL)])}
-    <div class="footer-talk"><h2>Let's talk</h2>
-      <a class="big" href="mailto:{EMAIL}">{EMAIL}</a><a class="big" href="tel:{TEL}">{PHONE}</a>
-      <p class="footer-addr">{ADDR1}<br>{ADDR2}</p>
-      {socials_html()}
-    </div>
+    {col("Industries", [(i["name"], f"industries/{i['slug']}/") for i in INDUSTRIES])}
+    {col("Company", [("About us","about/"),("How we work","how-we-work/"),("Customer stories","customer-stories/"),("Our work","work/"),("Guides & resources","resources/"),("Common questions","faqs/"),("Contact us","contact/"),("Client support","support/")])}
+    {col("CityPulse", [("Free digital audit","free-audit/"),("CityPulse Kiosks", KIOSKS_URL),("Terms & Conditions","terms/"),("Privacy Policy","privacy/")])}
   </div>
-  <div class="wrap footer-base"><span>© <span id="year">2026</span> {LEGAL}. All rights reserved.</span><nav aria-label="Legal"><a href="{{R}}privacy/">Privacy Policy</a><a href="{{R}}terms/">Terms &amp; Conditions</a></nav></div>
+  <div class="wrap footer-base"><span>© <span id="year">2026</span> {LEGAL}. All rights reserved.</span><nav aria-label="Legal"><a href="{{R}}privacy/">Privacy Policy</a><a href="{{R}}terms/">Terms &amp; Conditions</a><a href="{{R}}contact/">Contact</a></nav>{socials_html()}</div>
 </footer>
 <div class="m-cta" id="m-cta"><span><b>Free digital audit</b>See how you rank, in 2 business days</span><a class="btn" href="{{R}}free-audit/">Get it</a></div>'''
 
@@ -413,3 +427,62 @@ FAQS = [
   ("How is CityPulse Digital related to CityPulse Kiosks?", "Same founders, two companies. CityPulse Kiosks places ads on touch-screen kiosks in hotels and venues; CityPulse Digital handles your online presence. Clients of one get introductions and bundles with the other."),
   ("What happens if I'm not happy?", "Tell us. We'll fix the work first. If it still isn't right, monthly plans can be cancelled with 30 days' notice after the initial term, and you keep everything we've built."),
 ]
+
+# ---------------------------------------------------------------- deep-site components
+def subnav(items, active):
+    """Pill sub-navigation under a page hero (service or industry families)."""
+    lis = "".join(f'<a href="{{R}}{h}"{" aria-current=\"page\"" if h == active else ""}>{l}</a>' for l, h in items)
+    return f'<nav class="subnav" aria-label="Section"><div class="wrap">{lis}</div></nav>'
+
+def feature_sections(items, art_icon="spark"):
+    """Alternating heading + paragraph + bullets blocks (Milestone-style)."""
+    out = []
+    for i, (h, p, bullets) in enumerate(items):
+        side = "flip" if i % 2 else ""
+        n = f"{i+1:02d}"
+        out.append(f'''<section class="feature {side}"><div class="wrap feature-grid">
+  <div class="feature-copy"><span class="f-num">{n}</span><h2>{h}</h2><p>{p}</p>{check_list(bullets)}</div>
+  <div class="feature-art" aria-hidden="true"><div class="f-card"><span class="f-ico">{icon(art_icon,"")}</span><ul>{"".join(f"<li>{b.split(chr(58))[0].split(chr(44))[0]}</li>" for b in bullets[:4])}</ul></div></div>
+</div></section>''')
+    return "".join(out)
+
+def expect_timeline(items):
+    return '<ol class="timeline">' + "".join(f'<li><b>{t}</b><span>{d}</span></li>' for t, d in items) + "</ol>"
+
+VALUES = [
+  ("Collaborative", "We work inside your accounts with you, not around you. You see every post, page and reply before or as it goes out."),
+  ("Plain-spoken", "No jargon, no vanity metrics. Reports talk about calls, bookings, reviews and revenue."),
+  ("Nimble", "A Phoenix team that answers the phone. Changes happen in days, not quarters."),
+  ("Local-first", "Hotels, restaurants, practices, dealerships and trades are the whole business — where being found locally decides the month."),
+]
+def value_cards():
+    return '<div class="values">' + "".join(f'<div class="value"><span class="v-ico">{icon("check","")}</span><h3>{t}</h3><p>{d}</p></div>' for t, d in VALUES) + "</div>"
+
+def counters(items, dark=True):
+    return f'<dl class="counters{" dark" if dark else ""}">' + "".join(f'<div><dd><span data-counter="{n}">{n}</span></dd><dt>{l}</dt></div>' for n, l in items) + "</dl>"
+
+def story_card(st):
+    bg = f'style="--c:{st["color"]};background-image:linear-gradient(180deg,rgba(15,28,43,.1),rgba(15,28,43,.85)),url({{R}}assets/{st["photo"]})"' if st.get("photo") else f'style="--c:{st["color"]}"'
+    return f'''<a class="story-card" href="{{R}}customer-stories/{st["slug"]}/" {bg}><span class="case-pill">{st["industry"]}</span><b>{st["name"]}</b><span class="story-h">{st["headline"]}</span><span class="svc-more">Read the story {icon("arrow","")}</span></a>'''
+
+def story_grid(slugs=None):
+    items = [s for s in STORIES if not slugs or s["slug"] in slugs]
+    return '<div class="story-grid">' + "".join(story_card(s) for s in items) + "</div>"
+
+def guide_card(g):
+    return f'<a class="guide-card" href="{{R}}resources/{g["slug"]}/"><span class="kind">{g["cat"]}</span><h3>{g["title"]}</h3><p>{g["lede"]}</p><span class="meta">{g["read"]} read</span></a>'
+
+def guide_grid(n=None, cls=""):
+    return f'<div class="guide-grid {cls}">' + "".join(guide_card(g) for g in (GUIDES[:n] if n else GUIDES)) + "</div>"
+
+def platform_strip():
+    return '<div class="platforms" aria-label="Platforms we work in"><div class="platforms-track">' + "".join(f"<span>{p}</span>" for p in PLATFORMS * 2) + "</div></div>"
+
+def article_page(trail, title, lede, sections, meta="", cta=None, eyebrow=""):
+    toc = "".join(f'<li><a href="#s{i+1}">{h}</a></li>' for i, (h, _) in enumerate(sections))
+    body = "".join(f'<h2 id="s{i+1}">{h}</h2>{b}' for i, (h, b) in enumerate(sections))
+    cta_html = f'<div class="callout static"><b>{cta[0]}</b><p>{cta[1]}</p>{btns(("Get a free audit", "free-audit/", "btn-small"), ("See pricing", "pricing/", "btn-small btn-ghost"))}</div>' if cta else ""
+    return page_hero(trail, title, lede, eyebrow=eyebrow) + f'''<section class="section"><div class="wrap article">
+  <aside class="toc"><b>In this guide</b><ol>{toc}</ol><p class="meta">{meta}</p><p class="meta"><a class="text-link" href="{{R}}resources/">All guides</a></p></aside>
+  <div class="prose">{body}{cta_html}</div>
+</div></section>'''

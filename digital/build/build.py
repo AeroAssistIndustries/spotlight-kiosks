@@ -3,6 +3,7 @@ import os, sys
 sys.path.insert(0, os.path.dirname(__file__))
 from lib import *
 import legal, pricing
+from content import FEATURES, INDUSTRY_DETAIL, STORIES, STORY_BY, GUIDES, GUIDE_BY
 
 # ---------------------------------------------------------------- shared pieces
 def score_card():
@@ -64,16 +65,28 @@ page("", "Websites, SEO, social media & reputation for local businesses", "CityP
   {score_card()}
 </div></section>
 
+{platform_strip()}
+
 <section class="section"><div class="wrap">
   {head("Everything your customers see before they call.", "Six services that work better together. Start with one, or hand us the whole thing.", "What we do")}
   {service_cards()}
+</div></section>
+
+<section class="section alt ai-sec"><div class="wrap">
+  {head("How AI is changing the way customers choose.", "Discovery is shifting from ten blue links to one recommended answer. The businesses that get recommended share three things — and we build all three.", "The shift")}
+  <div class="three ai-three">
+    <div><span class="big-num">60%</span><h3>of searches now end without a click</h3><p>Google answers on the results page — with your profile, your reviews and your hours. If they're wrong or thin, you lose the customer before your site loads.</p></div>
+    <div><span class="big-num">AI</span><h3>is where a growing share of local questions go</h3><p>“Best dentist near me that takes new patients.” ChatGPT, Gemini and Perplexity answer with three names and a reason. We make sure yours is one of them.</p></div>
+    <div><span class="big-num">3</span><h3>things the recommended businesses share</h3><p>Consistent facts everywhere, structured data on the site, and content that answers plainly. That's the core of every CityPulse plan.</p></div>
+  </div>
+  {btns(("AI search visibility", "services/ai-search/", "btn-dark"), ("Read the guide", "resources/show-up-in-ai-search/", "btn-ghost"))}
 </div></section>
 
 <section class="section dark proof"><div class="wrap">
   <div class="proof-grid">
     <div><p class="eyebrow">Why it matters</p><h2>Your next customer is already looking.</h2>
       <p class="lede">They search, they read the reviews, they glance at your feed, they tap your site. Every one of those is a moment you either win or lose — and most businesses lose a few without ever knowing.</p></div>
-    {stats([("1,000+", "direct hotel bookings from one website in 12 months"), ("350+", "websites designed by our team"), ("$50M+", "in direct bookings driven for clients"), ("1 day", "to answer every review, every platform")], dark=True)}
+    {counters([("1,000+", "direct hotel bookings from one website in 12 months"), ("350+", "websites designed by our team"), ("$50M+", "in direct bookings driven for clients"), ("1 day", "to answer every review, every platform")])}
   </div>
 </div></section>
 
@@ -89,9 +102,9 @@ page("", "Websites, SEO, social media & reputation for local businesses", "CityP
 </div></section>
 
 <section class="section"><div class="wrap">
-  {head("What clients say.", "", "Results")}
-  {testimonials(3)}
-  {btns(("See our work", "work/", "btn-dark"))}
+  {head("Customer stories.", "What happened when businesses handed us the work.", "Results")}
+  {story_grid()}
+  {btns(("All customer stories", "customer-stories/", "btn-dark"), ("Testimonials & work", "work/", "btn-ghost"))}
 </div></section>
 
 <section class="section alt" id="plans"><div class="wrap">
@@ -102,7 +115,13 @@ page("", "Websites, SEO, social media & reputation for local businesses", "CityP
 
 {kiosk_band()}
 
-<section class="section"><div class="wrap faq-wrap">
+<section class="section"><div class="wrap">
+  {head("Learn with us.", "Plain-English guides from the team — the same advice we give clients.", "Resources")}
+  {guide_grid(3)}
+  {btns(("All guides", "resources/", "btn-dark"))}
+</div></section>
+
+<section class="section alt"><div class="wrap faq-wrap">
   <div>{head("Common questions.", "", "Questions")}<p class="fine"><a class="text-link" href="{{R}}faqs/">All questions</a></p></div>
   <div class="faq">{faq_html([(q, a) for q, a in FAQS[:4]])}</div>
 </div></section>
@@ -125,36 +144,102 @@ page("services/", "Services", "Website design, local SEO, social media managemen
 {cta_band()}
 ''')
 
-for s in SERVICES:
-    others = [o for o in SERVICES if o["slug"] != s["slug"]][:3]
-    page(f"services/{s['slug']}/", s["name"], s["one"], f'''
-{page_hero([("Services", "services/"), (s["name"], f"services/{s['slug']}/")], s["h"], s["lede"], btns(("Get a free audit", "free-audit/"), ("Talk to us", "contact/", "btn-ghost")), aside=f'<div class="hero-ico">{icon(s["icon"], "")}</div>', eyebrow=s["name"])}
-<section class="section"><div class="wrap two-col">
-  <div>{head("What's included.", "", "The work")}{check_list(s["bullets"])}</div>
-  <aside class="callout"><b>{s["proof"]}</b><p>Included in <a class="text-link" href="{{R}}pricing/">Pulse Pro</a>, or available on its own.</p>{btns(("See pricing", "pricing/", "btn-small btn-dark"))}</aside>
+SVC_SUBNAV = [(x["short"], f"services/{x['slug']}/") for x in SERVICES]
+for s_ in SERVICES:
+    F = FEATURES[s_["slug"]]
+    others = [o for o in SERVICES if o["slug"] != s_["slug"]][:3]
+    page(f"services/{s_['slug']}/", s_["name"], s_["one"], f'''
+{page_hero([("Services", "services/"), (s_["name"], f"services/{s_['slug']}/")], s_["h"], s_["lede"], btns(("Get a free audit", "free-audit/"), ("Talk to us", "contact/", "btn-ghost")), aside=f'<div class="hero-ico">{icon(s_["icon"], "")}</div>', eyebrow=s_["name"])}
+{subnav(SVC_SUBNAV, f"services/{s_['slug']}/")}
+<section class="section intro-sec"><div class="wrap two-col">
+  <div><p class="eyebrow">Overview</p><h2>{s_["one"].split(" — ")[0] if " — " not in s_["one"] else s_["one"].split(" — ")[0]}</h2><p class="lede" style="margin-top:14px">{F["intro"]}</p></div>
+  <aside class="callout"><b>{s_["proof"]}</b><p>Included in <a class="text-link" href="{{R}}pricing/">Pulse Pro</a>, or available on its own.</p>{btns(("See pricing", "pricing/", "btn-small btn-dark"))}</aside>
 </div></section>
-<section class="section alt"><div class="wrap faq-wrap">
-  <div>{head("Questions people ask.", "", "FAQ")}</div>
-  <div class="faq">{faq_html(s["faqs"])}</div>
+<div class="features">{feature_sections(F["sections"], s_["icon"])}</div>
+<section class="section alt"><div class="wrap two-col">
+  <div>{head("What you get every month.", "", "Deliverables")}{check_list(F["monthly"])}</div>
+  <div>{head("What to expect, and when.", "", "Timeline")}{expect_timeline(F["expect"])}</div>
 </div></section>
-<section class="section"><div class="wrap">{head("Works well with", "", "")}{service_cards(others, compact=True)}</div></section>
-{cta_band(h=f"Want {s['short'].lower()} handled?", p="Start with a free audit — we'll tell you where you stand and what we'd do first.")}
+<section class="section dark"><div class="wrap">{head("Why CityPulse Digital.", "Your reliable client team: collaborative, plain-spoken, nimble and local-first.", "Why us")}{value_cards()}</div></section>
+<section class="section"><div class="wrap faq-wrap">
+  <div>{head(f"FAQs on {s_['short'].lower()}.", "", "Ask our experts")}<p class="fine"><a class="text-link" href="{{R}}contact/">Ask a question</a></p></div>
+  <div class="faq">{faq_html(F["faqs"])}</div>
+</div></section>
+<section class="section alt"><div class="wrap">{head("Works well with", "", "")}{service_cards(others, compact=True)}</div></section>
+{cta_band(h=f"Want {s_['short'].lower()} handled?", p="Start with a free audit — we'll tell you where you stand and what we'd do first.")}
 ''', active="services")
 
 # ---------------------------------------------------------------- industries
-ind_sections = ""
-for i in INDUSTRIES:
-    ind_sections += f'''<section class="section ind-sec" id="{i["slug"]}"><div class="wrap two-col">
-  <div><p class="eyebrow">{i["name"]}</p><h2>{i["h"]}</h2><p class="lede" style="margin-top:14px">{i["lede"]}</p>{check_list(i["points"])}</div>
-  <aside class="callout"><b>{i["proof"]}</b>{btns(("Get a free audit", "free-audit/", "btn-small"))}</aside>
-</div></section>'''
+IND_H2 = {"hotels": "Compete with the OTAs where they can't follow.", "restaurants": "Be the answer to \u201cwhere should we eat?\u201d", "medical": "Show up, look credible, make booking easy.", "automotive": "Two journeys, one brand, both found.", "home-services": "First and credible, every time they search."}
+IND_SUBNAV = [(i["name"], f"industries/{i['slug']}/") for i in INDUSTRIES]
 page("industries/", "Industries", "Digital marketing for hotels, restaurants, medical and dental practices, car dealerships and home services — built around how local customers choose.", f'''
 {page_hero([("Industries", "industries/")], "Marketing built around how your customers choose.", "Different businesses win in different places. A hotel lives on direct bookings and reviews; a dentist on trust and convenience; a contractor on being first in the search. We plan around that.", btns(("Get a free audit", "free-audit/")), eyebrow="Who we work with")}
-<nav class="jump" aria-label="Industries"><div class="wrap">{"".join(f'<a href="#{i["slug"]}">{i["name"]}</a>' for i in INDUSTRIES)}</div></nav>
-{ind_sections}
+<section class="section"><div class="wrap">
+  <div class="ind-grid big">{"".join(f'<a class="ind-card" href="{{R}}industries/{i["slug"]}/"><h3>{i["name"]}</h3><p>{i["lede"]}</p><span class="svc-more">See how {icon("arrow","")}</span></a>' for i in INDUSTRIES)}</div>
+</div></section>
 {kiosk_band()}
 {cta_band()}
 ''')
+for i in INDUSTRIES:
+    D = INDUSTRY_DETAIL[i["slug"]]
+    svcs = [SERVICE_BY[x] for x in D["services"]]
+    st = STORY_BY.get(D["story"]) if D.get("story") else None
+    story_html = f'<section class="section alt"><div class="wrap">{head("Customer story.", "", "Results")}{story_grid([st["slug"]])}</div></section>' if st else f'<section class="section alt"><div class="wrap">{head("What clients say.", "", "Results")}{testimonials(3)}</div></section>'
+    segs = "".join(f"<span>{x}</span>" for x in D["segments"])
+    page(f"industries/{i['slug']}/", D["title"], f"{D['title']}: {D['tagline']} Websites, local SEO, reviews, listings and social media from CityPulse Digital.", f'''
+{page_hero([("Industries", "industries/"), (i["name"], f"industries/{i['slug']}/")], i["h"], D["tagline"], btns(("Get a free audit", "free-audit/"), ("Talk to us", "contact/", "btn-ghost")), eyebrow=D["title"], aside=f'<div class="segments"><b>Who this is for</b>{segs}</div>')}
+{subnav(IND_SUBNAV, f"industries/{i['slug']}/")}
+<section class="section"><div class="wrap two-col">
+  <div><p class="eyebrow">A better digital presence for {i["name"].lower()}</p><h2>{IND_H2[i["slug"]]}</h2><p class="lede" style="margin-top:14px">{D["intro"]}</p></div>
+  <div>{counters(D["tiles"], dark=False)}</div>
+</div></section>
+<section class="section alt"><div class="wrap">
+  {head("How we approach it.", "Five moves, in the order they pay off.", "Our approach")}
+  <ol class="approach">{"".join(f'<li><span class="p-num">0{n+1}</span><h3>{t}</h3><p>{d}</p></li>' for n, (t, d) in enumerate(D["approach"]))}</ol>
+</div></section>
+<section class="section"><div class="wrap">{head(f"Services for {i['name'].lower()}.", "", "What we do")}{service_cards(svcs)}</div></section>
+{story_html}
+<section class="section"><div class="wrap faq-wrap">
+  <div>{head("Ask our experts.", "The questions " + i["name"].lower() + " ask us most.", "FAQ")}</div>
+  <div class="faq">{faq_html(D["faqs"])}</div>
+</div></section>
+{kiosk_band() if i["slug"] in ("hotels", "medical", "automotive", "restaurants") else ""}
+{cta_band(h=f"Let's find out where your {i['name'].split(' &')[0].lower()} stands.", p="A free audit of your site, search, reviews and social — with the three fixes that matter most.")}
+''', active="industries")
+
+# ---------------------------------------------------------------- customer stories
+page("customer-stories/", "Customer stories", "Results from CityPulse Digital clients: direct bookings, reviews, social media and brand work for hotels, restaurants and e-commerce.", f'''
+{page_hero([("Customer stories", "customer-stories/")], "What happened when they handed us the work.", "Real engagements, described plainly. Where a client prefers not to be named, we describe the business and keep the numbers to what they've confirmed.", btns(("Start your story", "contact/")), eyebrow="Customer stories")}
+<section class="section"><div class="wrap">{story_grid()}</div></section>
+<section class="section alt"><div class="wrap">{head("In their words.", "", "Testimonials")}{testimonials(5, "quotes-5")}</div></section>
+{cta_band(h="Want results like these?", p="Tell us about your business. We'll audit where you stand and show you the plan.")}
+''')
+for st in STORIES:
+    art = f'style="--c:{st["color"]};background-image:linear-gradient(180deg,rgba(15,28,43,.05) 30%,rgba(15,28,43,.85)),url({{R}}assets/{st["photo"]})"' if st.get("photo") else f'style="--c:{st["color"]}"'
+    who, where, q = st["quote"]
+    page(f"customer-stories/{st['slug']}/", f"{st['name']} — {st['headline']}", st["summary"], f'''
+{page_hero([("Customer stories", "customer-stories/"), (st["name"], f"customer-stories/{st['slug']}/")], st["headline"], st["summary"], btns(("Get a free audit", "free-audit/"), ("All stories", "customer-stories/", "btn-ghost")), eyebrow=f"{st['industry']} · {st['where']}", aside=f'<div class="case-art story-art" {art}><span class="case-pill">{st["industry"]}</span><b>{st["name"]}</b><span>{st["where"]}</span></div>')}
+<section class="section"><div class="wrap">{counters(st["results"], dark=False)}</div></section>
+<section class="section alt"><div class="wrap two-col">
+  <div><p class="eyebrow">The challenge</p><h2>Where they started.</h2><p class="lede" style="margin-top:14px">{st["challenge"]}</p></div>
+  <div><p class="eyebrow">The work</p><h2>What we did.</h2>{check_list(st["work"])}</div>
+</div></section>
+<section class="section"><div class="wrap narrow"><figure class="quote big"><blockquote>“{q}”</blockquote><figcaption><b>{who}</b><span>{where}</span></figcaption></figure>{f'<p class="fine center" style="margin-top:22px">{st["extra"]}</p>' if st["extra"] else ""}</div></section>
+<section class="section alt"><div class="wrap">{head("More stories.", "", "")}{story_grid([x["slug"] for x in STORIES if x["slug"] != st["slug"]])}</div></section>
+{cta_band(h="Want results like these?", p="Tell us about your business. We'll audit where you stand and show you the plan.")}
+''', active="customer-stories")
+
+# ---------------------------------------------------------------- resources
+page("resources/", "Guides & resources", "Plain-English guides on local SEO, Google Business Profile, reviews, website speed, social media and AI search from CityPulse Digital.", f'''
+{page_hero([("Resources", "resources/")], "Learn with us.", "The advice we give clients, written down. Use it yourself, or hand it to us.", btns(("Get a free audit", "free-audit/")), eyebrow="Guides & resources")}
+<section class="section"><div class="wrap">{guide_grid()}</div></section>
+<section class="section alt"><div class="wrap faq-wrap"><div>{head("Common questions.", "", "FAQ")}</div><div class="faq">{faq_html(FAQS[:5])}</div></div></section>
+{cta_band()}
+''')
+for g in GUIDES:
+    page(f"resources/{g['slug']}/", g["title"], g["lede"], article_page([("Resources", "resources/"), (g["cat"], "resources/"), (g["title"], f"resources/{g['slug']}/")], g["title"], g["lede"], g["sections"], meta=f"{g['cat']} · {g['read']} read", cta=g["cta"], eyebrow=g["cat"]) + f'''
+<section class="section alt"><div class="wrap">{head("More guides.", "", "")}{guide_grid(cls="three-up")}</div></section>
+{cta_band()}''', active="resources")
 
 # ---------------------------------------------------------------- pricing
 page("pricing/", "Pricing", f"CityPulse Digital plans: Pulse {pricing.money(PLANS[0]['price'])}/mo, Pulse Pro {pricing.money(PLANS[1]['price'])}/mo, Pulse Max {pricing.money(PLANS[2]['price'])}/mo, websites from $1,499, and à la carte social media, SEO and reputation management.", f'''
@@ -201,10 +286,21 @@ page("work/", "Our work", "Results from CityPulse Digital and its predecessor, L
 # ---------------------------------------------------------------- about / how we work / faqs
 page("about/", "About", "CityPulse Digital is a Phoenix, Arizona digital marketing agency serving hotels, restaurants, practices, dealerships and local businesses across the US. Formerly Landmark Digital Solutions.", f'''
 {page_hero([("About", "about/")], "A Phoenix team with a national reach.", "We started as Landmark Digital Solutions, building websites and running marketing for hotels, restaurants and local businesses. In 2026 we became CityPulse Digital — alongside our sister company CityPulse Kiosks — with one idea: a business should be easy to find and easy to choose, online and in person.", btns(("Work with us", "contact/")), eyebrow="About CityPulse Digital")}
-<section class="section"><div class="wrap three">
+{platform_strip()}
+<section class="section"><div class="wrap">{head("What it's like to work with us.", "", "Our values")}{value_cards()}</div></section>
+<section class="section alt"><div class="wrap three">
   <div><h3>Plain English</h3><p>No jargon in our reports, no vanity metrics in our calls. We talk about calls, bookings, reviews and revenue.</p></div>
   <div><h3>Your name on everything</h3><p>Domains, sites, profiles and ad accounts belong to you. We're the team working inside them, not the landlord.</p></div>
   <div><h3>Small business is the whole business</h3><p>Independent hotels, restaurants, practices and trades. The work that decides whether this month is a good one.</p></div>
+</div></section>
+<section class="section"><div class="wrap">
+  {head("From Landmark Digital to CityPulse Digital.", "", "Our story")}
+  <ol class="timeline wide">
+    <li><b>2017</b><span>Landmark Digital Solutions starts building websites and running marketing for hotels, restaurants and local businesses.</span></li>
+    <li><b>2019–2023</b><span>350+ websites, $50M+ in direct bookings driven for clients, and the Hotel Lexen site that proved the booking-first approach.</span></li>
+    <li><b>2026</b><span>CityPulse Kiosks launches concierge kiosks in hotel lobbies. Landmark Digital becomes CityPulse Digital, so the same clients are served online and in the room.</span></li>
+    <li><b>Today</b><span>A Phoenix team serving clients nationwide, with AI search visibility added to the toolkit.</span></li>
+  </ol>
 </div></section>
 <section class="section alt"><div class="wrap two-col">
   <div>{head("Two companies, one pulse.", "", "The CityPulse family")}<p>CityPulse Kiosks puts touch-screen concierge kiosks in hotel lobbies, waiting rooms and dealerships, and sells the ad space on them to local businesses. CityPulse Digital takes care of those same businesses online. Clients of one get introductions, bundles and a team that already knows them.</p>{btns(("Visit CityPulse Kiosks", KIOSKS_URL, "btn-ghost"))}</div>

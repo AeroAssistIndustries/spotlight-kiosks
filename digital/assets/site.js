@@ -138,3 +138,36 @@
     addEventListener("scroll", on, { passive: true }); on();
   } else if (bar) bar.remove();
 })();
+
+/* ---------- announcement bar rotation + animated counters ---------- */
+(function () {
+  "use strict";
+  const reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const bar = document.querySelector("[data-ann]");
+  if (bar) {
+    const items = [...bar.querySelectorAll(".ann")]; let i = 0, t;
+    const show = n => { i = (n + items.length) % items.length; items.forEach((a, j) => a.classList.toggle("on", j === i)); };
+    const tick = () => { clearTimeout(t); if (!reduce) t = setTimeout(() => { show(i + 1); tick(); }, 6000); };
+    bar.querySelector("[data-ann-prev]").addEventListener("click", () => { show(i - 1); tick(); });
+    bar.querySelector("[data-ann-next]").addEventListener("click", () => { show(i + 1); tick(); });
+    bar.addEventListener("mouseenter", () => clearTimeout(t)); bar.addEventListener("mouseleave", tick);
+    tick();
+  }
+  const counters = [...document.querySelectorAll("[data-counter]")];
+  if (counters.length) {
+    const run = el => {
+      const raw = el.dataset.counter, m = raw.match(/^([^\d]*)([\d,.]+)(.*)$/);
+      if (!m || reduce) return;
+      const pre = m[1], num = parseFloat(m[2].replace(/,/g, "")), post = m[3], dec = (m[2].split(".")[1] || "").length;
+      const t0 = performance.now(), ms = 1400;
+      (function f(now) {
+        const p = Math.min(1, (now - t0) / ms), e = 1 - Math.pow(1 - p, 3), v = num * e;
+        el.textContent = pre + (dec ? v.toFixed(dec) : Math.round(v).toLocaleString("en-US")) + post;
+        if (p < 1) requestAnimationFrame(f); else el.textContent = raw;
+      })(t0);
+    };
+    if (!("IntersectionObserver" in window)) return;
+    const io = new IntersectionObserver(es => es.forEach(x => { if (x.isIntersecting) { io.unobserve(x.target); run(x.target); } }), { threshold: 0.5 });
+    counters.forEach(c => io.observe(c));
+  }
+})();
