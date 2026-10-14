@@ -484,7 +484,8 @@ def counters(items, dark=True):
     return f'<dl class="counters{" dark" if dark else ""}">' + "".join(f'<div><dd><span data-counter="{n}">{n}</span></dd><dt>{l}</dt></div>' for n, l in items) + "</dl>"
 
 def story_card(st):
-    bg = f'style="--c:{st["color"]};background-image:linear-gradient(180deg,rgba(15,28,43,.1),rgba(15,28,43,.85)),url({{R}}assets/{st["photo"]})"' if st.get("photo") else f'style="--c:{st["color"]}"'
+    sp = st.get("photo") or (f"photos/{_variants(f'story-{st['slug']}.jpg')[1][0]}" if _variants(f"story-{st['slug']}.jpg") else None)
+    bg = f'style="--c:{st["color"]};background-image:linear-gradient(180deg,rgba(15,28,43,.1),rgba(15,28,43,.85)),url({{R}}assets/{sp})"' if sp else f'style="--c:{st["color"]}"'
     return f'''<a class="story-card" href="{{R}}customer-stories/{st["slug"]}/" {bg}><span class="case-pill">{st["industry"]}</span><b>{st["name"]}</b><span class="story-h">{st["headline"]}</span><span class="svc-more">Read the story {icon("arrow","")}</span></a>'''
 
 def story_grid(slugs=None):

@@ -810,3 +810,8 @@ p{margin:0}
   .reveal-words .w,.hero .lede,.hero .btn-row,.hero-points,.hero-visual{opacity:1;transform:none;animation:none}
   .ai-cursor,.ai-ans>b,.ai-card,.ai-src{animation:none;opacity:1;transform:none;width:auto}
 }
+.hero-photo img{object-position:28% 30%}
+.photo-band::after{background:linear-gradient(90deg,rgba(15,28,43,.9) 0%,rgba(15,28,43,.6) 45%,rgba(15,28,43,.25) 100%),linear-gradient(180deg,rgba(15,28,43,0) 50%,rgba(15,28,43,.7) 100%)}
+.pb-media .ph img{object-position:70% 40%}
+.proof-photo img{object-position:50% 30%}
+.page-hero.photo{background-position:70% center}
