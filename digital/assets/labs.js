@@ -1,4 +1,4 @@
-/* CityPulse Digital — interactive labs: live site-speed test (PageSpeed Insights), voice search demo,
+/* Landmark Digital — interactive labs: live site-speed test (PageSpeed Insights), voice search demo,
    scroll-driven customer journey, animated monthly report. All client-side; no data is stored. */
 (function () {
   "use strict";

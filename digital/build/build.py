@@ -1,4 +1,4 @@
-"""Every page of the CityPulse Digital site. Run: python3 build/build.py"""
+"""Every page of the Landmark Digital site. Run: python3 build/build.py"""
 import os, sys
 sys.path.insert(0, os.path.dirname(__file__))
 from lib import *
@@ -16,11 +16,11 @@ def score_card():
   <div class="sc-head"><span class="sc-dot"></span><b>Digital presence</b><span class="sc-tag">Live</span></div>
   <div class="sc-ring"><svg viewBox="0 0 120 120"><circle class="sc-track" cx="60" cy="60" r="52"/><circle class="sc-prog" cx="60" cy="60" r="52"/></svg><div class="sc-num"><b data-from="42" data-to="91">42</b><span>out of 100</span></div></div>
   <ul class="sc-rows">{r}</ul>
-  <div class="sc-foot"><span>Before</span><span class="sc-arrow">{icon("arrow","")}</span><span>After 90 days with CityPulse</span></div>
+  <div class="sc-foot"><span>Before</span><span class="sc-arrow">{icon("arrow","")}</span><span>After 90 days with Landmark</span></div>
 </div>'''
 
 def ticker():
-    items = [("<b>60%</b> of local searches end without a click", ), ("AI assistants now answer <b>1 in 5</b> “near me” questions", ), ("<b>93%</b> of customers read reviews before choosing", ), ("Sites loading in <b>&lt;2s</b> convert twice as often", ), ("<b>4.8★</b> average rating across CityPulse clients", ), ("Every review answered within <b>24 hours</b>", ), ("<b>1,000+</b> direct bookings from one hotel site", ), ("Phoenix-based · <b>clients nationwide</b>", )]
+    items = [("<b>60%</b> of local searches end without a click", ), ("AI assistants now answer <b>1 in 5</b> “near me” questions", ), ("<b>93%</b> of customers read reviews before choosing", ), ("Sites loading in <b>&lt;2s</b> convert twice as often", ), ("<b>4.8★</b> average rating across Landmark clients", ), ("Every review answered within <b>24 hours</b>", ), ("<b>1,000+</b> direct bookings from one hotel site", ), ("Phoenix-based · <b>clients nationwide</b>", )]
     row = "".join(f"<span>{t[0]}</span>" for t in items)
     return f'<div class="ticker" aria-hidden="true"><div class="ticker-track">{row}{row}</div></div>'
 
@@ -33,7 +33,7 @@ def before_after():
     ph = _variants("story-restaurant.jpg"); img = f'<img src="{{R}}assets/photos/{ph[2][0]}" alt="" loading="lazy">' if ph else "<i></i>"
     ph2 = _variants("ind-restaurants.jpg"); img2 = f'<img src="{{R}}assets/photos/{ph2[2][0]}" alt="" loading="lazy">' if ph2 else "<i></i>"
     return f'''<section class="section alt" id="before-after"><div class="wrap ba">
-  <div class="ba-copy"><p class="eyebrow">Before / after</p><h2>Same business. <span class="hl">Different first impression.</span></h2><p class="lede">This is what a customer sees in the two seconds before they decide. Drag the handle — the left side is what most local businesses look like today; the right is after 30 days with CityPulse.</p>
+  <div class="ba-copy"><p class="eyebrow">Before / after</p><h2>Same business. <span class="hl">Different first impression.</span></h2><p class="lede">This is what a customer sees in the two seconds before they decide. Drag the handle — the left side is what most local businesses look like today; the right is after 30 days with Landmark.</p>
     <ul class="ba-list"><li><b>01</b><span>Complete profile: categories, services, hours, menu, booking link — everything Google can show.</span></li><li><b>02</b><span>Real photos, refreshed monthly, and a weekly post so the profile never looks abandoned.</span></li><li><b>03</b><span>Review flow that keeps the stars fresh and every review answered within a business day.</span></li></ul>
     {btns(("Get your free audit", "free-audit/"), ("Local listings service", "services/local-listings/", "btn-ghost"))}</div>
   <div class="ba-side"><div class="ba-tabs" role="tablist"><button type="button" role="tab" aria-selected="true" data-tab="profile">Google profile</button><button type="button" role="tab" aria-selected="false" data-tab="site">Website</button></div>
@@ -44,7 +44,7 @@ def before_after():
   </div>
   <div class="ba-stage" data-ba data-pane="site" hidden aria-label="Before and after comparison of a website">
     <div class="ba-pane before"><span class="ba-tag">Before</span><div class="site-mock old"><div class="sm-bar"><i></i><i></i><i></i><span>bellavita-trattoria.com</span></div><div class="sm-body"><div class="sm-nav"><b>BELLA VITA</b><span>Home</span><span>About Us</span><span>Gallery</span><span>Contact</span></div><div class="sm-hero"><span>Welcome to our website!!</span></div><div class="sm-cols"><i></i><i></i><i></i></div><div class="sm-txt"><i></i><i></i><i style="width:60%"></i></div><p class="sm-note">✕ 6.4s load · not mobile-friendly · no menu online · phone number in an image</p></div></div></div>
-    <div class="ba-pane after"><span class="ba-tag">After · CityPulse</span><div class="site-mock new"><div class="sm-bar"><i></i><i></i><i></i><span>bellavitatrattoria.com</span></div><div class="sm-body"><div class="sm-nav"><b>Bella Vita</b><span>Menu</span><span>Reserve</span><span>Catering</span><em>Order online</em></div><div class="sm-hero2">{photo("story-restaurant.jpg", "sm-img", sizes="300px")}<div><b>Handmade pasta, since 1998.</b><em>Reserve a table</em></div></div><div class="sm-row"><span>★ 4.8 · 212 reviews</span><span>Open till 10pm</span><span>📍 2 min from you</span></div><p class="sm-ok">✓ 1.1s load · mobile-first · menu, reservations &amp; ordering built in</p></div></div></div>
+    <div class="ba-pane after"><span class="ba-tag">After · Landmark</span><div class="site-mock new"><div class="sm-bar"><i></i><i></i><i></i><span>bellavitatrattoria.com</span></div><div class="sm-body"><div class="sm-nav"><b>Bella Vita</b><span>Menu</span><span>Reserve</span><span>Catering</span><em>Order online</em></div><div class="sm-hero2">{photo("story-restaurant.jpg", "sm-img", sizes="300px")}<div><b>Handmade pasta, since 1998.</b><em>Reserve a table</em></div></div><div class="sm-row"><span>★ 4.8 · 212 reviews</span><span>Open till 10pm</span><span>📍 2 min from you</span></div><p class="sm-ok">✓ 1.1s load · mobile-first · menu, reservations &amp; ordering built in</p></div></div></div>
     <div class="ba-handle" role="slider" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" tabindex="0" aria-label="Drag to compare"></div>
   </div></div>
 </div></section>'''
@@ -92,7 +92,7 @@ def journey():
              ("The map pack", "Three names. One of them gets the call.", "Google shows three businesses with stars and distance. If you're not in the three, most people never scroll further.", "map"),
              ("The reviews", "4.8 ★ · 212 reviews · owner replies", "They open your profile and read the newest three reviews — and whether anyone answered them.", "reviews"),
              ("The website", "Loads in 1.1 seconds. Phone number at the top.", "A tap takes them to your site. If it's slow, or the menu is a PDF, they go back to the list.", "site"),
-             ("The call", "“Hi, do you have a table for six tonight?”", "Every one of those moments is a step you either win or lose. CityPulse makes sure you win all five.", "call")]
+             ("The call", "“Hi, do you have a table for six tonight?”", "Every one of those moments is a step you either win or lose. Landmark makes sure you win all five.", "call")]
     st = "".join(f'<div class="jn-step"><span class="jn-num">0{i+1}</span><h3>{t}</h3><p class="jn-q">{q}</p><p>{d}</p></div>' for i, (t, q, d, _) in enumerate(steps))
     scr = {
       "search": '<div class="jn-ui"><div class="jn-bar">best hotel near me with free parking</div><div class="jn-sk"></div><div class="jn-sk w2"></div><div class="jn-sk"></div></div>',
@@ -156,8 +156,8 @@ page("", "Digital marketing for local businesses", "Phoenix digital marketing ag
     <div class="hero-search" aria-hidden="true"><span class="live">Live</span>{icon("search","")}<span class="q"></span><span class="ans">{icon("check","")}<b></b></span></div>
     <p class="eyebrow">Phoenix, Arizona · Clients nationwide</p>
     <h1 class="reveal-words">{words("Be found.<br>Be chosen.<br><em>Be talked about.</em>")}</h1>
-    <p class="lede">Websites, search, social media and reviews — handled by one team, reported on one page. CityPulse Digital is the marketing department small businesses never had.</p>
-    <div class="btn-row"><a class="btn" href="{{R}}free-audit/">Get a free digital audit</a><a class="btn btn-ghost" href="{{R}}pricing/">See plans from [[PLAN:pulse]]/mo</a></div>
+    <p class="lede">Websites, search, social media and reviews — handled by one team, reported on one page. Landmark Digital is the marketing department small businesses never had.</p>
+    <div class="btn-row"><a class="btn" href="{{R}}free-audit/">Get a free digital audit</a><a class="btn btn-ghost" href="{{R}}pricing/">See plans from [[PLAN:launch]]/mo</a></div>
     <ul class="hero-points"><li>No long contracts</li><li>You own everything</li><li>Reports you can read in 2 minutes</li></ul>
     <div class="hero-ind" role="group" aria-label="See it for your industry"><span>I run a</span>{"".join(f'<button type="button" data-ind="{k}" aria-pressed="{"true" if i==0 else "false"}">{v}</button>' for i,(k,v) in enumerate([("hotel","Hotel"),("restaurant","Restaurant"),("dental","Dental practice"),("auto","Dealership"),("home","Home services")]))}</div>
   </div>
@@ -182,7 +182,7 @@ page("", "Digital marketing for local businesses", "Phoenix digital marketing ag
   <div class="three ai-three">
     <div><span class="big-num">60%</span><h3>of searches now end without a click</h3><p>Google answers on the results page — with your profile, your reviews and your hours. If they're wrong or thin, you lose the customer before your site loads.</p></div>
     <div><span class="big-num">AI</span><h3>is where a growing share of local questions go</h3><p>“Best dentist near me that takes new patients.” ChatGPT, Gemini and Perplexity answer with three names and a reason. We make sure yours is one of them.</p></div>
-    <div><span class="big-num">3</span><h3>things the recommended businesses share</h3><p>Consistent facts everywhere, structured data on the site, and content that answers plainly. That's the core of every CityPulse plan.</p></div>
+    <div><span class="big-num">3</span><h3>things the recommended businesses share</h3><p>Consistent facts everywhere, structured data on the site, and content that answers plainly. That's the core of every Landmark plan.</p></div>
   </div>
   {btns(("AI search visibility", "services/ai-search/", "btn-dark"), ("Read the guide", "resources/show-up-in-ai-search/", "btn-ghost"))}
   <div class="voice-wrap"><div><p class="eyebrow">Try it</p><h3>Ask out loud — like your customers do.</h3><p>Tap the mic and ask for a place near you. This is how a growing share of searches now start.</p></div>{voice_demo()}</div>
@@ -243,7 +243,7 @@ page("", "Digital marketing for local businesses", "Phoenix digital marketing ag
 ''', extra_js=("home.js", "hero-fx.js", "labs.js"))
 
 # ---------------------------------------------------------------- services
-page("services/", "Services", "Website design, local SEO, social media management, reputation management, local listings and AI search visibility — from CityPulse Digital in Phoenix.", f'''
+page("services/", "Services", "Website design, local SEO, social media management, reputation management, local listings and AI search visibility — from Landmark Digital in Phoenix.", f'''
 {page_hero([("Services", "services/")], "One team for everything online.", "Each service stands on its own. Together they compound: a fast site ranks better, good reviews lift the map pack, social proof feeds the search results — and AI engines notice all of it.", btns(("Get a free audit", "free-audit/"), ("See pricing", "pricing/", "btn-ghost")), eyebrow="Services")}
 <section class="section"><div class="wrap"><h2 class="sr">Our services</h2>{service_cards()}</div></section>
 <section class="section alt"><div class="wrap">
@@ -266,14 +266,14 @@ for s_ in SERVICES:
 {subnav(SVC_SUBNAV, f"services/{s_['slug']}/")}
 <section class="section intro-sec"><div class="wrap two-col">
   <div><p class="eyebrow">Overview</p><h2>{s_["one"].split(" — ")[0] if " — " not in s_["one"] else s_["one"].split(" — ")[0]}</h2><p class="lede" style="margin-top:14px">{F["intro"]}</p></div>
-  <aside class="callout"><b>{s_["proof"]}</b><p>Included in <a class="text-link" href="{{R}}pricing/">Pulse Pro</a>, or available on its own.</p>{btns(("See pricing", "pricing/", "btn-small btn-dark"))}</aside>
+  <aside class="callout"><b>{s_["proof"]}</b><p>Included in <a class="text-link" href="{{R}}pricing/">Grow</a>, or available on its own.</p>{btns(("See pricing", "pricing/", "btn-small btn-dark"))}</aside>
 </div></section>
 <div class="features">{feature_sections(F["sections"], s_["icon"])}</div>
 <section class="section alt"><div class="wrap two-col">
   <div>{head("What you get every month.", "", "Deliverables")}{check_list(F["monthly"])}</div>
   <div>{head("What to expect, and when.", "", "Timeline")}{expect_timeline(F["expect"])}</div>
 </div></section>
-<section class="section dark"><div class="wrap">{head("Why CityPulse Digital.", "Your reliable client team: collaborative, plain-spoken, nimble and local-first.", "Why us")}{value_cards()}</div></section>
+<section class="section dark"><div class="wrap">{head("Why Landmark Digital.", "Your reliable client team: collaborative, plain-spoken, nimble and local-first.", "Why us")}{value_cards()}</div></section>
 <section class="section"><div class="wrap faq-wrap">
   <div>{head(f"FAQs on {s_['short'].lower()}.", "", "Ask our experts")}<p class="fine"><a class="text-link" href="{{R}}contact/">Ask a question</a></p></div>
   <div class="faq">{faq_html(F["faqs"])}</div>
@@ -299,7 +299,7 @@ for i in INDUSTRIES:
     st = STORY_BY.get(D["story"]) if D.get("story") else None
     story_html = f'<section class="section alt"><div class="wrap">{head("Customer story.", "", "Results")}{story_grid([st["slug"]])}</div></section>' if st else f'<section class="section alt"><div class="wrap">{head("What clients say.", "", "Results")}{testimonials(3)}</div></section>'
     segs = "".join(f"<span>{x}</span>" for x in D["segments"])
-    page(f"industries/{i['slug']}/", D["title"], f"{D['title']} from CityPulse Digital: {D['tagline']}"[:158].rsplit(" ", 1)[0].rstrip(".,") + ".", f'''
+    page(f"industries/{i['slug']}/", D["title"], f"{D['title']} from Landmark Digital: {D['tagline']}"[:158].rsplit(" ", 1)[0].rstrip(".,") + ".", f'''
 {page_hero([("Industries", "industries/"), (i["name"], f"industries/{i['slug']}/")], i["h"], D["tagline"], btns(("Get a free audit", "free-audit/"), ("Talk to us", "contact/", "btn-ghost")), eyebrow=D["title"], aside=f'<div class="segments"><b>Who this is for</b>{segs}</div>').replace('class="page-hero dark"', f'class="page-hero dark photo"{photo_bg(f"ind-{i['slug']}.jpg")}', 1)}
 {subnav(IND_SUBNAV, f"industries/{i['slug']}/")}
 <section class="section"><div class="wrap two-col">
@@ -321,7 +321,7 @@ for i in INDUSTRIES:
 ''', active="industries")
 
 # ---------------------------------------------------------------- customer stories
-page("customer-stories/", "Customer stories", "Results from CityPulse Digital clients: direct bookings, reviews, social media and brand work for hotels, restaurants and e-commerce.", f'''
+page("customer-stories/", "Customer stories", "Results from Landmark Digital clients: direct bookings, reviews, social media and brand work for hotels, restaurants and e-commerce.", f'''
 {page_hero([("Customer stories", "customer-stories/")], "What happened when they handed us the work.", "Real engagements, described plainly. Where a client prefers not to be named, we describe the business and keep the numbers to what they've confirmed.", btns(("Start your story", "contact/")), eyebrow="Customer stories")}
 <section class="section"><div class="wrap">{story_grid()}</div></section>
 <section class="section alt"><div class="wrap">{head("In their words.", "", "Testimonials")}{testimonials(5, "quotes-5")}</div></section>
@@ -344,7 +344,7 @@ for st in STORIES:
 ''', active="customer-stories")
 
 # ---------------------------------------------------------------- resources
-page("resources/", "Guides & resources", "Plain-English guides on local SEO, Google Business Profile, reviews, website speed, social media and AI search from CityPulse Digital.", f'''
+page("resources/", "Guides & resources", "Plain-English guides on local SEO, Google Business Profile, reviews, website speed, social media and AI search from Landmark Digital.", f'''
 {page_hero([("Resources", "resources/")], "Learn with us.", "The advice we give clients, written down. Use it yourself, or hand it to us.", btns(("Get a free audit", "free-audit/")), eyebrow="Guides & resources")}
 <section class="section"><div class="wrap"><h2 class="sr">All guides</h2>{guide_grid()}</div></section>
 <section class="section alt"><div class="wrap faq-wrap"><div>{head("Common questions.", "", "FAQ")}</div><div class="faq">{faq_html(FAQS[:5])}</div></div></section>
@@ -356,10 +356,10 @@ for g in GUIDES:
 {cta_band()}''', active="resources")
 
 # ---------------------------------------------------------------- pricing
-page("pricing/", "Pricing", f"CityPulse Digital plans: Pulse {pricing.money(PLANS[0]['price'])}/mo, Pulse Pro {pricing.money(PLANS[1]['price'])}/mo, Pulse Max {pricing.money(PLANS[2]['price'])}/mo, websites from $1,499, and à la carte social media, SEO and reputation management.", f'''
+page("pricing/", "Pricing", f"Landmark Digital plans: Launch {pricing.money(PLANS[0]['price'])}/mo, Grow {pricing.money(PLANS[1]['price'])}/mo, Scale {pricing.money(PLANS[2]['price'])}/mo, websites from $1,499, and à la carte social media, SEO and reputation management.", f'''
 {page_hero([("Pricing", "pricing/")], "Clear prices. No surprises.", "Every plan is month to month after an initial three months. Ad spend, if any, is billed to your own ad account. Everything we build stays yours.", btns(("Get a free audit first", "free-audit/"), ("Ask a question", "contact/", "btn-ghost")), eyebrow="Pricing")}
 <section class="section" id="plans"><div class="wrap">{head("Growth plans.", "Pick the plan that matches where you are. Upgrade any time.", "Monthly")}{plan_cards()}
-  <p class="fine center">All plans include onboarding, a monthly report, and access to the team by email and phone. Pulse Max covers up to 3 locations; add more at $450 per location per month.</p></div></section>
+  <p class="fine center">All plans include onboarding, a monthly report, and access to the team by email and phone. Scale covers up to 3 locations; add more at $450 per location per month.</p></div></section>
 <section class="section alt" id="roi"><div class="wrap roi">
   <div><p class="eyebrow">Worth it?</p><h2>What is one more <span class="hl">customer</span> worth to you?</h2><p class="lede">Move the sliders. This is the simple math we run with every client before they sign — and the number we report against every month.</p>
     <div class="roi-field"><label for="roi-ticket">Average sale per customer</label><output>$<b id="roi-ticket-v">120</b></output><input id="roi-ticket" type="range" min="20" max="2000" step="10" value="120"></div>
@@ -367,8 +367,8 @@ page("pricing/", "Pricing", f"CityPulse Digital plans: Pulse {pricing.money(PLAN
     <div class="roi-field"><label for="roi-repeat">Visits per customer per year</label><output><b id="roi-repeat-v">3</b>×</output><input id="roi-repeat" type="range" min="1" max="24" step="1" value="3"></div>
   </div>
   <div class="roi-card" data-roi><div class="roi-big"><span>Added revenue per year</span><b>$<i id="roi-rev">129,600</i></b></div>
-    <div class="roi-rows"><div><span>Pulse Pro, per year</span><b>$<i id="roi-cost">21,588</i></b></div><div><span>Return on every $1</span><b>$<i id="roi-x">6.00</i></b></div><div><span>Customers to break even</span><b><i id="roi-be">15</i> / month</b></div></div>
-    <div class="roi-bar"><i id="roi-fill"></i></div><p class="fine">Illustration only — based on your inputs and the Pulse Pro plan. We'll run it with your real numbers in the free audit.</p>
+    <div class="roi-rows"><div><span>Grow, per year</span><b>$<i id="roi-cost">21,588</i></b></div><div><span>Return on every $1</span><b>$<i id="roi-x">6.00</i></b></div><div><span>Customers to break even</span><b><i id="roi-be">15</i> / month</b></div></div>
+    <div class="roi-bar"><i id="roi-fill"></i></div><p class="fine">Illustration only — based on your inputs and the Grow plan. We'll run it with your real numbers in the free audit.</p>
     {btns(("Run it with my numbers", "free-audit/"))}</div>
 </div></section>
 <section class="section" id="compare"><div class="wrap">{head("Compare the plans.", "Every plan includes onboarding, a monthly report and a team on the phone.", "Side by side")}{plan_matrix()}</div></section>
@@ -379,14 +379,14 @@ page("pricing/", "Pricing", f"CityPulse Digital plans: Pulse {pricing.money(PLAN
 </div></section>
 <section class="section alt"><div class="wrap faq-wrap">
   <div>{head("Pricing questions.", "", "FAQ")}</div>
-  <div class="faq">{faq_html([FAQS[0], FAQS[4], FAQS[2], FAQS[7], ("Is there a setup fee?", "No setup fee on monthly plans. Website projects take a 50% deposit to start, with the balance due before launch."), ("What about ad spend?", "Paid campaigns run from your own Google or Meta ad account, so you pay the platform directly and keep the account history. Our management fee is included in Pulse Max or quoted separately.")])}</div>
+  <div class="faq">{faq_html([FAQS[0], FAQS[4], FAQS[2], FAQS[7], ("Is there a setup fee?", "No setup fee on monthly plans. Website projects take a 50% deposit to start, with the balance due before launch."), ("What about ad spend?", "Paid campaigns run from your own Google or Meta ad account, so you pay the platform directly and keep the account history. Our management fee is included in Scale or quoted separately.")])}</div>
 </div></section>
 {cta_band()}
 ''')
 
 # ---------------------------------------------------------------- work
-page("work/", "Our work", "Results from CityPulse Digital (formerly Landmark Digital Solutions): hotel websites that drive direct bookings, restaurant sites, brand refreshes and social media.", f'''
-{page_hero([("Work", "work/")], "Work that paid for itself.", "A selection of projects and results. Our team built and marketed websites for years as Landmark Digital Solutions before becoming CityPulse Digital — same people, bigger toolkit.", btns(("Start a project", "contact/")), eyebrow="Our work")}
+page("work/", "Our work", "Results from Landmark Digital: hotel websites that drive direct bookings, restaurant sites, brand refreshes and social media.", f'''
+{page_hero([("Work", "work/")], "Work that paid for itself.", "A selection of projects and results. Our team has built and marketed websites for hotels, restaurants and local businesses since 2017 — same people, bigger toolkit.", btns(("Start a project", "contact/")), eyebrow="Our work")}
 <section class="section"><div class="wrap">
   <article class="case"><div class="case-art lexen" aria-hidden="true"><span class="case-pill">Hospitality</span><b>Hotel Lexen</b><span>North Hollywood, CA</span></div>
     <div class="case-body"><p class="eyebrow">Case study</p><h2>1,000+ direct bookings in year one.</h2>
@@ -410,12 +410,12 @@ page("work/", "Our work", "Results from CityPulse Digital (formerly Landmark Dig
 ''')
 
 # ---------------------------------------------------------------- about / how we work / faqs
-page("about/", "About", "CityPulse Digital is a Phoenix digital marketing agency (formerly Landmark Digital Solutions) serving hotels, restaurants, practices and local businesses nationwide.", f'''
-{page_hero([("About", "about/")], "A Phoenix team with a national reach.", "We started as Landmark Digital Solutions, building websites and running marketing for hotels, restaurants and local businesses. In 2026 we became CityPulse Digital — alongside our sister company CityPulse Kiosks — with one idea: a business should be easy to find and easy to choose, online and in person.", btns(("Work with us", "contact/")), eyebrow="About CityPulse Digital")}
+page("about/", "About", "Landmark Digital is a Phoenix digital marketing agency serving hotels, restaurants, practices and local businesses nationwide.", f'''
+{page_hero([("About", "about/")], "A Phoenix team with a national reach.", "Landmark Digital has been building websites and running marketing for hotels, restaurants and local businesses since 2017. In 2026 we relaunched — alongside our sister company CityPulse Kiosks — with one idea: a business should be easy to find and easy to choose, online and in person.", btns(("Work with us", "contact/")), eyebrow="About Landmark Digital")}
 {platform_strip()}
 <section class="section"><div class="wrap two-col founder">
   <div>{photo("about-sarvesh.jpg", "founder-photo", sizes="(max-width: 980px) 100vw, 35vw")}</div>
-  <div><p class="eyebrow">Founder</p><h2>Built by someone who runs businesses too.</h2><p class="lede" style="margin-top:14px">Sarvesh Joshi founded CityPulse Digital after years of building websites and running marketing for hotels, restaurants and local businesses as Landmark Digital Solutions — and after owning and operating businesses himself. He also co-founded CityPulse Kiosks and leads AeroAssist Industries, a Phoenix drone-technology company. The common thread: practical systems that get customers in the door.</p>{btns(("Talk to Sarvesh", "contact/", "btn-dark"))}</div>
+  <div><p class="eyebrow">Founder</p><h2>Built by someone who runs businesses too.</h2><p class="lede" style="margin-top:14px">Sarvesh Joshi founded Landmark Digital after years of building websites and running marketing for hotels, restaurants and local businesses — and after owning and operating businesses himself. He also co-founded CityPulse Kiosks and leads AeroAssist Industries, a Phoenix drone-technology company. The common thread: practical systems that get customers in the door.</p>{btns(("Talk to Sarvesh", "contact/", "btn-dark"))}</div>
 </div></section>
 {photo_band("about-office.jpg", "Phoenix, Arizona", "Small team. Big toolkit.", "We're based at 4750 S 44th Place in Phoenix, in the same building as CityPulse Kiosks, and work with clients across the US by video, email and one shared monthly plan.")}
 <section class="section"><div class="wrap">{head("What it's like to work with us.", "", "Our values")}{value_cards()}</div></section>
@@ -425,22 +425,22 @@ page("about/", "About", "CityPulse Digital is a Phoenix digital marketing agency
   <div><h3>Small business is the whole business</h3><p>Independent hotels, restaurants, practices and trades. The work that decides whether this month is a good one.</p></div>
 </div></section>
 <section class="section"><div class="wrap">
-  {head("From Landmark Digital to CityPulse Digital.", "", "Our story")}
+  {head("Nine years of getting businesses found.", "", "Our story")}
   <ol class="timeline wide">
-    <li><b>2017</b><span>Landmark Digital Solutions starts building websites and running marketing for hotels, restaurants and local businesses.</span></li>
+    <li><b>2017</b><span>Landmark Digital starts building websites and running marketing for hotels, restaurants and local businesses.</span></li>
     <li><b>2019–2023</b><span>350+ websites, $50M+ in direct bookings driven for clients, and the Hotel Lexen site that proved the booking-first approach.</span></li>
-    <li><b>2026</b><span>CityPulse Kiosks launches concierge kiosks in hotel lobbies. Landmark Digital becomes CityPulse Digital, so the same clients are served online and in the room.</span></li>
+    <li><b>2026</b><span>CityPulse Kiosks launches concierge kiosks in hotel lobbies. Landmark Digital relaunches with a bigger toolkit, so the same clients are served online and in the room.</span></li>
     <li><b>Today</b><span>A Phoenix team serving clients nationwide, with AI search visibility added to the toolkit.</span></li>
   </ol>
 </div></section>
 <section class="section alt"><div class="wrap two-col">
-  <div>{head("Two companies, one pulse.", "", "The CityPulse family")}<p>CityPulse Kiosks puts touch-screen concierge kiosks in hotel lobbies, waiting rooms and dealerships, and sells the ad space on them to local businesses. CityPulse Digital takes care of those same businesses online. Clients of one get introductions, bundles and a team that already knows them.</p>{btns(("Visit CityPulse Kiosks", KIOSKS_URL, "btn-ghost"))}</div>
+  <div>{head("Two companies, one team.", "", "Our sister company")}<p>CityPulse Kiosks puts touch-screen concierge kiosks in hotel lobbies, waiting rooms and dealerships, and sells the ad space on them to local businesses. Landmark Digital takes care of those same businesses online. Clients of one get introductions, bundles and a team that already knows them.</p>{btns(("Visit CityPulse Kiosks", KIOSKS_URL, "btn-ghost"))}</div>
   <aside class="callout"><b>Phoenix, Arizona</b><p>{ADDR1}<br>{ADDR2}</p><p><a class="text-link" href="tel:{TEL}">{PHONE}</a><br><a class="text-link" href="mailto:{EMAIL}">{EMAIL}</a></p></aside>
 </div></section>
 {cta_band()}
 ''', active="company")
 
-page("how-we-work/", "How we work", "From a free audit to a one-page plan, a 30-day build and monthly growth — how a CityPulse Digital engagement runs.", f'''
+page("how-we-work/", "How we work", "From a free audit to a one-page plan, a 30-day build and monthly growth — how a Landmark Digital engagement runs.", f'''
 {page_hero([("Company", "about/"), ("How we work", "how-we-work/")], "Audit. Plan. Build. Grow.", "Every engagement runs the same way, whether you need one service or all of them. Here's what happens, and when.", btns(("Start with the audit", "free-audit/")), eyebrow="How we work")}
 <section class="section"><div class="wrap"><h2 class="sr">The four steps</h2>{process_steps()}</div></section>
 <section class="section alt"><div class="wrap">
@@ -459,7 +459,7 @@ page("how-we-work/", "How we work", "From a free audit to a one-page plan, a 30-
 {cta_band()}
 ''', extra_js=("labs.js",), active="company")
 
-page("faqs/", "Common questions", "Answers about contracts, pricing, reporting, ownership and how CityPulse Digital works with clients.", f'''
+page("faqs/", "Common questions", "Answers about contracts, pricing, reporting, ownership and how Landmark Digital works with clients.", f'''
 {page_hero([("Company", "about/"), ("Common questions", "faqs/")], "A little clarity before you start.", "The questions we hear most, answered the way we'd answer them on a call.", eyebrow="Questions")}
 <section class="section"><div class="wrap narrow"><div class="faq">{faq_html(FAQS + [f for s in SERVICES for f in s["faqs"][:1]])}</div></div></section>
 {cta_band(h="Still have a question?", p="Ask it. We answer every message within one business day.", primary=("Contact us", "contact/"), secondary=("Get a free audit", "free-audit/"))}
@@ -474,12 +474,12 @@ page("free-audit/", "Free digital audit", "Free digital marketing audit: your we
 {cta_band(h="Rather just talk?", p="Call or email and we'll walk through it together.", primary=("Contact us", "contact/"), secondary=("See pricing", "pricing/"))}
 ''', extra_js=("scorecard.js", "labs.js"))
 
-page("contact/", "Contact", "Contact CityPulse Digital in Phoenix, Arizona — websites, SEO, social media and reputation management for local businesses nationwide.", f'''
+page("contact/", "Contact", "Contact Landmark Digital in Phoenix, Arizona — websites, SEO, social media and reputation management for local businesses nationwide.", f'''
 {page_hero([("Contact", "contact/")], "Let's talk about your business.", "Tell us what you're trying to do and we'll come back within one business day with honest next steps.", eyebrow="Contact", aside=f'<div class="contact-card"><a href="tel:{TEL}">{icon("phone","")}<span>{PHONE}</span></a><a href="mailto:{EMAIL}">{icon("mail","")}<span>{EMAIL}</span></a><p>{icon("pin","")}<span>{ADDR1}<br>{ADDR2}</span></p><p class="fine">Mon–Fri, 8am–6pm Arizona time</p></div>')}
 {form_section("message", "Send a message.", "Or skip the form and call — we like talking to owners.", ["Tell us about your goals", "We reply within one business day", "If it's a fit, you get a one-page plan"], contact_form()).replace('<div class="talk">', photo("audit-call.jpg", "form-photo", sizes="(max-width: 980px) 100vw, 35vw") + '<div class="talk">', 1)}
 ''', active="company")
 
-page("support/", "Client support", "Support for current CityPulse Digital clients: website changes, social media, reviews and listings, reports and billing.", f'''
+page("support/", "Client support", "Support for current Landmark Digital clients: website changes, social media, reviews and listings, reports and billing.", f'''
 {page_hero([("Company", "about/"), ("Client support", "support/")], "What can we help with?", "For current clients. Website changes, social posts, review or listing issues, reports and billing — send it here and it goes straight to your account team.", eyebrow="Support", aside=f'<div class="contact-card"><a href="mailto:{SUPPORT}">{icon("mail","")}<span>{SUPPORT}</span></a><a href="tel:{TEL}">{icon("phone","")}<span>{PHONE}</span></a><p class="fine">Urgent (site down, wrong information live): call us.</p></div>')}
 {form_section("request", "Send a request.", "Include links and we'll email you for screenshots if we need them.", ["Describe the request", "We confirm and give you a time", "You get a note when it's done"], support_form())}
 ''', active="company")
@@ -491,9 +491,9 @@ def legal_page(path, title, items, intro):
     return f'''<section class="page-hero"><div class="wrap narrow">{crumbs([(title, path)])}<h1>{title}</h1><p class="updated">Effective {legal.EFFECTIVE} · {legal.LEGAL}</p><p class="lede">{intro}</p></div></section>
 <section class="section"><div class="wrap article"><aside class="toc"><b>On this page</b><ol>{toc}</ol></aside><div class="prose legal">{body}</div></div></section>'''
 
-page("terms/", "Terms & Conditions", "Terms and conditions for citypulsedigi.com and City Pulse Digital LLC services.",
+page("terms/", "Terms & Conditions", "Terms and conditions for landmarkdigi.com and Landmark Digital LLC services.",
      legal_page("terms/", "Terms &amp; Conditions", legal.TERMS, "The rules for using this site and buying our services, in plain language."))
-page("privacy/", "Privacy Policy", "How City Pulse Digital LLC collects, uses and protects information.",
+page("privacy/", "Privacy Policy", "How Landmark Digital LLC collects, uses and protects information.",
      legal_page("privacy/", "Privacy Policy", legal.PRIVACY, "What we collect, why, and what we don't do with it."))
 
 # ---------------------------------------------------------------- 404

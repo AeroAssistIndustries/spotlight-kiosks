@@ -1,4 +1,4 @@
-"""Deep content for the CityPulse Digital site: service feature sections, industry pages,
+"""Deep content for the Landmark Digital site: service feature sections, industry pages,
 customer stories and guides. Edit here; build.py lays it out."""
 
 # ---------------------------------------------------------------- service pages: feature sections
@@ -46,9 +46,9 @@ FEATURES = {
   expect=[("Month 1", "Audit, fixes, Google Business Profile overhaul, keyword map. Profile views and calls usually move first."), ("Months 2–3", "Content and citations land. Map-pack positions improve for your main services."), ("Months 4–6", "Organic rankings for competitive terms. Leads from search measurable and growing."), ("Ongoing", "Defend, expand to new services and areas, and adapt to Google's changes.")],
   faqs=[("How long until SEO works?", "Google Business Profile improvements often show within weeks. Competitive organic rankings usually take 3–6 months of consistent work."),
         ("Do you guarantee page one?", "No one honest does. We guarantee the work, transparent reporting and a plan built on your real competition."),
-        ("What is AI search visibility?", "People now ask ChatGPT, Gemini and Perplexity for recommendations. We structure your content and data so those engines understand and cite your business. It's included in Pulse Pro."),
+        ("What is AI search visibility?", "People now ask ChatGPT, Gemini and Perplexity for recommendations. We structure your content and data so those engines understand and cite your business. It's included in Grow."),
         ("Do I need a new website for SEO?", "Not always. If the site is sound we work with it. If it's slow or hard to edit, we'll tell you and quote a rebuild."),
-        ("Can you do SEO for multiple locations?", "Yes. Pulse Max covers up to three locations with their own profiles, pages and reports; more at $450 per location."),
+        ("Can you do SEO for multiple locations?", "Yes. Scale covers up to three locations with their own profiles, pages and reports; more at $450 per location."),
         ("Do you use AI to write content?", "We use AI tools for research and drafts, and people for the final word. Everything is fact-checked, in your voice and approved by you.")],
 ),
 "social-media": dict(
@@ -69,7 +69,7 @@ FEATURES = {
   expect=[("Week 1", "Brand kit, voice notes, platform audit, first calendar."), ("Month 1", "Consistent posting starts. Profiles cleaned up and optimized."), ("Months 2–3", "Engagement climbs as the audience learns to expect you. Best-performing formats doubled down."), ("Ongoing", "Seasonal campaigns, video, paid boosts when there's something to push.")],
   faqs=[("Which platforms should I be on?", "Where your customers are. For most local businesses that means Instagram, Facebook and Google; for B2B it's LinkedIn. We'll recommend 2–3 and do them well."),
         ("Do I need to send you content?", "Photos and short clips from your phone go a long way. We give you a simple monthly shot list, and we handle the rest."),
-        ("Can you run ads too?", "Yes. Paid social and Google Ads are included in Pulse Max, or added to any plan. Ad spend is billed to your own ad account."),
+        ("Can you run ads too?", "Yes. Paid social and Google Ads are included in Scale, or added to any plan. Ad spend is billed to your own ad account."),
         ("Who answers the comments?", "We do, on business days, within a business day. Anything sensitive comes to you first."),
         ("Do I approve posts?", "Yes — the whole month at once, from one link. Most clients spend five minutes on it."),
         ("Can you take over my existing accounts?", "Yes. You add us as a manager; the accounts stay yours and we never need your password.")],
@@ -132,7 +132,7 @@ FEATURES = {
   faqs=[("Is this just SEO with a new name?", "It overlaps, but AI engines weigh different signals: structured data, third-party mentions and content that answers a question directly. We do both."),
         ("How do you measure it?", "We run a set of real customer prompts every month and report whether and how your business is mentioned."),
         ("Does it work for a small local business?", "Often better than for big brands — local questions have fewer competitors and AI engines lean heavily on Google Business Profile data."),
-        ("Is it included in a plan?", "Yes, in Pulse Pro and Pulse Max. On its own it's $299 a month.")],
+        ("Is it included in a plan?", "Yes, in Grow and Scale. On its own it's $299 a month.")],
 ),
 }
 
@@ -153,13 +153,13 @@ INDUSTRY_DETAIL = {
   faqs=[("Can you help us get more direct bookings?", "That's the whole point. A fast booking-first site, a direct-rate promise, retargeting and a Google profile that sends guests to you instead of an OTA."),
         ("Do you work with our booking engine?", "Yes — Cloudbeds, SiteMinder, Mews, Little Hotelier, WebRezPro and most others connect cleanly."),
         ("How do you handle TripAdvisor?", "Listing optimized, reviews answered within a business day, management responses in the hotel's voice."),
-        ("Can guests see our ad on the CityPulse kiosk too?", "Yes. CityPulse Kiosks puts a concierge kiosk in your lobby at no cost to the hotel, and your neighborhood partners can advertise on it.")],
+        ("Can guests see our ad on the Landmark kiosk too?", "Yes. CityPulse Kiosks puts a concierge kiosk in your lobby at no cost to the hotel, and your neighborhood partners can advertise on it.")],
 ),
 "restaurants": dict(
   title="Restaurant & bar marketing", tagline="Full tables start on a phone.",
   intro="Someone standing on a corner asking their phone 'where should we eat?' is your next table. The answer comes from Google Maps, reviews, Instagram and, increasingly, an AI assistant. We make sure your menu loads instantly, your profile shows tonight's special and your feed makes people hungry.",
   segments=["Independent restaurants", "Bars & lounges", "Cafés & bakeries", "Fast casual & food halls", "Multi-location groups"],
-  tiles=[("90%", "of diners research a restaurant online before visiting"), ("1 day", "to answer every review"), ("16", "designed posts a month on Pulse Pro")],
+  tiles=[("90%", "of diners research a restaurant online before visiting"), ("1 day", "to answer every review"), ("16", "designed posts a month on Grow")],
   approach=[("A menu-first website", "Menu, hours, reservations and ordering above the fold, loading in under two seconds. Menu schema so Google shows dishes in search."),
             ("Google profile that sells tonight", "Weekly posts for specials and events, menu and photos kept current, reservation and order links connected."),
             ("Reviews that fill tables", "QR cards on tables and receipts, every review answered within a business day, kitchen feedback summarized weekly."),
@@ -267,7 +267,7 @@ GUIDES = [
          ("6. Posts, Q&A and messaging", "<ul><li>Post weekly: an update, an offer or an event. Posts expire from view, so consistency matters more than polish.</li><li>Seed the Q&A with the five questions customers ask most, and answer them yourself.</li><li>Turn on messaging only if someone will answer within a few hours; otherwise leave it off.</li></ul>"),
          ("7. Reviews", "<p>Ask every customer, automatically, after every visit — by text or email with the direct review link. Reply to every review within a business day. Rating, recency, volume and response rate all influence ranking, and all four influence the customer reading them.</p>"),
          ("8. Check it monthly", "<p>Google changes categories, adds attributes and sometimes accepts public “edits” to your profile. Once a month: check the facts, read the insights (searches, calls, directions), add photos, and compare your rating and review count with the three competitors above and below you in the map.</p>")],
-       cta=("Want it done for you?", "Local listings management is included in every CityPulse Digital plan, or on its own from $499/mo with local SEO.")),
+       cta=("Want it done for you?", "Local listings management is included in every Landmark Digital plan, or on its own from $499/mo with local SEO.")),
   dict(slug="get-more-google-reviews", seo="How to get more Google reviews", cat="Reputation", title="How to get more Google reviews (without breaking the rules)", lede="A system that asks every customer, every time — and why that's better than any incentive.", read="6 min",
        sections=[
          ("The math of reviews", "<p>A business with a 4.7 rating and 300 recent reviews beats a 4.9 with 40 old ones, in Google's ranking and in the customer's mind. Recency and volume signal that you're busy and consistent. The only reliable way to get both is to ask everyone, every time, automatically.</p>"),
@@ -294,7 +294,7 @@ GUIDES = [
          ("4. Earn third-party mentions", "<p>Engines trust what others say about you more than what you say. Local press, chamber listings, partner websites, “best of” lists and guides all count. Pitch the local ones; they're easier than you think.</p>"),
          ("5. Measure it", "<p>Make a list of 10–20 questions your customers would ask an assistant. Once a month, ask each engine and record whether you're mentioned, where, and who else is. Watch for AI referrers (chatgpt.com, perplexity.ai) in your analytics. That's your GEO scorecard.</p>"),
          ("The good news", "<p>Everything above also improves traditional SEO and your Google Business Profile. There's no trade-off — it's the same work, done more carefully.</p>")],
-       cta=("AI search visibility is included in Pulse Pro", "Or on its own for $299/mo: audit, schema, answer-first content and a monthly visibility report.")),
+       cta=("AI search visibility is included in Grow", "Or on its own for $299/mo: audit, schema, answer-first content and a monthly visibility report.")),
   dict(slug="restaurant-social-media-calendar", seo="Restaurant social media calendar", cat="Social media", title="A month of restaurant social media, planned in an hour", lede="A repeatable content calendar that fills a feed without a full-time marketer.", read="6 min",
        sections=[
          ("The problem with 'post when you can'", "<p>Feeds go quiet because nobody decided what Tuesday's post was. A calendar removes the decision: every week has the same shape, and you only fill in the specifics. One hour at the start of the month and a few phone clips during service are enough.</p>"),

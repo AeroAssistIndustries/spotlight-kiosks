@@ -1,11 +1,11 @@
-"""Terms & Conditions and Privacy Policy content for City Pulse Digital LLC.
+"""Terms & Conditions and Privacy Policy content for Landmark Digital LLC.
 Adapted from the CityPulse Kiosks terms (same company group, same address)."""
 EFFECTIVE = "October 14, 2026"
-LEGAL = "City Pulse Digital LLC"
-SHORT = "CityPulse Digital"
-DOMAIN = "citypulsedigi.com"
-EMAIL = "hello@citypulsedigi.com"
-SUPPORT = "support@citypulsedigi.com"
+LEGAL = "Landmark Digital LLC"
+SHORT = "Landmark Digital"
+DOMAIN = "landmarkdigi.com"
+EMAIL = "hello@landmarkdigi.com"
+SUPPORT = "support@landmarkdigi.com"
 PHONE = "602-887-4058"
 ADDRESS = f"{LEGAL}, 4750 S 44th Pl, Suite E20, Phoenix, AZ 85040"
 
@@ -29,7 +29,7 @@ TERMS = [
 ("Inquiries, quotes and agreements", f"""<p>Nothing on the Site is an offer to provide Services. Package pricing, inclusions and timelines described on the Site are a starting point and are confirmed in a written proposal, order confirmation or service agreement (each an “Agreement”). If anything on the Site conflicts with an Agreement, the Agreement controls.</p>
 <p>Prices shown are in US dollars and exclude applicable taxes unless stated otherwise. Advertising spend paid to platforms such as Google, Meta or TikTok is separate from our fees and is billed to your own advertising account. We may change published prices at any time; changes don't affect an Agreement you've already signed.</p>"""),
 
-("Monthly plans, billing and cancellation", f"""<p><b>What you're buying.</b> A monthly plan (for example Pulse, Pulse Pro or Pulse Max, or a stand-alone service) buys the services listed in your Agreement for the business and locations named in it, at the monthly price shown.</p>
+("Monthly plans, billing and cancellation", f"""<p><b>What you're buying.</b> A monthly plan (for example Launch, Grow or Scale, or a stand-alone service) buys the services listed in your Agreement for the business and locations named in it, at the monthly price shown.</p>
 <p><b>Payment.</b> Monthly plans are billed in advance each month by card or ACH through our payment processor (currently Stripe), or by invoice where agreed. By starting a plan, you authorize us to charge your payment method each month until the plan ends. Work may be paused if a payment is more than 10 days late.</p>
 <p><b>Initial term.</b> Monthly plans have an initial term of three months, because search, social and reputation work needs time to show results. After the initial term, the plan continues month to month.</p>
 <p><b>Cancelling.</b> After the initial term, either of us may cancel a monthly plan with 30 days' written notice by email to <a href="mailto:{EMAIL}">{EMAIL}</a>. Cancellation takes effect at the end of the period you've already paid for. Except as described in these Terms or required by law, payments are non-refundable and we don't give partial refunds for unused time.</p>
@@ -92,7 +92,7 @@ PRIVACY = [
 ("How we use information", """<ul><li>to respond to inquiries, audit requests and support requests;</li>
 <li>to prepare proposals and quotes, and to provide, manage and bill for the Services;</li>
 <li>to produce reports for you about your marketing;</li>
-<li>to send service messages and, with your permission or where the law allows, occasional updates about CityPulse that you can opt out of at any time;</li>
+<li>to send service messages and, with your permission or where the law allows, occasional updates about Landmark Digital that you can opt out of at any time;</li>
 <li>to comply with legal obligations and to protect our rights, our users and the public.</li></ul>
 <p>We don't sell your personal information, and we don't share it with third parties for their own marketing.</p>"""),
 
@@ -100,7 +100,7 @@ PRIVACY = [
 <ul><li><b>Service providers</b> who help us run the business — for example Stripe for payments, our web host and email provider, scheduling, listings, review-request and reporting tools, design and project tools, and accounting — under obligations to protect it;</li>
 <li><b>Platforms</b> such as Google, Meta, Apple, Yelp and advertising networks, when we publish content, manage listings or run campaigns on your behalf, under their own policies;</li>
 <li><b>Legal and safety</b> reasons, when required by law, legal process or to protect rights, property or safety;</li>
-<li><b>Business transfers</b>, if CityPulse is involved in a merger, acquisition or sale of assets, in which case this policy continues to apply to the information transferred.</li></ul>"""),
+<li><b>Business transfers</b>, if Landmark is involved in a merger, acquisition or sale of assets, in which case this policy continues to apply to the information transferred.</li></ul>"""),
 
 ("Third-party websites", """<p>Links on the Site may take you to websites run by others, including our sister company CityPulse Kiosks and the platforms we work with. Their collection and use of your information is governed by their own privacy policies, not this one.</p>"""),
 

@@ -1,4 +1,4 @@
-/* CityPulse Digital — home page: the digital presence score card fills in once it's on screen */
+/* Landmark Digital — home page: the digital presence score card fills in once it's on screen */
 (function () {
   "use strict";
   const card = document.querySelector("[data-score]");

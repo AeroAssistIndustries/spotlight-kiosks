@@ -1,4 +1,4 @@
-/* CityPulse Digital — instant digital-presence scorecard (runs entirely in the browser) */
+/* Landmark Digital — instant digital-presence scorecard (runs entirely in the browser) */
 (function () {
   "use strict";
   const form = document.querySelector("[data-scorecard]");

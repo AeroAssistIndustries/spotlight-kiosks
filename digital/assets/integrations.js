@@ -2,7 +2,7 @@
    Forms and checkout call these helpers; providers are chosen in assets/config.js. */
 (function () {
   "use strict";
-  const CFG = window.CITYPULSE_CONFIG || {};
+  const CFG = window.LANDMARK_CONFIG || {};
   const forms = CFG.forms || {}, pay = CFG.payments || {};
   const provider = forms.provider || "none";
 
@@ -31,7 +31,7 @@
         return r.ok;
       }
       if (provider === "wordpress") {
-        const fd = new FormData(); fd.set("action", "citypulse_submit");
+        const fd = new FormData(); fd.set("action", "landmark_submit");
         Object.entries(data).forEach(([k, v]) => fd.set(k, v));
         const r = await fetch(forms.ajaxUrl, { method: "POST", body: fd, credentials: "same-origin" });
         const j = await r.json().catch(() => ({}));
@@ -59,7 +59,7 @@
       return true;
     }
     if (provider === "wordpress") {
-      const fd = new FormData(form); fd.set("action", "citypulse_submit");
+      const fd = new FormData(form); fd.set("action", "landmark_submit");
       Object.entries(fields).forEach(([k, v]) => fd.set(k, v));
       try {
         const r = await fetch(forms.ajaxUrl, { method: "POST", body: fd, credentials: "same-origin" });
@@ -94,5 +94,5 @@
     } catch (e) { return ""; }
   }
 
-  window.CityPulse = { formsReady, send, sendWithFiles, paymentLink, maxUploadMB: CFG.maxUploadMB || 5 };
+  window.Landmark = { formsReady, send, sendWithFiles, paymentLink, maxUploadMB: CFG.maxUploadMB || 5 };
 })();

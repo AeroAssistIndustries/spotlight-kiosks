@@ -1,4 +1,4 @@
-/* CityPulse Digital — home hero "signal field": a live network of search, review, social and map
+/* Landmark Digital — home hero "signal field": a live network of search, review, social and map
    signals flowing toward the business, plus live notifications and a typing search demo. */
 (function () {
   "use strict";

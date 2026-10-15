@@ -1,4 +1,4 @@
-/* CityPulse Digital — site behavior: menus, forms, scroll reveals, sticky phone bar */
+/* Landmark Digital — site behavior: menus, forms, scroll reveals, sticky phone bar */
 (function () {
   "use strict";
   const $ = (s, r = document) => r.querySelector(s);
@@ -52,10 +52,10 @@
       if (f.tagName === "SELECT") { const o = [...f.options].find(o => o.value === v || o.text === v); if (o) f.value = o.value; }
       else if (!f.value) f.value = v;
     });
-    // ?plan=pulse-pro preselects the interest on the contact form
+    // ?plan=grow preselects the interest on the contact form
     const plan = params.get("plan"), interest = form.elements["Interest"];
     if (plan && interest) {
-      const map = { pulse: "Everything — a growth plan", "pulse-pro": "Everything — a growth plan", "pulse-max": "Everything — a growth plan", website: "Website design" };
+      const map = { launch: "Everything — a growth plan", grow: "Everything — a growth plan", scale: "Everything — a growth plan", website: "Website design" };
       const o = [...interest.options].find(o => o.text === map[plan]); if (o) interest.value = o.value;
       const msg = form.elements["Message"]; if (msg && !msg.value && plan !== "website") msg.value = `I'm interested in the ${plan.replace("-", " ").replace(/\b\w/g, c => c.toUpperCase())} plan.\n\n`;
     }
@@ -88,8 +88,8 @@
       });
       const nameField = form.elements[form.dataset.subjectField || "Business"];
       const subject = form.dataset.subject + (nameField && nameField.value.trim() ? ` — ${nameField.value.trim()}` : "");
-      const body = `Hello CityPulse Digital team,\n\n${lines.join("\n")}\n\nThank you.`;
-      const btn = $("button[type=submit]", form), api = window.CityPulse;
+      const body = `Hello Landmark Digital team,\n\n${lines.join("\n")}\n\nThank you.`;
+      const btn = $("button[type=submit]", form), api = window.Landmark;
       let sent = false;
       if (api && api.formsReady()) {
         btn.disabled = true; const t = btn.textContent; btn.textContent = "Sending…";

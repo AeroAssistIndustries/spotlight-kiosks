@@ -1,4 +1,4 @@
-/* CityPulse Digital — site-wide effects: scroll progress, cursor-lit cards, gradient ring on the score card */
+/* Landmark Digital — site-wide effects: scroll progress, cursor-lit cards, gradient ring on the score card */
 (function () {
   "use strict";
   const reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;

@@ -1,11 +1,11 @@
-"""Packages and prices for CityPulse Digital. Edit here; every page and the theme pick it up."""
+"""Packages and prices for Landmark Digital. Edit here; every page and the theme pick it up."""
 
 def money(n):
     return f"${n:,.0f}"
 
 # Monthly growth plans (the main offer). "popular" marks the highlighted card.
 PLANS = [
-    dict(id="pulse", name="Pulse", price=899, tagline="Get found and look the part.",
+    dict(id="launch", name="Launch", price=899, tagline="Get found and look the part.",
          who="Single-location businesses that need the basics done right, every month.",
          includes=[
              "Google Business Profile setup and weekly optimization",
@@ -15,10 +15,10 @@ PLANS = [
              "Social media on 2 platforms — 8 posts a month, designed and scheduled",
              "Monthly performance report in plain English",
          ]),
-    dict(id="pulse-pro", name="Pulse Pro", price=1799, popular=True, tagline="Rank, grow and keep your reputation ahead.",
+    dict(id="grow", name="Grow", price=1799, popular=True, tagline="Rank, grow and keep your reputation ahead.",
          who="Businesses competing for local search and ready to grow on every channel.",
          includes=[
-             "Everything in Pulse",
+             "Everything in Launch",
              "Local SEO: keyword strategy, on-page work, technical fixes and local content",
              "AI search visibility — getting cited by ChatGPT, Gemini and Perplexity",
              "Social media on 3 platforms — 16 posts a month plus stories and community replies",
@@ -26,10 +26,10 @@ PLANS = [
              "Website care: updates, backups, security and speed",
              "Quarterly strategy call",
          ]),
-    dict(id="pulse-max", name="Pulse Max", price=2999, tagline="A full marketing department, without the payroll.",
+    dict(id="scale", name="Scale", price=2999, tagline="A full marketing department, without the payroll.",
          who="Multi-location brands, hotels and groups that need a team behind them.",
          includes=[
-             "Everything in Pulse Pro",
+             "Everything in Grow",
              "Up to 3 locations included (more at $450 per location)",
              "Content: 2 blog articles or landing pages a month",
              "Paid social and Google Ads management (ad spend billed separately)",

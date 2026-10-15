@@ -1,6 +1,6 @@
 """Export the site as an installable WordPress theme.
 Run:  python3 build/export_wp.py
-Output: dist/citypulse-digital-theme/ and dist/citypulse-digital-theme.zip
+Output: dist/landmark-digital-theme/ and dist/landmark-digital-theme.zip
 
 Page content is stored in WordPress as Custom HTML blocks so it can be edited in the page
 editor. Links and asset paths are written as {{CP_HOME}} and {{CP_ASSETS}} tokens and resolved
@@ -13,8 +13,8 @@ from lib import PAGE_DATA, NAV, icon, footer, e, EMAIL, PHONE, TEL, ADDR1, ADDR2
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DIST = os.path.join(ROOT, "dist")
-THEME = os.path.join(DIST, "citypulse-digital-theme")
-VERSION = "1.2.0"
+THEME = os.path.join(DIST, "landmark-digital-theme")
+VERSION = "2.0.0"
 FORMS_TO = "sarvesh.joshiaz@gmail.com"
 
 def tok(html):
@@ -61,7 +61,7 @@ def wp_header():
     return php(f'''<?php
 /**
  * Site header. Navigation mirrors the static site; edit the links here.
- * @package CityPulseDigital
+ * @package LandmarkDigital
  */
 ?><!doctype html>
 <html <?php language_attributes(); ?>>
@@ -87,28 +87,28 @@ def wp_header():
 
 def wp_footer():
     f = footer().replace('<span id="year">2026</span>', "<?php echo esc_html( gmdate( 'Y' ) ); ?>")
-    return "<?php\n/**\n * Site footer.\n * @package CityPulseDigital\n */\n?>\n" + php(f) + "\n<?php wp_footer(); ?>\n</body>\n</html>\n"
+    return "<?php\n/**\n * Site footer.\n * @package LandmarkDigital\n */\n?>\n" + php(f) + "\n<?php wp_footer(); ?>\n</body>\n</html>\n"
 
 # ------------------------------------------------------------------ PHP files
 STYLE = f"""/*
-Theme Name: CityPulse Digital
+Theme Name: Landmark Digital
 Theme URI: https://{DOMAIN}
 Author: {LEGAL}
-Description: Website theme for CityPulse Digital — websites, SEO, social media, reputation management and AI search visibility for local businesses. Activate it and all site pages are created for you.
+Description: Website theme for Landmark Digital — websites, SEO, social media, reputation management and AI search visibility for local businesses. Activate it and all site pages are created for you.
 Version: {VERSION}
 Requires at least: 6.0
 Tested up to: 6.8
 Requires PHP: 7.4
 License: Proprietary
-Text Domain: citypulsedigital
+Text Domain: landmarkdigital
 */
 /* The real styles live in assets/styles.css (enqueued in functions.php). */
 """
 
 FUNCTIONS = r"""<?php
 /**
- * CityPulse Digital theme functions.
- * @package CityPulseDigital
+ * Landmark Digital theme functions.
+ * @package LandmarkDigital
  */
 defined( 'ABSPATH' ) || exit;
 
@@ -132,7 +132,7 @@ add_action( 'wp_enqueue_scripts', function () {
 	wp_enqueue_style( 'cpd', $uri . 'styles.css', array( 'cpd-fonts' ), $v );
 	wp_enqueue_style( 'cpd-future', $uri . 'future.css', array( 'cpd' ), $v );
 	wp_enqueue_script( 'cpd-integrations', $uri . 'integrations.js', array(), $v, true );
-	wp_add_inline_script( 'cpd-integrations', 'window.CITYPULSE_CONFIG = ' . wp_json_encode( cpd_public_config() ) . ';', 'before' );
+	wp_add_inline_script( 'cpd-integrations', 'window.LANDMARK_CONFIG = ' . wp_json_encode( cpd_public_config() ) . ';', 'before' );
 	if ( is_front_page() ) {
 		wp_enqueue_script( 'cpd-home', $uri . 'home.js', array(), $v, true );
 		wp_enqueue_script( 'cpd-hero', $uri . 'hero-fx.js', array(), $v, true );
@@ -161,7 +161,7 @@ add_action( 'wp_head', function () {
 		echo '<meta property="og:description" content="' . esc_attr( $desc ) . "\">\n";
 		echo '<meta property="og:image" content="' . esc_url( $uri . 'og-card.png' ) . "\">\n";
 		echo "<meta property=\"og:image:width\" content=\"1200\">\n<meta property=\"og:image:height\" content=\"630\">\n";
-		echo "<meta property=\"og:site_name\" content=\"CityPulse Digital\">\n";
+		echo "<meta property=\"og:site_name\" content=\"Landmark Digital\">\n";
 		echo "<meta name=\"twitter:card\" content=\"summary_large_image\">\n";
 		echo '<meta name="twitter:title" content="' . esc_attr( wp_get_document_title() ) . "\">\n";
 		echo '<meta name="twitter:description" content="' . esc_attr( $desc ) . "\">\n";
@@ -188,8 +188,8 @@ add_action( 'wp_head', function () {
 	// Local business structured data.
 	if ( is_front_page() ) {
 		echo '<script type="application/ld+json">' . wp_json_encode( array(
-			'@context' => 'https://schema.org', '@type' => 'ProfessionalService', 'name' => 'CityPulse Digital',
-			'legalName' => 'City Pulse Digital LLC', 'url' => home_url( '/' ), 'logo' => $uri . 'logo.png', 'image' => $uri . 'og-card.png',
+			'@context' => 'https://schema.org', '@type' => 'ProfessionalService', 'name' => 'Landmark Digital',
+			'legalName' => 'Landmark Digital LLC', 'url' => home_url( '/' ), 'logo' => $uri . 'logo.png', 'image' => $uri . 'og-card.png',
 			'telephone' => '+1-602-887-4058', 'email' => '__EMAIL__',
 			'address' => array( '@type' => 'PostalAddress', 'streetAddress' => '4750 S 44th Pl, Suite E20', 'addressLocality' => 'Phoenix', 'addressRegion' => 'AZ', 'postalCode' => '85040', 'addressCountry' => 'US' ),
 			'areaServed' => 'US', 'priceRange' => '$$',
@@ -267,7 +267,7 @@ function cpd_current_class( $key, $hrefs ) {
 PAGE_PHP = """<?php
 /**
  * Default page template. Page content is edited in the block editor (Custom HTML blocks).
- * @package CityPulseDigital
+ * @package LandmarkDigital
  */
 get_header(); ?>
 <main id="main">
@@ -284,12 +284,12 @@ endwhile;
 INDEX_PHP = """<?php
 /**
  * Fallback template (posts, archives, search).
- * @package CityPulseDigital
+ * @package LandmarkDigital
  */
 get_header(); ?>
 <main id="main">
 <section class="page-hero"><div class="wrap narrow">
-	<h1><?php echo is_search() ? esc_html__( 'Search results', 'citypulsedigital' ) : esc_html( wp_strip_all_tags( get_the_archive_title() ?: get_bloginfo( 'name' ) ) ); ?></h1>
+	<h1><?php echo is_search() ? esc_html__( 'Search results', 'landmarkdigital' ) : esc_html( wp_strip_all_tags( get_the_archive_title() ?: get_bloginfo( 'name' ) ) ); ?></h1>
 </div></section>
 <section class="section"><div class="wrap narrow prose">
 <?php if ( have_posts() ) : while ( have_posts() ) : the_post(); ?>
@@ -298,7 +298,7 @@ get_header(); ?>
 		<?php the_excerpt(); ?>
 	</article>
 <?php endwhile; the_posts_pagination(); else : ?>
-	<p><?php esc_html_e( 'Nothing here yet.', 'citypulsedigital' ); ?></p>
+	<p><?php esc_html_e( 'Nothing here yet.', 'landmarkdigital' ); ?></p>
 <?php endif; ?>
 </div></section>
 </main>
@@ -308,7 +308,7 @@ get_header(); ?>
 SINGLE_PHP = """<?php
 /**
  * Single post (blog).
- * @package CityPulseDigital
+ * @package LandmarkDigital
  */
 get_header(); ?>
 <main id="main">
@@ -322,8 +322,8 @@ get_header(); ?>
 
 SETTINGS_PHP = r"""<?php
 /**
- * Settings → CityPulse Digital: form delivery and page tools.
- * @package CityPulseDigital
+ * Settings → Landmark Digital: form delivery and page tools.
+ * @package LandmarkDigital
  */
 defined( 'ABSPATH' ) || exit;
 
@@ -349,11 +349,11 @@ function cpd_public_config() {
 }
 
 add_action( 'admin_menu', function () {
-	add_options_page( 'CityPulse Digital settings', 'CityPulse Digital', 'manage_options', 'citypulsedigital', 'cpd_settings_page' );
+	add_options_page( 'Landmark Digital settings', 'Landmark Digital', 'manage_options', 'landmarkdigital', 'cpd_settings_page' );
 } );
 
 add_action( 'admin_init', function () {
-	register_setting( 'citypulsedigital', 'cpd_settings', array(
+	register_setting( 'landmarkdigital', 'cpd_settings', array(
 		'type'              => 'array',
 		'sanitize_callback' => function ( $in ) {
 			$d   = cpd_defaults();
@@ -374,12 +374,12 @@ function cpd_settings_page() {
 	$n = 'cpd_settings';
 	?>
 	<div class="wrap">
-		<h1>CityPulse Digital settings</h1>
+		<h1>Landmark Digital settings</h1>
 		<?php if ( isset( $_GET['cpd_pages'] ) ) : // phpcs:ignore ?>
 			<div class="notice notice-success"><p><?php echo esc_html( sprintf( 'Pages checked: %d created, %d updated.', (int) $_GET['created'], (int) $_GET['updated'] ) ); // phpcs:ignore ?></p></div>
 		<?php endif; ?>
 		<form method="post" action="options.php">
-			<?php settings_fields( 'citypulsedigital' ); ?>
+			<?php settings_fields( 'landmarkdigital' ); ?>
 			<h2>Forms</h2>
 			<table class="form-table" role="presentation">
 				<tr><th scope="row">Delivery</th><td>
@@ -414,7 +414,7 @@ add_action( 'admin_post_cpd_pages', function () {
 	}
 	check_admin_referer( 'cpd_pages' );
 	$r = cpd_install_pages( ! empty( $_POST['overwrite'] ) );
-	wp_safe_redirect( add_query_arg( array( 'page' => 'citypulsedigital', 'cpd_pages' => 1, 'created' => $r['created'], 'updated' => $r['updated'] ), admin_url( 'options-general.php' ) ) );
+	wp_safe_redirect( add_query_arg( array( 'page' => 'landmarkdigital', 'cpd_pages' => 1, 'created' => $r['created'], 'updated' => $r['updated'] ), admin_url( 'options-general.php' ) ) );
 	exit;
 } );
 """
@@ -422,7 +422,7 @@ add_action( 'admin_post_cpd_pages', function () {
 SETUP_PHP = r"""<?php
 /**
  * Creates the site's pages from content/pages.json when the theme is activated.
- * @package CityPulseDigital
+ * @package LandmarkDigital
  */
 defined( 'ABSPATH' ) || exit;
 
@@ -481,8 +481,8 @@ add_action( 'after_switch_theme', function () {
 	if ( ! get_option( 'permalink_structure' ) ) {
 		update_option( 'permalink_structure', '/%postname%/' );
 	}
-	if ( in_array( get_option( 'blogname' ), array( '', 'WordPress', 'My WordPress Website', 'My Blog' ), true ) || preg_replace( '/[^a-z]/', '', strtolower( (string) get_option( 'blogname' ) ) ) === 'citypulsedigital' ) {
-		update_option( 'blogname', 'CityPulse Digital' );
+	if ( in_array( get_option( 'blogname' ), array( '', 'WordPress', 'My WordPress Website', 'My Blog' ), true ) || preg_replace( '/[^a-z]/', '', strtolower( (string) get_option( 'blogname' ) ) ) === 'landmarkdigital' ) {
+		update_option( 'blogname', 'Landmark Digital' );
 	}
 	if ( in_array( get_option( 'blogdescription' ), array( '', 'Just another WordPress site' ), true ) ) {
 		update_option( 'blogdescription', 'Be found. Be chosen. Be talked about.' );
@@ -504,7 +504,7 @@ FORMS_PHP = r"""<?php
 /**
  * Receives audit requests, messages and support requests when Delivery is "WordPress":
  * saves each one under Inquiries and emails it.
- * @package CityPulseDigital
+ * @package LandmarkDigital
  */
 defined( 'ABSPATH' ) || exit;
 
@@ -522,8 +522,8 @@ add_action( 'init', function () {
 	) );
 } );
 
-add_action( 'wp_ajax_citypulse_submit', 'cpd_handle_submit' );
-add_action( 'wp_ajax_nopriv_citypulse_submit', 'cpd_handle_submit' );
+add_action( 'wp_ajax_landmark_submit', 'cpd_handle_submit' );
+add_action( 'wp_ajax_nopriv_landmark_submit', 'cpd_handle_submit' );
 
 function cpd_handle_submit() {
 	// Spam guards: hidden honeypot field and a simple per-visitor rate limit.
@@ -582,7 +582,7 @@ function cpd_handle_submit() {
 
 def page404_php():
     body = php(page404["body"]) if page404 else "<section class='page-hero'><div class='wrap'><h1>Page not found</h1></div></section>"
-    return "<?php\n/**\n * 404 page.\n * @package CityPulseDigital\n */\nget_header(); ?>\n<main id=\"main\">\n" + pricing.fill(body) + "\n</main>\n<?php get_footer();\n"
+    return "<?php\n/**\n * 404 page.\n * @package LandmarkDigital\n */\nget_header(); ?>\n<main id=\"main\">\n" + pricing.fill(body) + "\n</main>\n<?php get_footer();\n"
 
 # ------------------------------------------------------------------ write theme
 def main():
@@ -604,12 +604,12 @@ def main():
     shot = os.path.join(ROOT, "build", "screenshot.png")
     if os.path.exists(shot):
         shutil.copy(shot, os.path.join(THEME, "screenshot.png"))
-    zpath = os.path.join(DIST, "citypulse-digital-theme.zip")
+    zpath = os.path.join(DIST, "landmark-digital-theme.zip")
     with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED) as z:
         for dp, _, fn in os.walk(THEME):
             for f in fn:
                 full = os.path.join(dp, f)
-                z.write(full, os.path.join("citypulse-digital", os.path.relpath(full, THEME)))
+                z.write(full, os.path.join("landmark-digital", os.path.relpath(full, THEME)))
     print(f"Theme: {len(pages)} pages -> {zpath} ({os.path.getsize(zpath)//1024} KB)")
 
 if __name__ == "__main__":

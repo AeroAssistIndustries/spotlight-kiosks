@@ -1,6 +1,6 @@
-# CityPulse Digital website
+# Landmark Digital website
 
-Multi-page site for CityPulse Digital (City Pulse Digital LLC) — websites, SEO, social media, reputation
+Multi-page site for Landmark Digital (Landmark Digital LLC) — websites, SEO, social media, reputation
 management, local listings and AI search visibility for local businesses. Sister company of CityPulse Kiosks;
 same brand system (navy #0F1C2B, pulse teal #22C7B6, Bricolage Grotesque + Instrument Sans).
 
@@ -20,18 +20,18 @@ After editing anything in `build/`, regenerate:
 
 ```
 python3 build/build.py          # static site (index.html files)
-python3 build/export_wp.py      # WordPress theme -> dist/citypulse-digital-theme.zip
+python3 build/export_wp.py      # WordPress theme -> dist/landmark-digital-theme.zip
 ```
 
 ## Forms
 
 `assets/config.js` chooses where forms deliver (FormSubmit by default, to `forms.to`). In WordPress the theme
-delivers forms itself (saved under **Inquiries** and emailed) — set the inbox under **Settings → CityPulse
+delivers forms itself (saved under **Inquiries** and emailed) — set the inbox under **Settings → Landmark
 Digital**. If delivery ever fails, the form opens a ready-made email draft in the visitor's own mail app.
 
 ## WordPress
 
-See `HANDOFF.md`. Short version: Appearance → Themes → Upload `dist/citypulse-digital-theme.zip` → Activate.
+See `HANDOFF.md`. Short version: Appearance → Themes → Upload `dist/landmark-digital-theme.zip` → Activate.
 All 19 pages are created on activation.
 
 ## Brand

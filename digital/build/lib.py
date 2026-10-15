@@ -1,15 +1,15 @@
-"""Shared layout, components and content data for the CityPulse Digital site.
+"""Shared layout, components and content data for the Landmark Digital site.
 Pages use {R} as a placeholder for the relative path back to the site root."""
 import html, os
 import pricing
 from content import ANNOUNCEMENTS, STORIES, GUIDES, PLATFORMS, INDUSTRY_DETAIL
 from photos import PHOTOS
 
-SITE = "CityPulse Digital"
-LEGAL = "City Pulse Digital LLC"
-DOMAIN = "citypulsedigi.com"
-EMAIL = "hello@citypulsedigi.com"
-SUPPORT = "support@citypulsedigi.com"
+SITE = "Landmark Digital"
+LEGAL = "Landmark Digital LLC"
+DOMAIN = "landmarkdigi.com"
+EMAIL = "hello@landmarkdigi.com"
+SUPPORT = "support@landmarkdigi.com"
 PHONE = "602-887-4058"
 TEL = "+16028874058"
 ADDR1 = "4750 S 44th Pl, Suite E20"
@@ -71,7 +71,7 @@ SERVICES = [
        proof="Every post is designed by a person, scheduled on purpose and tied to something you're trying to sell that month.",
        faqs=[("Which platforms should I be on?", "Where your customers are. For most local businesses that means Instagram, Facebook and Google; for B2B it's LinkedIn. We'll recommend 2–3 and do them well."),
              ("Do I need to send you content?", "Photos and short clips from your phone go a long way. We'll give you a simple monthly shot list, and we handle the rest."),
-             ("Can you run ads too?", "Yes. Paid social and Google Ads are included in Pulse Max, or added to any plan. Ad spend is billed to your own ad account.")]),
+             ("Can you run ads too?", "Yes. Paid social and Google Ads are included in Scale, or added to any plan. Ad spend is billed to your own ad account.")]),
   dict(slug="reputation", icon="star", name="Reputation management", short="Reputation",
        h="Reviews are the new word of mouth. Own them.", one="More five-star reviews, fast responses to every one, and listings that say the same thing everywhere.",
        lede="Before anyone calls, books or walks in, they read your reviews. We help you earn more of the good ones, respond to all of them within a business day and keep your name, hours and details consistent across the web.",
@@ -90,7 +90,7 @@ SERVICES = [
   dict(slug="ai-search", icon="ai", name="AI search visibility", short="AI search (GEO)",
        h="Be the business the AI recommends.", one="Generative engine optimization: content and structured data that get you cited by ChatGPT, Gemini and Perplexity.",
        lede="A growing share of “where should I eat?” and “who's the best dentist near me?” questions are asked to AI assistants. They answer from sources they trust. We make your business one of them.",
-       bullets=["AI visibility audit: how ChatGPT, Gemini and Perplexity describe you today", "Schema markup for your business, services, menus, reviews and FAQs", "Answer-first content: FAQs and guides written the way people ask", "Entity consistency across listings, social and your site", "Monthly check of prompts, mentions and citations", "Included in Pulse Pro, or add it to any plan"],
+       bullets=["AI visibility audit: how ChatGPT, Gemini and Perplexity describe you today", "Schema markup for your business, services, menus, reviews and FAQs", "Answer-first content: FAQs and guides written the way people ask", "Entity consistency across listings, social and your site", "Monthly check of prompts, mentions and citations", "Included in Grow, or add it to any plan"],
        proof="The same work that helps AI engines — clear structure, consistent facts, useful answers — also lifts traditional SEO.",
        faqs=[("Is this just SEO with a new name?", "It overlaps, but AI engines weigh different signals: structured data, third-party mentions and content that answers a question directly. We do both."),
              ("How do you measure it?", "We run a set of real customer prompts every month and report whether and how your business is mentioned.")]),
@@ -121,7 +121,7 @@ NAV = [
   ] + [(g["title"][:52] + ("…" if len(g["title"]) > 52 else ""), f"resources/{g['slug']}/", g["cat"]) for g in GUIDES[:5]] + [("Common questions", "faqs/", "Contracts, reporting, ownership")]),
   ("link", "Pricing", "pricing/"),
   ("menu", "Company", "company", [
-    ("About CityPulse Digital", "about/", "A Phoenix team with a national reach", True),
+    ("About Landmark Digital", "about/", "A Phoenix team with a national reach", True),
     ("How we work", "how-we-work/", "From audit to launch to monthly growth"),
     ("Contact us", "contact/", "Talk with the team"),
     ("Client support", "support/", "For current clients"),
@@ -130,7 +130,7 @@ NAV = [
 ]
 
 BRAND_LOGO = ('<picture><source media="(max-width: 560px)" srcset="{R}assets/logo-compact.svg">'
-              '<img src="{R}assets/logo-anim.svg" alt="CityPulse Digital" width="591" height="97"></picture>')
+              '<img src="{R}assets/logo-anim.svg" alt="Landmark Digital" width="684" height="79"></picture>')
 
 def _href(h):
     return h if h.startswith("http") else "{R}" + h
@@ -155,7 +155,7 @@ def header(active):
 <div class="ann-bar" data-ann><div class="wrap ann-inner"><button class="ann-nav" type="button" data-ann-prev aria-label="Previous announcement">{icon("chev","")}</button><div class="ann-track">{ann}</div><button class="ann-nav" type="button" data-ann-next aria-label="Next announcement">{icon("chev","")}</button><a class="ann-cta" href="{{R}}free-audit/">Is your business ready for AI search? <b>Request a free audit</b></a></div></div>
 <header class="site-header">
   <div class="wrap header-inner">
-    <a class="brand" href="{{R}}" aria-label="CityPulse Digital home">{BRAND_LOGO}</a>
+    <a class="brand" href="{{R}}" aria-label="Landmark Digital home">{BRAND_LOGO}</a>
     <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav"><span class="sr">Menu</span><i></i><i></i></button>
     <nav id="site-nav" class="site-nav" aria-label="Main">
       {"".join(out)}
@@ -164,7 +164,7 @@ def header(active):
   </div>
 </header>'''
 
-SOCIALS = []  # e.g. ("Instagram", "https://www.instagram.com/citypulsedigital/")
+SOCIALS = []  # e.g. ("Instagram", "https://www.instagram.com/landmarkdigital/")
 def socials_html():
     return ('<p class="socials">' + "".join(f'<a href="{u}" rel="noopener" target="_blank">{n}</a>' for n, u in SOCIALS) + '</p>') if SOCIALS else ""
 
@@ -181,13 +181,13 @@ def footer():
 </div></section>
 <footer class="site-footer">
   <div class="wrap footer-grid">
-    <div class="footer-brand"><img src="{{R}}assets/logo-stacked-light.svg" alt="CityPulse Digital" width="402" height="122"><p>Websites, search, social and reputation for businesses that want to be found — and chosen.</p>
+    <div class="footer-brand"><img src="{{R}}assets/logo-stacked-light.svg" alt="Landmark Digital" width="495" height="118"><p>Websites, search, social and reputation for businesses that want to be found — and chosen.</p>
       <p class="footer-addr"><b>Headquarters</b>{ADDR1}<br>{ADDR2}</p>
       <p class="footer-addr"><b>Sales</b><a href="tel:{TEL}">{PHONE}</a><b>Support</b><a href="mailto:{SUPPORT}">{SUPPORT}</a><b>Email</b><a href="mailto:{EMAIL}">{EMAIL}</a></p></div>
     {col("Services", [(s["short"], f"services/{s['slug']}/") for s in SERVICES] + [("Pricing", "pricing/")])}
     {col("Industries", [(i["name"], f"industries/{i['slug']}/") for i in INDUSTRIES])}
     {col("Company", [("About us","about/"),("How we work","how-we-work/"),("Customer stories","customer-stories/"),("Our work","work/"),("Guides & resources","resources/"),("Common questions","faqs/"),("Contact us","contact/"),("Client support","support/")])}
-    {col("CityPulse", [("Free digital audit","free-audit/"),("CityPulse Kiosks", KIOSKS_URL),("Terms & Conditions","terms/"),("Privacy Policy","privacy/")])}
+    {col("Landmark", [("Free digital audit","free-audit/"),("CityPulse Kiosks", KIOSKS_URL),("Terms & Conditions","terms/"),("Privacy Policy","privacy/")])}
   </div>
   <div class="wrap footer-base"><span>© <span id="year">2026</span> {LEGAL}. All rights reserved.</span><nav aria-label="Legal"><a href="{{R}}privacy/">Privacy Policy</a><a href="{{R}}terms/">Terms &amp; Conditions</a><a href="{{R}}contact/">Contact</a></nav>{socials_html()}</div>
 </footer>
@@ -342,7 +342,7 @@ def cta_band(h="Let's find out where you stand.", p="A free digital audit shows 
 def kiosk_band():
     return f'''<section class="kiosk-band"><div class="wrap kiosk-grid">
   <div><p class="eyebrow">Sister company</p><h2>Online and in the lobby.</h2>
-    <p>CityPulse Digital clients can also run their ad on CityPulse Kiosks — touch-screen concierge kiosks in hotel lobbies, waiting rooms and dealerships across the US. One brand, seen on the phone and in the room.</p>
+    <p>Landmark Digital clients can also run their ad on CityPulse Kiosks — touch-screen concierge kiosks in hotel lobbies, waiting rooms and dealerships across the US. One team, seen on the phone and in the room.</p>
     <div class="btn-row"><a class="btn btn-ghost" href="{KIOSKS_URL}" target="_blank" rel="noopener">Visit CityPulse Kiosks</a></div></div>
   <div class="kiosk-art" aria-hidden="true"><div class="kb-screen"><span class="kb-top"></span><span class="kb-tiles"><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="kb-ad"><b>Your ad here</b></span></div></div>
 </div></section>'''
@@ -413,7 +413,7 @@ def audit_form():
             field("Phone", "Phone", "tel", opt=True),
             field("Anything we should know?", "Notes", "textarea", full=True, opt=True, ph="Competitors you watch, goals, what you've tried…"),
         ]),
-    ], "I'd like CityPulse Digital to review my online presence and send me the results. No obligation.", "Send my audit request", subject_field="Business",
+    ], "I'd like Landmark Digital to review my online presence and send me the results. No obligation.", "Send my audit request", subject_field="Business",
        done="Thanks — your audit will be in your inbox within two business days.")
 
 def contact_form():
@@ -452,10 +452,10 @@ FAQS = [
   ("Do I have to sign a long contract?", "No. Monthly plans run month to month after an initial three months, which is the minimum time for SEO and social to show results. Website projects are a one-time agreement with a 50% deposit."),
   ("What does the free audit include?", "A written review of your website (speed, mobile, SEO basics), your Google Business Profile and listings, your reviews and your social presence, with the three things we'd fix first. It takes us about two business days."),
   ("Who owns the website, content and accounts?", "You do. Your domain, hosting, WordPress site, social accounts and ad accounts stay in your name. We work inside them as a manager, and we hand everything back cleanly if you ever leave."),
-  ("How do you report results?", "A one-page monthly report in plain English: what we did, what moved (calls, leads, rankings, reviews, followers) and what's next. Pulse Pro and Max clients also get a quarterly or monthly strategy call."),
+  ("How do you report results?", "A one-page monthly report in plain English: what we did, what moved (calls, leads, rankings, reviews, followers) and what's next. Grow and Max clients also get a quarterly or monthly strategy call."),
   ("Can I start with one service?", "Yes. Social media, local SEO, reputation and AI search visibility are each available on their own. Most clients start with one and bundle into a plan once they see the reports."),
   ("Do you work with businesses outside Arizona?", "Yes. We're based in Phoenix and work with clients across the US. Everything is handled by video call, email and a shared monthly plan."),
-  ("How is CityPulse Digital related to CityPulse Kiosks?", "Same founders, two companies. CityPulse Kiosks places ads on touch-screen kiosks in hotels and venues; CityPulse Digital handles your online presence. Clients of one get introductions and bundles with the other."),
+  ("How is Landmark Digital related to CityPulse Kiosks?", "Same founders, two companies. CityPulse Kiosks places ads on touch-screen kiosks in hotels and venues; Landmark Digital handles your online presence. Clients of one get introductions and bundles with the other."),
   ("What happens if I'm not happy?", "Tell us. We'll fix the work first. If it still isn't right, monthly plans can be cancelled with 30 days' notice after the initial term, and you keep everything we've built."),
 ]
 
