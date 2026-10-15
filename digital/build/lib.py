@@ -130,7 +130,7 @@ NAV = [
 ]
 
 BRAND_LOGO = ('<picture><source media="(max-width: 560px)" srcset="{R}assets/logo-compact.svg">'
-              '<img src="{R}assets/logo-anim.svg" alt="Landmark Digital" width="684" height="79"></picture>')
+              '<img src="{R}assets/logo-anim.svg" alt="Landmark Digital" width="425" height="135"></picture>')
 
 def _href(h):
     return h if h.startswith("http") else "{R}" + h
@@ -181,7 +181,7 @@ def footer():
 </div></section>
 <footer class="site-footer">
   <div class="wrap footer-grid">
-    <div class="footer-brand"><img src="{{R}}assets/logo-stacked-light.svg" alt="Landmark Digital" width="495" height="118"><p>Websites, search, social and reputation for businesses that want to be found — and chosen.</p>
+    <div class="footer-brand"><img src="{{R}}assets/logo-stacked-light.svg" alt="Landmark Digital" width="250" height="271"><p>Websites, search, social and reputation for businesses that want to be found — and chosen.</p>
       <p class="footer-addr"><b>Headquarters</b>{ADDR1}<br>{ADDR2}</p>
       <p class="footer-addr"><b>Sales</b><a href="tel:{TEL}">{PHONE}</a><b>Support</b><a href="mailto:{SUPPORT}">{SUPPORT}</a><b>Email</b><a href="mailto:{EMAIL}">{EMAIL}</a></p></div>
     {col("Services", [(s["short"], f"services/{s['slug']}/") for s in SERVICES] + [("Pricing", "pricing/")])}
