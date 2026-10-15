@@ -8,15 +8,14 @@ os.makedirs("out", exist_ok=True)
 _gid = [0]
 
 def mark(x=0, y=0, s=1.0, ink=NAVY, grad=True):
-    """L monogram in a 100x100 box."""
+    """LD monogram in a 100x100 box: navy L, gradient D bowl growing out of its stem."""
     _gid[0] += 1; g = f"lmg{_gid[0]}"
-    defs = f'<defs><linearGradient id="{g}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="{CYAN}"/><stop offset="1" stop-color="{VIOLET}"/></linearGradient></defs>' if grad else ""
+    defs = f'<defs><linearGradient id="{g}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{CYAN}"/><stop offset="1" stop-color="{VIOLET}"/></linearGradient></defs>' if grad else ""
     fill = f"url(#{g})" if grad else ink
-    stem = f'<rect x="14" y="10" width="20" height="78" rx="10" fill="{ink}"/>'
-    foot = f'<rect x="14" y="68" width="74" height="20" rx="10" fill="{fill}"/>'
-    dot  = f'<circle cx="74" cy="28" r="12" fill="{fill}" class="lm-dot"/>'
-    ring = f'<circle cx="74" cy="28" r="20" fill="none" stroke="{fill}" stroke-width="3" opacity=".35"/>'
-    return f'{defs}<g transform="translate({x:.2f},{y:.2f}) scale({s:.4f})">{ring}{dot}{foot}{stem}</g>'
+    dee  = f'<path d="M48 14 H 60 A 36 36 0 0 1 60 86 H 48 Z" fill="{fill}"/>'
+    stem = f'<rect x="12" y="10" width="20" height="78" rx="10" fill="{ink}"/>'
+    foot = f'<rect x="12" y="68" width="48" height="20" rx="10" fill="{ink}"/>'
+    return f'{defs}<g transform="translate({x:.2f},{y:.2f}) scale({s:.4f})">{dee}{stem}{foot}</g>'
 
 def svg(w, h, body, label="Landmark Digital"):
     return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w:.0f} {h:.0f}" width="{w:.0f}" height="{h:.0f}" role="img" aria-label="{label}">{body}</svg>'
@@ -55,7 +54,7 @@ open("out/logo-compact.svg","w").write(horizontal(digital=False))
 open("out/logo-compact-light.svg","w").write(horizontal(WHITE, CYAN, WHITE, digital=False))
 open("out/logo-mark.svg","w").write(svg(100, 100, mark(), "Landmark"))
 open("out/logo-mark-light.svg","w").write(svg(100, 100, mark(ink=WHITE), "Landmark"))
-tile = lambda: f'<rect width="128" height="128" rx="30" fill="{NAVY}"/>' + mark(14, 14, 1.0, WHITE)
+tile = lambda: f'<rect width="128" height="128" rx="30" fill="{NAVY}"/>' + mark(16, 16, 0.96, WHITE)
 open("out/app-icon.svg","w").write(svg(128,128, tile(), "Landmark"))
 open("out/favicon.svg","w").write(svg(128,128, tile(), "Landmark"))
 print("ok")
