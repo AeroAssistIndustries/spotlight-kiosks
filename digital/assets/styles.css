@@ -70,7 +70,7 @@ p{margin:0}
 .header-inner{display:flex;align-items:center;justify-content:space-between;height:var(--head-h);gap:24px}
 .brand{display:block;flex:none}
 .brand picture{display:block}
-.brand img{height:44px;width:auto}
+.brand img{height:40px;width:auto}
 .site-nav{display:flex;align-items:center;gap:4px}
 .site-nav>a,.nav-btn{display:inline-flex;align-items:center;gap:6px;text-decoration:none;font:500 15px/1 var(--body);padding:10px 12px;border-radius:8px;background:none;border:0;color:var(--ink);cursor:pointer}
 .site-nav>a:hover,.nav-btn:hover,.nav-item.open .nav-btn{background:var(--paper)}
@@ -397,7 +397,7 @@ p{margin:0}
 .site-footer{background:#0A1420;color:var(--muted-dark);padding:64px 0 28px;font-size:15px;position:relative;overflow:hidden;border-top:3px solid var(--lamp)}
 .site-footer .wrap{position:relative;z-index:1}
 .footer-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1.1fr;gap:32px}
-.footer-brand img{height:150px;width:auto;margin-bottom:16px}
+.footer-brand img{height:120px;width:auto;margin-bottom:16px}
 .footer-brand p{max-width:22em}
 .site-footer h2{font:700 15px/1 var(--body);color:var(--paper);margin-bottom:14px;letter-spacing:0}
 .site-footer nav{display:flex;flex-direction:column;gap:8px}
