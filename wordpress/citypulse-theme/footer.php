@@ -11,7 +11,7 @@
     <div><h2>Advertise</h2><nav aria-label="Advertise"><a href="<?php echo esc_url( home_url( '/' ) ); ?>#get-started">Get started — <span class="cp-p" data-reg="$798">$598</span></a><a href="<?php echo esc_url( home_url( '/' ) ); ?>pricing/">Pricing & calculator</a><a href="<?php echo esc_url( home_url( '/' ) ); ?>advertise/">Advertising options</a><a href="<?php echo esc_url( home_url( '/' ) ); ?>creative-studio/">Creative studio</a><a href="<?php echo esc_url( home_url( '/' ) ); ?>campaign-planner/">Campaign planner</a><a href="<?php echo esc_url( home_url( '/' ) ); ?>campaign-ideas/">Campaign ideas</a><a href="<?php echo esc_url( home_url( '/' ) ); ?>agencies/">For agencies</a></nav></div>
     <div><h2>Company</h2><nav aria-label="Company"><a href="<?php echo esc_url( home_url( '/' ) ); ?>about/">About us</a><a href="<?php echo esc_url( home_url( '/' ) ); ?>hosts/">Host a kiosk</a><a href="<?php echo esc_url( home_url( '/' ) ); ?>resources/">Guides & resources</a><a href="<?php echo esc_url( home_url( '/' ) ); ?>faqs/">Common questions</a><a href="<?php echo esc_url( home_url( '/' ) ); ?>contact/">Contact us</a><a href="<?php echo esc_url( home_url( '/' ) ); ?>support/">Help & support</a></nav></div>
     <div class="footer-talk"><h2>Let's talk</h2>
-      <a class="big" href="mailto:sales@citypulsekiosks.com">sales@citypulsekiosks.com</a><a class="big" href="tel:+16028874058">602-887-4058</a>
+      <a class="big" href="mailto:sales@citypulsekiosks.com">sales@citypulsekiosks.com</a><a class="big" href="tel:+16029755513">602-975-5513</a>
       <p class="footer-addr">4750 S 44th Pl, Suite E20<br>Phoenix, AZ 85040</p>
       
     </div>

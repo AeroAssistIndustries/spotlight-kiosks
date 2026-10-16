@@ -60,7 +60,7 @@ TERMS = [
 
 ("General", """<p>If any part of these Terms is found unenforceable, the rest remains in effect. Our failure to enforce any part of these Terms isn't a waiver. You may not transfer your rights under these Terms; we may transfer ours, for example as part of a merger or sale of the business. These Terms, together with the Privacy Policy and any signed agreement with us, are the entire agreement about their subject.</p>"""),
 
-("Contact us", f"""<p>Questions about these Terms? Contact us at <a href="mailto:{EMAIL}">{EMAIL}</a>, call 602-887-4058, or write to {ADDRESS}.</p>"""),
+("Contact us", f"""<p>Questions about these Terms? Contact us at <a href="mailto:{EMAIL}">{EMAIL}</a>, call 602-975-5513, or write to {ADDRESS}.</p>"""),
 ]
 
 PRIVACY = [
@@ -110,5 +110,5 @@ PRIVACY = [
 
 ("Changes to this policy", """<p>We may update this Privacy Policy from time to time. When we do, we'll change the effective date at the top of this page. If a change is significant, we'll take reasonable steps to let you know.</p>"""),
 
-("Contact us", f"""<p>Questions or requests about privacy? Email <a href="mailto:{EMAIL}">{EMAIL}</a>, call 602-887-4058, or write to {ADDRESS}.</p>"""),
+("Contact us", f"""<p>Questions or requests about privacy? Email <a href="mailto:{EMAIL}">{EMAIL}</a>, call 602-975-5513, or write to {ADDRESS}.</p>"""),
 ]

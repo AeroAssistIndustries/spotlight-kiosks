@@ -244,7 +244,7 @@
       review.classList.toggle("sent", sent);
       $("h3", review).textContent = sent ? "Thanks — your message is on its way." : "Your email is ready.";
       $(".review-lede", review).textContent = sent
-        ? `We'll reply to ${fields.email || "you"} within one business day. Need us sooner? Call 602-887-4058.`
+        ? `We'll reply to ${fields.email || "you"} within one business day. Need us sooner? Call 602-975-5513.`
         : (api && api.formsReady() ? "We couldn't send it automatically just now. Open it in your email app and press send — or copy it." : "Check the details, then open it in your email app and press send. You can also copy or save it.");
       form.hidden = true; review.hidden = false; review.scrollIntoView({ behavior: "smooth", block: "start" });
       $("h3", review).focus();
@@ -449,7 +449,7 @@ ${lines.map((l, i) => `<text x="90" y="${(tall ? 200 : 380) + i * fs * 1.08}" fo
   const mo = $("[data-download-overview]");
   if (mo) mo.addEventListener("click", () => {
     const rows = $$("#overview div").map(d => `${$("dt", d).textContent}\n${$("dd", d).textContent.trim()}\n`);
-    download("citypulse-media-overview.txt", `CITYPULSE KIOSKS — MEDIA OVERVIEW\n\n${rows.join("\n")}\nsales@citypulsekiosks.com · 602-887-4058\n`);
+    download("citypulse-media-overview.txt", `CITYPULSE KIOSKS — MEDIA OVERVIEW\n\n${rows.join("\n")}\nsales@citypulsekiosks.com · 602-975-5513\n`);
   });
 
   const y = $("#year"); if (y) y.textContent = new Date().getFullYear();

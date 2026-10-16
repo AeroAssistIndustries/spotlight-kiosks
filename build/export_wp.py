@@ -14,7 +14,7 @@ from lib import PAGE_DATA, NAV, icon, footer, e, EMAIL, PHONE, TEL, ADDR1, ADDR2
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DIST = os.path.join(ROOT, "dist")
 THEME = os.path.join(DIST, "citypulse-theme")
-VERSION = "1.3.7"
+VERSION = "1.3.8"
 
 def tok(html):
     return html.replace("{R}assets/", "{{CP_ASSETS}}").replace("{R}", "{{CP_HOME}}")

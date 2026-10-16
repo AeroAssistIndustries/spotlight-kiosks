@@ -6,8 +6,8 @@ import pricing
 SITE = "CityPulse Kiosks"
 EMAIL = "sales@citypulsekiosks.com"
 SUPPORT = "support@citypulsekiosks.com"
-PHONE = "602-887-4058"
-TEL = "+16028874058"
+PHONE = "602-975-5513"
+TEL = "+16029755513"
 ADDR1 = "4750 S 44th Pl, Suite E20"
 ADDR2 = "Phoenix, AZ 85040"
 OUT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
