@@ -15,7 +15,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DIST = os.path.join(ROOT, "dist")
 THEME = os.path.join(DIST, "landmark-digital-theme")
 VERSION = "2.0.0"
-FORMS_TO = "sarvesh.joshiaz@gmail.com"
+FORMS_TO = "sarvesh@landmarkdigi.com"
 
 def tok(html):
     return html.replace("{R}assets/", "{{CP_ASSETS}}").replace("{R}", "{{CP_HOME}}")

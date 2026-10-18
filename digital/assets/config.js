@@ -6,7 +6,7 @@
      "wordpress":  WordPress theme only — saved in the WP admin and emailed (Settings → Landmark Digital).
      "none":       forms fall back to opening an email draft in the visitor's own email app. */
 window.LANDMARK_CONFIG = {
-  forms: { provider: "formsubmit", to: "sarvesh.joshiaz@gmail.com", endpoint: "" },
+  forms: { provider: "formsubmit", to: "sarvesh@landmarkdigi.com", endpoint: "" },
   payments: { provider: "stripe", yearly: "", monthly: "" },
   maxUploadMB: 5
 };

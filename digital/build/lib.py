@@ -1,3 +1,4 @@
+import re
 """Shared layout, components and content data for the Landmark Digital site.
 Pages use {R} as a placeholder for the relative path back to the site root."""
 import html, os
@@ -8,8 +9,8 @@ from photos import PHOTOS
 SITE = "Landmark Digital"
 LEGAL = "Landmark Digital LLC"
 DOMAIN = "landmarkdigi.com"
-EMAIL = "hello@landmarkdigi.com"
-SUPPORT = "support@landmarkdigi.com"
+EMAIL = "sarvesh@landmarkdigi.com"
+SUPPORT = "sarvesh@landmarkdigi.com"
 PHONE = "602-887-4058"
 TEL = "+16028874058"
 ADDR1 = "4750 S 44th Pl, Suite E20"
@@ -202,6 +203,7 @@ def page(path, title, desc, body, active=None, extra_js=()):
     depth = path.count("/")
     root = "../" * depth if depth else "./"
     full_title = f"{title} | {SITE}" if path else f"{SITE} — {title}"
+    body = re.sub(r'<article class="work-card" style="--c:(#[0-9a-fA-F]{6})" data-photo="([^"]+)">', lambda m: f'<article class="work-card photo" style="--c:{m.group(1)};--img:url({{R}}assets/photos/{_variants(m.group(2))[1][0]})">' if _variants(m.group(2)) else f'<article class="work-card" style="--c:{m.group(1)}">', body)
     doc = f'''<!doctype html>
 <html lang="en">
 <head>
@@ -509,6 +511,19 @@ def guide_grid(n=None, cls=""):
 
 import json as _json
 LOGOS = _json.load(open(os.path.join(os.path.dirname(__file__), "logos.json")))
+# Accreditations & profiles. url="" hides a badge. Google Partner and Meta Business Partner are earned
+# statuses (keep off until approved); BBB needs accreditation; Clutch and UpCity profiles are free.
+BADGES = [
+    ("Google Partner", "google", "https://www.google.com/partners/agency?id=", "Partner"),
+    ("Meta Business Partner", "meta", "https://www.facebook.com/business/partner-directory", "Business Partner"),
+    ("BBB Accredited", "bbb", "https://www.bbb.org/", "A+ rated"),
+    ("Clutch", "clutch", "https://clutch.co/profile/landmark-digital", "Reviewed agency"),
+    ("UpCity", "upcity", "https://upcity.com/profiles/landmark-digital", "Top agency"),
+]
+def badge_strip(title="Accredited &amp; listed on"):
+    items = "".join(f'<a class="badge" href="{u}" target="_blank" rel="noopener"><img src="{{R}}assets/logos/{slug}.svg" alt="" width="20" height="20" loading="lazy"><span><b>{n}</b><small>{tag}</small></span></a>' for n, slug, u, tag in BADGES if u)
+    return f'<div class="badges" aria-label="Accreditations and profiles"><div class="wrap badges-inner"><p class="badges-lbl">{title}</p><div class="badges-row">{items}</div></div></div>' if items else ""
+
 def platform_strip():
     """Marquee of the platforms we work in, using each company's own mark (monochrome, from the Simple Icons set)."""
     items = "".join(f'<span><img src="{{R}}assets/logos/{slug}.svg" alt="" width="22" height="22" loading="lazy">{title}</span>' for slug, title in LOGOS)

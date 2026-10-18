@@ -164,9 +164,8 @@ page("", "Digital marketing for local businesses", "Phoenix digital marketing ag
   <div class="hero-visual">{photo("hero-owner.jpg", "hero-photo", sizes="(max-width: 980px) 100vw, 45vw", eager=True).replace("</figure>", '<span class="scan"></span></figure>').replace('class="ph hero-photo"', 'class="ph hero-photo is-on" data-ind="hotel"')}{"".join(photo(f"ind-{f}.jpg", "hero-photo hero-alt", sizes="(max-width: 980px) 100vw, 45vw").replace('class="ph hero-photo hero-alt"', f'class="ph hero-photo hero-alt" data-ind="{k}"').replace(' src="', ' data-src="').replace(' srcset="', ' data-srcset="') for k, f in [("restaurant","restaurants"),("dental","medical"),("auto","automotive"),("home","home-services")])}{score_card()}<div class="hud" aria-hidden="true"><div class="hud-chip c1"></div><div class="hud-chip c2"></div><div class="hud-chip c3"></div><div class="hud-chip c4"></div></div></div>
   <div class="signals" aria-hidden="true">{"".join(f'<i style="--x:{x}%;--y:{y}%;--d:{d}s;--s:{sz}"></i>' for x, y, d, sz in [(8,18,7,1),(22,72,9,.6),(35,30,11,.8),(48,80,8,.5),(60,14,10,.9),(72,60,12,.7),(85,26,9,1.1),(92,70,7,.6),(15,50,13,.5),(55,48,6,.4),(78,88,10,.8),(40,8,12,.6)])}</div>
 </div></section>
-{ticker()}
 {platform_strip()}
-{wordmark()}
+{badge_strip()}
 
 <section class="section"><div class="wrap">
   {head("Everything your customers see before they call.", "Six services that work better together. Start with one, or hand us the whole thing.", "What we do")}
@@ -397,12 +396,12 @@ page("work/", "Our work", "Results from Landmark Digital: hotel websites that dr
 <section class="section alt"><div class="wrap">
   {head("More projects.", "", "Selected work")}
   <div class="work-grid">
-    <article class="work-card" style="--c:#2E4439"><span class="case-pill">Restaurant</span><h3>Restaurant website + social</h3><p>A menu-first site with online ordering and a monthly social calendar that put the kitchen on camera.</p></article>
-    <article class="work-card" style="--c:#5a2c82"><span class="case-pill">E-commerce</span><h3>Brand reinvention</h3><p>New identity, new store, two years of measurable sales growth attributed to the rebrand.</p></article>
-    <article class="work-card" style="--c:#1b6ca8"><span class="case-pill">Professional services</span><h3>Website UX/UI redesign</h3><p>Clearer services, faster pages and a contact flow that gets filled in.</p></article>
-    <article class="work-card" style="--c:#a2740a"><span class="case-pill">Local business</span><h3>Logo and brand kit</h3><p>A mark that works on a storefront, a social avatar and a business card.</p></article>
-    <article class="work-card" style="--c:#0E6B63"><span class="case-pill">Luxury retail</span><h3>Watch dealer website</h3><p>An inventory-driven site for a luxury watch group, built to feel like the showroom.</p></article>
-    <article class="work-card" style="--c:#7a3b1f"><span class="case-pill">Artist</span><h3>Artist portfolio</h3><p>A gallery site that lets the work breathe and the collector get in touch.</p></article>
+    <article class="work-card" style="--c:#2E4439" data-photo="story-restaurant.jpg"><span class="case-pill">Restaurant</span><h3>Restaurant website + social</h3><p>A menu-first site with online ordering and a monthly social calendar that put the kitchen on camera.</p></article>
+    <article class="work-card" style="--c:#5a2c82" data-photo="story-ecommerce.jpg"><span class="case-pill">E-commerce</span><h3>Brand reinvention</h3><p>New identity, new store, two years of measurable sales growth attributed to the rebrand.</p></article>
+    <article class="work-card" style="--c:#1b6ca8" data-photo="svc-websites.jpg"><span class="case-pill">Professional services</span><h3>Website UX/UI redesign</h3><p>Clearer services, faster pages and a contact flow that gets filled in.</p></article>
+    <article class="work-card" style="--c:#a2740a" data-photo="about-office.jpg"><span class="case-pill">Local business</span><h3>Logo and brand kit</h3><p>A mark that works on a storefront, a social avatar and a business card.</p></article>
+    <article class="work-card" style="--c:#0E6B63" data-photo="svc-reputation.jpg"><span class="case-pill">Luxury retail</span><h3>Watch dealer website</h3><p>An inventory-driven site for a luxury watch group, built to feel like the showroom.</p></article>
+    <article class="work-card" style="--c:#7a3b1f" data-photo="customer-phone.jpg"><span class="case-pill">Artist</span><h3>Artist portfolio</h3><p>A gallery site that lets the work breathe and the collector get in touch.</p></article>
   </div>
 </div></section>
 <section class="section"><div class="wrap">{head("In their words.", "", "Testimonials")}{testimonials(5, "quotes-5")}</div></section>
@@ -413,6 +412,7 @@ page("work/", "Our work", "Results from Landmark Digital: hotel websites that dr
 page("about/", "About", "Landmark Digital is a Phoenix digital marketing agency serving hotels, restaurants, practices and local businesses nationwide.", f'''
 {page_hero([("About", "about/")], "A Phoenix team with a national reach.", "Landmark Digital has been building websites and running marketing for hotels, restaurants and local businesses since 2017. In 2026 we relaunched — alongside our sister company CityPulse Kiosks — with one idea: a business should be easy to find and easy to choose, online and in person.", btns(("Work with us", "contact/")), eyebrow="About Landmark Digital")}
 {platform_strip()}
+{badge_strip()}
 <section class="section"><div class="wrap two-col founder">
   <div>{photo("about-sarvesh.jpg", "founder-photo", sizes="(max-width: 980px) 100vw, 35vw")}</div>
   <div><p class="eyebrow">Founder</p><h2>Built by someone who runs businesses too.</h2><p class="lede" style="margin-top:14px">Sarvesh Joshi founded Landmark Digital after years of building websites and running marketing for hotels, restaurants and local businesses — and after owning and operating businesses himself. He also co-founded CityPulse Kiosks and leads AeroAssist Industries, a Phoenix drone-technology company. The common thread: practical systems that get customers in the door.</p>{btns(("Talk to Sarvesh", "contact/", "btn-dark"))}</div>

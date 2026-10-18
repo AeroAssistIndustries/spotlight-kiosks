@@ -50,7 +50,7 @@ contact page preselects a plan (the pricing buttons use this).
 ## Go-live checklist
 
 - [ ] Domain pointed, HTTPS on, site URL set in Settings → General
-- [ ] Mailboxes: **hello@landmarkdigi.com** and **support@landmarkdigi.com** (both appear on the site)
+- [ ] Mailboxes: **sarvesh@landmarkdigi.com** and **sarvesh@landmarkdigi.com** (both appear on the site)
 - [ ] SMTP plugin connected; test email received
 - [ ] Settings → Landmark Digital: Delivery = WordPress, Send to = the sales inbox
 - [ ] Test all three forms
