@@ -7,6 +7,6 @@
      "none":       forms fall back to opening an email draft in the visitor's own email app. */
 window.LANDMARK_CONFIG = {
   forms: { provider: "formsubmit", to: "sarvesh@landmarkdigi.com", endpoint: "" },
-  payments: { provider: "stripe", yearly: "", monthly: "" },
+  payments: { provider: "stripe", launch: "", grow: "", scale: "" },  // paste the Stripe Payment Link for each plan
   maxUploadMB: 5
 };

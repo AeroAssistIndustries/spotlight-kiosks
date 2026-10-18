@@ -14,7 +14,7 @@ from lib import PAGE_DATA, NAV, icon, footer, e, EMAIL, PHONE, TEL, ADDR1, ADDR2
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DIST = os.path.join(ROOT, "dist")
 THEME = os.path.join(DIST, "landmark-digital-theme")
-VERSION = "2.0.0"
+VERSION = "2.2.0"
 FORMS_TO = "sarvesh@landmarkdigi.com"
 
 def tok(html):
@@ -131,6 +131,7 @@ add_action( 'wp_enqueue_scripts', function () {
 	wp_enqueue_style( 'cpd-fonts', 'https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&display=swap', array(), null );
 	wp_enqueue_style( 'cpd', $uri . 'styles.css', array( 'cpd-fonts' ), $v );
 	wp_enqueue_style( 'cpd-future', $uri . 'future.css', array( 'cpd' ), $v );
+	wp_enqueue_style( 'cpd-checkout', $uri . 'checkout.css', array( 'cpd-future' ), $v );
 	wp_enqueue_script( 'cpd-integrations', $uri . 'integrations.js', array(), $v, true );
 	wp_add_inline_script( 'cpd-integrations', 'window.LANDMARK_CONFIG = ' . wp_json_encode( cpd_public_config() ) . ';', 'before' );
 	if ( is_front_page() ) {
@@ -139,6 +140,9 @@ add_action( 'wp_enqueue_scripts', function () {
 	}
 	if ( is_front_page() || is_page( array( 'free-audit', 'how-we-work' ) ) ) {
 		wp_enqueue_script( 'cpd-labs', $uri . 'labs.js', array(), $v, true );
+	}
+	if ( is_page( array( 'get-started', 'welcome' ) ) ) {
+		wp_enqueue_script( 'cpd-checkout', $uri . 'checkout.js', array( 'cpd-integrations' ), $v, true );
 	}
 	if ( is_page( 'free-audit' ) ) {
 		wp_enqueue_script( 'cpd-scorecard', $uri . 'scorecard.js', array(), $v, true );
@@ -328,7 +332,7 @@ SETTINGS_PHP = r"""<?php
 defined( 'ABSPATH' ) || exit;
 
 function cpd_defaults() {
-	return array( 'forms_provider' => 'wordpress', 'forms_to' => '__FORMS_TO__', 'formspree' => '' );
+	return array( 'forms_provider' => 'wordpress', 'forms_to' => '__FORMS_TO__', 'formspree' => '', 'pay_launch' => '', 'pay_grow' => '', 'pay_scale' => '' );
 }
 function cpd_opt( $key ) {
 	$o = wp_parse_args( get_option( 'cpd_settings', array() ), cpd_defaults() );
@@ -345,6 +349,8 @@ function cpd_public_config() {
 			'endpoint' => 'formspree' === $provider ? cpd_opt( 'formspree' ) : '',
 			'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
 		),
+		'payments' => array( 'provider' => 'stripe', 'launch' => cpd_opt( 'pay_launch' ), 'grow' => cpd_opt( 'pay_grow' ), 'scale' => cpd_opt( 'pay_scale' ) ),
+		'maxUploadMB' => 5,
 	);
 }
 
@@ -361,6 +367,9 @@ add_action( 'admin_init', function () {
 			$out['forms_provider'] = in_array( $in['forms_provider'] ?? '', array( 'wordpress', 'formsubmit', 'formspree', 'none' ), true ) ? $in['forms_provider'] : $d['forms_provider'];
 			$out['forms_to']       = sanitize_email( $in['forms_to'] ?? '' ) ?: $d['forms_to'];
 			$out['formspree']      = esc_url_raw( $in['formspree'] ?? '' );
+			foreach ( array( 'pay_launch', 'pay_grow', 'pay_scale' ) as $k ) {
+				$out[ $k ] = esc_url_raw( $in[ $k ] ?? '' );
+			}
 			return $out;
 		},
 	) );
@@ -392,6 +401,11 @@ function cpd_settings_page() {
 				</td></tr>
 				<tr><th scope="row"><label for="cpd-to">Send to</label></th><td><input id="cpd-to" type="email" class="regular-text" name="<?php echo esc_attr( $n ); ?>[forms_to]" value="<?php echo esc_attr( $o['forms_to'] ); ?>"></td></tr>
 				<tr><th scope="row"><label for="cpd-fs">Formspree endpoint</label></th><td><input id="cpd-fs" type="url" class="regular-text" placeholder="https://formspree.io/f/xxxx" name="<?php echo esc_attr( $n ); ?>[formspree]" value="<?php echo esc_attr( $o['formspree'] ); ?>"><p class="description">Only used when Delivery is Formspree.</p></td></tr>
+				<tr><th scope="row">Stripe Payment Links</th><td>
+					<p><label for="cpd-pl">Launch ($899/mo)</label><br><input id="cpd-pl" type="url" class="regular-text" placeholder="https://buy.stripe.com/…" name="<?php echo esc_attr( $n ); ?>[pay_launch]" value="<?php echo esc_attr( $o['pay_launch'] ); ?>"></p>
+					<p><label for="cpd-pg">Grow ($1,799/mo)</label><br><input id="cpd-pg" type="url" class="regular-text" placeholder="https://buy.stripe.com/…" name="<?php echo esc_attr( $n ); ?>[pay_grow]" value="<?php echo esc_attr( $o['pay_grow'] ); ?>"></p>
+					<p><label for="cpd-ps">Scale ($2,999/mo)</label><br><input id="cpd-ps" type="url" class="regular-text" placeholder="https://buy.stripe.com/…" name="<?php echo esc_attr( $n ); ?>[pay_scale]" value="<?php echo esc_attr( $o['pay_scale'] ); ?>"></p>
+					<p class="description">Create one recurring Payment Link per plan in Stripe (Products → Payment Links, monthly). Leave empty to take sign-ups without online payment — the order still arrives by email and you invoice.</p></td></tr>
 			</table>
 			<?php submit_button(); ?>
 		</form>

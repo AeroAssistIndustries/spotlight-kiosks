@@ -235,6 +235,7 @@ def page(path, title, desc, body, active=None, extra_js=()):
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{R}}assets/styles.css?v=2">
 <link rel="stylesheet" href="{{R}}assets/future.css?v=2">
+<link rel="stylesheet" href="{{R}}assets/checkout.css?v=1">
 </head>
 <body>
 {header(active or path)}
@@ -523,6 +524,75 @@ BADGES = [
 def badge_strip(title="Accredited &amp; listed on"):
     items = "".join(f'<a class="badge" href="{u}" target="_blank" rel="noopener"><img src="{{R}}assets/logos/{slug}.svg" alt="" width="20" height="20" loading="lazy"><span><b>{n}</b><small>{tag}</small></span></a>' for n, slug, u, tag in BADGES if u)
     return f'<div class="badges" aria-label="Accreditations and profiles"><div class="wrap badges-inner"><p class="badges-lbl">{title}</p><div class="badges-row">{items}</div></div></div>' if items else ""
+
+INDUSTRY_OPTS = ["Hotel / hospitality", "Restaurant / bar", "Medical / dental", "Car dealership / auto services", "Home services / contractor", "Retail / e-commerce", "Professional services", "Other"]
+def checkout_section():
+    """Self-serve sign-up for a monthly plan: plan → business → access & goals → review & pay (Stripe Payment Link)."""
+    from pricing import PLANS, money
+    plans = "".join(f'<label class="co-opt"><input type="radio" name="plan" value="{p["id"]}"{" checked" if p.get("popular") else ""}><span><b>{p["name"]} — {money(p["price"])}/mo</b><small>{p["tagline"]}</small></span></label>' for p in PLANS)
+    inds = "".join(f"<option>{i}</option>" for i in INDUSTRY_OPTS)
+    cards = "".join(f'<div class="co-plan-card" data-plan-card="{p["id"]}"{"" if p.get("popular") else " hidden"}><span>{p["name"]}</span><b>{money(p["price"])}<small style="display:inline;font-size:14px;color:#B9C6E6"> /month</small></b><span>{p["who"]}</span><ul>{"".join(f"<li>{i}</li>" for i in p["includes"][:5])}</ul></div>' for p in PLANS)
+    return f'''<section class="section checkout" id="get-started" aria-labelledby="co-title"><div class="wrap">
+  <div class="section-head"><div><p class="eyebrow">Get started</p><h2 id="co-title">Start your plan today.</h2></div><p>Pick a plan, tell us about your business, and you're set up in about five minutes. Month to month after the first three; you own everything we build. Prefer to talk first? <a class="text-link" href="{{R}}free-audit/">Get the free audit</a>.</p></div>
+  <div class="co-grid">
+  <form id="checkout" class="co-form" novalidate data-welcome="{{R}}welcome/">
+    <input type="text" name="_gotcha" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <ol class="co-steps" aria-label="Sign-up steps"><li class="on"><span>1</span>Plan</li><li><span>2</span>Business</li><li><span>3</span>Access &amp; goals</li><li><span>4</span>Pay</li></ol>
+
+    <fieldset class="co-step" data-step="1"><legend>Choose your plan</legend>
+      <div class="co-bill">{plans}</div>
+      <div class="grid2">
+        <label class="field"><span>Locations</span><select name="locations"><option>1 location</option><option>2 locations</option><option>3 locations</option><option>4+ locations (we'll quote)</option></select></label>
+        <label class="field"><span>Start date <span class="opt">(optional)</span></span><input type="date" name="start_date"></label>
+      </div>
+      <p class="fine">Need a website too? Website projects are quoted separately after the audit — <a class="text-link" href="{{R}}pricing/#websites">see website packages</a>.</p>
+    </fieldset>
+
+    <fieldset class="co-step" data-step="2" hidden><legend>About your business</legend>
+      <div class="grid2">
+        <label class="field"><span>Business name</span><input name="business" required autocomplete="organization" data-label="Business name"></label>
+        <label class="field"><span>Industry</span><select name="industry">{inds}</select></label>
+        <label class="field"><span>Your name</span><input name="name" required autocomplete="name" data-label="Your name"></label>
+        <label class="field"><span>Email</span><input name="email" type="email" required autocomplete="email" data-label="Email"></label>
+        <label class="field"><span>Phone</span><input name="phone" type="tel" required autocomplete="tel" data-label="Phone"></label>
+        <label class="field"><span>City &amp; state</span><input name="city" required placeholder="Phoenix, AZ" data-label="City"></label>
+        <label class="field full"><span>Website <span class="opt">(optional)</span></span><input name="website" type="url" placeholder="https://" autocomplete="url"></label>
+      </div>
+    </fieldset>
+
+    <fieldset class="co-step" data-step="3" hidden><legend>Access and goals</legend>
+      <div class="grid2">
+        <label class="field"><span>Google Business Profile</span><select name="gbp"><option>Claimed — I can add you as a manager</option><option>Exists, but I don't have access</option><option>Not set up yet</option><option>Not sure</option></select></label>
+        <label class="field"><span>Social accounts</span><select name="social"><option>Instagram + Facebook</option><option>Instagram only</option><option>Facebook only</option><option>Also TikTok</option><option>None yet</option></select></label>
+        <label class="field full"><span>Social handles <span class="opt">(optional)</span></span><input name="handles" placeholder="@yourbusiness, facebook.com/yourbusiness"></label>
+        <label class="field full"><span>What matters most in the next 90 days?</span><select name="goal"><option>More calls and bookings from Google</option><option>More and better reviews</option><option>A consistent social presence</option><option>A faster, better website</option><option>Show up in ChatGPT / AI search</option><option>All of the above</option></select></label>
+        <label class="field full"><span>Anything we should know? <span class="opt">(optional)</span></span><textarea name="notes" rows="3" placeholder="Competitors you watch, busy seasons, what's been tried before…"></textarea></label>
+      </div>
+      <div class="drop" data-drop="logo"><input type="file" name="logo" id="co-logo" accept="image/png,image/jpeg,image/svg+xml,image/webp,application/pdf" data-label="Logo">
+        <label for="co-logo"><b>Upload your logo</b><span>PNG, JPG, SVG or PDF · up to 5 MB · optional</span></label><p class="drop-file" hidden></p></div>
+    </fieldset>
+
+    <fieldset class="co-step" data-step="4" hidden><legend>Review and pay</legend>
+      <dl class="co-review" id="co-review"></dl>
+      <div class="co-total"><span id="co-due-label">Due today · then monthly</span><b id="co-due"></b></div>
+      <label class="ack"><input type="checkbox" name="agree_terms" required data-label="Terms"> <span>I agree to the <a href="{{R}}terms/" target="_blank">Terms &amp; Conditions</a>, including the three-month initial term, monthly billing and 30-day cancellation.</span></label>
+      <label class="ack"><input type="checkbox" name="agree_access" required data-label="Access"> <span>I'm authorized to act for this business and to give Landmark Digital access to its website, profiles and accounts.</span></label>
+      <label class="field full"><span>Type your full legal name to sign</span><input name="sign_name" required autocomplete="name" maxlength="120" data-label="Signature"><small>Typing your name is your electronic signature under the E-SIGN Act and Arizona's UETA.</small></label>
+      <p class="fine">Payment is handled securely by Stripe. Your card details never touch our site.</p>
+    </fieldset>
+
+    <p class="form-error" role="alert" hidden></p>
+    <div class="co-nav"><button class="btn btn-ghost btn-small" type="button" data-co="back" disabled>Back</button><span class="fine" data-co="label">Step 1 of 4</span><button class="btn" type="button" data-co="next">Continue</button><button class="btn" type="submit" data-co="pay" hidden>Pay securely</button></div>
+  </form>
+
+  <aside class="co-side" aria-label="Your plan">
+    {cards}
+    <dl class="co-sum"><div><dt>Plan</dt><dd id="co-sum-plan">Grow · monthly</dd></div><div><dt>Business</dt><dd id="co-sum-biz">—</dd></div><div><dt>Total</dt><dd id="co-sum-total">—</dd></div></dl>
+    <ul class="check-list co-incl"><li>No long contracts — 3 months, then month to month</li><li>Everything we build is yours</li><li>A real person on email and phone</li><li>One-page report every month</li></ul>
+  </aside>
+  </div>
+  <div class="co-done" id="co-done" hidden tabindex="-1"><h3>Order received.</h3><p></p><div class="btn-row"></div></div>
+</div></section>'''
 
 def platform_strip():
     """Marquee of the platforms we work in, using each company's own mark (monochrome, from the Simple Icons set)."""

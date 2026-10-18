@@ -131,7 +131,7 @@ def plan_cards():
         cards += f'''<article class="plan{pop}">{badge}<h3>{p["name"]}</h3><p class="plan-tag">{p["tagline"]}</p>
   <p class="plan-price"><b>{pricing.money(p["price"])}</b><span>/month</span></p><p class="plan-who">{p["who"]}</p>
   <ul class="plan-list">{inc}</ul>
-  <a class="btn{' btn-dark' if not p.get('popular') else ''}" href="{{R}}contact/?plan={p["id"]}">Start with {p["name"]}</a></article>'''
+  <a class="btn{' btn-dark' if not p.get('popular') else ''}" href="{{R}}get-started/?plan={p["id"]}">Start with {p["name"]}</a></article>'''
     return f'<div class="plans">{cards}</div>'
 
 def website_cards():
@@ -495,6 +495,28 @@ page("terms/", "Terms & Conditions", "Terms and conditions for landmarkdigi.com 
      legal_page("terms/", "Terms &amp; Conditions", legal.TERMS, "The rules for using this site and buying our services, in plain language."))
 page("privacy/", "Privacy Policy", "How Landmark Digital LLC collects, uses and protects information.",
      legal_page("privacy/", "Privacy Policy", legal.PRIVACY, "What we collect, why, and what we don't do with it."))
+
+# ---------------------------------------------------------------- get started + welcome
+page("get-started/", "Get started", "Start a Landmark Digital plan online in five minutes: choose Launch, Grow or Scale, tell us about your business and pay securely.", f'''
+{page_hero([("Get started", "get-started/")], "Five minutes to a marketing team.", "Choose a plan, tell us about your business and pay securely. We start the audit the same day and your onboarding call is booked within 48 hours.", eyebrow="Sign up online")}
+{checkout_section()}
+<section class="section"><div class="wrap faq-wrap"><div>{head("Before you sign up.", "", "Questions")}</div><div class="faq">{faq_html([(q, a) for q, a in FAQS[:5]])}</div></div></section>
+''', active="pricing", extra_js=("checkout.js",))
+
+page("welcome/", "Welcome", "Thanks for starting a plan with Landmark Digital.", f'''
+<section class="page-hero dark"><div class="wrap narrow"><p class="eyebrow">Welcome</p><h1>You're in. Let's get you found.</h1><p class="lede">Thanks for your order. A receipt is on its way to your email.</p><p class="co-order" id="welcome-order" hidden></p></div></section>
+<section class="section"><div class="wrap narrow">
+  {head("What happens next.", "", "The first two weeks")}
+  <ol class="timeline wide">
+    <li><b>Today</b><span>We start your audit — website, Google profile, reviews, social and AI search — and email you a link to book your onboarding call.</span></li>
+    <li><b>Day 2–3</b><span>Onboarding call: we walk through the audit, agree the 90-day plan and collect access to your profiles and accounts.</span></li>
+    <li><b>Week 1–2</b><span>Profiles fixed and synced, review flow switched on, first month of content sent for your approval.</span></li>
+    <li><b>Every month</b><span>One-page report: what we did, what moved, what's next.</span></li>
+  </ol>
+  <div class="callout"><b>Need to change something?</b><p>Reply to your receipt or email <a href="mailto:{EMAIL}">{EMAIL}</a>. You can also call <a href="tel:{TEL}">{PHONE}</a>.</p></div>
+  {btns(("Back to the home page", ""), ("Read a guide while you wait", "resources/", "btn-ghost"))}
+</div></section>
+''', extra_js=("checkout.js",))
 
 # ---------------------------------------------------------------- 404
 page("404/", "Page not found", "That page doesn't exist.", f'''
