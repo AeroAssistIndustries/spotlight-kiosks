@@ -18,7 +18,8 @@
       const tick = setInterval(() => { si = Math.min(steps.length - 1, si + 1); const p = out.querySelector(".sp-wait p"); if (p) p.textContent = steps[si]; }, 7000);
       const ctrl = new AbortController(); const to = setTimeout(() => ctrl.abort(), 75000);
       try {
-        const api = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?strategy=mobile&category=performance&category=seo&category=accessibility&url=" + encodeURIComponent(url);
+        const key = (window.LANDMARK_CONFIG && window.LANDMARK_CONFIG.pagespeedKey) || "";
+        const api = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?strategy=mobile&category=performance&category=seo&category=accessibility&url=" + encodeURIComponent(url) + (key ? "&key=" + encodeURIComponent(key) : "");
         const r = await fetch(api, { signal: ctrl.signal }); const j = await r.json();
         if (!r.ok || !j.lighthouseResult) throw new Error((j.error && j.error.message) || "no result");
         const L = j.lighthouseResult, cat = L.categories, au = L.audits;
@@ -35,7 +36,7 @@
           <p class="fine">Measured live by Google PageSpeed Insights on a simulated mid-range phone. Nothing is stored. <a class="text-link" href="${box.dataset.root || "./"}free-audit/#audit">Get the full audit →</a></p></div>`;
         if (!reduce) { const ring = out.querySelector(".sp-ring"); let v = 0; (function up() { v = Math.min(perf, v + 2); ring.style.setProperty("--v", v); if (v < perf) requestAnimationFrame(up); })(); }
       } catch (err) {
-        const quota = /quota|rate|429/i.test(String(err && err.message));
+        const quota = /quota|rate|429|403/i.test(String(err && err.message));
         out.innerHTML = `<p class="sp-err">${err.name === "AbortError" ? "That took too long — the site may be very slow or blocking the test." : quota ? "Google's free tester is busy right now. Try again in a minute, or" : "We couldn't test that address. Check the spelling, or"} <a class="text-link" href="${box.dataset.root || "./"}free-audit/#audit">request the full audit</a> and we'll run it for you.</p>`;
       } finally { clearInterval(tick); clearTimeout(to); box.classList.remove("busy"); btn.disabled = false; }
     });

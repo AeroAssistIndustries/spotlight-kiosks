@@ -1,4 +1,4 @@
-/* CityPulse Kiosks — one place that talks to outside services.
+/* Landmark Digital — one place that talks to outside services.
    Forms and checkout call these helpers; providers are chosen in assets/config.js. */
 (function () {
   "use strict";

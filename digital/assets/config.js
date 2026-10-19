@@ -8,5 +8,6 @@
 window.LANDMARK_CONFIG = {
   forms: { provider: "formsubmit", to: "sarvesh@landmarkdigi.com", endpoint: "" },
   payments: { provider: "stripe", launch: "", grow: "", scale: "" },  // paste the Stripe Payment Link for each plan
-  maxUploadMB: 5
+  maxUploadMB: 5,
+  pagespeedKey: ""   // optional Google PageSpeed Insights API key for the live speed tester (free in Google Cloud Console)
 };
