@@ -248,8 +248,10 @@ export function validateContent(input, prev) {
 const COOKIE = "cp_admin";
 const b64url = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 const fromB64url = s => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((s.length + 3) % 4)), c => c.charCodeAt(0));
-async function hmacKey(env) {
-  return crypto.subtle.importKey("raw", enc.encode("citypulse-admin|" + env.ADMIN_PASSWORD), { name: "HMAC", hash: "SHA-256" }, false, ["sign", "verify"]);
+/* Session cookies are signed with the Cloudflare secret plus a random key kept in D1 (auth.skey). The key is
+   replaced on every password change, so someone who only knew the starting secret cannot mint a sign-in. */
+async function hmacKey(env, skey) {
+  return crypto.subtle.importKey("raw", enc.encode("citypulse-admin|" + env.ADMIN_PASSWORD + "|" + (skey || "")), { name: "HMAC", hash: "SHA-256" }, false, ["sign", "verify"]);
 }
 async function sameSecret(a, b) {
   const [x, y] = await Promise.all([crypto.subtle.digest("SHA-256", enc.encode(a)), crypto.subtle.digest("SHA-256", enc.encode(b))]);
@@ -277,12 +279,13 @@ async function codeHash(env, code) {
   return b64url(await crypto.subtle.sign("HMAC", k, enc.encode(String(code).toUpperCase().replace(/[^A-Z0-9]/g, ""))));
 }
 async function getAuth(env) {
-  const blank = { pw: null, codes: [], epoch: 0, fp: null, changed_at: null, codes_at: null };
+  const blank = { pw: null, codes: [], epoch: 0, fp: null, skey: null, changed_at: null, codes_at: null };
   if (!hasDB(env)) return blank;
   await ensure(env);
   const row = await env.DB.prepare("SELECT json FROM auth WHERE id = 'staff'").first();
   let a = blank; try { if (row) a = { ...blank, ...JSON.parse(row.json) }; } catch (e) { /* keep blank */ }
   if (a.fp !== await secretPrint(env)) a = { ...blank, epoch: a.epoch || 0 };   // the Cloudflare secret was changed: start over
+  if (a.pw && !a.skey) { a.skey = newSessionKey(); await putAuth(env, a); }      // older installs: add a signing key once
   return a;
 }
 async function putAuth(env, a) {
@@ -300,15 +303,17 @@ function pwProblem(next) {
   if (/^(.)\1+$/.test(next) || /^(password|citypulse|1234567890)/i.test(next)) return "Pick something harder to guess.";
   return "";
 }
+function newSessionKey() { return b64url(crypto.getRandomValues(new Uint8Array(32))); }
 async function setPassword(env, a, next) {
+  a.skey = newSessionKey();
   const salt = b64url(crypto.getRandomValues(new Uint8Array(16)));
   a.pw = { salt, hash: await pwHash(env, next, salt) };
   a.epoch = (a.epoch || 0) + 1; a.changed_at = new Date().toISOString();
   await putAuth(env, a);
 }
-async function sessionCookie(env, epoch) {
-  const exp = String(Date.now() + 12 * 3600000), body = exp + "." + (epoch || 0);
-  const sig = b64url(await crypto.subtle.sign("HMAC", await hmacKey(env), enc.encode(body)));
+async function sessionCookie(env, a) {
+  const exp = String(Date.now() + 12 * 3600000), body = exp + "." + ((a && a.epoch) || 0);
+  const sig = b64url(await crypto.subtle.sign("HMAC", await hmacKey(env, a && a.skey), enc.encode(body)));
   return `${COOKIE}=${body}.${sig}; Path=/admin; HttpOnly; Secure; SameSite=Strict; Max-Age=43200`;
 }
 const CODE_ABC = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
@@ -322,8 +327,9 @@ async function signedIn(req, env) {
   const m = (req.headers.get("Cookie") || "").match(/(?:^|;\s*)cp_admin=([0-9]+)\.([0-9]+)\.([A-Za-z0-9_-]+)/);
   if (!m || +m[1] < Date.now()) return false;
   try {
-    if (!(await crypto.subtle.verify("HMAC", await hmacKey(env), fromB64url(m[3]), enc.encode(m[1] + "." + m[2])))) return false;
-    return +m[2] === ((await getAuth(env)).epoch || 0);
+    const a = await getAuth(env);
+    if (!(await crypto.subtle.verify("HMAC", await hmacKey(env, a.skey), fromB64url(m[3]), enc.encode(m[1] + "." + m[2])))) return false;
+    return +m[2] === (a.epoch || 0);
   } catch (e) { return false; }
 }
 const tries = new Map();
@@ -661,7 +667,7 @@ async function admin(req, env, ctx, url, fetchSeed, onContentSaved) {
       await new Promise(r => setTimeout(r, 400));
       return send(401, { error: "That password is not right." });
     }
-    return send(200, { ok: true }, "", { "Set-Cookie": await sessionCookie(env, auth.epoch) });
+    return send(200, { ok: true }, "", { "Set-Cookie": await sessionCookie(env, auth) });
   }
 
   /* Forgot password: a one-time recovery code sets a new password and signs this browser in. */
@@ -681,7 +687,7 @@ async function admin(req, env, ctx, url, fetchSeed, onContentSaved) {
     }
     hit.used = new Date().toISOString();
     await setPassword(env, auth, body.next);
-    return send(200, { ok: true, left: auth.codes.filter(c => !c.used).length }, "", { "Set-Cookie": await sessionCookie(env, auth.epoch) });
+    return send(200, { ok: true, left: auth.codes.filter(c => !c.used).length }, "", { "Set-Cookie": await sessionCookie(env, auth) });
   }
   if (api === "logout" && req.method === "POST")
     return send(200, { ok: true }, "", { "Set-Cookie": `${COOKIE}=; Path=/admin; HttpOnly; Secure; SameSite=Strict; Max-Age=0` });
@@ -706,7 +712,7 @@ async function admin(req, env, ctx, url, fetchSeed, onContentSaved) {
     if (problem) return send(400, { error: problem });
     if (String(body.next) === String(body.current)) return send(400, { error: "Pick a password different from the current one." });
     await setPassword(env, a, body.next);
-    return send(200, { ok: true }, "", { "Set-Cookie": await sessionCookie(env, a.epoch) });
+    return send(200, { ok: true }, "", { "Set-Cookie": await sessionCookie(env, a) });
   }
   if (api === "recovery-codes" && req.method === "POST") {
     const ip = req.headers.get("CF-Connecting-IP") || "local";
