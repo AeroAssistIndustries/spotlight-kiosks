@@ -128,6 +128,7 @@ def footer():
     </div>
   </div>
   <div class="wrap footer-base"><span>© <span id="year">2026</span> CityPulse Kiosks. All rights reserved.</span><nav aria-label="Legal"><a href="{{R}}privacy/">Privacy Policy</a><a href="{{R}}terms/">Terms &amp; Conditions</a><a href="https://citypulse-sales-studio.pages.dev/" rel="nofollow">Team login</a><a href="https://spotlight-kiosks.sarvesh-bb0.workers.dev/admin" rel="nofollow">Owner login</a></nav></div>
+  <p class="wrap footer-legal" style="margin:0 auto;padding-top:14px;padding-bottom:18px;border-top:1px solid rgba(255,255,255,.08);font-size:12px;line-height:1.6;color:rgba(255,255,255,.48)">All company names, hotel brands, logos and trademarks shown on this site are the property of their respective owners and are used for identification and reference purposes only. Unless expressly stated, their use does not imply any affiliation with, sponsorship by, or endorsement from the trademark holders. CityPulse Kiosks is an independent advertising company.</p>
 </footer>
 <div class="m-cta" id="m-cta"><span><b>[[W:y1]] [[P:y1]]/yr</b>one location, or [[P:mo]]/mo<span class="cp-sale"> · 25% off</span></span><a class="btn" href="{{R}}#get-started">Get started</a></div>'''
 
