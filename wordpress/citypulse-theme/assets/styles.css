@@ -2170,3 +2170,13 @@ button:focus-visible, [tabindex]:focus-visible { outline: 3px solid #0F1C2B !imp
 .m-cta .cp-sale{font-size:12px;max-width:none;display:inline}
 .btn .cp-was{opacity:.7}
 .calc-out .big .cp-was{display:block;font:600 clamp(20px,2.2vw,26px)/1 var(--body);letter-spacing:0;opacity:.55;margin-bottom:8px}
+
+/* Pay on the page (Square card form + Google Pay), added to checkout step 4 by checkout.js */
+.co-paybox{margin:18px 0 10px;padding:16px 18px 6px;border:1px solid var(--line);border-radius:16px;background:#fff}
+.co-paybox-h{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+.co-paybox-h b{font:700 18px/1.2 var(--display)}
+.co-paybox-h span{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.co-wallet{min-height:48px;margin-bottom:6px}
+.co-or{display:flex;align-items:center;gap:12px;margin:10px 0 4px;font-size:13px;color:var(--muted)}
+.co-or::before,.co-or::after{content:"";flex:1;height:1px;background:var(--line)}
+.co-card{min-height:90px}

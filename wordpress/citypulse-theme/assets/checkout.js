@@ -1,6 +1,8 @@
 /* CityPulse Kiosks — self-serve checkout for one location.
-   Order details and files are delivered by the form service and payment happens
-   on the hosted payment link — both set in assets/config.js, sent via assets/integrations.js. */
+   Payment happens right here in step 4: Square's secure card form (and Google Pay) is shown on the page, the card
+   goes from that form straight to Square, and Sales Studio (sales.citypulsekiosks.com/api/web/checkout) charges the
+   one-time token at the price it holds. After payment the order and files are delivered by the form service
+   (assets/integrations.js). If the card form can't load, checkout falls back to the hosted payment link. */
 (function () {
   "use strict";
   const $ = (s, r = document) => r.querySelector(s);
@@ -157,8 +159,140 @@
     back.disabled = i === 0; next.hidden = i === steps.length - 1; pay.hidden = i !== steps.length - 1;
     label.textContent = `Step ${i + 1} of ${steps.length}`;
     if (i === steps.length - 1) review();
-    pay.textContent = stripeLink() ? (billing() === "annual" ? `Pay ${Y1} securely` : `Pay ${MO} securely`) : "Place my order";
+    if (i >= steps.length - 2) sqLoad();
+    if (i === steps.length - 1) sqShow();
+    payLabel();
     const lg = $("legend", steps[i]); lg.tabIndex = -1;
+  }
+  function payLabel() {
+    if (pay.disabled) return;
+    pay.textContent = SQ.state === "ready" ? `Pay ${dueText()} securely` : stripeLink() ? (billing() === "annual" ? `Pay ${Y1} securely` : `Pay ${MO} securely`) : "Place my order";
+  }
+
+  /* ---------- pay on this page: Square's card form + Google Pay ---------- */
+  const CFG = window.CITYPULSE_CONFIG || {};
+  const PAY_API = String((CFG.payments && CFG.payments.api) || "https://sales.citypulsekiosks.com").replace(/\/+$/, "");
+  const SQ = { state: "idle", cfg: null, payments: null, card: null, gpay: null, req: null, idem: "", orderId: "" };
+  const cents = () => SQ.cfg ? SQ.cfg.prices[planKey()] : (billing() === "annual" ? PR.now.y1 : PR.now.mo) * 100;
+  const dollars = c => "$" + (c / 100).toLocaleString("en-US", { minimumFractionDigits: c % 100 ? 2 : 0, maximumFractionDigits: 2 });
+  const dueText = () => dollars(cents());
+  const newIdem = () => (window.crypto && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2)).replace(/[^A-Za-z0-9-]/g, "").slice(0, 45);
+  const LOCK = '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M7 10V7a5 5 0 0 1 10 0v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><rect x="4" y="10" width="16" height="11" rx="2.5" fill="currentColor"/></svg>';
+  function sqBox() {
+    let box = $("#co-paybox", form);
+    if (box) return box;
+    const last = steps[steps.length - 1], fine = $("p.fine", last);
+    box = document.createElement("div"); box.className = "co-paybox"; box.id = "co-paybox"; box.hidden = true;
+    box.innerHTML = `<div class="co-paybox-h"><b>Payment</b><span>${LOCK} Secured by Square</span></div><div id="co-gpay" class="co-wallet" hidden></div><p class="co-or" hidden><span>or pay by card</span></p><div id="co-card" class="co-card"><span class="fine">Loading the secure card form…</span></div>`;
+    last.insertBefore(box, fine || null);
+    return box;
+  }
+  function sqScript(sandbox) {
+    if (window.Square) return Promise.resolve(window.Square);
+    return new Promise((ok, no) => {
+      const s = document.createElement("script");
+      s.src = sandbox ? "https://sandbox.web.squarecdn.com/v1/square.js" : "https://web.squarecdn.com/v1/square.js";
+      s.onload = () => window.Square ? ok(window.Square) : no(new Error("no Square"));
+      s.onerror = () => no(new Error("Square script blocked"));
+      document.head.appendChild(s);
+    });
+  }
+  /* Gets the card form ready in the background once the shopper reaches the last two steps. */
+  let sqLoading = null;
+  function sqLoad() {
+    if (sqLoading || SQ.state === "off") return sqLoading;
+    SQ.state = "loading";
+    sqLoading = (async () => {
+      try {
+        const r = await fetch(PAY_API + "/api/web/config", { mode: "cors", credentials: "omit" });
+        if (!r.ok) throw new Error("config " + r.status);
+        SQ.cfg = await r.json();
+        if (!SQ.cfg.appId || !SQ.cfg.locationId || !SQ.cfg.prices) throw new Error("not set up");
+        const Sq = await sqScript(SQ.cfg.sandbox);
+        SQ.payments = Sq.payments(SQ.cfg.appId, SQ.cfg.locationId);
+        SQ.card = await SQ.payments.card({ style: { input: { fontSize: "16px", color: "#121B26" }, "input::placeholder": { color: "#8A96A3" }, ".input-container.is-focus": { borderColor: "#22C7B6" }, ".message-icon": { color: "#536170" } } });
+        SQ.state = "ready";
+        if (!steps[steps.length - 1].hidden) sqShow();
+        payLabel();
+      } catch (e) {
+        SQ.state = "off";
+        const box = $("#co-paybox", form); if (box) box.remove();
+        payLabel();
+      }
+    })();
+    return sqLoading;
+  }
+  async function sqShow() {
+    if (SQ.state !== "ready" && SQ.state !== "loading") return;
+    const box = sqBox(); box.hidden = false;
+    $("#co-due").textContent = dueText();
+    if (SQ.state !== "ready") return;
+    if (!SQ.cardOn) { SQ.cardOn = true; $("#co-card", box).innerHTML = ""; try { await SQ.card.attach("#co-card"); } catch (e) { SQ.cardOn = false; } }
+    const total = { amount: (cents() / 100).toFixed(2), label: billing() === "annual" ? "CityPulse kiosk ad, yearly" : "CityPulse kiosk ad, first month" };
+    if (SQ.req) { try { SQ.req.update({ total }); } catch (e) { /* keep the old total */ } return; }
+    try {
+      SQ.req = SQ.payments.paymentRequest({ countryCode: "US", currencyCode: "USD", total, requestBillingContact: false });
+      SQ.gpay = await SQ.payments.googlePay(SQ.req);
+      await SQ.gpay.attach("#co-gpay", { buttonColor: "black", buttonSizeMode: "fill", buttonType: "pay" });
+      $("#co-gpay", box).hidden = false; $(".co-or", box).hidden = false;
+      $("#co-gpay", box).addEventListener("click", e => { e.preventDefault(); if (!validate(3) || pay.disabled) return; payWith(SQ.gpay); });
+    } catch (e) { /* Google Pay isn't available on this browser; the card form still works */ }
+  }
+  /* Charges the card (or Google Pay), then sends the order and files and moves on to the welcome page. */
+  async function payWith(method) {
+    const f = form.elements, email = f.email.value.trim(), c = cents();
+    const old = pay.textContent; pay.disabled = true; pay.textContent = "Processing payment…"; err.hidden = true;
+    const undo = msg => { pay.disabled = false; pay.textContent = old; SQ.idem = ""; fail(null, msg); };
+    let t;
+    try { t = await method.tokenize(); } catch (e) { return undo("The payment form had a problem. Check the details and try again."); }
+    if (!t || t.status !== "OK") { pay.disabled = false; pay.textContent = old; if (t && t.status === "Cancel") return; const m = t && t.errors && t.errors[0] && t.errors[0].message; return undo(m ? `${m}.`.replace(/\.\.$/, ".") : "Check your card details and try again."); }
+    const [first, ...rest] = f.name.value.trim().split(/\s+/);
+    let verification = "";
+    try { const v = await SQ.payments.verifyBuyer(t.token, { amount: (c / 100).toFixed(2), currencyCode: "USD", intent: "CHARGE", billingContact: { givenName: first || "", familyName: rest.join(" "), email, phone: f.phone.value.trim() } }); verification = (v && v.token) || ""; } catch (e) { /* the bank didn't ask for an extra check */ }
+    SQ.orderId = SQ.orderId || orderId(); SQ.idem = SQ.idem || newIdem();
+    const ad = adSource() === "upload" ? `Finished ad: ${files.artwork ? files.artwork.name : "-"}` : `We design it · "${f.headline.value.trim() || "headline to be agreed"}"`;
+    let r, j = {};
+    try {
+      r = await fetch(PAY_API + "/api/web/checkout", { method: "POST", mode: "cors", credentials: "omit", headers: { "Content-Type": "application/json" }, body: JSON.stringify({
+        plan: planKey(), token: t.token, verification, idem: SQ.idem, expectCents: c,
+        order: { id: SQ.orderId, business: f.business.value.trim(), name: f.name.value.trim(), email, phone: f.phone.value.trim(), market: market(), venue: f.venue_type ? f.venue_type.value : "", website: f.destination_url.value.trim(), ad, signed: f.sign_name.value.trim() }
+      }) });
+      j = await r.json().catch(() => ({}));
+    } catch (e) {
+      /* keep the same payment key, so pressing Pay again can never charge twice */
+      pay.disabled = false; pay.textContent = old;
+      return fail(null, "We couldn't confirm your payment because the connection dropped. Press Pay again (you won't be charged twice), or call us at (602) 975-5513.");
+    }
+    if (!r.ok || !j.ok) {
+      if (r.status === 409 && j.cents) { SQ.cfg.prices[planKey()] = j.cents; $("#co-due").textContent = dueText(); }
+      return undo(j.error || "The payment didn't go through. Try another card, or call us at (602) 975-5513.");
+    }
+    paid(j);
+  }
+  async function paid(j) {
+    const id = j.orderId, email = form.elements.email.value.trim();
+    const order = { id, plan: planText(), market: market(), business: form.elements.business.value, paid: true };
+    store.set("citypulse-order", order);
+    const welcome = new URL(form.dataset.welcome, location.href); welcome.searchParams.set("order", id); welcome.searchParams.set("paid", "1");
+    pay.textContent = "Paid. Sending your order…";
+    const extra = {
+      _subject: `Paid kiosk order ${id} — ${order.business} (${order.market})`, _replyto: email,
+      order_id: id, plan: planText(), market: order.market, payment: `Paid online ${dollars(j.cents)} by ${j.card}${j.receiptUrl ? " · receipt " + j.receiptUrl : ""}`
+    };
+    if (API.formsReady()) {
+      const logo = $("#co-logo"), art = $("#co-art"), sel = form.elements.market;
+      const useArt = adSource() === "upload" && files.artwork;
+      art.name = useArt ? "attachment" : "artwork"; art.disabled = !useArt;
+      logo.name = useArt ? "attachment_logo" : "attachment"; logo.disabled = !files.logo;
+      sel.name = "market_choice"; form.elements.market_other && (form.elements.market_other.disabled = true);
+      if (await API.sendWithFiles(form, extra, welcome.toString())) return;
+    }
+    /* Paid, but the order details didn't send: never ask them to pay again, just to email the files. */
+    const mail = `mailto:sales@citypulsekiosks.com?subject=${encodeURIComponent(`Files for paid order ${id} — ${order.business}`)}&body=${encodeURIComponent(`Hello CityPulse team,\n\nI paid for order ${id} (${planText()}, ${order.market}). My logo/artwork is attached.\n\n${form.elements.name.value}`)}`;
+    const done = $("#co-done");
+    $("p", done).innerHTML = `Your payment went through and your order number is <b>${esc(id)}</b>. We've emailed your confirmation. Please send us your logo or artwork with the button below.`;
+    $(".btn-row", done).innerHTML = `<a class="btn" href="${mail}">Email your files</a><a class="btn btn-ghost" href="${welcome}">What happens next</a>`;
+    form.closest(".co-grid").hidden = true; done.hidden = false; done.focus();
   }
   function go(i) { show(i); $("legend", steps[i]).focus({ preventScroll: true }); form.scrollIntoView({ behavior: "smooth", block: "start" }); }
   next.addEventListener("click", () => { if (validate(cur)) go(cur + 1); });
@@ -174,6 +308,9 @@
   form.addEventListener("submit", async e => {
     e.preventDefault();
     if (!validate(3)) return;
+    if (pay.disabled) return;
+    if (SQ.state === "loading") { pay.disabled = true; pay.textContent = "Loading the payment form…"; await sqLoading; pay.disabled = false; payLabel(); if (SQ.state === "ready") { await sqShow(); return fail(null, "Enter your card details above to finish."); } }
+    if (SQ.state === "ready") return payWith(SQ.card);
     const id = orderId(), email = form.elements.email.value.trim();
     const order = { id, plan: planText(), market: market(), business: form.elements.business.value };
     store.set("citypulse-order", order);

@@ -5,7 +5,7 @@
  */
 defined( 'ABSPATH' ) || exit;
 
-define( 'CITYPULSE_VERSION', '1.3.8' );
+define( 'CITYPULSE_VERSION', '1.3.9' );
 
 require get_theme_file_path( 'inc/settings.php' );
 require get_theme_file_path( 'inc/setup.php' );
@@ -52,6 +52,7 @@ add_action( 'wp_head', function () {
 	if ( ! $desc ) {
 		$desc = get_bloginfo( 'description' );
 	}
+	$desc = str_replace( array( '602-887-4058', '(602) 887-4058' ), array( '602-975-5513', '(602) 975-5513' ), (string) $desc );
 	if ( ! $seo_plugin ) {
 		echo '<meta name="description" content="' . esc_attr( $desc ) . "\">\n";
 		echo '<meta property="og:title" content="' . esc_attr( wp_get_document_title() ) . "\">\n";
@@ -108,3 +109,7 @@ function citypulse_current_class( $key, $hrefs ) {
 		echo ' current';
 	}
 }
+
+add_filter( 'the_content', function ( $c ) {
+	return str_replace( 'Payment is handled securely by Stripe.', 'Payment is handled securely by Square.', $c );
+}, 20 );
