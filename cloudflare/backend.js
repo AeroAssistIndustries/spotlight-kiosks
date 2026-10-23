@@ -955,6 +955,29 @@ async function shareToken(env, venue, sponsor) {
 
 const escH = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 /* The advertiser's own live report, opened from a private link (no sign-in). */
+/* Sends Sales Studio the list of ads on every venue's kiosks, each with its private report link, so staff can
+   connect an advertiser's account to the kiosk ad they bought by picking it from a list. Sales Studio checks every
+   link with this server before trusting it. Runs with the 5-minute schedule; sends only when something changed. */
+export async function pushAds(env, base) {
+  if (!hasDB(env) || !env.ADMIN_PASSWORD) return { skipped: true };
+  await ensure(env);
+  const rows = (await env.DB.prepare("SELECT venue, json FROM content").all()).results || [], ads = [];
+  for (const r of rows) {
+    let v; try { v = JSON.parse(r.json); } catch (e) { continue; }
+    for (const sp of v.sponsors || []) {
+      if (!sp || sp.house || !sp.id || !ID_RE.test(sp.id) || !ID_RE.test(r.venue)) continue;
+      ads.push({ venue: r.venue, venueName: v.name || r.venue, address: v.address || "", sponsor: sp.id, name: sp.name || sp.id, active: sp.active !== false, start: sp.start || "", end: sp.end || "", report: `${base}/r/${r.venue}/${sp.id}/${await shareToken(env, r.venue, sp.id)}` });
+    }
+  }
+  const body = JSON.stringify({ ads }), sig = b64url(await crypto.subtle.digest("SHA-256", enc.encode(body)));
+  const last = await env.DB.prepare("SELECT json FROM settings WHERE venue = '_adpush'").first().catch(() => null);
+  const hour = Math.floor(Date.now() / 3600000);
+  if (last) { try { const l = JSON.parse(last.json); if (l.sig === sig && l.hour === hour) return { same: true }; } catch (e) { /* send */ } }
+  const r = await fetch(env.SALES_ADS_URL || "https://sales.citypulsekiosks.com/kiosk/ads", { method: "POST", headers: { "Content-Type": "application/json", "User-Agent": "CityPulse kiosk server (ad list)" }, body });
+  if (r.ok) await env.DB.prepare("INSERT INTO settings (venue, json, updated_at) VALUES ('_adpush', ?, ?) ON CONFLICT(venue) DO UPDATE SET json = excluded.json, updated_at = excluded.updated_at").bind(JSON.stringify({ sig, hour }), nowIso()).run();
+  return { sent: r.ok, ads: ads.length };
+}
+
 async function sharedReport(env, url, fetchSeed) {
   const [, , venue, sponsor, token] = url.pathname.split("/");
   const page = (status, body) => new Response(body, { status, headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow", "Referrer-Policy": "no-referrer", "X-Frame-Options": "DENY", "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; img-src 'self' https: data:; base-uri 'none'; form-action 'none'" } });
@@ -974,15 +997,27 @@ async function sharedReport(env, url, fetchSeed) {
   const eng = per("adEngaged"), tot = per("adShown"), rch = per("adReach"), qrs = per("qr");
   const sum = a => a.reduce((x, y) => x + y, 0), fmt = n => Number(n).toLocaleString("en-US");
   const R = sum(rch), E = sum(eng), T = sum(tot), Q = sum(qrs);
-  /* The same report as data, for the advertiser's dashboard in Sales Studio (read server to server; no personal data). */
+  const logo = s.logo ? (s.logo.startsWith("media:") ? `${url.origin}/media/${s.logo.slice(6)}` : assetsBase(env) + s.logo) : "";
+  /* The same report as data, for the advertiser's dashboard in Sales Studio (read server to server; no personal data):
+     totals and day by day, the period before for comparison, each kiosk at the venue, the venue's busiest hours,
+     and the ad itself as it shows on screen. */
   if (url.searchParams.get("format") === "json") {
-    const ks = (await env.DB.prepare("SELECT kiosk, last_seen FROM kiosks WHERE venue = ?").bind(venue).all()).results || [];
+    const ks = (await env.DB.prepare("SELECT kiosk, last_seen, first_seen FROM kiosks WHERE venue = ?").bind(venue).all()).results || [];
     const online = ks.filter(k => k.last_seen && Date.now() - Date.parse(k.last_seen) < 15 * 60000).length;
     const today = dayKey(tz), live = s.active !== false && (!s.start || today >= s.start) && (!s.end || today <= s.end);
-    return new Response(JSON.stringify({ sponsor: { id: s.id, name: s.name, start: s.start || "", end: s.end || "", live },
-      venue: { id: venue, name: v.name || "", address: v.address || "", kiosks: ks.length, online },
-      days, from: list[0], to: list[list.length - 1], totals: { reach: R, engaged: E, views: T, qr: Q },
-      daily: list.map((d, i) => ({ day: d, engaged: eng[i], views: tot[i], qr: qrs[i], reach: rch[i] })) }),
+    const prevFrom = dayKey(tz, new Date(Date.now() - (2 * days - 1) * 86400000));
+    const pr = (await env.DB.prepare("SELECT type, SUM(n) AS n FROM events WHERE venue = ? AND day >= ? AND day < ? AND ((type IN ('adShown', 'adEngaged', 'adReach') AND (key = ? OR key = ?)) OR (type = 'qr' AND key = ?)) GROUP BY type").bind(venue, prevFrom, list[0], s.id, s.name, "ad:" + s.id).all()).results || [];
+    const pv = t => (pr.find(x => x.type === t) || {}).n || 0;
+    const bk = (await env.DB.prepare("SELECT kiosk, type, SUM(n) AS n FROM events WHERE venue = ? AND day >= ? AND ((type IN ('adShown', 'adEngaged') AND (key = ? OR key = ?)) OR (type = 'qr' AND key = ?)) GROUP BY kiosk, type").bind(venue, list[0], s.id, s.name, "ad:" + s.id).all()).results || [];
+    const hrs = Array(24).fill(0);
+    ((await env.DB.prepare("SELECT key, SUM(n) AS n FROM events WHERE venue = ? AND day >= ? AND type = 'hours' GROUP BY key").bind(venue, list[0]).all()).results || []).forEach(r => { const i = +r.key; if (i >= 0 && i < 24) hrs[i] += r.n; });
+    const sess = ((await env.DB.prepare("SELECT SUM(n) AS n FROM events WHERE venue = ? AND day >= ? AND type = 'sessions'").bind(venue, list[0]).first()) || {}).n || 0;
+    const kioskRows = ks.map(k => ({ kiosk: k.kiosk, online: !!(k.last_seen && Date.now() - Date.parse(k.last_seen) < 15 * 60000), lastSeen: k.last_seen || "", since: k.first_seen || "",
+      views: bk.filter(x => x.kiosk === k.kiosk && x.type === "adShown").reduce((a, x) => a + x.n, 0), engaged: bk.filter(x => x.kiosk === k.kiosk && x.type === "adEngaged").reduce((a, x) => a + x.n, 0), qr: bk.filter(x => x.kiosk === k.kiosk && x.type === "qr").reduce((a, x) => a + x.n, 0) }));
+    return new Response(JSON.stringify({ sponsor: { id: s.id, name: s.name, start: s.start || "", end: s.end || "", live, kind: s.kind || "", tagline: s.tagline || "", website: s.website || "", logo: logo || "" },
+      venue: { id: venue, name: v.name || "", address: v.address || "", tz, kiosks: ks.length, online, sessions: sess, hours: hrs },
+      days, from: list[0], to: list[list.length - 1], totals: { reach: R, engaged: E, views: T, qr: Q }, previous: { reach: pv("adReach"), engaged: pv("adEngaged"), views: pv("adShown"), qr: pv("qr") },
+      daily: list.map((d, i) => ({ day: d, engaged: eng[i], views: tot[i], qr: qrs[i], reach: rch[i] })), kiosks: kioskRows }),
       { status: 200, headers: { "Content-Type": "application/json", "Cache-Control": "no-store", "X-Robots-Tag": "noindex" } });
   }
   const nice = d => new Date(d + "T12:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
@@ -990,7 +1025,6 @@ async function sharedReport(env, url, fetchSeed) {
   const max = Math.max(4, ...eng), W = 720, H = 150, bw = W / days, every = Math.ceil(days / 8);
   const bars = list.map((d, i) => { const w = Math.max(2, bw * 0.34), he = eng[i] / max * (H - 8), hq = qrs[i] / max * (H - 8);
     return `<rect x="${i * bw + bw / 2 - w - 1}" y="${H - he}" width="${w}" height="${he}" rx="2" fill="#0B7F74"><title>${lab(d)}: ${eng[i]} views with a guest</title></rect><rect x="${i * bw + bw / 2 + 1}" y="${H - hq}" width="${w}" height="${hq}" rx="2" fill="#0F1C2B"><title>${lab(d)}: ${qrs[i]} QR scans</title></rect>${i % every === 0 ? `<text x="${i === 0 ? 0 : i * bw + bw / 2}" y="${H + 15}" text-anchor="${i === 0 ? "start" : "middle"}">${lab(d)}</text>` : ""}`; }).join("");
-  const logo = s.logo ? (s.logo.startsWith("media:") ? `${url.origin}/media/${s.logo.slice(6)}` : assetsBase(env) + s.logo) : "";
   const kpi = (l, n, sub) => `<div class="kpi"><span>${l}</span><b>${n}</b><small>${sub}</small></div>`;
   const seg = [7, 30, 90].map(d => d === days ? `<b>${d} days</b>` : `<a href="?days=${d}">${d} days</a>`).join("");
   return page(200, `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex">
