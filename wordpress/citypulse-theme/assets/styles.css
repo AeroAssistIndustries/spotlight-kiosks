@@ -2171,6 +2171,16 @@ button:focus-visible, [tabindex]:focus-visible { outline: 3px solid #0F1C2B !imp
 .btn .cp-was{opacity:.7}
 .calc-out .big .cp-was{display:block;font:600 clamp(20px,2.2vw,26px)/1 var(--body);letter-spacing:0;opacity:.55;margin-bottom:8px}
 
+/* Phones: the hero's kiosk photo is shown whole (the ad callout and the kiosk both in frame) instead of being
+   cropped to the tall card; the caption sits on the dark area under it. */
+@media (max-width:640px){
+  .slide-photo{background:#0B1622}
+  .slide-photo img{position:absolute;top:0;left:0;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;object-position:50% 50%!important}
+  .slide-photo::after{inset:auto 0 auto 0;top:calc(75cqw - 20cqw);height:20.5cqw;background:linear-gradient(rgba(11,22,34,0),#0B1622)}
+}
+/* Prices inside the result cards keep the size and line of the text around them */
+.roi span span,.roi b span{display:inline;margin:0;font-size:inherit;color:inherit;line-height:inherit}
+
 /* Pay on the page (Square card form + Google Pay), added to checkout step 4 by checkout.js */
 .co-paybox{margin:18px 0 10px;padding:16px 18px 6px;border:1px solid var(--line);border-radius:16px;background:#fff}
 .co-paybox-h{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
