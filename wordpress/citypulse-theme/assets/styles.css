@@ -2226,3 +2226,22 @@ button:focus-visible, [tabindex]:focus-visible { outline: 3px solid #0F1C2B !imp
 .mk-none,.mk-note{margin:12px 0 0;font-size:14px;color:var(--muted)}
 @media (max-width:640px){.mk-list{grid-template-columns:1fr}.usmap svg:not(.zoomed) .st-labels{display:none}.mk-out{top:8px;left:8px}}
 .mk-close{background:none;border:0;padding:4px 0;font:600 15px/1 var(--body);color:var(--ink);text-decoration:underline;cursor:pointer}
+/* Work with us (/work-with-us/) */
+.cr-earn{background:var(--forest);color:var(--paper);border-radius:22px;padding:clamp(24px,3vw,34px)}
+.cr-earn-k{font:600 14px/1.3 var(--body);color:var(--lamp);letter-spacing:.04em;text-transform:uppercase;margin:0}
+.cr-earn-big{font:800 clamp(64px,8vw,96px)/1 var(--display);letter-spacing:-.03em;margin:10px 0 4px}
+.cr-earn-sub{color:var(--muted-dark);margin:0 0 20px}
+.cr-earn-ex{border-top:1px solid rgba(255,255,255,.15);padding-top:16px;display:grid;gap:6px;font-size:16px}
+.cr-earn-ex span{color:var(--muted-dark)}.cr-earn-ex b{font-weight:600}
+.step-list.cr-steps{grid-template-columns:repeat(4,1fr)}
+.cp-form{background:#fff;border:1px solid var(--line);border-radius:22px;padding:clamp(22px,3vw,34px);color:var(--ink)}
+.cp-form fieldset{border:0;padding:0;margin:0 0 22px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.cp-form legend{font:700 18px/1.2 var(--display);margin-bottom:14px;padding:0}
+.cp-form .fine{color:var(--muted)}
+.cp-form .cr-setup,.cp-form .cr-one{grid-template-columns:1fr}
+.cp-form .cr-setup .ack{margin:0}
+@media (max-width:640px){.cp-form fieldset{grid-template-columns:1fr}}
+.cr-hp{position:absolute!important;left:-9999px!important;width:1px;height:1px;overflow:hidden}
+@media (max-width:980px){.step-list.cr-steps{grid-template-columns:1fr 1fr}}
+@media (max-width:640px){.step-list.cr-steps{grid-template-columns:1fr}}
+.careers-page~.m-cta{display:none!important}

@@ -5,7 +5,7 @@
  */
 defined( 'ABSPATH' ) || exit;
 
-define( 'CITYPULSE_VERSION', '1.3.11' );
+define( 'CITYPULSE_VERSION', '1.4.0' );
 
 require get_theme_file_path( 'inc/settings.php' );
 require get_theme_file_path( 'inc/setup.php' );
@@ -16,6 +16,7 @@ require get_theme_file_path( 'inc/kiosks.php' );
 require get_theme_file_path( 'inc/fleet.php' );
 require get_theme_file_path( 'inc/media.php' );
 require get_theme_file_path( 'inc/access.php' );
+require get_theme_file_path( 'inc/careers.php' );
 
 add_action( 'after_setup_theme', function () {
 	add_theme_support( 'title-tag' );
