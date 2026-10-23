@@ -79,40 +79,175 @@
     setInterval(() => { if (!vis || document.hidden) return; nodes.forEach((n, j) => n.classList.toggle("on", j === k)); k = (k + 1) % nodes.length; }, 1500);
   });
 
-  /* ---------- US markets map ---------- */
+  /* ---------- US markets map ----------
+     State labels, tap a state to zoom in and list its cities, search for a city, and live kiosks from Sales Studio
+     (by city, venue type and cross streets only, never the host's name). */
   $$("[data-usmap]").forEach(m => {
-    const tip = $(".map-tip", m);
-    const home = (document.querySelector('.brand') || {}).getAttribute ? document.querySelector('.brand').getAttribute("href") : "./";
+    const svg = $("svg", m), tip = $(".map-tip", m), NS = "http://www.w3.org/2000/svg";
+    if (!svg) return;
+    const home = (document.querySelector(".brand") || {}).getAttribute ? document.querySelector(".brand").getAttribute("href") : "./";
+    const price = () => (window.CP_PRICE ? CP_PRICE.money(CP_PRICE.now.y1) : "$798") + "/yr";
+    const ABBR = { Alabama: "AL", Alaska: "AK", Arizona: "AZ", Arkansas: "AR", California: "CA", Colorado: "CO", Connecticut: "CT", Delaware: "DE", "District of Columbia": "DC", Florida: "FL", Georgia: "GA", Hawaii: "HI", Idaho: "ID", Illinois: "IL", Indiana: "IN", Iowa: "IA", Kansas: "KS", Kentucky: "KY", Louisiana: "LA", Maine: "ME", Maryland: "MD", Massachusetts: "MA", Michigan: "MI", Minnesota: "MN", Mississippi: "MS", Missouri: "MO", Montana: "MT", Nebraska: "NE", Nevada: "NV", "New Hampshire": "NH", "New Jersey": "NJ", "New Mexico": "NM", "New York": "NY", "North Carolina": "NC", "North Dakota": "ND", Ohio: "OH", Oklahoma: "OK", Oregon: "OR", Pennsylvania: "PA", "Rhode Island": "RI", "South Carolina": "SC", "South Dakota": "SD", Tennessee: "TN", Texas: "TX", Utah: "UT", Vermont: "VT", Virginia: "VA", Washington: "WA", "West Virginia": "WV", Wisconsin: "WI", Wyoming: "WY" };
+    const NAME = Object.fromEntries(Object.entries(ABBR).map(([k, v]) => [v, k]));
+    const NUDGE = { FL: [14, 8], LA: [-10, -4], MI: [14, 22], ID: [-4, 22], KY: [6, 3], CA: [-10, 6], MN: [-6, 8], OK: [12, 0], VA: [8, 4], TX: [4, 8], NY: [6, 4], WV: [-3, 3], MS: [0, 0], AK: [0, 0], HI: [10, 6], NC: [8, 2], TN: [0, 0], ME: [0, 4] };
+    const SIDE = ["VT", "NH", "MA", "RI", "CT", "NJ", "DE", "MD", "DC"];
+    const states = $$(".st", svg), pins = $$(".pin", svg), FULL = [0, 0, 975, 610];
+    const VENUE = { Hotel: "Hotel lobby", "Medical office": "Medical office", Dealership: "Dealership lounge", Restaurant: "Restaurant" };
+    const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+    const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); Object.entries(attrs || {}).forEach(([k, v]) => e.setAttribute(k, v)); if (parent) parent.appendChild(e); return e; };
+
+    /* state labels (small north-east states sit out in the ocean with a short line) */
+    const labels = el("g", { class: "st-labels", "aria-hidden": "true" });
+    svg.insertBefore(labels, $(".pins", svg) || null);
+    const side = [];
+    states.forEach(st => {
+      const ab = ABBR[st.dataset.state]; if (!ab) return;
+      const b = st.getBBox(); let x = b.x + b.width / 2, y = b.y + b.height / 2;
+      if (SIDE.includes(ab)) { side.push({ ab, x, y }); return; }
+      const n = NUDGE[ab]; if (n) { x += n[0]; y += n[1]; }
+      for (let i = 0; i < 4 && pins.some(p => Math.hypot(p.cx.baseVal.value - x, p.cy.baseVal.value - y) < 11); i++) y += 9; /* keep the label clear of a pin */
+      const t = el("text", { x, y, class: "st-lab", "text-anchor": "middle", "dominant-baseline": "central" }, labels); t.textContent = ab;
+    });
+    side.sort((a, b) => a.y - b.y).forEach((s, i) => {
+      const ly = 150 + i * 19, lx = 948;
+      el("line", { x1: s.x, y1: s.y, x2: lx - 12, y2: ly, class: "st-lead" }, labels);
+      const t = el("text", { x: lx, y: ly, class: "st-lab side", "text-anchor": "middle", "dominant-baseline": "central" }, labels); t.textContent = s.ab;
+    });
+
+    /* panel, search and legend */
+    const bar = document.createElement("div"); bar.className = "mk-bar";
+    const allCities = pins.flatMap(p => p.dataset.markets.split("|")).sort();
+    bar.innerHTML = `<form class="mk-find" role="search"><label class="sr" for="mk-q">Find your city</label><input id="mk-q" list="mk-cities" type="search" placeholder="Find your city or state" autocomplete="off"><datalist id="mk-cities">${allCities.map(c => `<option value="${esc(c)}">`).join("")}${Object.keys(ABBR).map(s => `<option value="${esc(s)}">`).join("")}</datalist><button class="btn btn-small" type="submit">Find</button></form><div class="mk-legend"><span><i class="lg-mk"></i>Open for ads</span><span><i class="lg-live"></i>Live kiosk</span><span><i class="lg-soon"></i>Coming soon</span></div>`;
+    m.parentNode.insertBefore(bar, m);
+    const panel = document.createElement("div"); panel.className = "mk-panel"; panel.hidden = true; panel.setAttribute("aria-live", "polite");
+    m.parentNode.insertBefore(panel, m.nextSibling);
+    const zoomOut = document.createElement("button"); zoomOut.type = "button"; zoomOut.className = "mk-out"; zoomOut.hidden = true; zoomOut.textContent = "← All states"; m.appendChild(zoomOut);
+
+    /* live and coming-soon kiosks from Sales Studio */
+    const R = Math.PI / 180, sy0 = Math.sin(29.5 * R), nn = (sy0 + Math.sin(45.5 * R)) / 2, cc = 1 + sy0 * (2 * nn - sy0), r0 = Math.sqrt(cc) / nn;
+    const raw = (x, y) => { const r = Math.sqrt(cc - 2 * nn * Math.sin(y)) / nn; return [r * Math.sin(x * nn), r0 - r * Math.cos(x * nn)]; };
+    const C0 = raw(-0.6 * R, 38.7 * R), K = 1300;
+    const proj = (lng, lat) => { const q = raw((lng + 96) * R, lat * R); return [487.5 - K * C0[0] + K * q[0], 305 + K * C0[1] - K * q[1]]; };
+    let kiosks = [];
+    const kLayer = el("g", { class: "kiosks" }, svg);
+    const CFG = window.CITYPULSE_CONFIG || {}, API = String((CFG.payments && CFG.payments.api) || "https://sales.citypulsekiosks.com").replace(/\/+$/, "");
+    fetch(API + "/api/web/locations", { mode: "cors", credentials: "omit" }).then(r => r.ok ? r.json() : null).then(j => {
+      if (!j || !Array.isArray(j.locations)) return;
+      kiosks = j.locations.filter(k => k.state && NAME[k.state]).map(k => Object.assign({}, k, { stateName: NAME[k.state] }));
+      kiosks.forEach(k => {
+        if (k.lat == null || k.lng == null || k.state === "AK" || k.state === "HI") return;
+        const [x, y] = proj(k.lng, k.lat);
+        k.x = x; k.y = y;
+        k.dot = el("circle", { cx: x, cy: y, r: 6, class: "kiosk " + k.status, tabindex: "0", role: "button", "aria-label": kioskText(k) }, kLayer);
+        k.dot.addEventListener("mouseenter", () => showKiosk(k)); k.dot.addEventListener("focus", () => showKiosk(k));
+        k.dot.addEventListener("mouseleave", hide); k.dot.addEventListener("blur", hide);
+        k.dot.addEventListener("click", e => { e.stopPropagation(); showKiosk(k); });
+      });
+      if (cur) showState(cur, true);
+    }).catch(() => {});
+    function kioskText(k) { return `${k.status === "live" ? "Live kiosk" : "Coming soon"}: ${VENUE[k.venue] || k.venue || "Kiosk"}${k.cross ? ", " + k.cross : ""}, ${k.city}, ${k.state}`; }
+    function marketFor(k) { /* the market a kiosk belongs to: its own city if listed, else the nearest pin in its state */
+      const key = (k.city + ", " + k.state).toLowerCase();
+      const exact = pins.find(p => p.dataset.markets.toLowerCase().split("|").includes(key));
+      if (exact) return exact.dataset.markets.split("|").find(mk => mk.toLowerCase() === key);
+      const inState = pins.filter(p => p.dataset.state === k.stateName);
+      if (!inState.length) return `${k.city}, ${k.state}`;
+      if (k.x == null) return inState[0].dataset.markets.split("|")[0];
+      let best = inState[0], bd = 1e9;
+      inState.forEach(p => { const d = Math.hypot(p.cx.baseVal.value - k.x, p.cy.baseVal.value - k.y); if (d < bd) { bd = d; best = p; } });
+      return best.dataset.markets.split("|")[0];
+    }
+
+    /* tooltip */
     let hideT;
-    function show(pin) {
-      clearTimeout(hideT);
-      $$(".pin.on", m).forEach(p => p.classList.remove("on")); pin.classList.add("on");
-      const list = pin.dataset.markets.split("|");
-      $("b", tip).textContent = pin.dataset.name;
-      $(".tip-links", tip).innerHTML = list.map(mk => `<a href="${home}?market=${encodeURIComponent(mk)}#get-started">${list.length > 1 ? mk + " — " : ""}Advertise here${list.length > 1 ? "" : " — " + (window.CP_PRICE ? CP_PRICE.money(CP_PRICE.now.y1) : "$798") + "/yr"}</a>`).join("");
-      const r = pin.getBoundingClientRect(), b = m.getBoundingClientRect();
+    function place(target) {
+      const r = target.getBoundingClientRect(), b = m.getBoundingClientRect();
       tip.hidden = false;
       tip.style.left = Math.max(8, Math.min(b.width - tip.offsetWidth - 8, r.left - b.left + r.width / 2 - tip.offsetWidth / 2)) + "px";
-      tip.style.top = (r.top - b.top - tip.offsetHeight - 10) + "px";
-      $$(".st", m).forEach(st => st.classList.toggle("on", st.dataset.state === pin.dataset.state));
+      tip.style.top = Math.max(4, r.top - b.top - tip.offsetHeight - 10) + "px";
     }
-    function hide() { hideT = setTimeout(() => { tip.hidden = true; $$(".pin.on", m).forEach(p => p.classList.remove("on")); $$(".st.on", m).forEach(s => s.classList.remove("on")); }, 400); }
-    $$(".pin", m).forEach(pin => {
+    function show(pin) {
+      clearTimeout(hideT);
+      $$(".pin.on, .kiosk.on", svg).forEach(p => p.classList.remove("on")); pin.classList.add("on");
+      const list = pin.dataset.markets.split("|"), here = kiosks.filter(k => list.includes(marketFor(k)));
+      $("b", tip).textContent = pin.dataset.name;
+      $(".tip-links", tip).innerHTML = (here.length ? `<span class="tip-k">${here.filter(k => k.status === "live").length ? here.filter(k => k.status === "live").length + " live kiosk" + (here.filter(k => k.status === "live").length > 1 ? "s" : "") : "Kiosks coming soon"}</span>` : "") + list.map(mk => `<a href="${home}?market=${encodeURIComponent(mk)}#get-started">${list.length > 1 ? esc(mk) + " — " : ""}Advertise here${list.length > 1 ? "" : " — " + price()}</a>`).join("");
+      place(pin);
+    }
+    function showKiosk(k) {
+      clearTimeout(hideT);
+      $$(".pin.on, .kiosk.on", svg).forEach(p => p.classList.remove("on")); k.dot.classList.add("on");
+      $("b", tip).textContent = `${k.city}, ${k.state}`;
+      const mk = marketFor(k);
+      $(".tip-links", tip).innerHTML = `<span class="tip-k">${k.status === "live" ? "Live kiosk" : "Coming soon"} · ${esc(VENUE[k.venue] || k.venue || "Kiosk")}</span>${k.cross ? `<span class="tip-x">${esc(k.cross)}</span>` : ""}<a href="${home}?market=${encodeURIComponent(mk)}#get-started">Advertise here — ${price()}</a>`;
+      place(k.dot);
+    }
+    function hide() { hideT = setTimeout(() => { tip.hidden = true; $$(".pin.on, .kiosk.on", svg).forEach(p => p.classList.remove("on")); }, 400); }
+    pins.forEach(pin => {
       pin.addEventListener("mouseenter", () => show(pin)); pin.addEventListener("mouseleave", hide);
       pin.addEventListener("focus", () => show(pin)); pin.addEventListener("blur", hide);
-      pin.addEventListener("click", e => { e.stopPropagation(); show(pin); });
+      pin.addEventListener("click", e => { e.stopPropagation(); show(pin); if (!cur) showState(pin.dataset.state); });
       pin.addEventListener("keydown", e => { if (e.key === "Enter") { show(pin); const a = $(".tip-links a", tip); if (a) a.focus(); } });
     });
     tip.addEventListener("mouseenter", () => clearTimeout(hideT)); tip.addEventListener("mouseleave", hide);
-    // clicking a state filters the city list on the same page
-    const root = document.querySelector("[data-filter-root]");
-    $$(".st", m).forEach(st => st.addEventListener("click", () => {
-      const pin = $(`.pin[data-state="${CSS.escape(st.dataset.state)}"]`, m); if (pin) show(pin);
-      if (root && root.querySelector("[data-filter-select]")) {
-        const opt = [...root.querySelector("[data-filter-select]").options].find(o => o.text === st.dataset.state);
-        if (opt) root.dispatchEvent(new CustomEvent("citypulse:filter", { detail: opt.value }));
-      }
-    }));
+
+    /* zoom into a state */
+    let cur = "", vb = FULL.slice(), anim = 0;
+    const zoomK = () => 975 / vb[2];
+    function setVB(v) { vb = v; svg.setAttribute("viewBox", v.map(n => n.toFixed(1)).join(" ")); const k = zoomK(), sc = (svg.clientWidth || 975) / 975; svg.style.setProperty("--z", Math.max(.2, k * sc)); pins.forEach(p => p.setAttribute("r", (p.classList.contains("multi") ? 6.5 : 5) / Math.sqrt(k))); kiosks.forEach(q => q.dot && q.dot.setAttribute("r", 6 / Math.sqrt(k))); window.CP_MAPZ = k; }
+    function animateTo(to) {
+      cancelAnimationFrame(anim);
+      const from = vb.slice(), t0 = performance.now(), D = reduceMotion ? 1 : 520;
+      const step = now => { const t = Math.min(1, (now - t0) / D), e = 1 - Math.pow(1 - t, 3); setVB(from.map((f, i) => f + (to[i] - f) * e)); if (t < 1) anim = requestAnimationFrame(step); };
+      anim = requestAnimationFrame(step);
+    }
+    function fitBox(b) {
+      const pad = Math.max(b.width, b.height) * 0.18 + 12, w = b.width + pad * 2, h = b.height + pad * 2, ar = 975 / 610;
+      let W = Math.max(w, h * ar), H = W / ar; if (W < 120) { W = 120; H = W / ar; }
+      return [b.x + b.width / 2 - W / 2, b.y + b.height / 2 - H / 2, W, H];
+    }
+    function showState(name, quiet) {
+      const st = states.find(s => s.dataset.state === name); if (!st) return;
+      cur = name;
+      states.forEach(s => s.classList.toggle("on", s === st)); svg.classList.add("zoomed");
+      if (!quiet) animateTo(fitBox(st.getBBox()));
+      $$(".city-lab", svg).forEach(t => t.remove());
+      const mine = pins.filter(p => p.dataset.state === name), ks = kiosks.filter(k => k.stateName === name);
+      mine.forEach(p => { const t = el("text", { x: p.cx.baseVal.value, y: p.cy.baseVal.value, class: "city-lab", "text-anchor": "start", "dominant-baseline": "central" }, $(".pins", svg) || svg); t.textContent = p.dataset.name; });
+      zoomOut.hidden = false;
+      const rows = mine.flatMap(p => p.dataset.markets.split("|")).map(mk => {
+        const kk = ks.filter(k => marketFor(k) === mk);
+        return `<li><div><b>${esc(mk)}</b>${kk.length ? kk.map(k => `<span class="mk-k ${k.status}">${k.status === "live" ? "Live" : "Coming soon"} · ${esc(VENUE[k.venue] || k.venue || "Kiosk")}${k.cross ? " · " + esc(k.cross) : ""}${k.city && (k.city + ", " + k.state) !== mk ? " · " + esc(k.city) : ""}</span>`).join("") : `<span class="mk-k">Open for ads</span>`}</div><a class="btn btn-small" href="${home}?market=${encodeURIComponent(mk)}#get-started">Advertise here</a></li>`;
+      }).join("") + ks.filter(k => !mine.some(p => p.dataset.markets.split("|").includes(marketFor(k)))).map(k => `<li><div><b>${esc(k.city + ", " + k.state)}</b><span class="mk-k ${k.status}">${k.status === "live" ? "Live" : "Coming soon"} · ${esc(VENUE[k.venue] || k.venue || "Kiosk")}${k.cross ? " · " + esc(k.cross) : ""}</span></div><a class="btn btn-small" href="${home}?market=${encodeURIComponent(k.city + ", " + k.state)}#get-started">Advertise here</a></li>`).join("");
+      const live = ks.filter(k => k.status === "live").length, soon = ks.length - live;
+      panel.innerHTML = `<div class="mk-ph"><div><p class="eyebrow">${esc(ABBR[name] || "")}</p><h3>${esc(name)}</h3><p class="mk-sum">${mine.length ? `${allIn(name)} ${allIn(name) === 1 ? "market" : "markets"}` : "No markets listed yet"}${live ? ` · ${live} live kiosk${live > 1 ? "s" : ""}` : ""}${soon ? ` · ${soon} coming soon` : ""}</p></div><button type="button" class="text-link mk-close">All states</button></div>${rows ? `<ul class="mk-list">${rows}</ul>` : `<p class="mk-none">We’re adding venues here. <a href="${home}?market=other#get-started">Request ${esc(name)}</a> and we’ll place your ad as soon as a kiosk opens.</p>`}<p class="mk-note">Venue names are shared with advertisers after checkout. Cross streets show the general area.</p>`;
+      panel.hidden = false;
+      $(".mk-close", panel).addEventListener("click", reset);
+      /* the Locations page also filters its city list */
+      const root = document.querySelector("[data-filter-root]");
+      if (root && root.querySelector("[data-filter-select]")) { const opt = [...root.querySelector("[data-filter-select]").options].find(o => o.text === name); if (opt) root.dispatchEvent(new CustomEvent("citypulse:filter", { detail: opt.value })); }
+    }
+    const allIn = name => pins.filter(p => p.dataset.state === name).reduce((n, p) => n + p.dataset.markets.split("|").length, 0);
+    function reset() { cur = ""; states.forEach(s => s.classList.remove("on")); svg.classList.remove("zoomed"); $$(".city-lab", svg).forEach(t => t.remove()); panel.hidden = true; zoomOut.hidden = true; tip.hidden = true; animateTo(FULL); }
+    zoomOut.addEventListener("click", reset);
+    setVB(FULL); window.addEventListener("resize", () => setVB(vb));
+    m.addEventListener("keydown", e => { if (e.key === "Escape" && cur) reset(); });
+    states.forEach(st => {
+      st.addEventListener("click", () => { if (cur === st.dataset.state) return; showState(st.dataset.state); });
+      st.addEventListener("mouseenter", () => { if (cur) return; const n = allIn(st.dataset.state), k = kiosks.filter(q => q.stateName === st.dataset.state && q.status === "live").length; st.setAttribute("aria-label", `${st.dataset.state}: ${n} market${n === 1 ? "" : "s"}${k ? ", " + k + " live kiosk" + (k > 1 ? "s" : "") : ""}`); });
+    });
+    $(".mk-find", bar).addEventListener("submit", e => {
+      e.preventDefault();
+      const q = $("#mk-q", bar).value.trim().toLowerCase(); if (!q) return;
+      const stName = Object.keys(ABBR).find(s => s.toLowerCase() === q || ABBR[s].toLowerCase() === q);
+      if (stName) { showState(stName); m.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" }); return; }
+      const pin = pins.find(p => p.dataset.markets.toLowerCase().split("|").some(mk => mk === q || mk.split(",")[0] === q)) || pins.find(p => p.dataset.markets.toLowerCase().includes(q));
+      const k = kiosks.find(x => x.city.toLowerCase() === q || (x.city + ", " + x.state).toLowerCase() === q);
+      const target = pin || (k && pins.find(p => p.dataset.state === k.stateName));
+      if (!target) { $("#mk-q", bar).setCustomValidity("We don’t list that city yet. Pick a state, or choose “Other” at checkout."); $("#mk-q", bar).reportValidity(); setTimeout(() => $("#mk-q", bar).setCustomValidity(""), 2500); return; }
+      showState(target.dataset.state); m.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" });
+      setTimeout(() => show(target), reduceMotion ? 0 : 560);
+    });
   });
 
   /* ---------- customer journey ---------- */
@@ -494,7 +629,7 @@ ${lines.map((l, i) => `<text x="90" y="${(tall ? 200 : 380) + i * fs * 1.08}" fo
       if (!pins.length) return;
       var p = pins[Math.floor(Math.random() * pins.length)], c = document.createElementNS(NS, "circle");
       c.setAttribute("cx", p.getAttribute("cx")); c.setAttribute("cy", p.getAttribute("cy"));
-      c.setAttribute("r", p.classList.contains("multi") ? 9 : 7); c.setAttribute("class", "pin-ping");
+      c.setAttribute("r", (p.classList.contains("multi") ? 9 : 7) / Math.sqrt(window.CP_MAPZ || 1)); c.setAttribute("class", "pin-ping");
       p.parentNode.insertBefore(c, p);
       setTimeout(function () { c.remove(); }, 2200);
     };

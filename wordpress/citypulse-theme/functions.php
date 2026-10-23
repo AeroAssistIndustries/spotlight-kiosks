@@ -5,7 +5,7 @@
  */
 defined( 'ABSPATH' ) || exit;
 
-define( 'CITYPULSE_VERSION', '1.3.9' );
+define( 'CITYPULSE_VERSION', '1.3.10' );
 
 require get_theme_file_path( 'inc/settings.php' );
 require get_theme_file_path( 'inc/setup.php' );
