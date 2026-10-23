@@ -2,7 +2,9 @@
    Payment happens right here in step 4: Square's secure card form (and Google Pay) is shown on the page, the card
    goes from that form straight to Square, and Sales Studio (sales.citypulsekiosks.com/api/web/checkout) charges the
    one-time token at the price it holds. After payment the order and files are delivered by the form service
-   (assets/integrations.js). If the card form can't load, checkout falls back to the hosted payment link. */
+   (assets/integrations.js). If the card form can't load, checkout falls back to the hosted payment link.
+   Coupon codes: "Have a code?" under the card form asks Sales Studio (/api/web/coupon) for the price with the code,
+   and the payment sends the code so Sales Studio charges that price. A link like /?code=SPRING25#checkout fills it in. */
 (function () {
   "use strict";
   const $ = (s, r = document) => r.querySelector(s);
@@ -68,7 +70,7 @@
     $("#co-venue-name").textContent = m ? `A venue in ${m}` : "A venue near you";
     $("#co-sum-plan").textContent = billing() === "annual" ? "1 location · yearly" : "1 location · monthly";
     $("#co-sum-city").textContent = m || "Not chosen yet";
-    $("#co-sum-total").textContent = billing() === "annual" ? `${Y1}/yr` : `${MO}/mo`;
+    $("#co-sum-total").textContent = codeOn() ? `${dueText()} today` : billing() === "annual" ? `${Y1}/yr` : `${MO}/mo`;
     const n = form.elements.headline.value.length; $("#co-hl-count").textContent = `${n} of 60`;
   }
 
@@ -83,6 +85,7 @@
     $("#co-review").innerHTML = rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join("");
     $("#co-due-label").textContent = billing() === "annual" ? "Due today, 3-year term, billed yearly" : "Due today, 3-year term, billed monthly";
     $("#co-due").textContent = billing() === "annual" ? Y1 : MO;
+    if (SQ.cfg) $("#co-due").textContent = dueText();
   }
 
   /* ---------- files ---------- */
@@ -172,8 +175,10 @@
   /* ---------- pay on this page: Square's card form + Google Pay ---------- */
   const CFG = window.CITYPULSE_CONFIG || {};
   const PAY_API = String((CFG.payments && CFG.payments.api) || "https://sales.citypulsekiosks.com").replace(/\/+$/, "");
-  const SQ = { state: "idle", cfg: null, payments: null, card: null, gpay: null, req: null, idem: "", orderId: "" };
-  const cents = () => SQ.cfg ? SQ.cfg.prices[planKey()] : (billing() === "annual" ? PR.now.y1 : PR.now.mo) * 100;
+  const SQ = { state: "idle", cfg: null, payments: null, card: null, gpay: null, req: null, idem: "", orderId: "", coupon: null };
+  const baseCents = () => SQ.cfg ? SQ.cfg.prices[planKey()] : (billing() === "annual" ? PR.now.y1 : PR.now.mo) * 100;
+  const codeOn = () => !!(SQ.coupon && SQ.coupon.plan === planKey());
+  const cents = () => codeOn() ? SQ.coupon.cents : baseCents();
   const dollars = c => "$" + (c / 100).toLocaleString("en-US", { minimumFractionDigits: c % 100 ? 2 : 0, maximumFractionDigits: 2 });
   const dueText = () => dollars(cents());
   const newIdem = () => (window.crypto && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2)).replace(/[^A-Za-z0-9-]/g, "").slice(0, 45);
@@ -183,9 +188,56 @@
     if (box) return box;
     const last = steps[steps.length - 1], fine = $("p.fine", last);
     box = document.createElement("div"); box.className = "co-paybox"; box.id = "co-paybox"; box.hidden = true;
-    box.innerHTML = `<div class="co-paybox-h"><b>Payment</b><span>${LOCK} Secured by Square</span></div><div id="co-gpay" class="co-wallet" hidden></div><p class="co-or" hidden><span>or pay by card</span></p><div id="co-card" class="co-card"><span class="fine">Loading the secure card form…</span></div>`;
+    box.innerHTML = `<div class="co-paybox-h"><b>Payment</b><span>${LOCK} Secured by Square</span></div><div id="co-gpay" class="co-wallet" hidden></div><p class="co-or" hidden><span>or pay by card</span></p><div id="co-card" class="co-card"><span class="fine">Loading the secure card form…</span></div><div class="co-code" id="co-code"></div>`;
     last.insertBefore(box, fine || null);
     return box;
+  }
+  /* ---------- coupon codes ---------- */
+  const urlCode = (new URLSearchParams(location.search).get("code") || "").trim().slice(0, 24);
+  if (urlCode) store.set("citypulse-code", urlCode);
+  let codeOpen = false, codeBusy = false, codeErr = "", codeTyped = "";
+  function codeBox() {
+    const box = $("#co-code", form); if (!box) return;
+    const c = SQ.coupon;
+    if (codeOn()) { box.innerHTML = `<div class="co-code-on"><span>Code <b>${esc(c.code)}</b> · ${/%/.test(c.label) ? esc(c.label) + ", you save " : "you save "}${dollars(c.offCents)}</span><button type="button" class="text-link" data-code="off">Remove</button></div>`; return; }
+    if (!codeOpen) { box.innerHTML = `<button type="button" class="text-link" data-code="open">Have a code?</button>`; return; }
+    box.innerHTML = `<div class="co-code-row"><label class="field"><span>Coupon code</span><input id="co-code-in" autocomplete="off" autocapitalize="characters" maxlength="24" value="${esc(codeTyped || (c && c.code) || store.get("citypulse-code") || "")}"></label><button type="button" class="btn btn-small btn-dark" data-code="apply"${codeBusy ? " disabled" : ""}>${codeBusy ? "Checking…" : "Apply"}</button></div>${codeErr ? `<p class="co-code-err" role="alert">${esc(codeErr)}</p>` : ""}`;
+  }
+  function dueChanged() {
+    $("#co-due").textContent = dueText();
+    const st = $("#co-sum-total"); if (st) st.textContent = codeOn() ? `${dueText()} today` : billing() === "annual" ? `${Y1}/yr` : `${MO}/mo`;
+    if (SQ.req) { try { SQ.req.update({ total: { amount: (cents() / 100).toFixed(2), label: billing() === "annual" ? "CityPulse kiosk ad, yearly" : "CityPulse kiosk ad, first month" } }); } catch (e) { /* keep the old total */ } }
+    codeBox(); payLabel();
+  }
+  async function applyCode(code, quiet) {
+    code = String(code || "").trim().toUpperCase().replace(/\s+/g, "");
+    codeTyped = code;
+    if (!code) { codeErr = "Type your code first."; codeBox(); return; }
+    codeBusy = true; codeErr = ""; codeBox();
+    try {
+      const r = await fetch(PAY_API + "/api/web/coupon", { method: "POST", mode: "cors", credentials: "omit", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code, plan: planKey() }) });
+      const j = await r.json().catch(() => ({}));
+      if (r.ok && j.ok) { SQ.coupon = j; store.set("citypulse-code", j.code); codeOpen = false; codeTyped = ""; }
+      else { SQ.coupon = null; codeOpen = true; codeErr = j.error || "That code didn't work."; if (quiet) store.set("citypulse-code", code); }
+    } catch (e) { codeOpen = true; codeErr = "We couldn't check the code just now. Try again in a moment."; }
+    codeBusy = false; dueChanged();
+    if (codeOn() && !quiet) { const b = $("#co-code", form); if (b) b.scrollIntoView({ block: "nearest" }); }
+  }
+  form.addEventListener("click", e => {
+    const b = e.target.closest && e.target.closest("[data-code]"); if (!b) return;
+    e.preventDefault();
+    if (b.dataset.code === "open") { codeOpen = true; codeBox(); const i = $("#co-code-in", form); if (i) i.focus(); }
+    if (b.dataset.code === "apply") applyCode(($("#co-code-in", form) || {}).value);
+    if (b.dataset.code === "off") { codeOpen = true; codeErr = ""; const c = SQ.coupon; SQ.coupon = null; store.set("citypulse-code", ""); dueChanged(); const i = $("#co-code-in", form); if (i && c) i.value = c.code; }
+  });
+  form.addEventListener("keydown", e => { if (e.key === "Enter" && e.target && e.target.id === "co-code-in") { e.preventDefault(); applyCode(e.target.value); } });
+  /* the plan changed after a code was applied, or a code came in the link: check it for this plan */
+  function codeFollow() {
+    if (SQ.state !== "ready") return;
+    if (SQ.coupon && SQ.coupon.plan !== planKey() && !codeBusy) return applyCode(SQ.coupon.code, true);
+    const saved = store.get("citypulse-code");
+    if (!SQ.coupon && saved && !SQ.triedSaved) { SQ.triedSaved = true; return applyCode(saved, true); }
+    codeBox();
   }
   function sqScript(sandbox) {
     if (window.Square) return Promise.resolve(window.Square);
@@ -227,6 +279,7 @@
     const box = sqBox(); box.hidden = false;
     $("#co-due").textContent = dueText();
     if (SQ.state !== "ready") return;
+    codeFollow();
     if (!SQ.cardOn) { SQ.cardOn = true; $("#co-card", box).innerHTML = ""; try { await SQ.card.attach("#co-card"); } catch (e) { SQ.cardOn = false; } }
     const total = { amount: (cents() / 100).toFixed(2), label: billing() === "annual" ? "CityPulse kiosk ad, yearly" : "CityPulse kiosk ad, first month" };
     if (SQ.req) { try { SQ.req.update({ total }); } catch (e) { /* keep the old total */ } return; }
@@ -254,7 +307,7 @@
     let r, j = {};
     try {
       r = await fetch(PAY_API + "/api/web/checkout", { method: "POST", mode: "cors", credentials: "omit", headers: { "Content-Type": "application/json" }, body: JSON.stringify({
-        plan: planKey(), token: t.token, verification, idem: SQ.idem, expectCents: c,
+        plan: planKey(), token: t.token, verification, idem: SQ.idem, expectCents: c, coupon: codeOn() ? SQ.coupon.code : "",
         order: { id: SQ.orderId, business: f.business.value.trim(), name: f.name.value.trim(), email, phone: f.phone.value.trim(), market: market(), venue: f.venue_type ? f.venue_type.value : "", website: f.destination_url.value.trim(), ad, signed: f.sign_name.value.trim() }
       }) });
       j = await r.json().catch(() => ({}));
@@ -264,7 +317,8 @@
       return fail(null, "We couldn't confirm your payment because the connection dropped. Press Pay again (you won't be charged twice), or call us at (602) 975-5513.");
     }
     if (!r.ok || !j.ok) {
-      if (r.status === 409 && j.cents) { SQ.cfg.prices[planKey()] = j.cents; $("#co-due").textContent = dueText(); }
+      if (r.status === 409 && j.coupon === false) { SQ.coupon = null; codeOpen = true; codeErr = ""; if (j.cents) SQ.cfg.prices[planKey()] = j.cents; SQ.idem = ""; dueChanged(); }
+      else if (r.status === 409 && j.cents) { if (codeOn()) SQ.coupon.cents = j.cents; else SQ.cfg.prices[planKey()] = j.cents; dueChanged(); }
       return undo(j.error || "The payment didn't go through. Try another card, or call us at (602) 975-5513.");
     }
     paid(j);
