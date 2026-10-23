@@ -1,7 +1,7 @@
 # "Test the kiosk" — live demo of the real kiosk software + every size we install, drawn to scale.
 from lib import *
 
-TK_KIOSK_REMOTE = "https://aeroassistindustries.github.io/spotlight-kiosks/kiosk-app/?demo=1"
+TK_KIOSK_REMOTE = "https://kiosk.citypulsekiosks.com/kiosk-app/?demo=1"
 
 def tk_page():
     tries = [

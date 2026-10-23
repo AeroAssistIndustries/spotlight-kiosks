@@ -99,13 +99,13 @@ For better answers, add a Claude API key; the relay then uses Claude instead of 
 
 | Name | Default |
 |---|---|
-| `VENUE_URL` | `https://aeroassistindustries.github.io/spotlight-kiosks/assets/lexen-data.json` |
+| `VENUE_URL` | `https://kiosk.citypulsekiosks.com/assets/lexen-data.json` |
 | `ALLOWED_ORIGINS` | `https://aeroassistindustries.github.io` |
 | `CF_MODEL` | `@cf/google/gemma-4-26b-a4b-it` (free allowance) |
 | `MODEL` | `claude-haiku-5-5` (only with `ANTHROPIC_API_KEY`) |
 | `ADMIN_PASSWORD` | none (secret; the dashboard stays locked until it is set) |
 | `VENUE_ID` | `lexen` (the venue the dashboard manages) |
-| `GUIDE_URL` | `https://aeroassistindustries.github.io/spotlight-kiosks/concierge/` (where guide QR codes lead) |
+| `GUIDE_URL` | `https://kiosk.citypulsekiosks.com/concierge/` (where guide QR codes lead) |
 
 ## Sales Studio moved
 

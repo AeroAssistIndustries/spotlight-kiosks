@@ -174,7 +174,7 @@ def page(path, title, desc, body, active=None, kiosk=False, extra_js=()):
 <meta name="description" content="{e(desc)}">
 <meta property="og:title" content="{e(full_title)}">
 <meta property="og:description" content="{e(desc)}">
-<meta property="og:image" content="https://aeroassistindustries.github.io/spotlight-kiosks/assets/og-card.png">
+<meta property="og:image" content="https://kiosk.citypulsekiosks.com/assets/og-card.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:site_name" content="CityPulse Kiosks">

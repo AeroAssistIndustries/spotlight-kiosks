@@ -1,6 +1,6 @@
 # CityPulse Kiosks website
 
-Static multi-page site for CityPulse Kiosks (formerly Spotlight Kiosks) — touch-screen venue kiosks that combine visitor information with local business advertising. Live on GitHub Pages: https://aeroassistindustries.github.io/spotlight-kiosks/
+Static multi-page site for CityPulse Kiosks (formerly Spotlight Kiosks) — touch-screen venue kiosks that combine visitor information with local business advertising. Live on GitHub Pages: https://kiosk.citypulsekiosks.com/
 
 ## Editing
 
@@ -42,7 +42,7 @@ Support, Contact) and every kiosk order is emailed there.
 ### Payments (ready for Stripe)
 
 In Stripe create two Payment Links for "CityPulse kiosk ad — 1 location": $598 recurring yearly and $90 recurring monthly during the launch sale (25% off through March 31, 2027). From April 1, 2027 switch them to the regular $798 yearly and $120 monthly. Prices live in `build/pricing.py`.
-Under *After payment* redirect to `https://aeroassistindustries.github.io/spotlight-kiosks/welcome/`. Paste the links into
+Under *After payment* redirect to `https://kiosk.citypulsekiosks.com/welcome/`. Paste the links into
 `payments.yearly` and `payments.monthly`.
 
 Checkout then: delivers the order (with files) to your inbox → sends the customer to Stripe with their email pre-filled and the

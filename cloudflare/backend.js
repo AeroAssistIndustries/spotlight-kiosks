@@ -366,10 +366,10 @@ async function count(env, venue, kiosk, type, key, n) {
 }
 
 function guideBase(env) {
-  return (env.GUIDE_URL || "https://aeroassistindustries.github.io/spotlight-kiosks/concierge/").replace(/\/?$/, "/");
+  return (env.GUIDE_URL || "https://kiosk.citypulsekiosks.com/concierge/").replace(/\/?$/, "/");
 }
 export function assetsBase(env) {
-  const v = env.VENUE_URL || "https://aeroassistindustries.github.io/spotlight-kiosks/assets/lexen-data.json";
+  const v = env.VENUE_URL || "https://kiosk.citypulsekiosks.com/assets/lexen-data.json";
   return v.slice(0, v.lastIndexOf("/") + 1);
 }
 

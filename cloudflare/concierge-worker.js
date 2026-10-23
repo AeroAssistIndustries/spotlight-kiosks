@@ -20,13 +20,13 @@
      CF_MODEL           Workers AI model (default: @cf/google/gemma-4-26b-a4b-it)
      ADMIN_PASSWORD     secret; the staff dashboard password
      VENUE_ID           the venue the dashboard manages (default: lexen)
-     GUIDE_URL          the phone guide (default: the CityPulse GitHub site's /concierge/)
+     GUIDE_URL          the phone guide (default: kiosk.citypulsekiosks.com/concierge/)
 */
 
 import { handle as backend, getContent, venueId, monitor, pushAds } from "./backend.js";
 
 const DEFAULTS = {
-  VENUE_URL: "https://aeroassistindustries.github.io/spotlight-kiosks/assets/lexen-data.json",
+  VENUE_URL: "https://kiosk.citypulsekiosks.com/assets/lexen-data.json",
   ALLOWED_ORIGINS: "https://aeroassistindustries.github.io,https://kiosk.citypulsekiosks.com,https://citypulsekiosks.com",
   MODEL: "claude-haiku-5-5",
   CF_MODEL: "@cf/google/gemma-4-26b-a4b-it"

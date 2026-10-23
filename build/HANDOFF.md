@@ -2,7 +2,7 @@
 
 **Package version:** 1.0.0 · October 2026
 **Contact:** Sarvesh Joshi · sarvesh.joshiaz@gmail.com · 602-887-4058
-**Reference site (static build of the same pages):** https://aeroassistindustries.github.io/spotlight-kiosks/
+**Reference site (static build of the same pages):** https://kiosk.citypulsekiosks.com/
 **Source repository:** https://github.com/AeroAssistIndustries/spotlight-kiosks
 
 ---
