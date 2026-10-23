@@ -974,6 +974,17 @@ async function sharedReport(env, url, fetchSeed) {
   const eng = per("adEngaged"), tot = per("adShown"), rch = per("adReach"), qrs = per("qr");
   const sum = a => a.reduce((x, y) => x + y, 0), fmt = n => Number(n).toLocaleString("en-US");
   const R = sum(rch), E = sum(eng), T = sum(tot), Q = sum(qrs);
+  /* The same report as data, for the advertiser's dashboard in Sales Studio (read server to server; no personal data). */
+  if (url.searchParams.get("format") === "json") {
+    const ks = (await env.DB.prepare("SELECT kiosk, last_seen FROM kiosks WHERE venue = ?").bind(venue).all()).results || [];
+    const online = ks.filter(k => k.last_seen && Date.now() - Date.parse(k.last_seen) < 15 * 60000).length;
+    const today = dayKey(tz), live = s.active !== false && (!s.start || today >= s.start) && (!s.end || today <= s.end);
+    return new Response(JSON.stringify({ sponsor: { id: s.id, name: s.name, start: s.start || "", end: s.end || "", live },
+      venue: { id: venue, name: v.name || "", address: v.address || "", kiosks: ks.length, online },
+      days, from: list[0], to: list[list.length - 1], totals: { reach: R, engaged: E, views: T, qr: Q },
+      daily: list.map((d, i) => ({ day: d, engaged: eng[i], views: tot[i], qr: qrs[i], reach: rch[i] })) }),
+      { status: 200, headers: { "Content-Type": "application/json", "Cache-Control": "no-store", "X-Robots-Tag": "noindex" } });
+  }
   const nice = d => new Date(d + "T12:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
   const lab = d => new Date(d + "T12:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
   const max = Math.max(4, ...eng), W = 720, H = 150, bw = W / days, every = Math.ceil(days / 8);

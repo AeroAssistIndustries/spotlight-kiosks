@@ -5,7 +5,7 @@
  */
 defined( 'ABSPATH' ) || exit;
 
-define( 'CITYPULSE_VERSION', '1.3.10' );
+define( 'CITYPULSE_VERSION', '1.3.11' );
 
 require get_theme_file_path( 'inc/settings.php' );
 require get_theme_file_path( 'inc/setup.php' );
@@ -113,3 +113,26 @@ function citypulse_current_class( $key, $hrefs ) {
 add_filter( 'the_content', function ( $c ) {
 	return str_replace( 'Payment is handled securely by Stripe.', 'Payment is handled securely by Square.', $c );
 }, 20 );
+
+/* Advertiser dashboard at /advertiser/: the site's header and footer around the dashboard app, which comes from
+   Sales Studio (sign-in by an emailed one-time link; customers see only their own account). Not indexed. */
+add_action( 'template_redirect', function () {
+	$path = trim( (string) wp_parse_url( isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '', PHP_URL_PATH ), '/' ); // phpcs:ignore
+	if ( 'advertiser' !== $path ) {
+		return;
+	}
+	global $wp_query;
+	$wp_query->is_404 = false;
+	status_header( 200 );
+	nocache_headers();
+	header( 'X-Robots-Tag: noindex, nofollow' );
+	add_filter( 'pre_get_document_title', function () { return 'Advertiser dashboard – CityPulse Kiosks'; } );
+	add_filter( 'wp_robots', function ( $r ) { $r['noindex'] = true; $r['nofollow'] = true; return $r; } );
+	$api = 'https://sales.citypulsekiosks.com';
+	wp_enqueue_style( 'citypulse-advertiser', $api . '/advertiser.css', array( 'citypulse' ), CITYPULSE_VERSION );
+	wp_enqueue_script( 'citypulse-advertiser', $api . '/advertiser.js', array(), CITYPULSE_VERSION, true );
+	get_header();
+	echo '<main id="main" class="advertiser-page"><div class="wrap"><div id="cp-adv" data-api="' . esc_url( $api ) . '"><p style="padding:60px 0;text-align:center">Loading your dashboard…</p></div></div></main>';
+	get_footer();
+	exit;
+} );
