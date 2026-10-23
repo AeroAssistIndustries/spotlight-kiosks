@@ -80,3 +80,27 @@ add_action( 'after_switch_theme', function () {
 	}
 	flush_rewrite_rules();
 } );
+
+
+/** Speed: defer the theme's scripts (WordPress keeps their order) and load web fonts without blocking first paint. */
+add_action( 'wp_enqueue_scripts', function () {
+	foreach ( array_keys( wp_scripts()->registered ) as $h ) {
+		if ( 0 === strpos( $h, 'citypulse-' ) ) {
+			wp_script_add_data( $h, 'strategy', 'defer' );
+		}
+	}
+}, 100 );
+add_filter( 'style_loader_tag', function ( $html, $handle ) {
+	if ( 'citypulse-fonts' !== $handle || is_admin() ) {
+		return $html;
+	}
+	return str_replace( " media='all'", " media='print' onload=\"this.media='all'\"", $html ) . '<noscript>' . $html . '</noscript>';
+}, 10, 2 );
+
+// GoDaddy's admin-bar styles (and the editor components they pull in) are only needed when signed in.
+add_action( 'wp_print_styles', function () {
+	if ( ! is_user_logged_in() ) {
+		wp_dequeue_style( 'godaddy-styles' );
+		wp_dequeue_style( 'wp-components' );
+	}
+}, 100 );

@@ -111,6 +111,8 @@ function citypulse_current_class( $key, $hrefs ) {
 	}
 }
 
+/* Payments now go through Square (Settings > CityPulse). The home page checkout is long enough that the host's
+   firewall blocks saving it from the editor, so its payment line is corrected here. */
 add_filter( 'the_content', function ( $c ) {
 	return str_replace( 'Payment is handled securely by Stripe.', 'Payment is handled securely by Square.', $c );
 }, 20 );

@@ -5,7 +5,20 @@
 import * as THREE from "./vendor/three.module.min.js";
 
 const hero = document.querySelector(".hero2");
-if (hero && !hero.querySelector(".cp-city")) start();
+// Build the 3D city only after the page has loaded and the browser is idle, so it never delays first paint.
+if (hero && !hero.querySelector(".cp-city")) {
+  const go = () => ("requestIdleCallback" in window ? requestIdleCallback(start, { timeout: 2500 }) : setTimeout(start, 1200));
+  document.readyState === "complete" ? go() : addEventListener("load", go, { once: true });
+}
+
+function softwareGL() {
+  try {
+    const gl = document.createElement("canvas").getContext("webgl");
+    const ext = gl && gl.getExtension("WEBGL_debug_renderer_info");
+    const r = ext ? String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)) : "";
+    return /swiftshader|llvmpipe|softpipe|software|basic render/i.test(r);
+  } catch (e) { return false; }
+}
 
 function webglOK() {
   try { const c = document.createElement("canvas"); return !!(c.getContext("webgl2") || c.getContext("webgl")); } catch (e) { return false; }
@@ -13,8 +26,12 @@ function webglOK() {
 
 function start() {
   if (!webglOK()) return;
-  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // reduced motion, or a device drawing 3D without a graphics chip (software rendering): show one composed still frame
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches || softwareGL();
   const phone = matchMedia("(max-width: 760px)").matches;
+  // phones and low-core laptops: 30 fps and fewer pixels, which halves the work per second
+  const lowPower = phone || (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4;
+  const FRAME = lowPower ? 1000 / 30 - 2 : 0; let lastDraw = 0;
   const NAVY = new THREE.Color("#0a1522"), TEAL = new THREE.Color("#22c7b6");
 
   /* ---------- stage ---------- */
@@ -26,7 +43,7 @@ function start() {
   hero.classList.add("hero-live");
 
   const renderer = new THREE.WebGLRenderer({ antialias: !phone, powerPreference: "high-performance" });
-  let dpr = Math.min(devicePixelRatio || 1, phone ? 1.5 : 1.75);
+  let dpr = Math.min(devicePixelRatio || 1, phone ? 1 : lowPower ? 1.25 : 1.75);
   renderer.setPixelRatio(dpr);
   renderer.setClearColor(NAVY, 1);
   wrap.prepend(renderer.domElement);
@@ -323,6 +340,8 @@ function start() {
   const ease = x => 1 - Math.pow(1 - x, 3);
 
   function step(now) {
+    if (running && FRAME && now - lastDraw < FRAME) { raf = requestAnimationFrame(step); return; }
+    lastDraw = now;
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
     t = (now - t0) / 1000;
     // intro: the city fades up and the camera settles, then hosts switch on one by one
