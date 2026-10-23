@@ -706,3 +706,36 @@ button.lt:active { transform: perspective(700px) rotateX(var(--rx, 0deg)) rotate
 /* Neighborhood tile: keep the label readable over the moving lights */
 .lt-map::after { content: ""; position: absolute; inset: auto 0 0 0; height: 46%; background: linear-gradient(0deg, rgba(8,15,24,.92), rgba(8,15,24,0)); pointer-events: none; }
 .lt-map .lt-label { z-index: 1; text-shadow: 0 1px 8px rgba(0,0,0,.7); }
+
+/* v18 · Phones (Sales Studio demo links, the kiosk link opened on a rep's or customer's phone).
+   The kiosk's minimum text size (15px) was made for real kiosk screens; on a phone it made the text
+   about twice as big as the tiles, so words ran over icons, the clock covered the date and the
+   forecast spilled out. On small screens everything now scales with the screen instead, so a phone
+   shows the kiosk exactly as it looks in the lobby, just smaller. Real kiosks (731px and up) are unchanged. */
+@media (max-width: 731px) and (max-aspect-ratio: 1/1) {
+  .cpk { font-size: 2.3vw; --pad: 3.6vw; }
+  .cpk.is-large { font-size: 2.8vw; }
+  .cpk.is-large .cpk-ads { font-size: 2.3vw; }
+}
+@media (max-height: 731px) and (min-aspect-ratio: 1/1) {
+  .cpk { font-size: 2.1vmin; --pad: 3.6vmin; }
+  .cpk.is-large { font-size: 2.5vmin; }
+  .cpk.is-large .cpk-ads { font-size: 2.1vmin; }
+}
+@media (max-width: 731px) and (max-aspect-ratio: 1/1), (max-height: 731px) and (min-aspect-ratio: 1/1) {
+  .kapp-fs { width: 34px; height: 34px; top: 6px; right: 6px; }
+  .kapp-fs svg { width: 16px; height: 16px; }
+  .cpk-meta { padding-right: 40px; }
+}
+/* Demo outline label: sits on the ad frame's top edge instead of covering the tiles above it */
+.cp-demo-mark .cpk-ads::before { transform: translate(-50%, -50%) !important; font-size: .9em !important; padding: .35em 1em !important; }
+@media (max-width: 731px) and (max-aspect-ratio: 1/1), (max-height: 731px) and (min-aspect-ratio: 1/1) {
+  /* text is a little larger than on the kiosk, so the two busiest tiles get a little more room */
+  .lt-ask .lt-face b { font-size: 1.3em; padding-right: 2.4em; }
+  .lt-wx { gap: .3em; padding-top: .7em !important; padding-bottom: .5em !important; }
+  .lt-wx-now .lt-big { font-size: 2.3em; }
+  .lt-wx-now .lt-wxic { width: 1.8em !important; height: 1.8em !important; }
+  .lt-wx-now .lt-sub { font-size: .82em; line-height: 1.2; }
+  .lt-week { padding-top: .3em; }
+  .lt-wd { font-size: .76em; gap: 0; }
+}
