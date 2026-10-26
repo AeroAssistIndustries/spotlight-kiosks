@@ -55,6 +55,35 @@ function citypulse_install_pages( $overwrite = false ) {
 	return $res;
 }
 
+/** Once: switch the advertiser term on the live pages from three years to one year (Oct 2026), keeping every other edit. */
+add_action( 'init', function () {
+	if ( (int) get_option( 'citypulse_term_v' ) >= 1 ) {
+		return;
+	}
+	$swap = array(
+		'Your order has an initial term of three years.' => 'Your order has an initial term of one year.',
+		'The term renews automatically for further three-year periods unless you cancel.' => 'The term renews automatically for further one-year periods unless you cancel.',
+		'You may cancel after the first year of the three-year term by emailing' => 'You may cancel at any time by emailing',
+		'including billing, the three-year term and cancellation' => 'including billing, the one-year term and cancellation',
+	);
+	foreach ( array( "'", '’', '&#039;', '&#x27;', '&rsquo;' ) as $q ) {
+		$swap[ 'Cancelling stops future payments and takes effect at the end of the period you' . $q . 've already paid for. You can' . $q . 't cancel during the first year.' ] = 'Cancelling stops the next renewal and takes effect at the end of the current one-year term; monthly plans keep billing until then.';
+	}
+	$pages = get_posts( array( 'post_type' => 'page', 'post_status' => array( 'publish', 'draft', 'private' ), 'numberposts' => -1 ) );
+	kses_remove_filters();
+	foreach ( $pages as $pg ) {
+		$new = strtr( $pg->post_content, $swap );
+		if ( $new !== $pg->post_content ) {
+			wp_update_post( array( 'ID' => $pg->ID, 'post_content' => wp_slash( $new ) ) );
+		}
+	}
+	kses_init_filters();
+	update_option( 'citypulse_term_v', 1 );
+	if ( function_exists( 'wp_cache_flush' ) ) {
+		wp_cache_flush();
+	}
+}, 20 );
+
 /** Once per brand update: fix the site name if the host set it as one word (e.g. "Citypulsekiosks"). */
 add_action( 'init', function () {
 	if ( (int) get_option( 'citypulse_brand_v' ) >= 2 ) {
